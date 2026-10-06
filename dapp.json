@@ -2,5 +2,17 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Tier board loads",
+      "path": "/",
+      "expectSelector": ".tier-band"
+    },
+    {
+      "id": "tier-board",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }

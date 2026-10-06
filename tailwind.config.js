@@ -55,6 +55,18 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The five tiers of the ladder, S to D: the badge and wash colour,
+        // and the text on the badge. Each is right in both looks.
+        'tier-s': token('tier-s'),
+        'on-tier-s': token('on-tier-s'),
+        'tier-a': token('tier-a'),
+        'on-tier-a': token('on-tier-a'),
+        'tier-b': token('tier-b'),
+        'on-tier-b': token('on-tier-b'),
+        'tier-c': token('tier-c'),
+        'on-tier-c': token('on-tier-c'),
+        'tier-d': token('tier-d'),
+        'on-tier-d': token('on-tier-d'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

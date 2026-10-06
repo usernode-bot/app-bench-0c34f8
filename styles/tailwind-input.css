@@ -18,11 +18,10 @@
  * bg-accent with text-on-accent, ...). :root is the light look, and .dark,
  * which the theme script in public/index.html sets on <html>, the dark one.
  *
- * Re-theme the app HERE: change the values, keep the names. The defaults
- * (warm greys, one teal accent) are a quiet starting point, not a look.
+ * Re-theme the app HERE: change the values, keep the names.
  * Keep every text pair at 4.5:1 or more in both looks: fg and muted on
  * ground, surface and raised; accent and danger on ground and surface;
- * on-accent on accent; on-danger on danger.
+ * on-accent on accent; on-danger on danger; on-tier-x on tier-x.
  *
  * Adopting the native UI kit later? Point its --un-accent and
  * --un-accent-contrast at the accent and on-accent tokens.
@@ -35,11 +34,23 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 180 83 9;       /* the one accent: deep amber */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 180 83 9;        /* the keyboard focus ring */
+    /* The five tiers of the ladder: S amber, A green, B blue, C violet,
+       D grey. Light look: the strong shade, worn with white text. */
+    --tier-s: 180 83 9;
+    --on-tier-s: 255 255 255;
+    --tier-a: 21 128 61;
+    --on-tier-a: 255 255 255;
+    --tier-b: 29 78 216;
+    --on-tier-b: 255 255 255;
+    --tier-c: 126 34 206;
+    --on-tier-c: 255 255 255;
+    --tier-d: 87 83 78;
+    --on-tier-d: 255 255 255;
   }
   .dark {
     --ground: 12 10 9;
@@ -48,11 +59,22 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 251 191 36;     /* bright amber */
+    --on-accent: 69 26 3;     /* very dark brown text on it */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 191 36;
+    /* Dark look: the tiers flip to their bright shades with dark text. */
+    --tier-s: 251 191 36;
+    --on-tier-s: 69 26 3;
+    --tier-a: 74 222 128;
+    --on-tier-a: 5 46 22;
+    --tier-b: 96 165 250;
+    --on-tier-b: 23 37 84;
+    --tier-c: 192 132 252;
+    --on-tier-c: 46 16 101;
+    --tier-d: 168 162 158;
+    --on-tier-d: 28 25 23;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

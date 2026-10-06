@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b45309'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,156 +108,686 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       (bg-ground, text-muted, bg-accent, ...) that are right in both looks,
-       and components (btn-primary, list, card, state-empty, ...). The real
-       app keeps the kit; CLAUDE.md's "## Design" says how. -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex max-w-md flex-col gap-6 px-4 py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-
-    <section>
-      <h2 class="section-label">What's already working</h2>
-      <ul class="list">
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Sign-in</p>
-            <p class="text-small text-muted">You're signed in through Homeroom automatically, with no accounts to build.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Database</p>
-            <p class="text-small text-muted">Your app has its own private database, ready to store things.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Live API</p>
-            <p class="text-small text-muted">The example below talks to a real server. Try it.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <section class="flex flex-col items-center gap-5">
-      <div class="w-full px-1">
-        <h2 class="text-heading">Try the example</h2>
-        <p class="text-small text-muted">This example will be replaced</p>
+    <header>
+      <p class="section-label">Tier List</p>
+      <div class="flex items-center justify-between gap-3">
+        <h1 class="min-h-7 text-title" id="list-title"></h1>
+        <button id="lists-btn" class="btn-secondary flex-none" aria-haspopup="dialog">Lists</button>
       </div>
+    </header>
 
-      <button id="press-btn" class="btn-primary h-32 w-32 rounded-full text-title active:scale-95">Press!</button>
+    <form id="add-form" class="flex gap-2">
+      <input id="add-input" class="field flex-1" type="text" maxlength="80"
+        placeholder="Add an item" aria-label="Add an item" autocomplete="off">
+      <button type="submit" class="btn-primary flex-none px-5">Add</button>
+    </form>
 
-      <p id="count" class="min-h-6 text-body text-muted"></p>
+    <div class="flex rounded-xl border border-line bg-surface p-1" role="group" aria-label="Board view">
+      <button id="view-mine" type="button" aria-pressed="true"
+        class="view-btn min-h-11 flex-1 rounded-lg bg-accent px-3 text-body font-medium text-on-accent">My tiers</button>
+      <button id="view-crowd" type="button" aria-pressed="false"
+        class="view-btn min-h-11 flex-1 rounded-lg px-3 text-body font-medium text-muted hover:text-fg">Crowd</button>
+    </div>
 
-      <div class="w-full">
-        <h3 class="section-label">Leaderboard</h3>
-        <!-- Anything that loads data shows exactly one of these at a time:
-             loading, the data, empty (it loaded, and there is nothing yet)
-             or error (it did not load). The script below switches them. -->
-        <div id="leaderboard-loading" role="status">
-          <span class="sr-only">Loading the leaderboard</span>
-          <div class="list">
-            <div class="list-row"><div class="skeleton h-4 w-1/2"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-1/3"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-2/5"></div></div>
-          </div>
-        </div>
-        <ol id="leaderboard" class="list" hidden></ol>
-        <div id="leaderboard-empty" class="state-empty" hidden>
-          <p class="text-heading">No presses yet</p>
-          <p class="text-body text-muted">Press the button to put your name on the board.</p>
-          <button id="leaderboard-press" class="btn-secondary">Press it</button>
-        </div>
-        <div id="leaderboard-error" class="state-error" hidden>
-          <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-          <p class="text-heading">Couldn't load the leaderboard</p>
-          <p class="text-body text-muted">Pressing still works, and every press is saved.</p>
-          <button id="leaderboard-retry" class="btn-secondary">Retry</button>
-        </div>
-      </div>
-    </section>
+    <p id="notice" role="status" hidden></p>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <!-- Anything that loads data shows exactly one of these at a time:
+         loading, the data, empty (it loaded, and there is nothing yet)
+         or error (it did not load). The script below switches them. -->
+    <div id="board-loading" role="status" class="flex flex-col gap-3">
+      <span class="sr-only">Loading the board</span>
+      <div class="skeleton h-20 w-full"></div>
+      <div class="skeleton h-20 w-full"></div>
+      <div class="skeleton h-20 w-full"></div>
+      <div class="skeleton h-20 w-full"></div>
+      <div class="skeleton h-20 w-full"></div>
+      <div class="skeleton h-20 w-full"></div>
+    </div>
+    <div id="board-error" class="state-error" hidden>
+      <p class="text-heading">Couldn't load the board</p>
+      <p class="text-body text-muted">Nothing was lost: every ranking is saved. Check your connection and try again.</p>
+      <button id="board-retry" class="btn-secondary">Retry</button>
+    </div>
+    <div id="board-empty" class="state-empty" hidden>
+      <p class="text-heading" id="empty-title"></p>
+      <p class="text-body text-muted" id="empty-body"></p>
+    </div>
+
+    <div id="board" class="flex flex-col gap-3" hidden></div>
   </main>
 
+  <!-- The item detail sheet: the crowd tally, who put it where, and five
+       tier buttons that set your own tier without dragging. -->
+  <div id="detail-overlay" class="fixed inset-0 z-40 flex items-end justify-center bg-ground/80 p-4 sm:items-center" hidden>
+    <div id="detail-sheet" class="card flex w-full max-w-md flex-col gap-3 p-5" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <!-- The list picker: switch lists, or start a new one from a name. -->
+  <div id="lists-overlay" class="fixed inset-0 z-40 flex items-end justify-center bg-ground/80 p-4 sm:items-center" hidden>
+    <div class="card flex w-full max-w-md flex-col gap-3 p-5" role="dialog" aria-modal="true" aria-label="Lists">
+      <h2 class="text-heading" id="lists-heading">Lists</h2>
+      <div id="lists-box" class="list" hidden></div>
+      <p id="lists-empty" class="text-body text-muted" hidden>No lists yet. Name one below to start it.</p>
+      <form id="list-form" class="flex gap-2">
+        <input id="list-input" class="field flex-1" type="text" maxlength="80"
+          placeholder="New list name" aria-label="New list name" autocomplete="off">
+        <button type="submit" class="btn-primary flex-none px-5">Create</button>
+      </form>
+      <button id="lists-close" class="btn-secondary" type="button">Close</button>
+    </div>
+  </div>
+
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token') || '';
-    const headers = token ? { 'x-usernode-token': token } : {};
-    const count = document.getElementById('count');
+    (function () {
+      // Token forwarded from the URL query, as the platform iframe injects
+      // it; later fetches carry it in a header.
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') || '';
+      const headers = token ? { 'x-usernode-token': token } : {};
+      const TIERS = ['S', 'A', 'B', 'C', 'D'];
 
-    // The leaderboard's states, one shown at a time. Empty only when the
-    // load worked and found nothing; a failure is the error state, never
-    // "No presses yet".
-    const views = {
-      loading: document.getElementById('leaderboard-loading'),
-      list: document.getElementById('leaderboard'),
-      empty: document.getElementById('leaderboard-empty'),
-      error: document.getElementById('leaderboard-error'),
-    };
-    function show(state) {
-      for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
-    }
+      // Class literals kept whole so the Tailwind extractor sees them.
+      const TIER_STYLE = {
+        S: {
+          band: 'tier-band flex items-start gap-3 rounded-xl border border-tier-s/40 bg-tier-s/10 p-3',
+          badge: 'flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-tier-s text-heading text-on-tier-s',
+          badgeSmall: 'flex h-8 w-8 flex-none items-center justify-center rounded-md bg-tier-s text-small font-bold text-on-tier-s',
+          pickOn: 'min-h-11 flex-1 rounded-lg border border-tier-s bg-tier-s text-body font-bold text-on-tier-s focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+          pickOff: 'min-h-11 flex-1 rounded-lg border border-line bg-surface text-body font-bold text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+        },
+        A: {
+          band: 'tier-band flex items-start gap-3 rounded-xl border border-tier-a/40 bg-tier-a/10 p-3',
+          badge: 'flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-tier-a text-heading text-on-tier-a',
+          badgeSmall: 'flex h-8 w-8 flex-none items-center justify-center rounded-md bg-tier-a text-small font-bold text-on-tier-a',
+          pickOn: 'min-h-11 flex-1 rounded-lg border border-tier-a bg-tier-a text-body font-bold text-on-tier-a focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+          pickOff: 'min-h-11 flex-1 rounded-lg border border-line bg-surface text-body font-bold text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+        },
+        B: {
+          band: 'tier-band flex items-start gap-3 rounded-xl border border-tier-b/40 bg-tier-b/10 p-3',
+          badge: 'flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-tier-b text-heading text-on-tier-b',
+          badgeSmall: 'flex h-8 w-8 flex-none items-center justify-center rounded-md bg-tier-b text-small font-bold text-on-tier-b',
+          pickOn: 'min-h-11 flex-1 rounded-lg border border-tier-b bg-tier-b text-body font-bold text-on-tier-b focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+          pickOff: 'min-h-11 flex-1 rounded-lg border border-line bg-surface text-body font-bold text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+        },
+        C: {
+          band: 'tier-band flex items-start gap-3 rounded-xl border border-tier-c/40 bg-tier-c/10 p-3',
+          badge: 'flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-tier-c text-heading text-on-tier-c',
+          badgeSmall: 'flex h-8 w-8 flex-none items-center justify-center rounded-md bg-tier-c text-small font-bold text-on-tier-c',
+          pickOn: 'min-h-11 flex-1 rounded-lg border border-tier-c bg-tier-c text-body font-bold text-on-tier-c focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+          pickOff: 'min-h-11 flex-1 rounded-lg border border-line bg-surface text-body font-bold text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+        },
+        D: {
+          band: 'tier-band flex items-start gap-3 rounded-xl border border-tier-d/40 bg-tier-d/10 p-3',
+          badge: 'flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-tier-d text-heading text-on-tier-d',
+          badgeSmall: 'flex h-8 w-8 flex-none items-center justify-center rounded-md bg-tier-d text-small font-bold text-on-tier-d',
+          pickOn: 'min-h-11 flex-1 rounded-lg border border-tier-d bg-tier-d text-body font-bold text-on-tier-d focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+          pickOff: 'min-h-11 flex-1 rounded-lg border border-line bg-surface text-body font-bold text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus',
+        },
+      };
+      const UNRANKED_BAND = 'tier-band flex items-start gap-3 rounded-xl border border-dashed border-line bg-surface p-3';
+      const UNRANKED_BADGE = 'flex h-11 w-11 flex-none items-center justify-center rounded-lg text-body font-bold text-muted';
+      const CHIP = 'tier-chip inline-flex min-h-11 min-w-11 max-w-full touch-none select-none items-center gap-2 rounded-lg border border-line bg-surface cursor-grab px-3 text-left text-body text-fg hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus';
+      const CHIP_DRAGGING = ' fixed z-50 pointer-events-none opacity-80 ring-2 ring-focus';
+      const COUNT_PILL = 'flex-none rounded-full bg-raised px-2 py-0.5 text-small tabular-nums text-muted';
+      const VIEW_ON = 'view-btn min-h-11 flex-1 rounded-lg bg-accent px-3 text-body font-medium text-on-accent';
+      const VIEW_OFF = 'view-btn min-h-11 flex-1 rounded-lg px-3 text-body font-medium text-muted hover:text-fg';
 
-    async function loadLeaderboard() {
-      let leaderboard;
-      try {
-        const res = await fetch('/api/leaderboard', { headers });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        ({ leaderboard } = await res.json());
-      } catch {
-        show('error');
-        return;
+      const els = {
+        title: document.getElementById('list-title'),
+        addForm: document.getElementById('add-form'),
+        addInput: document.getElementById('add-input'),
+        viewMine: document.getElementById('view-mine'),
+        viewCrowd: document.getElementById('view-crowd'),
+        notice: document.getElementById('notice'),
+        loading: document.getElementById('board-loading'),
+        error: document.getElementById('board-error'),
+        retry: document.getElementById('board-retry'),
+        empty: document.getElementById('board-empty'),
+        emptyTitle: document.getElementById('empty-title'),
+        emptyBody: document.getElementById('empty-body'),
+        board: document.getElementById('board'),
+        detailOverlay: document.getElementById('detail-overlay'),
+        detailSheet: document.getElementById('detail-sheet'),
+        listsBtn: document.getElementById('lists-btn'),
+        listsOverlay: document.getElementById('lists-overlay'),
+        listsBox: document.getElementById('lists-box'),
+        listsEmpty: document.getElementById('lists-empty'),
+        listForm: document.getElementById('list-form'),
+        listInput: document.getElementById('list-input'),
+        listsClose: document.getElementById('lists-close'),
+      };
+
+      let lists = [];
+      let list = null;       // the list on the board: { id, title, ... }
+      let items = [];        // [{ id, name, myTier, crowdTier, counts }]
+      let itemById = new Map();
+      let view = 'mine';     // 'mine' | 'crowd'
+      let detail = null;     // { itemId, data } while the sheet is open
+      let drag = null;
+      let suppressClick = false;
+
+      // ── small helpers ──────────────────────────────────────────────────
+      const views = { loading: els.loading, error: els.error, empty: els.empty, board: els.board };
+      function show(state) {
+        for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
       }
-      // People's names go in as text, never as HTML.
-      views.list.replaceChildren(...leaderboard.map((r, i) => {
-        const row = document.createElement('li');
-        row.className = 'list-row justify-between';
+
+      let noticeTimer = null;
+      function notice(text, isError) {
+        els.notice.textContent = text;
+        els.notice.className = isError ? 'text-small text-danger' : 'text-small text-muted';
+        els.notice.hidden = false;
+        clearTimeout(noticeTimer);
+        noticeTimer = setTimeout(() => { els.notice.hidden = true; }, 5000);
+      }
+
+      function crowdTierFrom(counts) {
+        let best = null;
+        for (const tier of TIERS) {
+          if (counts[tier] && (best === null || counts[tier] > counts[best])) best = tier;
+        }
+        return best;
+      }
+
+      function savedListId() {
+        try { return Number(localStorage.getItem('tier-list:list')) || null; }
+        catch { return null; }
+      }
+      function rememberListId(id) {
+        try { localStorage.setItem('tier-list:list', String(id)); } catch {}
+      }
+
+      // ── loading the board ──────────────────────────────────────────────
+      async function loadBoard() {
+        show('loading');
+        try {
+          if (!list) {
+            const res = await fetch('/api/lists', { headers });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            lists = (await res.json()).lists;
+            if (!lists.length) {
+              showEmpty('No lists yet', 'Open Lists to name the first one, then add things to rank.');
+              return;
+            }
+            const saved = savedListId();
+            list = lists.find(l => l.id === saved) || lists[0];
+          }
+          const res = await fetch('/api/lists/' + list.id, { headers });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          list = data.list;
+          items = data.items;
+          itemById = new Map(items.map(item => [item.id, item]));
+          els.title.textContent = list.title;
+          show(items.length ? 'board' : 'empty');
+          if (items.length) renderBoard();
+          else showEmpty('Nothing to rank yet', 'Add the first thing above and it will show up here for everyone to rank.');
+        } catch {
+          show('error');
+        }
+      }
+
+      function showEmpty(title, body) {
+        els.emptyTitle.textContent = title;
+        els.emptyBody.textContent = body;
+        show('empty');
+      }
+
+      // Quiet re-fetch after a change, so counts and the crowd view catch
+      // up without flashing the skeleton again.
+      async function refreshBoard() {
+        try {
+          const res = await fetch('/api/lists/' + list.id, { headers });
+          if (!res.ok) return;
+          const data = await res.json();
+          list = data.list;
+          items = data.items;
+          itemById = new Map(items.map(item => [item.id, item]));
+          els.title.textContent = list.title;
+          if (!items.length) showEmpty('Nothing to rank yet', 'Add the first thing above and it will show up here for everyone to rank.');
+          else { show('board'); renderBoard(); }
+        } catch {}
+      }
+
+      // ── rendering the board ────────────────────────────────────────────
+      function renderBoard() {
+        const groups = { U: [], S: [], A: [], B: [], C: [], D: [] };
+        for (const item of items) {
+          const tier = view === 'mine' ? item.myTier : item.crowdTier;
+          groups[tier || 'U'].push(item);
+        }
+        els.board.replaceChildren(band(null, groups.U), band('S', groups.S), band('A', groups.A),
+          band('B', groups.B), band('C', groups.C), band('D', groups.D));
+      }
+
+      function band(tier, group) {
+        const el = document.createElement('div');
+        el.className = tier ? TIER_STYLE[tier].band : UNRANKED_BAND;
+        el.dataset.tier = tier || 'U';
+        el.setAttribute('role', 'group');
+        el.setAttribute('aria-label', tier ? 'Tier ' + tier : 'Unranked');
+        const badge = document.createElement('span');
+        badge.className = tier ? TIER_STYLE[tier].badge : UNRANKED_BADGE;
+        badge.textContent = tier || '–';
+        badge.setAttribute('aria-hidden', 'true');
+        el.append(badge);
+        const chips = document.createElement('div');
+        chips.className = 'flex flex-wrap items-start gap-2';
+        if (!group.length) {
+          const nothing = document.createElement('span');
+          nothing.className = 'self-center px-1 text-small text-muted';
+          nothing.textContent = 'Nothing here yet';
+          chips.append(nothing);
+        } else {
+          for (const item of group) chips.append(chip(item));
+        }
+        el.append(chips);
+        return el;
+      }
+
+      function chip(item) {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = CHIP;
+        el.dataset.item = item.id;
         const name = document.createElement('span');
-        name.textContent = (i + 1) + '. ' + r.username;
-        const presses = document.createElement('span');
-        presses.className = 'tabular-nums text-muted';
-        presses.textContent = r.presses;
-        row.append(name, presses);
-        return row;
-      }));
-      const total = leaderboard.reduce((s, r) => s + parseInt(r.presses, 10), 0);
-      count.textContent = total + (total === 1 ? ' press so far' : ' presses so far');
-      show(leaderboard.length ? 'list' : 'empty');
-    }
+        name.textContent = item.name;
+        el.append(name);
+        if (view === 'crowd' && item.crowdTier) {
+          const pill = document.createElement('span');
+          pill.className = COUNT_PILL;
+          pill.textContent = String(item.counts[item.crowdTier]);
+          pill.setAttribute('aria-label', item.counts[item.crowdTier] +
+            (item.counts[item.crowdTier] === 1 ? ' vote' : ' votes'));
+          el.append(pill);
+        }
+        return el;
+      }
 
-    async function press() {
-      try {
-        const res = await fetch('/api/press', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...headers },
-        });
-        if (res.ok) loadLeaderboard();
-        else if (res.status === 401) count.textContent = 'Sign in to press!';
-      } catch {}
-    }
+      // ── dragging (Pointer Events, one path for touch and mouse) ────────
+      els.board.addEventListener('pointerdown', (e) => {
+        const target = e.target.closest('.tier-chip');
+        if (!target || drag) return;
+        const item = itemById.get(Number(target.dataset.item));
+        if (!item) return;
+        drag = {
+          item, chip: target, pointerId: e.pointerId,
+          startX: e.clientX, startY: e.clientY, moved: false,
+          ghost: null, targetTier: null, targetEl: null,
+        };
+        target.setPointerCapture(e.pointerId);
+      });
 
-    document.getElementById('press-btn').addEventListener('click', press);
-    document.getElementById('leaderboard-press').addEventListener('click', press);
-    document.getElementById('leaderboard-retry').addEventListener('click', () => {
-      show('loading');
-      loadLeaderboard();
-    });
+      els.board.addEventListener('pointermove', (e) => {
+        if (!drag || e.pointerId !== drag.pointerId) return;
+        const dx = e.clientX - drag.startX;
+        const dy = e.clientY - drag.startY;
+        if (!drag.moved) {
+          if (dx * dx + dy * dy < 36) return; // under 6 px it is still a tap
+          drag.moved = true;
+          const rect = drag.chip.getBoundingClientRect();
+          drag.offsetX = e.clientX - rect.left;
+          drag.offsetY = e.clientY - rect.top;
+          drag.ghost = drag.chip.cloneNode(true);
+          drag.ghost.className = CHIP + CHIP_DRAGGING;
+          drag.ghost.style.width = rect.width + 'px';
+          drag.ghost.style.left = '0px';
+          drag.ghost.style.top = '0px';
+          document.body.append(drag.ghost);
+          drag.chip.classList.add('opacity-40');
+        }
+        drag.ghost.style.transform = 'translate(' + (e.clientX - drag.offsetX) + 'px, ' + (e.clientY - drag.offsetY) + 'px)';
+        const over = document.elementFromPoint(e.clientX, e.clientY);
+        const bandEl = over && over.closest ? over.closest('.tier-band') : null;
+        const tierKey = bandEl ? bandEl.dataset.tier : null;
+        if (tierKey !== drag.targetTier) {
+          if (drag.targetEl) drag.targetEl.classList.remove('ring-2', 'ring-focus');
+          drag.targetTier = tierKey;
+          drag.targetEl = tierKey ? bandEl : null;
+          if (drag.targetEl) drag.targetEl.classList.add('ring-2', 'ring-focus');
+        }
+      });
 
-    loadLeaderboard();
+      function endDrag(e, cancelled) {
+        if (!drag || e.pointerId !== drag.pointerId) return;
+        const d = drag;
+        drag = null;
+        if (d.ghost) d.ghost.remove();
+        d.chip.classList.remove('opacity-40');
+        if (d.targetEl) d.targetEl.classList.remove('ring-2', 'ring-focus');
+        if (d.moved) {
+          suppressClick = true;
+          // A drop always sets YOUR placement, whatever view it started in.
+          if (!cancelled && d.targetTier && d.targetTier !== 'U' && d.targetTier !== d.item.myTier) {
+            savePlacement(d.item, d.targetTier);
+          }
+        }
+      }
+      els.board.addEventListener('pointerup', (e) => endDrag(e, false));
+      els.board.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+      // A press that never moved is a tap: it opens the item detail.
+      els.board.addEventListener('click', (e) => {
+        if (suppressClick) { suppressClick = false; return; }
+        const target = e.target.closest('.tier-chip');
+        if (!target) return;
+        const item = itemById.get(Number(target.dataset.item));
+        if (item) openDetail(item);
+      });
+
+      // ── saving a placement ─────────────────────────────────────────────
+      async function savePlacement(item, tier) {
+        const previous = item.myTier;
+        item.myTier = tier;
+        if (!els.board.hidden) renderBoard();
+        try {
+          const res = await fetch('/api/items/' + item.id + '/placement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({ tier }),
+          });
+          if (!res.ok) {
+            item.myTier = previous;
+            if (!els.board.hidden) renderBoard();
+            notice(res.status === 401
+              ? 'Make an account in Homeroom to place items.'
+              : "Couldn't save that placement. Your tier is unchanged.", true);
+            return false;
+          }
+          await refreshBoard();
+          return true;
+        } catch {
+          item.myTier = previous;
+          if (!els.board.hidden) renderBoard();
+          notice("Couldn't reach the server, so the placement wasn't saved.", true);
+          return false;
+        }
+      }
+
+      // ── adding an item ─────────────────────────────────────────────────
+      els.addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = els.addInput.value.trim();
+        if (!name || !list) return;
+        const button = els.addForm.querySelector('button');
+        button.disabled = true;
+        try {
+          const res = await fetch('/api/lists/' + list.id + '/items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({ name }),
+          });
+          if (res.ok) {
+            els.addInput.value = '';
+            const data = await res.json();
+            items.push({ ...data.item, myTier: null, crowdTier: null, counts: { S: 0, A: 0, B: 0, C: 0, D: 0 } });
+            itemById.set(data.item.id, items[items.length - 1]);
+            show('board');
+            renderBoard();
+          } else if (res.status === 401) {
+            notice('Make an account in Homeroom to add items.', true);
+          } else {
+            notice("Couldn't add that. Your text is kept, so you can try again.", true);
+          }
+        } catch {
+          notice("Couldn't reach the server. Your text is kept, so you can try again.", true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      // ── the item detail sheet ──────────────────────────────────────────
+      function closeDetail() {
+        detail = null;
+        els.detailOverlay.hidden = true;
+        els.detailSheet.replaceChildren();
+      }
+
+      async function openDetail(item) {
+        detail = { itemId: item.id, data: null };
+        els.detailOverlay.hidden = false;
+        renderDetailLoading(item);
+        try {
+          const res = await fetch('/api/items/' + item.id, { headers });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (!detail || detail.itemId !== item.id) return;
+          detail.data = data;
+          renderDetail();
+        } catch {
+          if (detail && detail.itemId === item.id) renderDetailError(item);
+        }
+      }
+
+      function renderDetailLoading(item) {
+        els.detailSheet.replaceChildren();
+        const heading = document.createElement('h2');
+        heading.className = 'text-heading';
+        heading.id = 'detail-heading';
+        heading.textContent = item.name;
+        const a = document.createElement('div');
+        a.className = 'skeleton h-4 w-2/3';
+        const b = document.createElement('div');
+        b.className = 'skeleton h-4 w-1/2';
+        els.detailSheet.setAttribute('aria-labelledby', 'detail-heading');
+        els.detailSheet.append(heading, a, b);
+      }
+
+      function renderDetailError(item) {
+        els.detailSheet.replaceChildren();
+        const box = document.createElement('div');
+        box.className = 'state-error';
+        const title = document.createElement('p');
+        title.className = 'text-heading';
+        title.textContent = "Couldn't load this item";
+        const body = document.createElement('p');
+        body.className = 'text-body text-muted';
+        body.textContent = 'The board still works and nothing was lost.';
+        const retry = document.createElement('button');
+        retry.className = 'btn-secondary';
+        retry.textContent = 'Retry';
+        retry.addEventListener('click', () => openDetail(item));
+        box.append(title, body, retry);
+        els.detailSheet.append(box);
+      }
+
+      function renderDetail() {
+        const data = detail.data;
+        const live = itemById.get(data.item.id);
+        els.detailSheet.replaceChildren();
+
+        const crumb = document.createElement('p');
+        crumb.className = 'text-small text-muted';
+        crumb.textContent = data.list.title;
+        const heading = document.createElement('h2');
+        heading.className = 'text-heading';
+        heading.id = 'detail-heading';
+        heading.textContent = data.item.name;
+        els.detailSheet.setAttribute('aria-labelledby', 'detail-heading');
+        els.detailSheet.append(crumb, heading);
+
+        const total = TIERS.reduce((sum, t) => sum + data.counts[t], 0);
+        const crowd = document.createElement('p');
+        crowd.className = 'text-body text-muted';
+        const best = crowdTierFrom(data.counts);
+        crowd.textContent = total
+          ? 'Crowd tier: ' + best + ', with ' + data.counts[best] + ' of ' + total +
+            (total === 1 ? ' vote' : ' votes')
+          : 'No votes yet';
+        els.detailSheet.append(crowd);
+
+        const where = document.createElement('h3');
+        where.className = 'section-label';
+        where.textContent = 'Who put it where';
+        els.detailSheet.append(where);
+
+        const byTier = {};
+        for (const p of data.placements) {
+          (byTier[p.tier] = byTier[p.tier] || []).push(p);
+        }
+        const rows = document.createElement('div');
+        rows.className = 'list';
+        for (const t of TIERS) {
+          const row = document.createElement('div');
+          row.className = 'list-row';
+          const badge = document.createElement('span');
+          badge.className = TIER_STYLE[t].badgeSmall;
+          badge.textContent = t;
+          badge.setAttribute('aria-label', 'Tier ' + t);
+          const names = document.createElement('span');
+          const people = (byTier[t] || []).map(p => p.mine ? 'you' : p.username);
+          names.textContent = people.length ? people.join(', ') : 'Nobody yet';
+          names.className = people.length ? 'text-body' : 'text-body text-muted';
+          row.append(badge, names);
+          rows.append(row);
+        }
+        els.detailSheet.append(rows);
+
+        const yours = document.createElement('h3');
+        yours.className = 'section-label';
+        yours.textContent = 'Your tier';
+        els.detailSheet.append(yours);
+
+        const pick = document.createElement('div');
+        pick.className = 'flex gap-2';
+        for (const t of TIERS) {
+          const active = live && live.myTier === t;
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = active ? TIER_STYLE[t].pickOn : TIER_STYLE[t].pickOff;
+          button.textContent = t;
+          button.setAttribute('aria-pressed', String(Boolean(active)));
+          button.setAttribute('aria-label', 'Place in tier ' + t);
+          button.addEventListener('click', async () => {
+            const item = itemById.get(data.item.id);
+            if (!item) return;
+            if (item.myTier === t) return;
+            const ok = await savePlacement(item, t);
+            if (ok && detail && detail.itemId === item.id && detail.data) {
+              // Re-read so the tally and the "who put it where" rows catch up.
+              openDetail(item);
+            } else if (!ok) {
+              renderDetail();
+            }
+          });
+          pick.append(button);
+        }
+        els.detailSheet.append(pick);
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'btn-secondary mt-1';
+        close.textContent = 'Close';
+        close.addEventListener('click', closeDetail);
+        els.detailSheet.append(close);
+      }
+
+      // ── the list picker ────────────────────────────────────────────────
+      function closeLists() {
+        els.listsOverlay.hidden = true;
+      }
+
+      async function openLists() {
+        els.listsOverlay.hidden = false;
+        els.listsBox.replaceChildren();
+        els.listsBox.hidden = true;
+        els.listsEmpty.hidden = true;
+        try {
+          const res = await fetch('/api/lists', { headers });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          lists = (await res.json()).lists;
+        } catch {
+          notice("Couldn't load the lists. The board still works.", true);
+          return;
+        }
+        if (!lists.length) {
+          els.listsEmpty.hidden = false;
+          return;
+        }
+        els.listsBox.hidden = false;
+        for (const l of lists) {
+          const row = document.createElement('button');
+          row.type = 'button';
+          const current = list && list.id === l.id;
+          row.className = 'list-row w-full justify-between text-left';
+          if (current) row.setAttribute('aria-current', 'true');
+          const name = document.createElement('span');
+          name.className = current ? 'text-body font-medium' : 'text-body';
+          name.textContent = l.title + (current ? ' (current)' : '');
+          const count = document.createElement('span');
+          count.className = 'text-small tabular-nums text-muted';
+          count.textContent = l.item_count + (l.item_count === 1 ? ' item' : ' items');
+          row.append(name, count);
+          row.addEventListener('click', () => {
+            list = l;
+            rememberListId(l.id);
+            closeLists();
+            loadBoard();
+          });
+          els.listsBox.append(row);
+        }
+      }
+
+      els.listForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = els.listInput.value.trim();
+        if (!title) return;
+        const button = els.listForm.querySelector('button');
+        button.disabled = true;
+        try {
+          const res = await fetch('/api/lists', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({ title }),
+          });
+          if (res.ok) {
+            els.listInput.value = '';
+            const data = await res.json();
+            list = data.list;
+            rememberListId(list.id);
+            closeLists();
+            loadBoard();
+          } else if (res.status === 401) {
+            notice('Make an account in Homeroom to start a list.', true);
+          } else {
+            notice("Couldn't create that list. Your text is kept, so you can try again.", true);
+          }
+        } catch {
+          notice("Couldn't reach the server. Your text is kept, so you can try again.", true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      // ── view toggle and the rest ───────────────────────────────────────
+      function setView(next) {
+        view = next;
+        els.viewMine.className = next === 'mine' ? VIEW_ON : VIEW_OFF;
+        els.viewCrowd.className = next === 'crowd' ? VIEW_ON : VIEW_OFF;
+        els.viewMine.setAttribute('aria-pressed', String(next === 'mine'));
+        els.viewCrowd.setAttribute('aria-pressed', String(next === 'crowd'));
+        if (!els.board.hidden) renderBoard();
+      }
+      els.viewMine.addEventListener('click', () => setView('mine'));
+      els.viewCrowd.addEventListener('click', () => setView('crowd'));
+
+      els.listsBtn.addEventListener('click', openLists);
+      els.listsClose.addEventListener('click', closeLists);
+      els.retry.addEventListener('click', loadBoard);
+      els.detailOverlay.addEventListener('click', (e) => {
+        if (e.target === els.detailOverlay) closeDetail();
+      });
+      els.listsOverlay.addEventListener('click', (e) => {
+        if (e.target === els.listsOverlay) closeLists();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeDetail(); closeLists(); }
+      });
+
+      loadBoard();
+    })();
   </script>
 </body>
 </html>

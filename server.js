@@ -154,29 +154,180 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-// Button press
-app.post('/api/press', async (req, res) => {
+// ── Tier list API ─────────────────────────────────────────────────────────
+// A list is a ranked collection (say, Bay Area restaurants), an item is a
+// thing being ranked, and a placement is one person's tier for one item.
+// Placements are append-only: a move INSERTs a row, and the latest row per
+// item and person is that person's tier. Nothing is ever updated or deleted.
+const TIERS = ['S', 'A', 'B', 'C', 'D'];
+
+// The crowd tier for an item: count the latest placements per tier, the
+// highest count wins, a tie breaks to the topmost tier.
+function crowdTierFrom(counts) {
+  let best = null;
+  for (const tier of TIERS) {
+    if (counts[tier] && (best === null || counts[tier] > counts[best])) best = tier;
+  }
+  return best;
+}
+
+function tallyPlacements(rows) {
+  const counts = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  for (const row of rows) counts[row.tier] += 1;
+  return counts;
+}
+
+// Every person's latest placement for the given items, one row per
+// (item_id, user_id). The append-only table is collapsed here, never
+// rewritten; the id breaks a same-timestamp tie deterministically.
+async function latestPlacements(itemIds) {
+  if (!itemIds.length) return [];
+  const { rows } = await pool.query(`
+    SELECT DISTINCT ON (item_id, user_id) item_id, user_id, username, tier, created_at
+    FROM placements
+    WHERE item_id = ANY($1)
+    ORDER BY item_id, user_id, created_at DESC, id DESC
+  `, [itemIds]);
+  return rows;
+}
+
+// All lists, newest first, with how many items each holds.
+app.get('/api/lists', async (_req, res) => {
   try {
-    await pool.query(`
-      INSERT INTO presses (user_id, username) VALUES ($1, $2)
-    `, [req.user.id, req.user.username]);
-    res.json({ ok: true });
+    const { rows } = await pool.query(`
+      SELECT l.id, l.title, l.username, l.created_at, COUNT(i.id)::int AS item_count
+      FROM lists l LEFT JOIN items i ON i.list_id = l.id
+      GROUP BY l.id
+      ORDER BY l.created_at DESC, l.id DESC
+    `);
+    res.json({ lists: rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Leaderboard
-app.get('/api/leaderboard', async (_req, res) => {
+// Create a list. A list's only setting is its name.
+app.post('/api/lists', async (req, res) => {
+  const title = typeof req.body.title === 'string' ? req.body.title.trim() : '';
+  if (title.length < 1 || title.length > 80) {
+    return res.status(400).json({ error: 'A list needs a name of 1 to 80 characters.' });
+  }
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO lists (title, created_by, username) VALUES ($1, $2, $3)
+       RETURNING id, title, username, created_at`,
+      [title, req.user.id, req.user.username]
+    );
+    res.status(201).json({ list: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// One list with its items. Each item carries the viewer's own tier (null
+// while unplaced), the crowd tier and the per-tier counts. Guests read this
+// too, so nothing here may assume req.user.
+app.get('/api/lists/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, title, username, created_at FROM lists WHERE id = $1`,
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'No such list' });
+    const list = rows[0];
+    const items = (await pool.query(
+      `SELECT id, name, username, created_at FROM items WHERE list_id = $1 ORDER BY created_at, id`,
+      [list.id]
+    )).rows;
+    const latest = await latestPlacements(items.map(item => item.id));
+    const byItem = new Map();
+    for (const row of latest) {
+      if (!byItem.has(row.item_id)) byItem.set(row.item_id, []);
+      byItem.get(row.item_id).push(row);
+    }
+    res.json({
+      list,
+      items: items.map(item => {
+        const placements = byItem.get(item.id) || [];
+        const counts = tallyPlacements(placements);
+        const mine = req.user && placements.find(p => p.user_id === req.user.id);
+        return {
+          ...item,
+          myTier: (mine && mine.tier) || null,
+          crowdTier: crowdTierFrom(counts),
+          counts,
+        };
+      }),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add an item for everyone to rank. Names may repeat; each is its own item.
+app.post('/api/lists/:id/items', async (req, res) => {
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  if (name.length < 1 || name.length > 80) {
+    return res.status(400).json({ error: 'An item needs a name of 1 to 80 characters.' });
+  }
+  try {
+    const found = await pool.query(`SELECT id FROM lists WHERE id = $1`, [req.params.id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'No such list' });
+    const { rows } = await pool.query(
+      `INSERT INTO items (list_id, name, created_by, username) VALUES ($1, $2, $3, $4)
+       RETURNING id, name, username, created_at`,
+      [found.rows[0].id, name, req.user.id, req.user.username]
+    );
+    res.status(201).json({ item: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// One item's detail: the counts per tier and each person's latest
+// placement, so anyone can check who put it where.
+app.get('/api/items/:id', async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT username, COUNT(*) as presses
-      FROM presses
-      GROUP BY username
-      ORDER BY presses DESC
-      LIMIT 50
-    `);
-    res.json({ leaderboard: rows });
+      SELECT i.id, i.name, i.username, i.created_at, i.list_id, l.title AS list_title
+      FROM items i JOIN lists l ON l.id = i.list_id
+      WHERE i.id = $1
+    `, [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'No such item' });
+    const item = rows[0];
+    const latest = await latestPlacements([item.id]);
+    latest.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    res.json({
+      item: { id: item.id, name: item.name, username: item.username, created_at: item.created_at },
+      list: { id: item.list_id, title: item.list_title },
+      counts: tallyPlacements(latest),
+      placements: latest.map(p => ({
+        user_id: p.user_id,
+        username: p.username,
+        tier: p.tier,
+        mine: Boolean(req.user && p.user_id === req.user.id),
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Place an item: appends a placement row. The latest row per person wins;
+// history stays.
+app.post('/api/items/:id/placement', async (req, res) => {
+  const tier = typeof req.body.tier === 'string' ? req.body.tier.trim().toUpperCase() : '';
+  if (!TIERS.includes(tier)) {
+    return res.status(400).json({ error: 'Tier must be one of S, A, B, C, D.' });
+  }
+  try {
+    const found = await pool.query(`SELECT id FROM items WHERE id = $1`, [req.params.id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'No such item' });
+    await pool.query(
+      `INSERT INTO placements (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)`,
+      [found.rows[0].id, req.user.id, req.user.username, tier]
+    );
+    res.json({ ok: true, tier });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -219,15 +370,105 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Staging demo data (see "Staging mock data" in the platform conventions):
+// one obviously fake list, six fake items and placements from five fake
+// identities, so the Crowd view and an item's detail have something to
+// show. Idempotent: a boot that finds the seed list already there does
+// nothing, and no seeded row is ever owned by a real account.
+const SEED_LIST_TITLE = 'Staging demo: Bay Area restaurants';
+const SEED_USERS = [
+  [900001, 'Staging Demo Ada'],
+  [900002, 'Staging Demo Ben'],
+  [900003, 'Staging Demo Cleo'],
+  [900004, 'Staging Demo Dee'],
+  [900005, 'Staging Demo Eli'],
+];
+const SEED_ITEMS = [
+  'Fresh Fake Falafel',
+  'Pretend Pane e Vino',
+  'Demo Dumpling House',
+  'Sample Sourdough Co.',
+  'Mock Garden Creamery',
+  'Mock Mission Burrito',
+];
+// Who put what where, by seed item index. The first item stays unplaced so
+// the Unranked row has a resident; the others spread over the tiers so the
+// Crowd view has counts to show.
+const SEED_PLACEMENTS = [
+  [],
+  ['S', 'S', 'A', 'S', 'S'],
+  ['S', 'A', 'A', 'B', 'C'],
+  ['B', 'A', 'A', 'C', 'D'],
+  ['A', 'C', 'B', 'B', 'C'],
+  ['C', 'D', 'D', 'C', 'C'],
+];
+
+async function seedStaging() {
+  const existing = await pool.query(`SELECT id FROM lists WHERE title = $1`, [SEED_LIST_TITLE]);
+  if (existing.rows.length) return;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const list = await client.query(
+      `INSERT INTO lists (title, created_by, username) VALUES ($1, 900000, 'Staging Demo') RETURNING id`,
+      [SEED_LIST_TITLE]
+    );
+    for (let i = 0; i < SEED_ITEMS.length; i++) {
+      const item = await client.query(
+        `INSERT INTO items (list_id, name, created_by, username) VALUES ($1, $2, 900000, 'Staging Demo') RETURNING id`,
+        [list.rows[0].id, SEED_ITEMS[i]]
+      );
+      const tiers = SEED_PLACEMENTS[i];
+      for (let p = 0; p < tiers.length; p++) {
+        const [userId, username] = SEED_USERS[p];
+        await client.query(
+          `INSERT INTO placements (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)`,
+          [item.rows[0].id, userId, username, tiers[p]]
+        );
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 async function start() {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS presses (
+    CREATE TABLE IF NOT EXISTS lists (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL,
+      title VARCHAR(80) NOT NULL,
+      created_by INTEGER NOT NULL,
       username VARCHAR(255) NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS items (
+      id SERIAL PRIMARY KEY,
+      list_id INTEGER NOT NULL REFERENCES lists(id),
+      name VARCHAR(80) NOT NULL,
+      created_by INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS placements (
+      id SERIAL PRIMARY KEY,
+      item_id INTEGER NOT NULL REFERENCES items(id),
+      user_id INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      tier VARCHAR(1) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  // The starter's `presses` table is left in the database, unused, rather
+  // than dropped: no data is deleted.
+  if (IS_STAGING) await seedStaging();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
