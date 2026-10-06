@@ -2,5 +2,22 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "board.default",
+      "name": "Tier board renders",
+      "path": "/",
+      "expectSelector": ".tier-board",
+      "expectText": "Add thing",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "server.js",
+        "styles/**",
+        "tailwind.config.js",
+        "dapp.json"
+      ]
+    }
+  ]
 }

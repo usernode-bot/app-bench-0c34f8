@@ -145,7 +145,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+// Set true by the shutdown handler below; /health answers 503 from then on
+// so anything polling readiness sees the container leaving rotation.
+let shuttingDown = false;
+
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'draining' });
+  res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -154,31 +161,172 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-// Button press
-app.post('/api/press', async (req, res) => {
+// ── Tier List ────────────────────────────────────────────────────────────────
+// Two public tables. `votes` is append-only: placing again inserts a new
+// row, and the latest row per (user_id, item_id) is the placement that
+// counts. `reports` is staging:private — schema only in staging, no seed
+// rows — and one report hides a thing from the board.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D'];
+
+// The crowd's tier for a tally: the tier most people picked, ties resolved
+// to the higher tier (S over A over B over C over D), null with no votes.
+// Walking TIERS in order and only replacing on a strictly larger count does
+// the tie-break for free.
+function crowdTier(tally) {
+  let best = null;
+  let bestCount = 0;
+  for (const tier of TIERS) {
+    if (tally[tier] > bestCount) {
+      best = tier;
+      bestCount = tally[tier];
+    }
+  }
+  return best;
+}
+
+// Shape one item for the client: the per-tier tally from each person's
+// latest vote, the crowd's tier and the voters' rows (username denormalised
+// onto the vote, so no join). `votes` arrives newest first.
+function shapeItem(item, votes) {
+  const tally = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+  for (const v of votes) tally[v.tier] += 1;
+  const crowd = crowdTier(tally);
+  return {
+    id: item.id,
+    name: item.name,
+    username: item.username,
+    created_at: item.created_at,
+    tally,
+    votes: votes.length,
+    crowdTier: crowd,
+    crowdCount: crowd ? tally[crowd] : 0,
+    voters: votes.map((v) => ({ username: v.username, tier: v.tier })),
+  };
+}
+
+// Every person's latest vote on one thing, most recent first.
+async function latestVotesForItem(itemId) {
+  const { rows } = await pool.query(`
+    SELECT user_id, username, tier, created_at, id FROM (
+      SELECT DISTINCT ON (user_id) user_id, username, tier, created_at, id
+      FROM votes
+      WHERE item_id = $1
+      ORDER BY user_id, created_at DESC, id DESC
+    ) latest
+    ORDER BY created_at DESC, id DESC
+  `, [itemId]);
+  return rows;
+}
+
+// All things with their tallies. Guests may read this too, so nothing here
+// assumes req.user. Reported things are hidden from the board (their report
+// rows are kept for review later).
+app.get('/api/items', async (_req, res) => {
   try {
-    await pool.query(`
-      INSERT INTO presses (user_id, username) VALUES ($1, $2)
-    `, [req.user.id, req.user.username]);
-    res.json({ ok: true });
+    const items = await pool.query(`
+      SELECT id, name, username, created_at
+      FROM items
+      WHERE NOT EXISTS (SELECT 1 FROM reports WHERE reports.item_id = items.id)
+      ORDER BY created_at ASC, id ASC
+    `);
+    const votes = await pool.query(`
+      SELECT DISTINCT ON (item_id, user_id) item_id, user_id, username, tier, created_at, id
+      FROM votes
+      ORDER BY item_id, user_id, created_at DESC, id DESC
+    `);
+    const byItem = new Map();
+    for (const v of votes.rows) {
+      if (!byItem.has(v.item_id)) byItem.set(v.item_id, []);
+      byItem.get(v.item_id).push(v);
+    }
+    res.json({ items: items.rows.map((i) => shapeItem(i, byItem.get(i.id) || [])) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('GET /api/items failed:', err.message);
+    res.status(500).json({ error: 'server_error' });
   }
 });
 
-// Leaderboard
-app.get('/api/leaderboard', async (_req, res) => {
+// The viewer's latest placement per thing. Guests get an empty list.
+app.get('/api/votes', async (req, res) => {
+  if (!req.user) return res.json({ votes: [] });
   try {
     const { rows } = await pool.query(`
-      SELECT username, COUNT(*) as presses
-      FROM presses
-      GROUP BY username
-      ORDER BY presses DESC
-      LIMIT 50
-    `);
-    res.json({ leaderboard: rows });
+      SELECT DISTINCT ON (item_id) item_id, tier
+      FROM votes
+      WHERE user_id = $1
+      ORDER BY item_id, created_at DESC, id DESC
+    `, [req.user.id]);
+    res.json({ votes: rows.map((r) => ({ item_id: r.item_id, tier: r.tier })) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('GET /api/votes failed:', err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Add a thing: it appears for the whole group, unplaced.
+app.post('/api/items', async (req, res) => {
+  const name = req.body && typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  if (name.length < 1 || name.length > 120) {
+    return res.status(400).json({ error: 'A thing needs a name of 1 to 120 characters.' });
+  }
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO items (name, user_id, username) VALUES ($1, $2, $3)
+       RETURNING id, name, username, created_at`,
+      [name, req.user.id, req.user.username]
+    );
+    res.status(201).json({ item: shapeItem(rows[0], []) });
+  } catch (err) {
+    console.error('POST /api/items failed:', err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Place a thing in a tier: your vote. Placing again replaces it — a new row
+// is appended and the latest one wins.
+app.post('/api/votes', async (req, res) => {
+  const itemId = Number(req.body && req.body.item);
+  const tier = req.body && req.body.tier;
+  if (!TIERS.includes(tier)) {
+    return res.status(400).json({ error: 'Pick a tier from S to D.' });
+  }
+  if (!Number.isInteger(itemId)) {
+    return res.status(404).json({ error: 'No such thing.' });
+  }
+  try {
+    const found = await pool.query(`
+      SELECT id, name, username, created_at FROM items
+      WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM reports WHERE reports.item_id = items.id)
+    `, [itemId]);
+    if (found.rowCount === 0) return res.status(404).json({ error: 'No such thing.' });
+    await pool.query(
+      `INSERT INTO votes (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)`,
+      [itemId, req.user.id, req.user.username, tier]
+    );
+    res.json({ item: shapeItem(found.rows[0], await latestVotesForItem(itemId)) });
+  } catch (err) {
+    console.error('POST /api/votes failed:', err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Report a thing: it leaves the board for everyone; the report row is kept
+// so it can be reviewed later (no moderation surface in this version).
+app.post('/api/items/:id/report', async (req, res) => {
+  const itemId = Number(req.params.id);
+  if (!Number.isInteger(itemId)) return res.status(404).json({ error: 'No such thing.' });
+  try {
+    const found = await pool.query(`SELECT id FROM items WHERE id = $1`, [itemId]);
+    if (found.rowCount === 0) return res.status(404).json({ error: 'No such thing.' });
+    await pool.query(
+      `INSERT INTO reports (item_id, user_id, username) VALUES ($1, $2, $3)`,
+      [itemId, req.user.id, req.user.username]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/items/:id/report failed:', err.message);
+    res.status(500).json({ error: 'server_error' });
   }
 });
 
@@ -220,17 +368,142 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // Schema, applied idempotently on boot. `items` and `votes` are public;
+  // `reports` is marked staging:private so staging copies its schema only,
+  // never its rows.
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS presses (
+    CREATE TABLE IF NOT EXISTS items (
       id SERIAL PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
       user_id INTEGER NOT NULL,
       username VARCHAR(255) NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS votes (
+      id SERIAL PRIMARY KEY,
+      item_id INTEGER NOT NULL REFERENCES items(id),
+      user_id INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      tier VARCHAR(1) NOT NULL CHECK (tier IN ('S','A','B','C','D')),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  // The latest-vote-per-person queries scan by thing and person.
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS votes_item_user_recent_idx
+    ON votes (item_id, user_id, created_at DESC)
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reports (
+      id SERIAL PRIMARY KEY,
+      item_id INTEGER NOT NULL REFERENCES items(id),
+      user_id INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
+
+  // Staging seed: obviously fake Bay Area restaurants and three fake
+  // voters whose placements disagree, so the crowd view differs from any
+  // one person's view and every tier holds a chip. Idempotent on the
+  // "Staging demo %" name prefix; never references a real user; no reports.
+  if (IS_STAGING) {
+    try {
+      const seeded = await pool.query(
+        `SELECT 1 FROM items WHERE name LIKE 'Staging demo %' LIMIT 1`
+      );
+      if (seeded.rowCount === 0) {
+        const people = {
+          ana: { id: 990001, username: 'staging-demo-ana' },
+          bru: { id: 990002, username: 'staging-demo-bru' },
+          che: { id: 990003, username: 'staging-demo-che' },
+        };
+        const names = [
+          'Staging demo Taqueria', 'Staging demo Ramen Shop',
+          'Staging demo Bagel Stand', 'Staging demo Pizza Truck',
+          'Staging demo Pho Kitchen', 'Staging demo Diner',
+          'Staging demo Gelato Cart', 'Staging demo Falafel Window',
+        ];
+        const adders = ['ana', 'bru', 'ana', 'che', 'bru', 'ana', 'che', 'bru'];
+        const ids = {};
+        for (let i = 0; i < names.length; i++) {
+          const who = people[adders[i]];
+          const row = await pool.query(
+            `INSERT INTO items (name, user_id, username, created_at)
+             VALUES ($1, $2, $3, NOW() - ($4::text || ' minutes')::interval)
+             RETURNING id`,
+            [names[i], who.id, who.username, String(names.length - i)]
+          );
+          ids[names[i]] = row.rows[0].id;
+        }
+        // [thing, person, tier, minutes ago]. An earlier row for the same
+        // person is a placement they later changed; the latest one wins.
+        const votes = [
+          ['Staging demo Taqueria', 'bru', 'B', 260],
+          ['Staging demo Taqueria', 'ana', 'S', 250],
+          ['Staging demo Taqueria', 'che', 'A', 240],
+          ['Staging demo Taqueria', 'bru', 'S', 230],
+          ['Staging demo Ramen Shop', 'che', 'C', 220],
+          ['Staging demo Ramen Shop', 'ana', 'A', 210],
+          ['Staging demo Ramen Shop', 'bru', 'A', 200],
+          ['Staging demo Ramen Shop', 'che', 'S', 190],
+          ['Staging demo Bagel Stand', 'ana', 'C', 180],
+          ['Staging demo Bagel Stand', 'bru', 'B', 170],
+          ['Staging demo Bagel Stand', 'che', 'B', 160],
+          ['Staging demo Bagel Stand', 'ana', 'A', 150],
+          ['Staging demo Pizza Truck', 'bru', 'S', 140],
+          ['Staging demo Pizza Truck', 'ana', 'B', 130],
+          ['Staging demo Pizza Truck', 'che', 'B', 120],
+          ['Staging demo Pho Kitchen', 'bru', 'C', 110],
+          ['Staging demo Pho Kitchen', 'ana', 'B', 100],
+          ['Staging demo Pho Kitchen', 'che', 'C', 90],
+          ['Staging demo Diner', 'che', 'C', 80],
+          ['Staging demo Diner', 'ana', 'D', 70],
+          ['Staging demo Diner', 'bru', 'D', 60],
+        ];
+        for (const [name, who, tier, minsAgo] of votes) {
+          const v = people[who];
+          await pool.query(
+            `INSERT INTO votes (item_id, user_id, username, tier, created_at)
+             VALUES ($1, $2, $3, $4, NOW() - ($5::text || ' minutes')::interval)`,
+            [ids[name], v.id, v.username, tier, String(minsAgo)]
+          );
+        }
+      }
+    } catch (err) {
+      console.error('staging seed failed:', err.message);
+    }
+  }
+
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // The platform stops each container with SIGTERM and a bounded grace
+  // period. Stop accepting connections, drain in-flight requests under a
+  // hard deadline, close the pool, exit. Idempotent: a repeat signal during
+  // the drain must not run a second teardown.
+  const DRAIN_MS = 3000;
+  let shutdown = async (signal) => {
+    shuttingDown = true;
+    shutdown = () => {};
+    console.log(`[shutdown] ${signal} received, draining`);
+    server.close(() => {});
+    server.closeIdleConnections?.();
+    const t = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+    try {
+      await pool.end();
+    } catch (e) {
+      console.error('[shutdown] pool.end failed:', e.message);
+    }
+    process.exit(0);
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

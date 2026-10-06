@@ -29,30 +29,30 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 249 248;    /* the page: warm stone, near-white */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
+    --raised: 245 243 241;    /* hovers, badges */
+    --fg: 41 37 36;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 194 65 12;      /* the one accent: ember, a bold red-orange */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 154 52 18;       /* the keyboard focus ring: deep ember */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
+    --ground: 12 10 9;        /* the page: warm near-black */
+    --surface: 28 25 23;      /* warm brown surfaces */
     --raised: 41 37 36;
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 251 146 60;     /* ember pushed brighter for the dark look */
+    --on-accent: 67 20 7;     /* deep brown text on the bright ember */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 253 186 116;     /* bright ember */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -122,5 +122,51 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The tier board, this app's signature element: five full-width bands with
+     a big letter badge at the left edge. S is the only badge wearing the
+     ember accent; A through D stay quiet warm neutrals. */
+  .tier-row {
+    @apply flex items-start gap-2 rounded-xl border border-line bg-surface p-2;
+  }
+  .tier-row-drop {
+    @apply ring-2 ring-focus;
+  }
+  .tier-badge {
+    @apply flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-raised text-heading font-bold text-muted;
+  }
+  .tier-badge-s {
+    @apply bg-accent text-on-accent;
+  }
+  .tier-chips {
+    @apply flex min-h-11 flex-1 flex-wrap content-start gap-1.5;
+  }
+  .tier-chip {
+    @apply inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-line bg-raised px-3 text-small font-medium text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .tray-chip {
+    @apply border-dashed bg-surface;
+  }
+  .chip-count {
+    @apply inline-flex min-w-6 justify-center rounded-full border border-line bg-surface px-1.5 text-muted;
+  }
+
+  /* The detail sheet at the bottom of the screen, over a dimmed page. */
+  .sheet {
+    max-height: 85vh;
+    max-height: 85dvh;
+    @apply flex flex-col gap-4 overflow-y-auto;
+  }
+
+  /* Rows inside the detail sheet: the crowd tally and the per-person votes. */
+  .tally-row,
+  .vote-row {
+    @apply flex items-center justify-between gap-3 border-b border-line py-2 text-small;
+  }
+  .tally-row:last-child,
+  .vote-row:last-child {
+    @apply border-b-0;
   }
 }

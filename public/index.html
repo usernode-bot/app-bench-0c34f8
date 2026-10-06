@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return (val.stack || (val.name + ': ' + val.message));
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23C2410C'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,156 +108,389 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       (bg-ground, text-muted, bg-accent, ...) that are right in both looks,
-       and components (btn-primary, list, card, state-empty, ...). The real
-       app keeps the kit; CLAUDE.md's "## Design" says how. -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex max-w-md flex-col gap-6 px-4 py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
+    <header class="flex flex-col gap-1">
       <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
+      <p class="text-small text-muted">Rank things with friends, from S tier down</p>
+    </header>
 
-    <section>
-      <h2 class="section-label">What's already working</h2>
-      <ul class="list">
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Sign-in</p>
-            <p class="text-small text-muted">You're signed in through Homeroom automatically, with no accounts to build.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Database</p>
-            <p class="text-small text-muted">Your app has its own private database, ready to store things.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Live API</p>
-            <p class="text-small text-muted">The example below talks to a real server. Try it.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- Your view vs the crowd's. Client-side: both endpoints are loaded
+         once and the board re-renders on toggle. -->
+    <div class="flex overflow-hidden rounded-lg border border-line bg-surface" role="group" aria-label="Which view of the board">
+      <button id="view-yours" type="button" class="min-h-11 flex-1 px-3 text-small font-semibold text-fg bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset">Your view</button>
+      <button id="view-crowd" type="button" class="min-h-11 flex-1 px-3 text-small font-medium text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset" aria-pressed="false">Crowd view</button>
+    </div>
 
-    <section class="flex flex-col items-center gap-5">
-      <div class="w-full px-1">
-        <h2 class="text-heading">Try the example</h2>
-        <p class="text-small text-muted">This example will be replaced</p>
-      </div>
+    <!-- The screen's one primary action. -->
+    <form id="add-form" class="flex gap-2">
+      <label class="sr-only" for="add-name">Add a thing</label>
+      <input id="add-name" class="field min-w-0 flex-1" type="text" maxlength="120" autocomplete="off" placeholder="Add a thing">
+      <button type="submit" class="btn-primary shrink-0">Add thing</button>
+    </form>
 
-      <button id="press-btn" class="btn-primary h-32 w-32 rounded-full text-title active:scale-95">Press!</button>
-
-      <p id="count" class="min-h-6 text-body text-muted"></p>
-
-      <div class="w-full">
-        <h3 class="section-label">Leaderboard</h3>
-        <!-- Anything that loads data shows exactly one of these at a time:
-             loading, the data, empty (it loaded, and there is nothing yet)
-             or error (it did not load). The script below switches them. -->
-        <div id="leaderboard-loading" role="status">
-          <span class="sr-only">Loading the leaderboard</span>
-          <div class="list">
-            <div class="list-row"><div class="skeleton h-4 w-1/2"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-1/3"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-2/5"></div></div>
-          </div>
+    <!-- The board's states, exactly one shown at a time: loading, error,
+         empty (loaded, nothing yet), or the board itself. -->
+    <div id="board-loading" role="status">
+      <span class="sr-only">Loading the board</span>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-start gap-2 rounded-xl border border-line bg-surface p-2">
+          <div class="skeleton h-11 w-11 rounded-lg"></div>
+          <div class="flex flex-1 flex-wrap gap-1.5"><div class="skeleton h-11 w-44 rounded-full"></div><div class="skeleton h-11 w-32 rounded-full"></div></div>
         </div>
-        <ol id="leaderboard" class="list" hidden></ol>
-        <div id="leaderboard-empty" class="state-empty" hidden>
-          <p class="text-heading">No presses yet</p>
-          <p class="text-body text-muted">Press the button to put your name on the board.</p>
-          <button id="leaderboard-press" class="btn-secondary">Press it</button>
+        <div class="flex items-start gap-2 rounded-xl border border-line bg-surface p-2">
+          <div class="skeleton h-11 w-11 rounded-lg"></div>
+          <div class="flex flex-1 flex-wrap gap-1.5"><div class="skeleton h-11 w-36 rounded-full"></div></div>
         </div>
-        <div id="leaderboard-error" class="state-error" hidden>
-          <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-          <p class="text-heading">Couldn't load the leaderboard</p>
-          <p class="text-body text-muted">Pressing still works, and every press is saved.</p>
-          <button id="leaderboard-retry" class="btn-secondary">Retry</button>
+        <div class="flex items-start gap-2 rounded-xl border border-line bg-surface p-2">
+          <div class="skeleton h-11 w-11 rounded-lg"></div>
+          <div class="flex flex-1 flex-wrap gap-1.5"><div class="skeleton h-11 w-48 rounded-full"></div><div class="skeleton h-11 w-28 rounded-full"></div></div>
+        </div>
+        <div class="flex items-start gap-2 rounded-xl border border-line bg-surface p-2">
+          <div class="skeleton h-11 w-11 rounded-lg"></div>
+          <div class="flex flex-1 flex-wrap gap-1.5"><div class="skeleton h-11 w-40 rounded-full"></div></div>
+        </div>
+        <div class="flex items-start gap-2 rounded-xl border border-line bg-surface p-2">
+          <div class="skeleton h-11 w-11 rounded-lg"></div>
+          <div class="flex flex-1 flex-wrap gap-1.5"><div class="skeleton h-11 w-32 rounded-full"></div></div>
         </div>
       </div>
+    </div>
+    <div id="board-error" class="state-error" hidden>
+      <p class="text-heading">Couldn't load the board</p>
+      <p class="text-body text-muted">Nothing was lost. Adding and ranking are paused until it loads.</p>
+      <button id="board-retry" type="button" class="btn-secondary">Retry</button>
+    </div>
+    <div id="board-empty" class="state-empty" hidden>
+      <p class="text-heading">Nothing to rank yet</p>
+      <p class="text-body text-muted">Add the first thing above and it will appear here for everyone.</p>
+    </div>
+
+    <section id="tray-section" hidden>
+      <h2 id="tray-label" class="section-label">Not placed yet</h2>
+      <div id="tray" class="flex min-h-14 content-start flex-wrap gap-1.5 rounded-xl border border-dashed border-line p-2"></div>
     </section>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <div id="board" class="tier-board flex flex-col gap-2" hidden></div>
   </main>
 
+  <!-- The detail sheet a tap on any chip opens. -->
+  <div id="sheet-root" class="fixed inset-0 z-10" hidden>
+    <div id="sheet-dim" class="absolute inset-0 bg-fg/45 dark:bg-fg/30"></div>
+    <section id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-name" tabindex="-1"
+      class="sheet absolute inset-x-0 bottom-0 flex flex-col gap-4 rounded-t-2xl border-t border-line bg-surface px-4 pb-8 pt-2 focus-visible:outline-none">
+      <div class="mx-auto h-1 w-9 flex-none rounded-full bg-line" aria-hidden="true"></div>
+      <div class="flex flex-col gap-1">
+        <h2 id="sheet-name" class="text-heading"></h2>
+        <p id="sheet-by" class="text-small text-muted"></p>
+      </div>
+      <div>
+        <h3 class="section-label">Crowd tally</h3>
+        <div id="sheet-tally"></div>
+      </div>
+      <div>
+        <h3 class="section-label">How everyone voted</h3>
+        <ul id="sheet-voters" class="flex flex-col"></ul>
+      </div>
+      <div>
+        <h3 class="section-label">Your placement</h3>
+        <div id="sheet-place" class="flex gap-1.5"></div>
+      </div>
+      <button id="sheet-report" type="button" class="min-h-11 self-start text-small text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">Report</button>
+    </section>
+  </div>
+
+  <!-- A short message about a refused or failed write, above everything. -->
+  <p id="toast" role="status" class="fixed inset-x-4 top-3 z-30 rounded-lg border border-line bg-surface px-4 py-3 text-small text-fg" hidden></p>
+
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token') || '';
-    const headers = token ? { 'x-usernode-token': token } : {};
-    const count = document.getElementById('count');
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token') || '';
+      const headers = token ? { 'x-usernode-token': token } : {};
+      const TIERS = ['S', 'A', 'B', 'C', 'D'];
+      const TOGGLE_ON = 'min-h-11 flex-1 px-3 text-small font-semibold text-fg bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset';
+      const TOGGLE_OFF = 'min-h-11 flex-1 px-3 text-small font-medium text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset';
 
-    // The leaderboard's states, one shown at a time. Empty only when the
-    // load worked and found nothing; a failure is the error state, never
-    // "No presses yet".
-    const views = {
-      loading: document.getElementById('leaderboard-loading'),
-      list: document.getElementById('leaderboard'),
-      empty: document.getElementById('leaderboard-empty'),
-      error: document.getElementById('leaderboard-error'),
-    };
-    function show(state) {
-      for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
-    }
+      const state = {
+        items: [],        // the things, with each one's tally and voters
+        mine: new Map(),  // item id -> the viewer's tier
+        view: 'yours',    // 'yours' | 'crowd'
+        phase: 'loading', // loading | ready | error
+        openId: null,     // the thing whose detail sheet is open
+      };
 
-    async function loadLeaderboard() {
-      let leaderboard;
-      try {
-        const res = await fetch('/api/leaderboard', { headers });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        ({ leaderboard } = await res.json());
-      } catch {
-        show('error');
-        return;
-      }
-      // People's names go in as text, never as HTML.
-      views.list.replaceChildren(...leaderboard.map((r, i) => {
-        const row = document.createElement('li');
-        row.className = 'list-row justify-between';
-        const name = document.createElement('span');
-        name.textContent = (i + 1) + '. ' + r.username;
-        const presses = document.createElement('span');
-        presses.className = 'tabular-nums text-muted';
-        presses.textContent = r.presses;
-        row.append(name, presses);
-        return row;
-      }));
-      const total = leaderboard.reduce((s, r) => s + parseInt(r.presses, 10), 0);
-      count.textContent = total + (total === 1 ? ' press so far' : ' presses so far');
-      show(leaderboard.length ? 'list' : 'empty');
-    }
+      const el = (id) => document.getElementById(id);
 
-    async function press() {
-      try {
-        const res = await fetch('/api/press', {
-          method: 'POST',
+      // ── API ──────────────────────────────────────────────────────────────
+      async function api(path, options) {
+        const res = await fetch(path, {
+          method: (options && options.method) || 'GET',
           headers: { 'Content-Type': 'application/json', ...headers },
+          body: options && options.body ? JSON.stringify(options.body) : undefined,
         });
-        if (res.ok) loadLeaderboard();
-        else if (res.status === 401) count.textContent = 'Sign in to press!';
-      } catch {}
-    }
+        let data = null;
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) {
+          const err = new Error('HTTP ' + res.status);
+          err.status = res.status;
+          err.code = data && data.error;
+          throw err;
+        }
+        return data;
+      }
 
-    document.getElementById('press-btn').addEventListener('click', press);
-    document.getElementById('leaderboard-press').addEventListener('click', press);
-    document.getElementById('leaderboard-retry').addEventListener('click', () => {
-      show('loading');
-      loadLeaderboard();
-    });
+      function handleWriteError(err) {
+        if (err && err.status === 401) toast('Make an account to continue');
+        else toast("That didn't save. Try again.");
+      }
 
-    loadLeaderboard();
+      // ── Loading ──────────────────────────────────────────────────────────
+      async function load() {
+        state.phase = 'loading';
+        render();
+        try {
+          const [itemsData, votesData] = await Promise.all([api('/api/items'), api('/api/votes')]);
+          state.items = itemsData.items;
+          state.mine = new Map(votesData.votes.map((v) => [v.item_id, v.tier]));
+          state.phase = 'ready';
+        } catch (_) {
+          state.phase = 'error';
+        }
+        render();
+      }
+
+      // ── Rendering ────────────────────────────────────────────────────────
+      function render() {
+        const loading = state.phase === 'loading';
+        const failed = state.phase === 'error';
+        const empty = !loading && !failed && state.items.length === 0;
+        el('board-loading').hidden = !loading;
+        el('board-error').hidden = !failed;
+        el('board-empty').hidden = !empty;
+        el('tray-section').hidden = loading || failed || empty;
+        el('board').hidden = loading || failed || empty;
+        el('view-yours').className = state.view === 'yours' ? TOGGLE_ON : TOGGLE_OFF;
+        el('view-crowd').className = state.view === 'crowd' ? TOGGLE_ON : TOGGLE_OFF;
+        el('view-yours').setAttribute('aria-pressed', String(state.view === 'yours'));
+        el('view-crowd').setAttribute('aria-pressed', String(state.view === 'crowd'));
+        if (!loading && !failed && !empty) renderBoard();
+        if (state.openId != null) renderSheet();
+      }
+
+      // Which tier a chip sits in for the current view. Your view: the tier
+      // you put it in, else the tray. Crowd view: the tier most people
+      // picked, or the tray for things nobody has ranked.
+      function chipTier(item) {
+        if (state.view === 'crowd') return item.votes > 0 ? item.crowdTier : null;
+        return state.mine.get(item.id) || null;
+      }
+
+      function buildChip(item, inTray) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'tier-chip' + (inTray ? ' tray-chip' : '');
+        chip.draggable = true;
+        const label = document.createElement('span');
+        label.textContent = item.name;
+        chip.append(label);
+        if (state.view === 'crowd' && item.votes > 0) {
+          const count = document.createElement('span');
+          count.className = 'chip-count tabular-nums';
+          count.textContent = String(item.crowdCount);
+          chip.append(count);
+        }
+        chip.addEventListener('click', () => openSheet(item.id));
+        chip.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', String(item.id));
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        return chip;
+      }
+
+      function buildRow(tier) {
+        const row = document.createElement('div');
+        row.className = 'tier-row';
+        const badge = document.createElement('div');
+        badge.className = tier === 'S' ? 'tier-badge tier-badge-s' : 'tier-badge';
+        badge.textContent = tier;
+        const chips = document.createElement('div');
+        chips.className = 'tier-chips';
+        row.append(badge, chips);
+        row.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          row.classList.add('tier-row-drop');
+        });
+        row.addEventListener('dragleave', () => row.classList.remove('tier-row-drop'));
+        row.addEventListener('drop', (e) => {
+          e.preventDefault();
+          row.classList.remove('tier-row-drop');
+          const item = state.items.find((i) => i.id === Number(e.dataTransfer.getData('text/plain')));
+          if (item) place(item, tier);
+        });
+        return row;
+      }
+
+      function renderBoard() {
+        const board = el('board');
+        board.replaceChildren();
+        const tray = el('tray');
+        tray.replaceChildren();
+        const rows = {};
+        for (const tier of TIERS) {
+          rows[tier] = buildRow(tier);
+          board.append(rows[tier]);
+        }
+        for (const item of state.items) {
+          const tier = chipTier(item);
+          if (tier) rows[tier].querySelector('.tier-chips').append(buildChip(item, false));
+          else tray.append(buildChip(item, true));
+        }
+        el('tray-label').textContent = state.view === 'yours' ? 'Not placed yet' : 'Not ranked yet';
+      }
+
+      // ── Writing ──────────────────────────────────────────────────────────
+      async function place(item, tier) {
+        try {
+          const data = await api('/api/votes', { method: 'POST', body: { item: item.id, tier } });
+          state.mine.set(item.id, tier);
+          Object.assign(item, data.item);
+          render();
+        } catch (err) {
+          handleWriteError(err);
+        }
+      }
+
+      async function addItem() {
+        const input = el('add-name');
+        const name = input.value.trim();
+        if (!name) {
+          toast('A thing needs a name.');
+          return;
+        }
+        try {
+          const data = await api('/api/items', { method: 'POST', body: { name } });
+          state.items.push(data.item);
+          input.value = '';
+          render();
+        } catch (err) {
+          handleWriteError(err);
+        }
+      }
+
+      async function reportCurrent() {
+        const item = currentItem();
+        if (!item) return;
+        try {
+          await api('/api/items/' + item.id + '/report', { method: 'POST' });
+          state.items = state.items.filter((i) => i.id !== item.id);
+          closeSheet();
+          render();
+        } catch (err) {
+          handleWriteError(err);
+        }
+      }
+
+      // ── Detail sheet ─────────────────────────────────────────────────────
+      function currentItem() {
+        return state.items.find((i) => i.id === state.openId) || null;
+      }
+
+      function openSheet(id) {
+        state.openId = id;
+        renderSheet();
+        el('sheet-root').hidden = false;
+        el('sheet').focus();
+      }
+
+      function closeSheet() {
+        state.openId = null;
+        el('sheet-root').hidden = true;
+      }
+
+      function renderSheet() {
+        const item = currentItem();
+        if (!item) {
+          closeSheet();
+          return;
+        }
+        el('sheet-name').textContent = item.name;
+        el('sheet-by').textContent = 'Added by ' + item.username;
+
+        const tally = el('sheet-tally');
+        tally.replaceChildren();
+        for (const tier of TIERS) {
+          const row = document.createElement('div');
+          row.className = 'tally-row';
+          const letter = document.createElement('span');
+          letter.textContent = tier;
+          const count = document.createElement('span');
+          count.className = 'tabular-nums' + (item.votes > 0 && item.crowdTier === tier ? ' font-semibold' : '');
+          count.textContent = String(item.tally[tier]);
+          row.append(letter, count);
+          tally.append(row);
+        }
+
+        const voters = el('sheet-voters');
+        voters.replaceChildren();
+        if (item.voters.length === 0) {
+          const none = document.createElement('p');
+          none.className = 'text-small text-muted';
+          none.textContent = 'Not ranked yet';
+          voters.append(none);
+        } else {
+          for (const v of item.voters) {
+            const row = document.createElement('li');
+            row.className = 'vote-row';
+            const name = document.createElement('span');
+            name.textContent = v.username;
+            const tier = document.createElement('span');
+            tier.className = 'font-semibold';
+            tier.textContent = v.tier;
+            row.append(name, tier);
+            voters.append(row);
+          }
+        }
+
+        const placeRow = el('sheet-place');
+        placeRow.replaceChildren();
+        const mine = state.mine.get(item.id) || null;
+        for (const tier of TIERS) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'flex min-h-11 flex-1 items-center justify-center rounded-lg border text-body font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus '
+            + (mine === tier ? 'border-accent bg-accent text-on-accent' : 'border-line bg-surface text-fg');
+          button.textContent = tier;
+          button.setAttribute('aria-pressed', String(mine === tier));
+          button.addEventListener('click', () => place(item, tier));
+          placeRow.append(button);
+        }
+      }
+
+      // ── Toast ────────────────────────────────────────────────────────────
+      let toastTimer;
+      function toast(text) {
+        const t = el('toast');
+        t.textContent = text;
+        t.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.hidden = true; }, 5000);
+      }
+
+      // ── Events ───────────────────────────────────────────────────────────
+      el('view-yours').addEventListener('click', () => { state.view = 'yours'; render(); });
+      el('view-crowd').addEventListener('click', () => { state.view = 'crowd'; render(); });
+      el('add-form').addEventListener('submit', (e) => { e.preventDefault(); addItem(); });
+      el('board-retry').addEventListener('click', load);
+      el('sheet-dim').addEventListener('click', closeSheet);
+      el('sheet-report').addEventListener('click', reportCurrent);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && state.openId != null) closeSheet();
+      });
+
+      load();
+    })();
   </script>
 </body>
 </html>

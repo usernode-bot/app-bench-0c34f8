@@ -100,22 +100,30 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A group tier list: anyone adds a thing to rank (the first use is Bay Area
+restaurants), everyone places each thing in a tier from S down to D, and the
+board shows your view and the crowd's. Tapping a chip opens its detail with
+the crowd tally and how each person voted. A reported thing leaves the board
+for everyone; the report row is kept for later review (no moderation surface
+yet).
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: ember, a bold red-orange (`#C2410C` in the light look,
+  pushed brighter to `#FB923C` in the dark, with deep brown text on it there);
+  neutrals: warm stone — a near-white page, white surfaces and warm grey
+  secondary text and hairlines in light, a warm near-black page with warm
+  brown surfaces in dark. All of it lives in the kit tokens in
+  `styles/tailwind-input.css`.
+- **Signature element:** the tier rows themselves: full-width bands with a
+  big letter badge at the left edge, S the only badge wearing the ember
+  accent, A through D quiet warm neutrals. Nothing else on screen competes
+  with them.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged in `tailwind.config.js`).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +145,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The tier set is fixed: S, A, B, C, D, the same five for everyone, chosen by
+  the creator. They cannot be renamed or added to.
+- `votes` is append-only: placing again inserts a new row, and the latest row
+  per (user_id, item_id) wins. Never UPDATE or DELETE a vote.
+- `reports` is `staging:private`; one report hides a thing from the board.
+  Report rows are kept, never deleted.
+- Things are never edited, renamed or deleted by users; only the Report
+  action removes one (for everyone).
+- No new dependencies, no new colour tokens: re-theme via the token values
+  in `styles/tailwind-input.css` only.
