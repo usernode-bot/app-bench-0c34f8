@@ -154,29 +154,108 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-// Button press
-app.post('/api/press', async (req, res) => {
+// ── Tier List ─────────────────────────────────────────────────────────────
+// One shared board. `items` are the things being ranked; `placements` are
+// append-only votes: one row per save, and the row with the highest `id`
+// per (item, person) is that person's tier. Nothing is updated or deleted,
+// so a change of mind is just a newer row.
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+const MAX_NAME = 120;
+
+// Add a thing to rank, for everyone. Names are trimmed, capped, and unique
+// case-insensitively: two "Gott's Rd." entries would only confuse the board.
+app.post('/api/items', async (req, res) => {
   try {
-    await pool.query(`
-      INSERT INTO presses (user_id, username) VALUES ($1, $2)
-    `, [req.user.id, req.user.username]);
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+    if (!name) return res.status(400).json({ error: 'Give the item a name first.' });
+    if (name.length > MAX_NAME) {
+      return res.status(400).json({ error: 'Item names are capped at 120 characters.' });
+    }
+    const dup = await pool.query(
+      'SELECT 1 FROM items WHERE lower(name) = lower($1)',
+      [name]
+    );
+    if (dup.rowCount > 0) return res.status(409).json({ error: 'duplicate' });
+    const { rows } = await pool.query(
+      `INSERT INTO items (name, created_by, created_by_name)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, created_by_name`,
+      [name, req.user.id, req.user.username]
+    );
+    res.status(201).json({ item: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Place an item in a tier, for you. Saving inserts a new row; your latest
+// row is the one that counts.
+app.post('/api/placements', async (req, res) => {
+  try {
+    const itemId = Number.parseInt(req.body?.item_id, 10);
+    const tier = req.body?.tier;
+    if (!TIERS.includes(tier)) return res.status(400).json({ error: 'Unknown tier.' });
+    if (!Number.isInteger(itemId)) return res.status(400).json({ error: 'Unknown item.' });
+    const item = await pool.query('SELECT 1 FROM items WHERE id = $1', [itemId]);
+    if (item.rowCount === 0) return res.status(400).json({ error: 'Unknown item.' });
+    await pool.query(
+      `INSERT INTO placements (item_id, user_id, username, tier)
+       VALUES ($1, $2, $3, $4)`,
+      [itemId, req.user.id, req.user.username, tier]
+    );
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Leaderboard
-app.get('/api/leaderboard', async (_req, res) => {
+// The whole board in one read: every item, your placement on it, everyone's
+// latest placement, and the crowd tier. Open to guests, who read only.
+app.get('/api/board', async (req, res) => {
   try {
-    const { rows } = await pool.query(`
-      SELECT username, COUNT(*) as presses
-      FROM presses
-      GROUP BY username
-      ORDER BY presses DESC
-      LIMIT 50
+    const userId = req.user ? req.user.id : null;
+    const { rows: itemRows } = await pool.query(
+      'SELECT id, name, created_by_name FROM items ORDER BY id'
+    );
+    // Latest row per (item, person). Ordering by `id`, never `created_at`:
+    // the row sequence decides what shows, so the time source cannot.
+    const { rows: latest } = await pool.query(`
+      WITH latest AS (
+        SELECT DISTINCT ON (item_id, user_id) item_id, user_id, username, tier, id
+        FROM placements
+        ORDER BY item_id, user_id, id DESC
+      )
+      SELECT item_id, user_id, username, tier FROM latest
+      ORDER BY item_id, id
     `);
-    res.json({ leaderboard: rows });
+    const byItem = new Map();
+    for (const row of latest) {
+      if (!byItem.has(row.item_id)) byItem.set(row.item_id, []);
+      byItem.get(row.item_id).push(row);
+    }
+    const items = itemRows.map((item) => {
+      const votes = byItem.get(item.id) || [];
+      const tally = {};
+      for (const t of TIERS) tally[t] = 0;
+      for (const v of votes) tally[v.tier] += 1;
+      // Walking TIERS top down and requiring a strictly greater count means
+      // a tie keeps the higher tier (S beats A beats B, and so on).
+      let crowd = null;
+      for (const t of TIERS) {
+        if (tally[t] > 0 && (!crowd || tally[t] > tally[crowd])) crowd = t;
+      }
+      const mine = userId == null ? null : votes.find((v) => v.user_id === userId);
+      return {
+        id: item.id,
+        name: item.name,
+        created_by_name: item.created_by_name,
+        your_tier: mine ? mine.tier : null,
+        crowd: crowd ? { tier: crowd, votes: tally[crowd] } : { tier: null, votes: 0 },
+        votes: tally,
+        people: votes.map((v) => ({ username: v.username, tier: v.tier })),
+      };
+    });
+    res.json({ can_rank: !!req.user, you: req.user ? req.user.username : null, items });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -221,16 +300,101 @@ app.get('*', (req, res) => {
 
 async function start() {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS presses (
+    CREATE TABLE IF NOT EXISTS items (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL,
-      username VARCHAR(255) NOT NULL,
+      name VARCHAR(120) NOT NULL,
+      created_by INTEGER,
+      created_by_name VARCHAR(255),
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS placements (
+      id SERIAL PRIMARY KEY,
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      tier VARCHAR(1) NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS placements_item_user_id_idx
+    ON placements (item_id, user_id, id)
+  `);
+
+  // Staging seed: obviously fake restaurants and fake diners (user ids
+  // 9001-9005, no real user), so a fresh staging database shows a populated
+  // board. Idempotent — each check runs before its insert. Mission Wrap Lab
+  // carries the deliberate C/D tie, which the higher-tier rule settles to C;
+  // Fog Harbor Diner has no votes, so the crowd tray and the No-votes-yet
+  // paths can be seen too.
+  if (IS_STAGING) {
+    const seedItems = [
+      'Birch & Vine',
+      'Cafe Terra',
+      'The Rolling Scone',
+      'Golden Gate Grill',
+      'Mission Wrap Lab',
+      'Fog Harbor Diner',
+    ];
+    for (const name of seedItems) {
+      await pool.query(
+        `INSERT INTO items (name, created_by, created_by_name)
+         SELECT $1::varchar(120), NULL, 'Demo diner'
+         WHERE NOT EXISTS (SELECT 1 FROM items WHERE lower(name) = lower($1::text))`,
+        [name]
+      );
+    }
+    const seedPlacements = [
+      ['Birch & Vine', 9001, 'Demo diner', 'S'],
+      ['Birch & Vine', 9002, 'Demo taster', 'S'],
+      ['Cafe Terra', 9003, 'Demo critic', 'A'],
+      ['Cafe Terra', 9004, 'Demo chef', 'A'],
+      ['The Rolling Scone', 9002, 'Demo taster', 'A'],
+      ['The Rolling Scone', 9003, 'Demo critic', 'B'],
+      ['The Rolling Scone', 9001, 'Demo diner', 'A'],
+      ['Golden Gate Grill', 9004, 'Demo chef', 'B'],
+      ['Golden Gate Grill', 9005, 'Demo guest', 'B'],
+      ['Golden Gate Grill', 9002, 'Demo taster', 'A'],
+      ['Mission Wrap Lab', 9001, 'Demo diner', 'C'],
+      ['Mission Wrap Lab', 9003, 'Demo critic', 'D'],
+    ];
+    for (const [itemName, userId, username, tier] of seedPlacements) {
+      await pool.query(
+        `INSERT INTO placements (item_id, user_id, username, tier)
+         SELECT i.id, $2, $3, $4
+         FROM items i
+         WHERE lower(i.name) = lower($1)
+           AND NOT EXISTS (
+             SELECT 1 FROM placements p WHERE p.item_id = i.id AND p.user_id = $2
+           )`,
+        [itemName, userId, username, tier]
+      );
+    }
+  }
+
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // The platform stops the container with SIGTERM (Ctrl-C sends SIGINT):
+  // stop accepting connections, let in-flight ones drain for a few seconds,
+  // close the pool and exit.
+  let shuttingDown = false;
+  function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received, shutting down`);
+    server.close(async () => {
+      try { await pool.end(); } catch {}
+      process.exit(0);
+    });
+    // Don't hang past the platform's stop window if a connection stalls.
+    setTimeout(() => process.exit(0), 3000).unref();
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

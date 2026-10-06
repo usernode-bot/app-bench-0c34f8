@@ -100,22 +100,28 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for ranking things with friends: anyone adds a thing
+(an item), everyone puts it in a tier from S down to F, and you can compare
+your list with the crowd's and see who voted what on any item. Built around
+Bay Area restaurants to start, but the list is one shared board for anything.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+Look: playful, tactile (see `.claude/skills/playful-tactile`).
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** Tangerine: a tomato orange accent on warm cream neutrals.
+  The sky blue pop is held for one thing only, the tier plates. Danger is
+  crimson so it never reads as the accent. Values live in
+  `styles/tailwind-input.css`.
+- **Signature element:** the tier plate: a big round letter plate at the
+  left of every tier row (`.tier-plate`), the one place the pop colour
+  appears. The S plate is the largest, so the top row reads as the boldest
+  thing on the board.
+- **Type scale:** `text-title` (2rem, weight 800), `text-heading` (1.25rem,
+  weight 700), `text-body`, `text-small`. Titles and headings use
+  `font-display` (`ui-rounded` first); body text stays the system face.
+- **One fixed look:** none. The board ships in a light and a dark look that
+  follow the viewer's Homeroom theme; there is no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +143,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- `placements` is append-only: saving a placement inserts a row, never
+  updates or deletes. The row with the highest `id` per (item, person) is
+  the person's tier. Display ordering uses `id`, never `created_at`.
+- An item's crowd tier is where most people put it; a tie goes to the
+  higher tier (S beats A beats B, and so on).
+- An item is just a name, capped at 120 characters, unique case-insensitively.
+  Items cannot be edited, renamed or deleted in this version.

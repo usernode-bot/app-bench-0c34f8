@@ -2,5 +2,10 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    { "name": "board loads", "path": "/", "expectText": "Crowd list" },
+    { "name": "board shows seeded items", "path": "/", "expectText": "Birch & Vine" },
+    { "id": "board", "visual": true, "impact": ["public/**", "server.js", "styles/**", "tailwind.config.js"], "path": "/" }
+  ]
 }

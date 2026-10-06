@@ -55,13 +55,21 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        pop: token('pop'), // the second colour, one recurring thing: the tier plates
+        'on-pop': token('on-pop'), // text on the pop
+        shade: token('shade'), // the lip colour under pressable things
+      },
+      // The house look's display face for titles and headings (see
+      // .claude/skills/playful-tactile); body text stays the system face.
+      fontFamily: {
+        display: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '700' }],
+        title: ['2rem', { lineHeight: '2.5rem', fontWeight: '800' }],
       },
     },
   },

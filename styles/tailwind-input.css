@@ -28,31 +28,41 @@
  * --un-accent-contrast at the accent and on-accent tokens.
  */
 @layer base {
+  /* Tangerine (see .claude/skills/playful-tactile): an energetic, sociable
+     tomato orange on warm cream neutrals, for a food-and-friends ranking
+     app. The sky blue pop is held for ONE thing: the tier plates. Danger is
+     crimson so it never reads as the accent. */
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 255 248 241;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 254 237 222;    /* hovers, badges, item chips */
+    --fg: 43 22 10;           /* text */
+    --muted: 104 72 52;       /* secondary text */
+    --line: 246 222 202;      /* borders, dividers, skeletons */
+    --accent: 194 65 12;      /* the one accent: the primary action */
     --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    --pop: 125 211 252;       /* the tier plates, and nothing else */
+    --on-pop: 12 74 110;      /* text on the pop */
+    --danger: 175 20 60;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 194 65 12;       /* the keyboard focus ring */
+    --shade: 43 22 10;        /* the lip colour under pressable things */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 26 14 8;
+    --surface: 41 24 15;
+    --raised: 58 36 23;
+    --fg: 255 244 235;
+    --muted: 214 184 160;
+    --line: 84 56 38;
+    --accent: 251 146 60;
+    --on-accent: 67 20 7;
+    --pop: 125 211 252;
+    --on-pop: 12 60 90;
+    --danger: 251 113 133;
+    --on-danger: 76 5 25;
+    --focus: 253 186 116;
+    --shade: 0 0 0;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -123,4 +133,112 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* ── The house look (see .claude/skills/playful-tactile) ─────────────────
+     The pressable lip: a solid shelf under anything you press, which the
+     thing sinks into when pressed. These rules sit after the kit's button
+     rules so they override their shape and size; colours and the focus
+     ring stay. No other shadows anywhere. */
+  .btn-primary,
+  .btn-secondary {
+    @apply min-h-12 rounded-full px-6 font-semibold motion-safe:transition-transform motion-safe:duration-75;
+    box-shadow: 0 4px 0 rgb(var(--shade) / 0.3);
+  }
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+  .btn-secondary {
+    @apply border-2 border-line;
+  }
+  /* Leave 8px or more below anything with a lip, so the shelf never
+     touches what follows. */
+  .tap-card {
+    @apply rounded-2xl border-2 border-line bg-surface p-4 motion-safe:transition-transform motion-safe:duration-75;
+    box-shadow: 0 3px 0 rgb(var(--shade) / 0.12);
+  }
+  .tap-card:active {
+    transform: translateY(3px);
+    box-shadow: none;
+  }
+  /* A pill choice: unselected on raised, selected filled with the accent. */
+  .chip {
+    @apply inline-flex min-h-11 items-center gap-2 rounded-full bg-raised px-4 text-body font-medium text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
+      focus-visible:ring-offset-ground;
+  }
+  .chip[aria-pressed="true"],
+  .chip[aria-selected="true"] {
+    @apply bg-accent text-on-accent;
+  }
+
+  /* The tier board: a row per tier with its letter plate — the signature
+     element, and the one place the pop colour appears. The S plate is the
+     largest, so the top row reads as the boldest thing on the board. */
+  .tier-row {
+    @apply flex items-start gap-3 rounded-2xl border-2 border-line bg-surface p-3;
+  }
+  .tier-row.drag-over {
+    @apply border-accent;
+  }
+  .tier-plate {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-pop font-display text-on-pop;
+    font-size: 1.25rem;
+    line-height: 1;
+    font-weight: 800;
+  }
+  .tier-plate-lg {
+    @apply h-14 w-14;
+    font-size: 1.75rem;
+  }
+  /* The small plate beside each voter in Who voted what. */
+  .tier-plate-mini {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pop font-display text-on-pop;
+    font-size: 0.875rem;
+    line-height: 1;
+    font-weight: 800;
+  }
+
+  /* An item chip: tap it for Who voted what, drag it into a tier, or step
+     it between tiers with its move buttons. */
+  .item-chip {
+    @apply inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-line bg-raised py-1 pl-4 pr-1 text-body font-medium text-fg;
+  }
+  .item-chip .chip-open {
+    @apply self-stretch rounded-full px-1 text-left text-body font-medium text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .mv-btn {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus
+      disabled:cursor-not-allowed disabled:opacity-40
+      motion-safe:transition-transform motion-safe:duration-75;
+  }
+  .mv-btn:not(:disabled):active {
+    transform: translateY(2px);
+  }
+}
+
+/* ── Motion that answers (the skill's §6) ───────────────────────────────────
+   Only ever the result of something the person did: an added item slides
+   in, a placement settles, the sheet slides up. Nothing moves on load and
+   nothing loops except the loading pulse. */
+@media (prefers-reduced-motion: no-preference) {
+  .anim-add { animation: item-in 200ms ease-out; }
+  .anim-settle { animation: chip-settle 150ms ease-out; }
+  .sheet-in { animation: sheet-up 200ms ease-out; }
+  .backdrop-in { animation: fade-in 150ms ease-out; }
+}
+@keyframes item-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@keyframes chip-settle {
+  from { transform: scale(0.95); }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
 }

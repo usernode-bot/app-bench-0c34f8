@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,7 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
           if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23c2410c'/><circle cx='50' cy='50' r='18' fill='%237dd3fc'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,156 +108,449 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       (bg-ground, text-muted, bg-accent, ...) that are right in both looks,
-       and components (btn-primary, list, card, state-empty, ...). The real
-       app keeps the kit; CLAUDE.md's "## Design" says how. -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex max-w-xl flex-col gap-4 px-4 py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
+    <h1 class="text-title font-display tracking-tight">Tier List</h1>
 
-    <section>
-      <h2 class="section-label">What's already working</h2>
-      <ul class="list">
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Sign-in</p>
-            <p class="text-small text-muted">You're signed in through Homeroom automatically, with no accounts to build.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Database</p>
-            <p class="text-small text-muted">Your app has its own private database, ready to store things.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Live API</p>
-            <p class="text-small text-muted">The example below talks to a real server. Try it.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- Add: the header's one filled button. Guests never see it. -->
+    <form id="add-form" class="flex items-start gap-2" hidden>
+      <label class="sr-only" for="add-input">Add an item to rank</label>
+      <input id="add-input" name="name" type="text" maxlength="120" autocomplete="off"
+             class="field flex-1" placeholder="Add a restaurant, park, anything">
+      <button type="submit" class="btn-primary">Add</button>
+    </form>
+    <p id="add-error" class="text-small text-danger" role="alert" hidden></p>
+    <p id="guest-note" class="text-small text-muted" hidden>Make an account to rank.</p>
 
-    <section class="flex flex-col items-center gap-5">
-      <div class="w-full px-1">
-        <h2 class="text-heading">Try the example</h2>
-        <p class="text-small text-muted">This example will be replaced</p>
-      </div>
+    <!-- Which list the board shows: yours, or where most people put things.
+         Switching re-renders from the board already in hand; no refetch. -->
+    <div class="flex gap-2" role="group" aria-label="Which list to show">
+      <button id="view-you" type="button" class="chip" aria-pressed="true">Your list</button>
+      <button id="view-crowd" type="button" class="chip" aria-pressed="false">Crowd list</button>
+    </div>
 
-      <button id="press-btn" class="btn-primary h-32 w-32 rounded-full text-title active:scale-95">Press!</button>
-
-      <p id="count" class="min-h-6 text-body text-muted"></p>
-
-      <div class="w-full">
-        <h3 class="section-label">Leaderboard</h3>
-        <!-- Anything that loads data shows exactly one of these at a time:
-             loading, the data, empty (it loaded, and there is nothing yet)
-             or error (it did not load). The script below switches them. -->
-        <div id="leaderboard-loading" role="status">
-          <span class="sr-only">Loading the leaderboard</span>
-          <div class="list">
-            <div class="list-row"><div class="skeleton h-4 w-1/2"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-1/3"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-2/5"></div></div>
-          </div>
-        </div>
-        <ol id="leaderboard" class="list" hidden></ol>
-        <div id="leaderboard-empty" class="state-empty" hidden>
-          <p class="text-heading">No presses yet</p>
-          <p class="text-body text-muted">Press the button to put your name on the board.</p>
-          <button id="leaderboard-press" class="btn-secondary">Press it</button>
-        </div>
-        <div id="leaderboard-error" class="state-error" hidden>
-          <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-          <p class="text-heading">Couldn't load the leaderboard</p>
-          <p class="text-body text-muted">Pressing still works, and every press is saved.</p>
-          <button id="leaderboard-retry" class="btn-secondary">Retry</button>
+    <!-- Anything that loads data shows exactly one of these at a time:
+         loading, the data, empty (it loaded, and there is nothing yet)
+         or error (it did not load). The script below switches them. -->
+    <div id="board-loading" role="status" aria-label="Loading the board" class="flex flex-col gap-3">
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-28 rounded-full"></div>
+          <div class="skeleton h-6 w-20 rounded-full"></div>
         </div>
       </div>
-    </section>
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-24 rounded-full"></div>
+          <div class="skeleton h-6 w-32 rounded-full"></div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-24 rounded-full"></div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-28 rounded-full"></div>
+          <div class="skeleton h-6 w-16 rounded-full"></div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-20 rounded-full"></div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="skeleton h-11 w-11 shrink-0 rounded-full"></div>
+        <div class="flex flex-1 flex-wrap gap-2">
+          <div class="skeleton h-6 w-24 rounded-full"></div>
+        </div>
+      </div>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <div id="board-empty" class="state-empty" hidden>
+      <!-- An empty board, drawn from the app's subject: tier rows and a
+           plate, token colours only. -->
+      <svg class="h-24 w-24" viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="24" cy="26" r="14" class="fill-current text-pop"/>
+        <rect x="46" y="16" width="42" height="20" rx="10" class="fill-current text-raised"/>
+        <rect x="10" y="46" width="78" height="16" rx="8" class="fill-current text-raised"/>
+        <rect x="10" y="70" width="52" height="16" rx="8" class="fill-current text-accent"/>
+      </svg>
+      <p class="text-heading">Nothing to rank yet</p>
+      <p class="text-body text-muted">Add the first thing and everyone can rank it.</p>
+      <button id="empty-add" type="button" class="btn-secondary">Add the first item</button>
+    </div>
+
+    <div id="board-error" class="state-error" hidden>
+      <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+      <p class="text-heading">Couldn't load the board</p>
+      <p class="text-body text-muted">The board didn't load, so ranking is unavailable. Everything else is fine; try again in a moment.</p>
+      <button id="board-retry" type="button" class="btn-secondary">Retry</button>
+    </div>
+
+    <!-- The board: the unplaced tray, then the six tier rows, S at the top.
+         The script fills the chip containers. -->
+    <div id="board" class="flex flex-col gap-3" hidden>
+      <section id="tray" class="rounded-2xl border-2 border-dashed border-line p-3" hidden>
+        <p class="section-label">Not ranked yet</p>
+        <div id="tray-chips" class="flex flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="S">
+        <span class="tier-plate tier-plate-lg" aria-hidden="true">S</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="A">
+        <span class="tier-plate" aria-hidden="true">A</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="B">
+        <span class="tier-plate" aria-hidden="true">B</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="C">
+        <span class="tier-plate" aria-hidden="true">C</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="D">
+        <span class="tier-plate" aria-hidden="true">D</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+      <section class="tier-row" data-tier="F">
+        <span class="tier-plate" aria-hidden="true">F</span>
+        <div class="tier-chips flex flex-1 flex-wrap gap-2"></div>
+      </section>
+    </div>
+
   </main>
+
+  <!-- Who voted what: a bottom sheet for one item's votes. Tapping any chip
+       opens it; Close, the backdrop or Escape dismisses it. -->
+  <div id="sheet-backdrop" class="backdrop-in fixed inset-0 bg-shade/40" hidden></div>
+  <div id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"
+       class="sheet-in fixed inset-x-0 bottom-0 mx-auto max-w-xl rounded-t-3xl border-2 border-b-0 border-line bg-surface p-4 pb-6"
+       hidden>
+    <div class="mx-auto mb-3 h-1.5 w-12 rounded-full bg-line" aria-hidden="true"></div>
+    <h2 id="sheet-title" class="text-heading font-display">Who voted what</h2>
+    <p id="sheet-item" class="mt-1 text-body font-semibold"></p>
+    <p id="sheet-tally" class="mt-1 text-small tabular-nums text-muted"></p>
+    <div id="sheet-voters" class="mt-2 flex flex-col divide-y divide-line"></div>
+    <button id="sheet-close" type="button" class="btn-secondary mt-4 w-full">Close</button>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token') || '';
     const headers = token ? { 'x-usernode-token': token } : {};
-    const count = document.getElementById('count');
 
-    // The leaderboard's states, one shown at a time. Empty only when the
-    // load worked and found nothing; a failure is the error state, never
-    // "No presses yet".
+    const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+    const el = (id) => document.getElementById(id);
+    // Drag is for pointer devices only; phones use the move buttons.
+    const pointerFine = window.matchMedia('(pointer: fine)').matches;
+
+    const boardEl = el('board');
+    const tierRows = [...boardEl.querySelectorAll('.tier-row')];
+    const tierChips = Object.fromEntries(
+      tierRows.map((row) => [row.dataset.tier, row.querySelector('.tier-chips')])
+    );
+    const tray = el('tray');
+    const trayChips = el('tray-chips');
     const views = {
-      loading: document.getElementById('leaderboard-loading'),
-      list: document.getElementById('leaderboard'),
-      empty: document.getElementById('leaderboard-empty'),
-      error: document.getElementById('leaderboard-error'),
+      loading: el('board-loading'),
+      board: boardEl,
+      empty: el('board-empty'),
+      error: el('board-error'),
     };
+    const addForm = el('add-form');
+    const addInput = el('add-input');
+    const addError = el('add-error');
+    const guestNote = el('guest-note');
+
+    let view = 'you'; // 'you' | 'crowd'
+    let canRank = false;
+    let myName = null;
+    let items = [];
+    let knownIds = new Set();
+    let freshId = null; // the item just added, for the slide-in
+    let placedId = null; // the item just moved, for the settle
+
     function show(state) {
-      for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
+      for (const [name, node] of Object.entries(views)) node.hidden = name !== state;
     }
 
-    async function loadLeaderboard() {
-      let leaderboard;
+    function plural(n, word) {
+      return n === 1 ? '1 ' + word : n + ' ' + word + 's';
+    }
+
+    function chevron(up) {
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 20 20');
+      svg.setAttribute('fill', 'currentColor');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.setAttribute('class', 'h-4 w-4');
+      const path = document.createElementNS(NS, 'path');
+      path.setAttribute('fill-rule', 'evenodd');
+      path.setAttribute('clip-rule', 'evenodd');
+      path.setAttribute('d', up
+        ? 'M14.77 12.79a.75.75 0 0 1-1.06-.02L10 8.83 6.29 12.77a.75.75 0 1 1-1.08-1.04l4.25-4.5a.75.75 0 0 1 1.08 0l4.25 4.5a.75.75 0 0 1-.02 1.06Z'
+        : 'M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z');
+      svg.append(path);
+      return svg;
+    }
+
+    function moveButton(label, up) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mv-btn';
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+      btn.append(chevron(up));
+      return btn;
+    }
+
+    // One item, as a chip. The name button opens Who voted what; the move
+    // buttons (your list, signed in, or the drag path on pointer devices)
+    // step it between tiers. Names go in as text, never as HTML.
+    function buildChip(item) {
+      const crowd = view === 'crowd';
+      const chip = document.createElement('div');
+      chip.className = 'item-chip';
+      chip.dataset.itemId = item.id;
+      if (item.id === freshId) chip.classList.add('anim-add');
+      if (item.id === placedId) chip.classList.add('anim-settle');
+
+      const votes = Object.values(item.votes || {}).reduce((a, b) => a + b, 0);
+      const name = document.createElement('button');
+      name.type = 'button';
+      name.className = 'chip-open';
+      name.textContent = item.name;
+      name.setAttribute('aria-label', item.name + ', ' + plural(votes, 'vote'));
+      name.addEventListener('click', () => openSheet(item));
+      chip.append(name);
+
+      if (crowd) {
+        const count = document.createElement('span');
+        count.className = 'pr-3 tabular-nums text-small text-muted';
+        count.textContent = item.crowd && item.crowd.votes
+          ? plural(item.crowd.votes, 'vote')
+          : 'No votes yet';
+        chip.append(count);
+      } else if (canRank) {
+        const at = TIERS.indexOf(item.your_tier);
+        // From the tray, Move up enters the ranking at F; Move down is off.
+        const upTier = at > 0 ? TIERS[at - 1] : (at === -1 ? 'F' : null);
+        const downTier = at >= 0 && at < TIERS.length - 1 ? TIERS[at + 1] : null;
+        const up = moveButton('Move up', true);
+        const down = moveButton('Move down', false);
+        if (upTier) up.addEventListener('click', () => place(item.id, upTier));
+        else up.disabled = true;
+        if (downTier) down.addEventListener('click', () => place(item.id, downTier));
+        else down.disabled = true;
+        chip.append(up, down);
+        if (pointerFine && at >= 0) {
+          chip.draggable = true;
+          chip.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', String(item.id));
+            e.dataTransfer.effectAllowed = 'move';
+          });
+        }
+      }
+      return chip;
+    }
+
+    // Place, then refetch: one write per placement, and the crowd view and
+    // counts stay honest without websockets. A refusal (a tier or item the
+    // server no longer knows) resyncs the board instead of guessing.
+    async function place(itemId, tier) {
+      placedId = itemId;
       try {
-        const res = await fetch('/api/leaderboard', { headers });
+        const res = await fetch('/api/placements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ item_id: itemId, tier }),
+        });
+        if (!res.ok) placedId = null;
+      } catch {
+        placedId = null;
+      }
+      await loadBoard();
+    }
+
+    function renderBoard() {
+      const perTier = { S: [], A: [], B: [], C: [], D: [], F: [] };
+      const unplaced = [];
+      for (const item of items) {
+        const tier = view === 'crowd' ? (item.crowd && item.crowd.tier) : item.your_tier;
+        if (tier && perTier[tier]) perTier[tier].push(item);
+        else unplaced.push(item);
+      }
+      for (const t of TIERS) {
+        tierChips[t].replaceChildren(...perTier[t].map(buildChip));
+      }
+      trayChips.replaceChildren(...unplaced.map(buildChip));
+      tray.hidden = unplaced.length === 0;
+      freshId = null;
+      placedId = null;
+    }
+
+    // first=true (initial load, Retry) shows the skeleton row; later calls
+    // refetch behind whatever is already on screen.
+    async function loadBoard(first) {
+      if (first) show('loading');
+      let data;
+      try {
+        const res = await fetch('/api/board', { headers });
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        ({ leaderboard } = await res.json());
+        data = await res.json();
       } catch {
         show('error');
         return;
       }
-      // People's names go in as text, never as HTML.
-      views.list.replaceChildren(...leaderboard.map((r, i) => {
-        const row = document.createElement('li');
-        row.className = 'list-row justify-between';
-        const name = document.createElement('span');
-        name.textContent = (i + 1) + '. ' + r.username;
-        const presses = document.createElement('span');
-        presses.className = 'tabular-nums text-muted';
-        presses.textContent = r.presses;
-        row.append(name, presses);
-        return row;
-      }));
-      const total = leaderboard.reduce((s, r) => s + parseInt(r.presses, 10), 0);
-      count.textContent = total + (total === 1 ? ' press so far' : ' presses so far');
-      show(leaderboard.length ? 'list' : 'empty');
+      const prev = knownIds;
+      items = data.items || [];
+      knownIds = new Set(items.map((it) => it.id));
+      freshId = null;
+      if (prev.size > 0) {
+        for (const it of items) {
+          if (!prev.has(it.id)) freshId = it.id;
+        }
+      }
+      canRank = !!data.can_rank;
+      myName = data.you || null;
+      addForm.hidden = !canRank;
+      guestNote.hidden = canRank;
+      el('empty-add').hidden = !canRank;
+      renderBoard();
+      show(items.length ? 'board' : 'empty');
     }
 
-    async function press() {
+    // Drop a chip on a tier row: pointer devices, your list, signed in.
+    for (const row of tierRows) {
+      row.addEventListener('dragover', (e) => {
+        if (view !== 'you' || !canRank) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        row.classList.add('drag-over');
+      });
+      row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        row.classList.remove('drag-over');
+        if (view !== 'you' || !canRank) return;
+        const id = Number(e.dataTransfer.getData('text/plain'));
+        if (Number.isInteger(id)) place(id, row.dataset.tier);
+      });
+    }
+
+    function setView(next) {
+      if (view === next) return;
+      view = next;
+      el('view-you').setAttribute('aria-pressed', String(view === 'you'));
+      el('view-crowd').setAttribute('aria-pressed', String(view === 'crowd'));
+      renderBoard();
+    }
+    el('view-you').addEventListener('click', () => setView('you'));
+    el('view-crowd').addEventListener('click', () => setView('crowd'));
+
+    addForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      addError.hidden = true;
+      let res;
       try {
-        const res = await fetch('/api/press', {
+        res = await fetch('/api/items', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({ name: addInput.value }),
         });
-        if (res.ok) loadLeaderboard();
-        else if (res.status === 401) count.textContent = 'Sign in to press!';
-      } catch {}
-    }
-
-    document.getElementById('press-btn').addEventListener('click', press);
-    document.getElementById('leaderboard-press').addEventListener('click', press);
-    document.getElementById('leaderboard-retry').addEventListener('click', () => {
-      show('loading');
-      loadLeaderboard();
+      } catch {
+        addError.textContent = "The item didn't save. Try again.";
+        addError.hidden = false;
+        return;
+      }
+      if (res.ok) {
+        addInput.value = '';
+        await loadBoard();
+        addInput.focus();
+        return;
+      }
+      let data = {};
+      try { data = await res.json(); } catch {}
+      addError.textContent = res.status === 409
+        ? 'Someone already added that item.'
+        : res.status === 401
+          ? 'Make an account to rank.'
+          : (data.error || "The item didn't save. Try again.");
+      addError.hidden = false;
     });
 
-    loadLeaderboard();
+    el('empty-add').addEventListener('click', () => addInput.focus());
+    el('board-retry').addEventListener('click', () => loadBoard(true));
+
+    // ── Who voted what ────────────────────────────────────────────────────
+    const sheet = el('sheet');
+    const backdrop = el('sheet-backdrop');
+    let lastFocused = null;
+
+    function voterRow(person) {
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-3 py-2';
+      const avatar = document.createElement('span');
+      avatar.className = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-raised text-body font-semibold text-muted';
+      avatar.textContent = (Array.from(person.username || '?')[0] || '?').toUpperCase();
+      const name = document.createElement('span');
+      name.className = 'flex-1 text-body';
+      name.textContent = person.username;
+      row.append(avatar, name);
+      if (myName && person.username === myName) {
+        const you = document.createElement('span');
+        you.className = 'text-small font-medium text-accent';
+        you.textContent = 'You';
+        row.append(you);
+      }
+      const plate = document.createElement('span');
+      plate.className = 'tier-plate-mini';
+      plate.textContent = person.tier;
+      row.append(plate);
+      return row;
+    }
+
+    function openSheet(item) {
+      const total = Object.values(item.votes || {}).reduce((a, b) => a + b, 0);
+      el('sheet-item').textContent = item.name;
+      el('sheet-tally').textContent = item.crowd && item.crowd.tier
+        ? 'Crowd pick: ' + item.crowd.tier + ', ' + item.crowd.votes + ' of ' + total
+          + (total === 1 ? ' vote.' : ' votes.')
+        : 'No votes yet.';
+      el('sheet-voters').replaceChildren(...(item.people || []).map(voterRow));
+      lastFocused = document.activeElement;
+      sheet.hidden = false;
+      backdrop.hidden = false;
+      el('sheet-close').focus();
+    }
+
+    function closeSheet() {
+      sheet.hidden = true;
+      backdrop.hidden = true;
+      if (lastFocused) {
+        lastFocused.focus();
+        lastFocused = null;
+      }
+    }
+
+    el('sheet-close').addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !sheet.hidden) closeSheet();
+    });
+
+    loadBoard(true);
   </script>
 </body>
 </html>
