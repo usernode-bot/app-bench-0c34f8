@@ -2,5 +2,20 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "board.default",
+      "path": "/",
+      "visual": true,
+      "id": "board.default",
+      "impact": [
+        "public/index.html",
+        "server.js",
+        "styles/tailwind-input.css",
+        "tailwind.config.js"
+      ],
+      "expectText": "Unranked"
+    }
+  ]
 }

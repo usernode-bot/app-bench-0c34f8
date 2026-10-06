@@ -35,11 +35,24 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 199 62 29;      /* the one accent: tomato red */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 199 62 29;       /* the keyboard focus ring */
+    /* The tier ladder, S best to D worst. Each tier pairs a badge colour
+       with an on-tier colour for its letter; both read at 4.5:1 or more.
+       S shares the accent: the top of the ladder is the app's own colour. */
+    --tier-s: 199 62 29;
+    --on-tier-s: 255 255 255;
+    --tier-a: 194 65 12;
+    --on-tier-a: 255 255 255;
+    --tier-b: 202 138 4;
+    --on-tier-b: 42 32 3;
+    --tier-c: 21 128 61;
+    --on-tier-c: 255 255 255;
+    --tier-d: 51 65 85;
+    --on-tier-d: 255 255 255;
   }
   .dark {
     --ground: 12 10 9;
@@ -48,16 +61,47 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 250 115 90;
+    --on-accent: 59 15 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 250 115 90;
+    --tier-s: 250 115 90;
+    --on-tier-s: 59 15 8;
+    --tier-a: 251 146 60;
+    --on-tier-a: 59 15 8;
+    --tier-b: 250 204 21;
+    --on-tier-b: 42 32 3;
+    --tier-c: 74 222 128;
+    --on-tier-c: 59 15 8;
+    --tier-d: 148 163 184;
+    --on-tier-d: 59 15 8;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
+  }
+  /* Point the native UI kit's tokens at this app's palette, in both looks,
+     so its sheets and controls read as this app rather than as the kit's
+     own defaults. html:root and html.dark out-rank the kit's own :root and
+     .dark declarations (native.css loads after this build), while only
+     token VALUES change; nothing of the kit's behaviour. */
+  html:root {
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
+    --un-surface: rgb(var(--surface));
+    --un-sheet-bg: rgb(var(--surface));
+    --un-muted: rgb(var(--muted));
+    --un-hairline: rgb(var(--line));
+  }
+  html.dark {
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
+    --un-surface: rgb(var(--surface));
+    --un-sheet-bg: rgb(var(--surface));
+    --un-muted: rgb(var(--muted));
+    --un-hairline: rgb(var(--line));
   }
 }
 
@@ -122,5 +166,65 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* ── The tier board ─────────────────────────────────────────────────────
+     The signature element: five rows, S best to D worst, each a drop zone.
+     The row tint comes from its own tier token through an alpha, so no
+     extra colour is needed; the accent ring marks the row under a drag. */
+  .tier-row {
+    @apply flex items-start gap-3 rounded-xl border border-line p-2;
+  }
+  .tier-row[data-tier="S"] {
+    background-color: rgb(var(--tier-s) / 0.08);
+    border-color: rgb(var(--tier-s) / 0.3);
+  }
+  .tier-row[data-tier="A"] {
+    background-color: rgb(var(--tier-a) / 0.08);
+    border-color: rgb(var(--tier-a) / 0.3);
+  }
+  .tier-row[data-tier="B"] {
+    background-color: rgb(var(--tier-b) / 0.1);
+    border-color: rgb(var(--tier-b) / 0.3);
+  }
+  .tier-row[data-tier="C"] {
+    background-color: rgb(var(--tier-c) / 0.08);
+    border-color: rgb(var(--tier-c) / 0.3);
+  }
+  .tier-row[data-tier="D"] {
+    background-color: rgb(var(--tier-d) / 0.1);
+    border-color: rgb(var(--tier-d) / 0.3);
+  }
+  .tier-row.drop-hover {
+    @apply bg-surface ring-2 ring-accent;
+  }
+  /* The bold letter badge: colour and letter colour always come paired. */
+  .tier-badge {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-heading font-bold;
+  }
+  .tier-badge-sm {
+    @apply flex h-7 min-w-7 shrink-0 items-center justify-center rounded-md px-2 text-small font-bold;
+  }
+  .tier-chips {
+    @apply flex min-h-12 flex-1 flex-wrap content-start gap-2;
+  }
+  /* A draggable item. touch-action: none lets the drag own the gesture;
+     there is deliberately no transition on it, so a drag tracks the
+     pointer instantly and reduced motion costs nothing. */
+  .chip {
+    @apply inline-flex max-w-full min-h-11 select-none items-center gap-2 rounded-lg border border-line
+      bg-surface px-3 text-body text-fg cursor-grab;
+    touch-action: none;
+  }
+  .chip.dragging {
+    @apply relative z-10 cursor-grabbing ring-2 ring-accent;
+  }
+  /* My list / Crowd toggle. */
+  .view-tab {
+    @apply min-h-11 flex-1 rounded-lg px-3 text-body font-medium text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .view-tab[aria-selected="true"] {
+    @apply bg-raised text-fg;
   }
 }

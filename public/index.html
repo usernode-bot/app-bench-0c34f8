@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,8 +26,8 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
+          if (val instanceof Error) return val.stack || val.message || '[error]';
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,32 +64,23 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
-       Writing class names as whole literals is what keeps this working — a
-       class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
-       is invisible to the compiler. If you genuinely need runtime-generated
-       classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23c73e1d'/><text x='50' y='68' font-size='52' font-family='system-ui,sans-serif' font-weight='bold' text-anchor='middle' fill='white'>S</text></svg>">
+  <!-- Tailwind, PRECOMPILED for this app. npm run build compiles
+       styles/tailwind-input.css to public/tailwind.css on every image
+       build, so the stylesheet is regenerated from THIS commit's markup
+       and can never drift behind the code. Class names are written as
+       whole literals for the same reason: a class assembled from
+       fragments at runtime is invisible to the compiler. -->
   <link rel="stylesheet" href="/tailwind.css">
-  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
-       handler in server.js serves it under a plain "node server.js"; the
-       platform's edge answers it everywhere else). Never vendor it and never
-       write a hostname in front of it.
-       It is NOT conditional on this app calling a bridge API: it is also how
-       the app ANSWERS the shell, so a scaffold without it is invisible to
-       anything that asks the frame a question. Offline launch is one of those.
-       Another is the page's colour: the bridge reports this document's opaque
-       ground to the shell (#1581), which is what makes the platform bar above
-       the app take the app's tone instead of the viewer's theme (#1945).
-       The bridge is also where the app learns the viewer's light/dark theme:
-       the script below reads it. -->
+  <!-- The native UI kit: the detail and add sheets are presented with
+       unNative.presentSheet, so they arrive and dismiss with the same
+       spring feel as the rest of the platform. -->
+  <link rel="stylesheet" href="/usernode-native/v1/native.css">
+  <script src="/usernode-native/v1/native.js"></script>
+  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path.
+       It is NOT conditional on this app calling a bridge API: it is also
+       how the app ANSWERS the shell, and it turns a 401 account_required
+       into the "Make an account to continue" sheet for guests. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
@@ -108,156 +99,468 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       (bg-ground, text-muted, bg-accent, ...) that are right in both looks,
-       and components (btn-primary, list, card, state-empty, ...). The real
-       app keeps the kit; CLAUDE.md's "## Design" says how. -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex max-w-md flex-col gap-5 px-4 py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
+    <header class="flex items-center justify-between gap-3">
+      <h1 class="text-title">Tier list</h1>
+      <button id="add-btn" class="btn-primary">Add item</button>
+    </header>
 
-    <section>
-      <h2 class="section-label">What's already working</h2>
-      <ul class="list">
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Sign-in</p>
-            <p class="text-small text-muted">You're signed in through Homeroom automatically, with no accounts to build.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Database</p>
-            <p class="text-small text-muted">Your app has its own private database, ready to store things.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Live API</p>
-            <p class="text-small text-muted">The example below talks to a real server. Try it.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <section class="flex flex-col items-center gap-5">
-      <div class="w-full px-1">
-        <h2 class="text-heading">Try the example</h2>
-        <p class="text-small text-muted">This example will be replaced</p>
+    <!-- My list / Crowd -->
+    <div class="flex flex-col gap-2">
+      <div class="flex rounded-xl border border-line bg-surface p-1" role="tablist">
+        <button id="tab-mine" class="view-tab" role="tab" aria-selected="true">My list</button>
+        <button id="tab-crowd" class="view-tab" role="tab" aria-selected="false">Crowd</button>
       </div>
+      <p id="crowd-hint" class="px-1 text-small text-muted" hidden>
+        How everyone ranked things. Tiers can't be dragged here; switch to
+        My list to place your own.
+      </p>
+    </div>
 
-      <button id="press-btn" class="btn-primary h-32 w-32 rounded-full text-title active:scale-95">Press!</button>
-
-      <p id="count" class="min-h-6 text-body text-muted"></p>
-
-      <div class="w-full">
-        <h3 class="section-label">Leaderboard</h3>
-        <!-- Anything that loads data shows exactly one of these at a time:
-             loading, the data, empty (it loaded, and there is nothing yet)
-             or error (it did not load). The script below switches them. -->
-        <div id="leaderboard-loading" role="status">
-          <span class="sr-only">Loading the leaderboard</span>
-          <div class="list">
-            <div class="list-row"><div class="skeleton h-4 w-1/2"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-1/3"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-2/5"></div></div>
-          </div>
-        </div>
-        <ol id="leaderboard" class="list" hidden></ol>
-        <div id="leaderboard-empty" class="state-empty" hidden>
-          <p class="text-heading">No presses yet</p>
-          <p class="text-body text-muted">Press the button to put your name on the board.</p>
-          <button id="leaderboard-press" class="btn-secondary">Press it</button>
-        </div>
-        <div id="leaderboard-error" class="state-error" hidden>
-          <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-          <p class="text-heading">Couldn't load the leaderboard</p>
-          <p class="text-body text-muted">Pressing still works, and every press is saved.</p>
-          <button id="leaderboard-retry" class="btn-secondary">Retry</button>
-        </div>
+    <!-- The board's states, one shown at a time: loading, error, empty
+         (it loaded, and there is nothing yet), or the board itself. -->
+    <div id="board-loading" role="status">
+      <span class="sr-only">Loading the tier list</span>
+      <div class="flex flex-col gap-2">
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
+        <div class="skeleton h-16 w-full"></div>
       </div>
-    </section>
+    </div>
+    <div id="board-error" class="state-error" hidden>
+      <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+      <p class="text-heading">Couldn't load the tier list</p>
+      <p class="text-body text-muted">Nothing was lost: your tiers are saved on the server. Everything else still works.</p>
+      <button id="board-retry" class="btn-secondary">Retry</button>
+    </div>
+    <div id="board-empty" class="state-empty" hidden>
+      <p class="text-heading">No items yet</p>
+      <p class="text-body text-muted">Add the first thing for everyone to rank, from S tier down to D.</p>
+      <button id="empty-add" class="btn-primary">Add item</button>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <div id="board" hidden class="flex flex-col gap-5">
+      <div id="tiers" class="flex flex-col gap-2"></div>
+      <div>
+        <h2 class="section-label">Unranked</h2>
+        <div id="tray-chips" class="flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+
   </main>
 
   <script>
+    // ── Setup ────────────────────────────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token') || '';
     const headers = token ? { 'x-usernode-token': token } : {};
-    const count = document.getElementById('count');
 
-    // The leaderboard's states, one shown at a time. Empty only when the
-    // load worked and found nothing; a failure is the error state, never
-    // "No presses yet".
-    const views = {
-      loading: document.getElementById('leaderboard-loading'),
-      list: document.getElementById('leaderboard'),
-      empty: document.getElementById('leaderboard-empty'),
-      error: document.getElementById('leaderboard-error'),
+    const TIERS = ['S', 'A', 'B', 'C', 'D'];
+    // Whole literals only: the Tailwind compiler reads this source text.
+    const TIER_BADGE = {
+      S: 'bg-tier-s text-on-tier-s',
+      A: 'bg-tier-a text-on-tier-a',
+      B: 'bg-tier-b text-on-tier-b',
+      C: 'bg-tier-c text-on-tier-c',
+      D: 'bg-tier-d text-on-tier-d',
     };
-    function show(state) {
-      for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
+
+    const el = (id) => document.getElementById(id);
+    const views = {
+      loading: el('board-loading'),
+      error: el('board-error'),
+      empty: el('board-empty'),
+      board: el('board'),
+    };
+    function show(name) {
+      for (const [key, node] of Object.entries(views)) node.hidden = key !== name;
     }
 
-    async function loadLeaderboard() {
-      let leaderboard;
-      try {
-        const res = await fetch('/api/leaderboard', { headers });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        ({ leaderboard } = await res.json());
-      } catch {
-        show('error');
-        return;
+    let items = [];   // what GET /api/items last returned
+    let view = 'mine';
+    let skipClick = false; // a chip's click right after a drag is not a tap
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json', ...headers },
+        ...opts,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      });
+      if (!res.ok) throw Object.assign(new Error('HTTP ' + res.status), { status: res.status });
+      return res.json();
+    }
+
+    // ── Rendering ────────────────────────────────────────────────────────
+    function chipLabel(item, inCrowd) {
+      // Names go in as text nodes, never HTML.
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.dataset.id = item.id;
+      const name = document.createElement('span');
+      name.className = 'truncate';
+      name.textContent = item.name;
+      chip.appendChild(name);
+      if (inCrowd) {
+        const note = document.createElement('span');
+        note.className = 'shrink-0 text-small tabular-nums text-muted';
+        if (item.total_votes > 0) {
+          note.textContent = item.total_votes;
+          chip.setAttribute('aria-label', item.name + ', ' + item.total_votes + ' votes');
+        } else {
+          note.textContent = 'No votes yet';
+          chip.setAttribute('aria-label', item.name + ', no votes yet');
+        }
+        chip.appendChild(note);
       }
-      // People's names go in as text, never as HTML.
-      views.list.replaceChildren(...leaderboard.map((r, i) => {
-        const row = document.createElement('li');
-        row.className = 'list-row justify-between';
-        const name = document.createElement('span');
-        name.textContent = (i + 1) + '. ' + r.username;
-        const presses = document.createElement('span');
-        presses.className = 'tabular-nums text-muted';
-        presses.textContent = r.presses;
-        row.append(name, presses);
+      if (view === 'mine') {
+        chip.setAttribute('aria-description', 'Drag into a tier, or tap for details');
+      }
+      chip.addEventListener('click', () => {
+        if (skipClick) return;
+        openItemSheet(item);
+      });
+      makeDraggable(chip, item);
+      return chip;
+    }
+
+    function render() {
+      if (items.length === 0) { show('empty'); return; }
+      show('board');
+
+      el('tab-mine').setAttribute('aria-selected', view === 'mine');
+      el('tab-crowd').setAttribute('aria-selected', view === 'crowd');
+      el('crowd-hint').hidden = view !== 'crowd';
+
+      const inCrowd = view === 'crowd';
+      const key = inCrowd ? 'crowd_tier' : 'my_tier';
+
+      const tiers = el('tiers');
+      tiers.replaceChildren(...TIERS.map((t) => {
+        const row = document.createElement('section');
+        row.className = 'tier-row';
+        row.dataset.tier = t;
+        row.setAttribute('aria-label', 'Tier ' + t);
+        const badge = document.createElement('div');
+        badge.className = 'tier-badge ' + TIER_BADGE[t];
+        badge.textContent = t;
+        const chips = document.createElement('div');
+        chips.className = 'tier-chips';
+        chips.replaceChildren(...items
+          .filter((item) => item[key] === t)
+          .map((item) => chipLabel(item, inCrowd)));
+        row.append(badge, chips);
         return row;
       }));
-      const total = leaderboard.reduce((s, r) => s + parseInt(r.presses, 10), 0);
-      count.textContent = total + (total === 1 ? ' press so far' : ' presses so far');
-      show(leaderboard.length ? 'list' : 'empty');
+
+      const tray = el('tray-chips');
+      tray.replaceChildren(...items
+        .filter((item) => !item[key])
+        .map((item) => chipLabel(item, inCrowd)));
     }
 
-    async function press() {
+    async function loadItems({ skeleton = false } = {}) {
+      if (skeleton) show('loading');
+      let data;
       try {
-        const res = await fetch('/api/press', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...headers },
-        });
-        if (res.ok) loadLeaderboard();
-        else if (res.status === 401) count.textContent = 'Sign in to press!';
-      } catch {}
+        data = await api('/api/items');
+      } catch (err) {
+        // A refresh that fails keeps the board on screen; a first load
+        // that fails is the error state, never "No items yet".
+        if (items.length === 0) show('error');
+        return;
+      }
+      items = data.items;
+      render();
     }
 
-    document.getElementById('press-btn').addEventListener('click', press);
-    document.getElementById('leaderboard-press').addEventListener('click', press);
-    document.getElementById('leaderboard-retry').addEventListener('click', () => {
-      show('loading');
-      loadLeaderboard();
-    });
+    // Place my tier optimistically, then confirm with the server; a
+    // failure puts the chip back where it was.
+    async function placeItem(item, tier) {
+      const prev = item.my_tier;
+      item.my_tier = tier;
+      render();
+      try {
+        await api('/api/items/' + item.id + '/placement', { method: 'PUT', body: { tier } });
+        loadItems(); // quiet refresh: vote counts moved too
+      } catch (err) {
+        item.my_tier = prev;
+        render();
+      }
+    }
 
-    loadLeaderboard();
+    // ── Dragging ─────────────────────────────────────────────────────────
+    // Pointer events, so mouse and touch work the same. Picking up a chip
+    // highlights the tier row under the pointer; a drop inside a row moves
+    // the item there, a drop anywhere else changes nothing. Chips track
+    // the pointer instantly (no transition), which is also what reduced
+    // motion asks for. Dragging is checked at gesture time, so it applies
+    // only in My list.
+    function makeDraggable(chip, item) {
+      chip.addEventListener('pointerdown', (e) => {
+        if (e.button && e.button !== 0) return;
+        if (view !== 'mine') return;
+        const start = { x: e.clientX, y: e.clientY };
+        let started = false, over = null, rects = null;
+
+        const rows = () => [...document.querySelectorAll('.tier-row')];
+        let rowEls = [];
+
+        const highlight = (tier) => {
+          if (tier === over) return;
+          rowEls.forEach((r) => r.classList.toggle('drop-hover', r.dataset.tier === tier));
+          over = tier;
+        };
+
+        const move = (ev) => {
+          const dx = ev.clientX - start.x;
+          const dy = ev.clientY - start.y;
+          if (!started) {
+            if (Math.hypot(dx, dy) < 6) return;
+            started = true;
+            chip.classList.add('dragging');
+            rowEls = rows();
+            rects = rowEls.map((r) => ({ el: r, rect: r.getBoundingClientRect() }));
+          }
+          chip.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+          const hit = rects.find(({ rect }) =>
+            ev.clientX >= rect.left && ev.clientX <= rect.right &&
+            ev.clientY >= rect.top && ev.clientY <= rect.bottom);
+          highlight(hit ? hit.el.dataset.tier : null);
+        };
+
+        const cleanup = () => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', end);
+          window.removeEventListener('pointercancel', cancel);
+          chip.classList.remove('dragging');
+          chip.style.transform = '';
+          rowEls.forEach((r) => r.classList.remove('drop-hover'));
+        };
+
+        function end() {
+          cleanup();
+          if (!started) return;
+          // The click that follows this pointerup is the drag ending, not
+          // a tap on the chip.
+          skipClick = true;
+          setTimeout(() => { skipClick = false; }, 0);
+          if (over && over !== item.my_tier) placeItem(item, over);
+        }
+        function cancel() {
+          cleanup();
+          if (started) { skipClick = true; setTimeout(() => { skipClick = false; }, 0); }
+        }
+
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', end);
+        window.addEventListener('pointercancel', cancel);
+      });
+    }
+
+    // ── Sheets ───────────────────────────────────────────────────────────
+    // The kit presents the sheet with its own spring and drag-to-dismiss.
+    // Standalone, without the kit, a plain overlay does the same job.
+    function present(contentEl) {
+      if (window.unNative && window.unNative.presentSheet) {
+        return window.unNative.presentSheet({ contentEl });
+      }
+      const backdrop = document.createElement('div');
+      backdrop.style.cssText =
+        'position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;' +
+        'background:rgb(var(--fg) / 0.4);z-index:50;';
+      const sheet = document.createElement('div');
+      sheet.style.cssText =
+        'width:100%;max-width:28rem;max-height:85vh;overflow-y:auto;border-radius:1rem 1rem 0 0;' +
+        'background:rgb(var(--surface));padding:1rem;';
+      sheet.appendChild(contentEl);
+      backdrop.appendChild(sheet);
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+      document.body.appendChild(backdrop);
+      const close = () => backdrop.remove();
+      return { el: sheet, dismiss: close };
+    }
+
+    function openItemSheet(item) {
+      const content = document.createElement('div');
+      content.className = 'flex flex-col gap-4 px-4 pb-6';
+
+      const title = document.createElement('h2');
+      title.className = 'text-heading';
+      title.textContent = item.name;
+      content.appendChild(title);
+
+      // Your tier: five buttons, so ranking works without dragging.
+      const tierLabel = document.createElement('p');
+      tierLabel.className = 'section-label mb-0';
+      tierLabel.textContent = 'Your tier';
+      const tierGrid = document.createElement('div');
+      tierGrid.className = 'grid grid-cols-5 gap-2';
+      TIERS.forEach((t) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const selected = item.my_tier === t;
+        btn.className = 'tier-badge w-full min-h-11 ' +
+          (selected ? TIER_BADGE[t] : 'border border-line bg-surface text-fg');
+        btn.textContent = t;
+        btn.setAttribute('aria-pressed', selected);
+        btn.setAttribute('aria-label', 'Tier ' + t);
+        btn.addEventListener('click', () => {
+          if (item.my_tier !== t) placeItem(item, t);
+          sheet.dismiss();
+        });
+        tierGrid.appendChild(btn);
+      });
+      content.append(tierLabel, tierGrid);
+
+      // How everyone voted: each person and their tier.
+      const votesLabel = document.createElement('p');
+      votesLabel.className = 'section-label mb-0';
+      votesLabel.textContent = 'How everyone voted';
+      const votesBox = document.createElement('div');
+      votesBox.className = 'flex flex-col gap-2';
+      content.append(votesLabel, votesBox);
+
+      const reportBtn = document.createElement('button');
+      reportBtn.type = 'button';
+      reportBtn.className = 'btn-secondary text-danger';
+      reportBtn.textContent = 'Report';
+      const reportHint = document.createElement('p');
+      reportHint.className = 'text-small text-muted';
+      reportHint.textContent = 'Reports are one per person; a reported item is hidden from everyone.';
+      let reportArmed = false;
+      reportBtn.addEventListener('click', async () => {
+        if (!reportArmed) {
+          reportArmed = true;
+          reportBtn.textContent = 'Tap again to report';
+          return;
+        }
+        try {
+          await api('/api/items/' + item.id + '/report', { method: 'POST', body: {} });
+          items = items.filter((it) => it.id !== item.id);
+          sheet.dismiss();
+          render();
+        } catch (err) {
+          if (err.status !== 401) {
+            reportHint.textContent = "Couldn't report. Try again.";
+          }
+        }
+      });
+      content.append(reportBtn, reportHint);
+
+      const sheet = present(content);
+
+      loadVotes(item, votesBox);
+    }
+
+    async function loadVotes(item, box) {
+      box.replaceChildren(skeletonList(), skeletonList(), skeletonList());
+      let votes;
+      try {
+        ({ votes } = await api('/api/items/' + item.id + '/votes'));
+      } catch (err) {
+        box.replaceChildren();
+        const p = document.createElement('p');
+        p.className = 'text-body text-muted';
+        p.textContent = "Couldn't load the votes. Your tier still saves, and you can retry from the board.";
+        box.appendChild(p);
+        return;
+      }
+      if (votes.length === 0) {
+        box.replaceChildren();
+        const p = document.createElement('p');
+        p.className = 'text-body text-muted';
+        p.textContent = 'No votes yet. You could be the first.';
+        box.appendChild(p);
+        return;
+      }
+      box.replaceChildren(...votes.map((v) => {
+        const row = document.createElement('div');
+        row.className = 'list-row';
+        const who = document.createElement('span');
+        who.className = 'truncate';
+        who.textContent = v.username;
+        const tier = document.createElement('span');
+        tier.className = 'tier-badge-sm ' + TIER_BADGE[v.tier];
+        tier.textContent = v.tier;
+        row.append(who, tier);
+        return row;
+      }));
+    }
+
+    function skeletonList() {
+      const row = document.createElement('div');
+      row.className = 'list';
+      const inner = document.createElement('div');
+      inner.className = 'list-row';
+      const skel = document.createElement('div');
+      skel.className = 'skeleton h-4 w-1/2';
+      inner.appendChild(skel);
+      row.appendChild(inner);
+      return row;
+    }
+
+    function openAddSheet() {
+      const content = document.createElement('div');
+      content.className = 'flex flex-col gap-3 px-4 pb-6';
+
+      const title = document.createElement('h2');
+      title.className = 'text-heading';
+      title.textContent = 'Add an item';
+      const label = document.createElement('label');
+      label.className = 'text-small text-muted';
+      label.setAttribute('for', 'new-item-name');
+      label.textContent = 'Anyone can rank it, so keep it something everyone knows.';
+      const input = document.createElement('input');
+      input.className = 'field';
+      input.id = 'new-item-name';
+      input.placeholder = 'e.g. a restaurant, a taco truck';
+      input.maxLength = 80;
+      const error = document.createElement('p');
+      error.className = 'text-small text-danger';
+      error.hidden = true;
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'btn-primary';
+      add.textContent = 'Add item';
+
+      add.addEventListener('click', async () => {
+        error.hidden = true;
+        add.disabled = true;
+        try {
+          await api('/api/items', { method: 'POST', body: { name: input.value } });
+          sheet.dismiss();
+          loadItems();
+        } catch (err) {
+          add.disabled = false;
+          if (err.status === 400) {
+            error.textContent = "That name doesn't work. Give it a name of 1 to 80 characters.";
+          } else if (err.status !== 401) {
+            error.textContent = "Couldn't add the item. Try again.";
+          }
+          error.hidden = false;
+        }
+      });
+
+      content.append(title, label, input, error, add);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') add.click();
+      });
+      const sheet = present(content);
+      input.focus();
+    }
+
+    // ── Wiring ───────────────────────────────────────────────────────────
+    el('tab-mine').addEventListener('click', () => { view = 'mine'; render(); });
+    el('tab-crowd').addEventListener('click', () => { view = 'crowd'; render(); });
+    el('add-btn').addEventListener('click', openAddSheet);
+    el('empty-add').addEventListener('click', openAddSheet);
+    el('board-retry').addEventListener('click', () => loadItems({ skeleton: true }));
+
+    loadItems({ skeleton: true });
   </script>
 </body>
 </html>

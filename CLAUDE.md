@@ -100,22 +100,34 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for ranking anything with friends, starting with Bay
+Area restaurants. Anyone signed in can add a new thing for everyone to
+rank; every person drags each thing into the tier they think it belongs
+in, from S tier down to D. The board has two views: **My list** (your own
+tiers, drag to change them) and **Crowd** (the tier most people chose,
+with vote counts, read-only). Tapping a thing shows who voted where, and
+offers Report for items that shouldn't be there. Guests can look at
+everything but can't vote.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version set it; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent tomato red (`accent`, shared by the S tier badge and
+  the Add item button); the tier ladder a burnt orange for A, amber for B,
+  green for C, slate for D, each with a paired `on-tier-*` letter colour
+  (4.5:1 or more in both looks); neutrals warm stone greys. Dark look
+  brightens the tier colours and switches on-accent letters to a deep
+  red-brown.
+- **Signature element:** the five tier rows, S at the top, each led by a
+  bold letter badge on its own tier colour, with the row itself tinted by
+  that colour — a drop zone that lights up with the accent ring while a
+  drag is over it.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  at the kit's default sizes.
+- Both looks (light and dark), following the viewer's Homeroom theme. No
+  theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +149,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Tiers are fixed: S, A, B, C, D, S best. Don't make them configurable
+  without a request that asks for it.
+- One placement per person per item (`placements` primary key), changed
+  by `PUT /api/items/:id/placement`; the crowd tier is computed per
+  request, never stored: the tier with the most votes, ties to the higher
+  tier, null when nobody has voted.
+- A report (`reports`, one per person per item) hides the item from every
+  GET route and refuses writes to it. This is the app's moderation path;
+  don't display reported items anywhere.
+- Item names are trimmed, 1 to 80 characters, duplicates allowed.
+- No new dependencies without a reason the request names.

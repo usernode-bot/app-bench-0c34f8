@@ -55,6 +55,19 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The tier ladder, S best to D worst. Each tier pairs a badge colour
+        // with the colour of its letter, so every badge reads at 4.5:1 or
+        // more in both looks (see styles/tailwind-input.css).
+        'tier-s': token('tier-s'),
+        'on-tier-s': token('on-tier-s'),
+        'tier-a': token('tier-a'),
+        'on-tier-a': token('on-tier-a'),
+        'tier-b': token('tier-b'),
+        'on-tier-b': token('on-tier-b'),
+        'tier-c': token('tier-c'),
+        'on-tier-c': token('on-tier-c'),
+        'tier-d': token('tier-d'),
+        'on-tier-d': token('on-tier-d'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

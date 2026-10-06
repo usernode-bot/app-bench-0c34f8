@@ -154,29 +154,148 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-// Button press
-app.post('/api/press', async (req, res) => {
+// ── Tier list ─────────────────────────────────────────────────────────────
+// Tiers are fixed: S best, then A, B, C, D. Everyone can add items; every
+// signed-in person has one placement per item, which they change by
+// dragging (or from the item's sheet). The crowd tier of an item is the
+// tier most people chose, ties going to the higher tier, and null when
+// nobody has voted. A reported item disappears from every route.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D'];
+const ITEM_NAME_MAX = 80;
+
+// The item as it stands for THIS viewer: `my_tier` only for a signed-in
+// user (guests get null and may read, never write).
+app.get('/api/items', async (req, res) => {
   try {
-    await pool.query(`
-      INSERT INTO presses (user_id, username) VALUES ($1, $2)
-    `, [req.user.id, req.user.username]);
-    res.json({ ok: true });
+    const { rows } = await pool.query(`
+      SELECT id, name, created_by_name, created_at
+      FROM items
+      WHERE NOT EXISTS (SELECT 1 FROM reports WHERE reports.item_id = items.id)
+      ORDER BY created_at, id
+    `);
+    const counts = {}; // item_id -> { S: n, ... }
+    const { rows: countRows } = await pool.query(`
+      SELECT item_id, tier, COUNT(*)::int AS n
+      FROM placements
+      GROUP BY item_id, tier
+    `);
+    for (const r of countRows) {
+      (counts[r.item_id] ||= {})[r.tier] = r.n;
+    }
+    const mine = {}; // item_id -> my tier
+    if (req.user) {
+      const { rows: mineRows } = await pool.query(`
+        SELECT item_id, tier FROM placements WHERE user_id = $1
+      `, [req.user.id]);
+      for (const r of mineRows) mine[r.item_id] = r.tier;
+    }
+    const items = rows.map((row) => {
+      const votes = Object.fromEntries(TIERS.map((t) => [t, counts[row.id]?.[t] || 0]));
+      const total = TIERS.reduce((s, t) => s + votes[t], 0);
+      // Crowd tier: most votes, ties to the higher tier, null with no votes.
+      let crowd_tier = null;
+      for (const t of TIERS) { // S first, so the first max wins a tie
+        if (votes[t] > 0 && (crowd_tier === null || votes[t] > votes[crowd_tier])) {
+          crowd_tier = t;
+        }
+      }
+      return {
+        id: row.id,
+        name: row.name,
+        created_by_name: row.created_by_name,
+        my_tier: mine[row.id] || null,
+        crowd_tier: total > 0 ? crowd_tier : null,
+        votes,
+        total_votes: total,
+      };
+    });
+    res.json({ items });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Leaderboard
-app.get('/api/leaderboard', async (_req, res) => {
+// Add a new item for everyone to rank. Signed-in only (the middleware
+// answers 401 before this runs otherwise).
+app.post('/api/items', async (req, res) => {
+  const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+  if (!name || name.length > ITEM_NAME_MAX) {
+    return res.status(400).json({ error: 'invalid_name' });
+  }
   try {
     const { rows } = await pool.query(`
-      SELECT username, COUNT(*) as presses
-      FROM presses
-      GROUP BY username
-      ORDER BY presses DESC
-      LIMIT 50
-    `);
-    res.json({ leaderboard: rows });
+      INSERT INTO items (name, created_by, created_by_name)
+      VALUES ($1, $2, $3)
+      RETURNING id, name
+    `, [name, req.user.id, req.user.username]);
+    res.json({ item: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// The visible item, or null when it does not exist or has been reported.
+async function findVisibleItem(id) {
+  const { rows } = await pool.query(`
+    SELECT id, name FROM items
+    WHERE id = $1
+      AND NOT EXISTS (SELECT 1 FROM reports WHERE reports.item_id = items.id)
+  `, [id]);
+  return rows[0] || null;
+}
+
+// Place (or move) MY tier for an item.
+app.put('/api/items/:id/placement', async (req, res) => {
+  const tier = req.body?.tier;
+  if (!TIERS.includes(tier)) {
+    return res.status(400).json({ error: 'invalid_tier' });
+  }
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
+  try {
+    const item = await findVisibleItem(id);
+    if (!item) return res.status(404).json({ error: 'not_found' });
+    await pool.query(`
+      INSERT INTO placements (item_id, user_id, username, tier)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (item_id, user_id) DO UPDATE SET tier = EXCLUDED.tier
+    `, [id, req.user.id, req.user.username, tier]);
+    res.json({ ok: true, tier });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Who voted where on an item: each person's name and their tier.
+app.get('/api/items/:id/votes', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
+  try {
+    if (!(await findVisibleItem(id))) return res.status(404).json({ error: 'not_found' });
+    const { rows } = await pool.query(`
+      SELECT username, tier FROM placements WHERE item_id = $1
+      ORDER BY CASE tier WHEN 'S' THEN 0 WHEN 'A' THEN 1 WHEN 'B' THEN 2
+        WHEN 'C' THEN 3 ELSE 4 END, username
+    `, [id]);
+    res.json({ votes: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Report an item, one report per person per item. A single report hides
+// the item from every route, reads included.
+app.post('/api/items/:id/report', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'not_found' });
+  try {
+    if (!(await findVisibleItem(id))) return res.status(404).json({ error: 'not_found' });
+    await pool.query(`
+      INSERT INTO reports (item_id, user_id) VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `, [id, req.user.id]);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -219,15 +338,83 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+async function seedStagingDemo() {
+  // Idempotent: any seeded item present means the whole set is in. Fake
+  // identities only, never the visitor.
+  const { rows } = await pool.query(
+    `SELECT 1 FROM items WHERE name LIKE 'Staging demo:%' LIMIT 1`
+  );
+  if (rows.length > 0) return;
+
+  const people = {
+    ana: { id: 900001, username: 'staging-demo-ana' },
+    dev: { id: 900002, username: 'staging-demo-dev' },
+    jo: { id: 900003, username: 'staging-demo-jo' },
+  };
+  const names = [
+    'Staging demo: Sourdough Corner',
+    'Staging demo: Pier 39 Chowder',
+    'Staging demo: Fog City Diner',
+    'Staging demo: Taco Truck 24',
+    'Staging demo: Mission Burrito Cart',
+  ];
+  const ids = [];
+  for (const [i, name] of names.entries()) {
+    const who = [people.ana, people.dev, people.jo][i % 3];
+    const { rows } = await pool.query(`
+      INSERT INTO items (name, created_by, created_by_name)
+      VALUES ($1, $2, $3) RETURNING id
+    `, [name, who.id, who.username]);
+    ids.push(rows[0].id);
+  }
+  // Nine placements from three fake users, so the Crowd view, the vote
+  // counts and the who-voted-where list are populated: Sourdough Corner
+  // crowd S, Pier 39 Chowder crowd A, Fog City Diner crowd B, Taco Truck
+  // 24 a C versus D tie resolved to C, and Burrito Cart with no votes.
+  const placements = [
+    [ids[0], people.ana, 'S'], [ids[0], people.dev, 'S'], [ids[0], people.jo, 'S'],
+    [ids[1], people.ana, 'A'], [ids[1], people.dev, 'A'],
+    [ids[2], people.dev, 'B'], [ids[2], people.jo, 'B'],
+    [ids[3], people.ana, 'C'], [ids[3], people.jo, 'D'],
+  ];
+  for (const [itemId, who, tier] of placements) {
+    await pool.query(`
+      INSERT INTO placements (item_id, user_id, username, tier)
+      VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING
+    `, [itemId, who.id, who.username, tier]);
+  }
+  console.log('Seeded staging demo items');
+}
+
 async function start() {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS presses (
+    CREATE TABLE IF NOT EXISTS items (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL,
-      username VARCHAR(255) NOT NULL,
+      name VARCHAR(80) NOT NULL,
+      created_by INTEGER NOT NULL,
+      created_by_name VARCHAR(255) NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS placements (
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      tier CHAR(1) NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D')),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (item_id, user_id)
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reports (
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (item_id, user_id)
+    )
+  `);
+  if (IS_STAGING) await seedStagingDemo().catch(err => console.warn('staging seed failed: ' + err.message));
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
