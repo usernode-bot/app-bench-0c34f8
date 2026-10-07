@@ -43,6 +43,11 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      // One rounded system family everywhere: ui-rounded where the platform
+      // has it, system-ui where it does not. No downloaded fonts.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

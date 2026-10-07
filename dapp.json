@@ -2,5 +2,27 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "tierlist.board.my",
+      "name": "Board renders in My tiers",
+      "path": "/",
+      "expectText": "Not placed yet",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "server.js",
+        "styles/**",
+        "tailwind.config.js"
+      ]
+    },
+    {
+      "id": "tierlist.board.crowd",
+      "name": "Crowd tiers render seeded placements",
+      "path": "/?view=crowd",
+      "expectSelector": "[data-view=\"crowd\"]",
+      "expectText": "Staging demo Mission Ramen"
+    }
+  ]
 }

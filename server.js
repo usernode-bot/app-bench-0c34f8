@@ -145,7 +145,197 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'draining' });
+  res.json({ status: 'ok' });
+});
+
+// ── Tier board data ───────────────────────────────────────────────────────
+// Two public tables: placements are meant to be seen by everyone, and
+// neither carries auth material or anything private beyond a username.
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS items (
+      id bigserial PRIMARY KEY,
+      name text NOT NULL,
+      created_by text NOT NULL,
+      created_by_id text NOT NULL,
+      created_at timestamptz DEFAULT now()
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS placements (
+      id bigserial PRIMARY KEY,
+      item_id bigint NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier text NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      updated_at timestamptz DEFAULT now(),
+      UNIQUE (item_id, user_id)
+    )`);
+}
+
+// Staging previews rebuild on every push and start from an empty copy of
+// these tables, so seed a populated board — for fake identities only,
+// never for whoever opens the preview. A no-op outside staging.
+async function seed() {
+  await pool.query(`
+    INSERT INTO items (id, name, created_by, created_by_id) VALUES
+      (900001, 'Staging demo Mission Ramen', 'staging-demo-chef', 'staging-demo-chef'),
+      (900002, 'Staging demo Bay Taqueria',  'staging-demo-chef', 'staging-demo-chef'),
+      (900003, 'Staging demo Bagel Barn',    'staging-demo-chef', 'staging-demo-chef'),
+      (900004, 'Staging demo Pizza Pier',    'staging-demo-chef', 'staging-demo-chef'),
+      (900005, 'Staging demo Salad Shack',   'staging-demo-chef', 'staging-demo-chef'),
+      (900006, 'Staging demo Ice Cream Stand', 'staging-demo-chef', 'staging-demo-chef')
+    ON CONFLICT (id) DO NOTHING`);
+  await pool.query(`
+    INSERT INTO placements (id, item_id, user_id, username, tier) VALUES
+      (910001, 900001, 'staging-demo-chef',   'staging-demo-chef', 'S'),
+      (910002, 900001, 'staging-demo-eater',  'staging-demo-eater', 'S'),
+      (910003, 900002, 'staging-demo-chef',   'staging-demo-chef', 'A'),
+      (910004, 900002, 'staging-demo-eater',  'staging-demo-eater', 'S'),
+      (910005, 900002, 'staging-demo-critic', 'staging-demo-critic', 'A'),
+      (910006, 900003, 'staging-demo-chef',   'staging-demo-chef', 'B'),
+      (910007, 900003, 'staging-demo-eater',  'staging-demo-eater', 'B'),
+      (910008, 900003, 'staging-demo-critic', 'staging-demo-critic', 'B'),
+      (910009, 900004, 'staging-demo-chef',   'staging-demo-chef', 'C'),
+      (910010, 900004, 'staging-demo-eater',  'staging-demo-eater', 'C'),
+      (910011, 900006, 'staging-demo-chef',   'staging-demo-chef', 'F'),
+      (910012, 900006, 'staging-demo-eater',  'staging-demo-eater', 'F')
+    ON CONFLICT (id) DO NOTHING`);
+}
+
+// Every item, with its placements, the caller's own tier and the crowd's
+// tier, in one round trip: a single query joining items to placements.
+// The crowd tier is the tier most people chose; a tie goes to the better
+// tier (S before A and so on).
+function assembleItems(rows, viewerId) {
+  const byId = new Map();
+  for (const row of rows) {
+    if (!byId.has(row.id)) {
+      byId.set(row.id, {
+        id: row.id,
+        name: row.name,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        placements: [],
+      });
+    }
+    if (row.user_id) {
+      byId.get(row.id).placements.push({
+        userId: row.user_id,
+        username: row.username,
+        tier: row.tier,
+        updatedAt: row.updated_at,
+      });
+    }
+  }
+  return [...byId.values()].map((item) => {
+    item.myTier = viewerId
+      ? (item.placements.find((p) => p.userId === viewerId)?.tier ?? null)
+      : null;
+    const counts = new Map();
+    for (const p of item.placements) counts.set(p.tier, (counts.get(p.tier) || 0) + 1);
+    let crowdTier = null;
+    let crowdCount = 0;
+    for (const tier of TIERS) {
+      const count = counts.get(tier) || 0;
+      if (count > crowdCount) { crowdTier = tier; crowdCount = count; }
+    }
+    item.crowdTier = crowdTier;
+    item.crowdCount = crowdCount;
+    return item;
+  });
+}
+
+async function loadItem(itemId, viewerId) {
+  const { rows } = await pool.query(
+    `SELECT i.id, i.name, i.created_by, i.created_at,
+            p.user_id, p.username, p.tier, p.updated_at
+       FROM items i
+       LEFT JOIN placements p ON p.item_id = i.id
+      WHERE i.id = $1
+      ORDER BY p.username`,
+    [itemId],
+  );
+  return assembleItems(rows, viewerId)[0] || null;
+}
+
+app.get('/api/items', async (req, res) => {
+  try {
+    // A guest may read; reads must not assume req.user.
+    const viewerId = req.user ? req.user.id : null;
+    const { rows } = await pool.query(
+      `SELECT i.id, i.name, i.created_by, i.created_at,
+              p.user_id, p.username, p.tier, p.updated_at
+         FROM items i
+         LEFT JOIN placements p ON p.item_id = i.id
+        ORDER BY i.id, p.username`,
+    );
+    res.json({ viewerId, items: assembleItems(rows, viewerId) });
+  } catch (err) {
+    console.error('GET /api/items failed:', err.message);
+    res.status(500).json({ error: 'internal' });
+  }
+});
+
+app.post('/api/items', async (req, res) => {
+  try {
+    // The middleware already answers guests 401 account_required on writes;
+    // this guard keeps the route honest if it ever runs without it.
+    if (!req.user) return res.status(401).json({ error: 'account_required' });
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+    if (!name || name.length > 60) return res.status(400).json({ error: 'invalid_name' });
+    const dup = await pool.query(
+      'SELECT id FROM items WHERE lower(name) = lower($1) LIMIT 1',
+      [name],
+    );
+    if (dup.rows.length) return res.status(409).json({ error: 'duplicate' });
+    const ins = await pool.query(
+      'INSERT INTO items (name, created_by, created_by_id) VALUES ($1, $2, $3) RETURNING id',
+      [name, req.user.username, req.user.id],
+    );
+    res.status(201).json({ item: await loadItem(ins.rows[0].id, req.user.id) });
+  } catch (err) {
+    console.error('POST /api/items failed:', err.message);
+    res.status(500).json({ error: 'internal' });
+  }
+});
+
+app.put('/api/items/:id/placement', async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'account_required' });
+    if (!/^\d+$/.test(req.params.id)) return res.status(404).json({ error: 'not_found' });
+    const itemId = Number(req.params.id);
+    const tier = req.body ? req.body.tier : undefined;
+    if (tier !== null && !TIERS.includes(tier)) {
+      return res.status(400).json({ error: 'invalid_tier' });
+    }
+    const known = await pool.query('SELECT id FROM items WHERE id = $1', [itemId]);
+    if (!known.rows.length) return res.status(404).json({ error: 'not_found' });
+    if (tier === null) {
+      // Dragged back to the tray: the caller's placement goes away.
+      await pool.query(
+        'DELETE FROM placements WHERE item_id = $1 AND user_id = $2',
+        [itemId, req.user.id],
+      );
+    } else {
+      // One row per person per item: moving overwrites the old tier.
+      await pool.query(
+        `INSERT INTO placements (item_id, user_id, username, tier)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (item_id, user_id)
+         DO UPDATE SET tier = EXCLUDED.tier, updated_at = now()`,
+        [itemId, req.user.id, req.user.username, tier],
+      );
+    }
+    res.json({ item: await loadItem(itemId, req.user.id) });
+  } catch (err) {
+    console.error('PUT placement failed:', err.message);
+    res.status(500).json({ error: 'internal' });
+  }
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -191,10 +381,42 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let shuttingDown = false;
+
 async function start() {
+  await migrate();
+  if (IS_STAGING) await seed();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  return server;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Every container is stopped and replaced on each deploy: stop accepting
+// connections, let in-flight requests finish under a hard deadline, close
+// the pool, exit. Idempotent — a repeat signal must not double-run.
+const DRAIN_MS = 3000;
+
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  if (shutdown.server) {
+    shutdown.server.close(() => {});
+    shutdown.server.closeIdleConnections?.();
+    const t = setTimeout(() => shutdown.server?.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+  }
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed:', e.message);
+  }
+  process.exit(0);
+}
+
+start().then((server) => {
+  shutdown.server = server;
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}).catch(err => { console.error(err); process.exit(1); });

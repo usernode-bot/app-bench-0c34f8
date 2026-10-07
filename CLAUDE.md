@@ -97,22 +97,26 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for ranking things with friends, for example Bay Area
+restaurants. Anyone signed in can add something to rank; everyone places
+items into their own S to F tiers (drag a chip into a rail, or tap it and
+pick a tier), can switch to the crowd's combined list, and can open any
+item to see how each person placed it. Guests can look but not write.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version filled it in; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** a warm coral accent (#B8402E light, #F97A62 dark; on-accent
+  white / near-black) on the kit's warm stone neutrals, unchanged from the
+  kit. The focus ring follows the accent; danger keeps its red.
+- **Signature element:** the tier ladder itself — six rails from S to F,
+  each opened by a big rounded letter badge in the coral, chips slotting
+  into the rail beside it. No other screen element carries the app.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  on one rounded system family (`ui-rounded`, falling back to `system-ui`,
+  set in `tailwind.config.js`).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

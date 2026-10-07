@@ -35,11 +35,11 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 184 64 46;      /* the one accent: deep coral */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 184 64 46;       /* the keyboard focus ring follows the accent */
   }
   .dark {
     --ground: 12 10 9;
@@ -48,17 +48,25 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 249 122 98;     /* coral, lightened for the dark look */
+    --on-accent: 28 25 23;    /* near-black text on the bright coral */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 249 122 98;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
   }
+}
+
+/* The native UI kit's accent, pointed at this app's coral. Set outside the
+   layers and on html:root so it out-specifies the kit's own :root and .dark
+   defaults; because it reads the tokens above, both looks follow them. */
+html:root {
+  --un-accent: rgb(var(--accent));
+  --un-accent-contrast: rgb(var(--on-accent));
 }
 
 /* ── Components ───────────────────────────────────────────────────────────
@@ -124,5 +132,65 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The tier ladder, this app's signature element: one rail per tier with a
+     big rounded letter badge, chips slotting into the rail beside it. */
+  .tier-rail {
+    @apply flex items-start gap-2 rounded-xl border border-line bg-surface p-2;
+  }
+  .tier-rail[data-active='true'] {
+    @apply border-accent;
+  }
+  .tier-badge {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-raised text-heading font-extrabold text-accent;
+  }
+
+  /* Items are chips: a name in a pill, and a button everywhere (tap to
+     open, keyboard included). Rail chips sit on the raised tone; tray
+     chips are dashed, things waiting to be placed. */
+  .chip {
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line bg-raised px-3.5 text-small text-fg
+      select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+  }
+  .chip-tray {
+    @apply border-dashed bg-surface text-muted;
+  }
+  .chip-count {
+    @apply rounded-full bg-accent px-2 text-small font-semibold text-on-accent;
+  }
+
+  /* A person's tier in the detail sheet; your own placement is the filled
+     one. Doubles as the fallback tier menu button when the native kit's
+     menu is unavailable. */
+  .tier-pill {
+    @apply inline-flex items-center justify-center rounded-full border border-line bg-raised px-3 py-0.5 text-small font-semibold text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .tier-pill-mine {
+    @apply border-transparent bg-accent text-on-accent;
+  }
+  .tier-menu-fallback {
+    @apply flex flex-wrap gap-2;
+  }
+  .tier-menu-fallback .tier-pill {
+    @apply min-h-11 px-5;
+  }
+
+  /* Fallbacks for when the hosted native kit is unavailable (a plain local
+     run): the kit's bottom sheet and toast are used whenever it loads. */
+  .sheet-fallback {
+    @apply fixed inset-0 z-40 flex items-end bg-fg/40;
+  }
+  .sheet-fallback-card {
+    @apply w-full rounded-t-2xl bg-surface;
+  }
+  .toast-fallback {
+    @apply pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-fg px-4 py-2 text-small text-ground;
+  }
+  .drag-ghost {
+    @apply pointer-events-none fixed left-0 top-0 z-50 opacity-90;
   }
 }
