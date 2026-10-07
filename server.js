@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { parseFeed } = require('./server/feedxml');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -145,7 +146,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+let shuttingDown = false;
+
+app.get('/health', (_req, res) =>
+  res.status(shuttingDown ? 503 : 200).json({ status: shuttingDown ? 'shutting-down' : 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +157,344 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// ── Schema ────────────────────────────────────────────────────────────────
+// Two tables, created idempotently on boot. Both are marked staging:private
+// (COMMENT ON TABLE): a person's feeds and reading state are their own, and
+// staging copies must carry the schema without carrying anyone's rows.
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      url text NOT NULL,
+      title text,
+      created_at timestamptz,
+      UNIQUE (user_id, url)
+    )`);
+  await pool.query(`COMMENT ON TABLE feeds IS 'staging:private'`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id serial PRIMARY KEY,
+      feed_id integer NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
+      guid text NOT NULL,
+      title text,
+      link text,
+      excerpt text,
+      published_at timestamptz,
+      read_at timestamptz,
+      fetched_at timestamptz,
+      UNIQUE (feed_id, guid)
+    )`);
+  await pool.query(`COMMENT ON TABLE posts IS 'staging:private'`);
+}
+
+// ── Feed fetching ─────────────────────────────────────────────────────────
+// Built-in fetch only, one AbortController timeout per feed. parseFeed (in
+// server/feedxml.js) is a string reader that never evaluates what it reads.
+const FEED_FETCH_TIMEOUT_MS = 8000;
+const FEED_MAX_BYTES = 5_000_000;
+
+async function fetchText(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), FEED_FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      redirect: 'follow',
+      headers: {
+        accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+      },
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (text.length > FEED_MAX_BYTES) throw new Error('Feed too large');
+    return text;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function initialOf(title) {
+  return (title || '').trim().charAt(0).toUpperCase() || '?';
+}
+
+// Upsert one feed's current items, matched on guid so a refresh updates
+// rather than duplicates, then trim the feed to its 100 most recent posts.
+async function storePosts(feedId, items, now) {
+  for (const it of items) {
+    await pool.query(
+      `INSERT INTO posts (feed_id, guid, title, link, excerpt, published_at, fetched_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (feed_id, guid) DO UPDATE SET
+         title = EXCLUDED.title,
+         link = EXCLUDED.link,
+         excerpt = EXCLUDED.excerpt,
+         published_at = COALESCE(posts.published_at, EXCLUDED.published_at),
+         fetched_at = EXCLUDED.fetched_at`,
+      [feedId, it.guid, it.title || null, it.link || null, it.excerpt || null, it.publishedAt, now]
+    );
+  }
+  await pool.query(
+    `DELETE FROM posts WHERE feed_id = $1 AND id NOT IN (
+       SELECT id FROM posts WHERE feed_id = $1
+       ORDER BY published_at DESC NULLS LAST, id DESC
+       LIMIT 100)`,
+    [feedId]
+  );
+}
+
+// Refresh one feed: fetch, parse, upsert. Throws on any failure so the
+// caller can name this feed in the per-feed failure list.
+async function refreshFeed(feed, now) {
+  const xml = await fetchText(feed.url);
+  const parsed = parseFeed(xml);
+  if (!parsed) throw new Error('Not an RSS or Atom feed');
+  const items = parsed.posts
+    .slice()
+    .sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')))
+    .slice(0, 100);
+  await storePosts(feed.id, items, now);
+  if (!feed.title && parsed.title) {
+    await pool.query('UPDATE feeds SET title = $2 WHERE id = $1 AND title IS NULL', [
+      feed.id,
+      parsed.title,
+    ]);
+    feed.title = parsed.title;
+  }
+}
+
+// ── Demo mode ─────────────────────────────────────────────────────────────
+// Staging previews run in a sandbox that cannot reach feed hosts, so the
+// populated screen would be invisible to checks. `GET /api/posts?demo=1`
+// (staging only) answers with obviously fake posts and never touches the
+// database; the page keeps demo read state in memory only. Real staging
+// databases start empty, and production ignores the parameter entirely.
+function demoPosts(now) {
+  const ago = (ms) => new Date(now.getTime() - ms).toISOString();
+  const H = 3600 * 1000;
+  const D = 24 * H;
+  return [
+    {
+      id: 1,
+      feed_title: 'Morning Ledger',
+      feed_initial: 'M',
+      title: 'Staging demo: A fresh post about printing press history',
+      published_at: ago(2 * H),
+      read_at: null,
+      link: 'https://example.com/staging-demo/post-1',
+      excerpt:
+        'Staging demo excerpt: a short look at how a hand press works, from setting the type to pulling a proof on damp paper.',
+    },
+    {
+      id: 2,
+      feed_title: 'Press Room Notes',
+      feed_initial: 'P',
+      title: 'Staging demo: Typesetting notes, week 40',
+      published_at: ago(1 * D),
+      read_at: null,
+      link: 'https://example.com/staging-demo/post-2',
+      excerpt:
+        'Staging demo excerpt: this week’s typesetting choices, from word spacing to how the last line of a column is set.',
+    },
+    {
+      id: 3,
+      feed_title: 'Morning Ledger',
+      feed_initial: 'M',
+      title: 'Staging demo: Ink, paper and the daily habit',
+      published_at: ago(2 * D),
+      read_at: ago(26 * H),
+      link: 'https://example.com/staging-demo/post-3',
+      excerpt:
+        'Staging demo excerpt: why a daily reading habit sticks, and what morning papers learned about rhythm and routine.',
+    },
+    {
+      id: 4,
+      feed_title: 'Press Room Notes',
+      feed_initial: 'P',
+      title: 'Staging demo: Letterpress glossary, A to F',
+      published_at: ago(3 * D),
+      read_at: null,
+      link: 'https://example.com/staging-demo/post-4',
+      excerpt:
+        'Staging demo excerpt: the first half of a small glossary of letterpress words, from ascender to forme.',
+    },
+    {
+      id: 5,
+      feed_title: 'Morning Ledger',
+      feed_initial: 'M',
+      title: 'Staging demo: Why we still print a proof',
+      published_at: ago(4 * D),
+      read_at: null,
+      link: 'https://example.com/staging-demo/post-5',
+      excerpt:
+        'Staging demo excerpt: a note on proofing before printing, and the errors a quick proof pull catches every time.',
+    },
+  ];
+}
+
+// ── API ───────────────────────────────────────────────────────────────────
+// Every query filters by the verified user id. Guests (req.guest, no
+// req.user) read an empty list: they have no feeds until they make an
+// account, and the middleware already answers their writes 401
+// account_required.
+
+// The one primary action: paste a feed link and follow it. The URL is
+// fetched once to prove it parses as RSS or Atom; the title comes from the
+// feed itself.
+app.post('/api/feeds', async (req, res, next) => {
+  try {
+    const raw = req.body && typeof req.body.url === 'string' ? req.body.url.trim() : '';
+    let url;
+    try {
+      url = new URL(raw);
+    } catch {
+      return res.status(400).json({
+        error: 'bad_feed',
+        message: 'That link did not work as an RSS feed. Check the address and try again.',
+      });
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return res.status(400).json({
+        error: 'bad_feed',
+        message: 'That link did not work as an RSS feed. Check the address and try again.',
+      });
+    }
+    const dup = await pool.query('SELECT id FROM feeds WHERE user_id = $1 AND url = $2', [
+      req.user.id,
+      url.href,
+    ]);
+    if (dup.rows.length) {
+      return res
+        .status(409)
+        .json({ error: 'duplicate', message: 'You already follow this feed.' });
+    }
+    let xml;
+    try {
+      xml = await fetchText(url.href);
+    } catch (err) {
+      console.warn('feed add failed for ' + url.href + ': ' + err.message);
+      return res.status(400).json({
+        error: 'bad_feed',
+        message: 'That link did not work as an RSS feed. Check the address and try again.',
+      });
+    }
+    const parsed = parseFeed(xml);
+    if (!parsed) {
+      return res.status(400).json({
+        error: 'bad_feed',
+        message: 'That link did not work as an RSS feed. Check the address and try again.',
+      });
+    }
+    const feed = await pool.query(
+      'INSERT INTO feeds (user_id, url, title, created_at) VALUES ($1, $2, $3, $4) RETURNING id, url, title',
+      [req.user.id, url.href, parsed.title || null, req.now]
+    );
+    await storePosts(
+      feed.rows[0].id,
+      parsed.posts
+        .slice()
+        .sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')))
+        .slice(0, 100),
+      req.now
+    );
+    res.status(201).json({
+      feed: {
+        id: feed.rows[0].id,
+        url: feed.rows[0].url,
+        title: feed.rows[0].title,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// The list: refresh every feed (in parallel, each with its own timeout),
+// then return the merged posts, newest first. Per-feed failures are named
+// in `failed` so the page can say which feeds could not be reached while
+// still showing the posts already stored.
+app.get('/api/posts', async (req, res, next) => {
+  try {
+    if (IS_STAGING && req.query.demo === '1') {
+      return res.json({ demo: true, feedCount: 2, failed: [], posts: demoPosts(req.now) });
+    }
+    const userId = req.user ? req.user.id : null;
+    const feeds = userId
+      ? (await pool.query('SELECT id, url, title FROM feeds WHERE user_id = $1 ORDER BY id', [
+          userId,
+        ])).rows
+      : [];
+    const settled = await Promise.allSettled(feeds.map((f) => refreshFeed(f, req.now)));
+    const failed = [];
+    settled.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        failed.push(feeds[i].title || feeds[i].url);
+        console.warn('feed refresh failed for ' + feeds[i].url + ': ' + (r.reason && r.reason.message));
+      }
+    });
+    const rows = userId
+      ? (await pool.query(
+          `SELECT p.id, p.title, p.link, p.excerpt, p.published_at, p.read_at,
+                  f.title AS feed_title
+             FROM posts p JOIN feeds f ON f.id = p.feed_id
+            WHERE f.user_id = $1
+            ORDER BY p.published_at DESC NULLS LAST, p.id DESC
+            LIMIT 200`,
+          [userId]
+        )).rows
+      : [];
+    res.json({
+      feedCount: feeds.length,
+      failed,
+      posts: rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        link: r.link,
+        excerpt: r.excerpt,
+        published_at: r.published_at,
+        read_at: r.read_at,
+        feed_title: r.feed_title,
+        feed_initial: initialOf(r.feed_title),
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Mark one post read. Idempotent: read_at is only set while it is empty,
+// and the join on feeds keeps a user from touching someone else's post.
+app.post('/api/posts/:id/read', async (req, res, next) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: 'not_found' });
+    await pool.query(
+      `UPDATE posts SET read_at = $2
+        WHERE id = $1 AND read_at IS NULL
+          AND feed_id IN (SELECT id FROM feeds WHERE user_id = $3)`,
+      [id, req.now, req.user.id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Mark every unread post read, across all of this user's feeds.
+app.post('/api/posts/read-all', async (req, res, next) => {
+  try {
+    await pool.query(
+      `UPDATE posts SET read_at = $1
+        WHERE read_at IS NULL
+          AND feed_id IN (SELECT id FROM feeds WHERE user_id = $2)`,
+      [req.now, req.user.id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +533,45 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Last resort for anything the routes threw: log it, answer JSON, never
+// leak a stack to the client.
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'server_error', message: 'Something went wrong on the server.' });
+});
+
 async function start() {
+  await ensureSchema();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  return server;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// The platform stops containers with SIGTERM (and people with Ctrl-C /
+// SIGINT): stop accepting connections, let in-flight requests drain for a
+// fixed moment, then close the database pool. /health answers 503 while
+// draining. Idempotent: a second signal changes nothing.
+const SHUTDOWN_DRAIN_MS = 3000;
+let serverRef = null;
+
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`Shutting down: draining for ${SHUTDOWN_DRAIN_MS} ms`);
+  if (serverRef) serverRef.close(() => {});
+  setTimeout(() => {
+    pool
+      .end()
+      .catch(() => {})
+      .finally(() => process.exit(0));
+  }, SHUTDOWN_DRAIN_MS);
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
+
+start()
+  .then(server => { serverRef = server; })
+  .catch(err => { console.error(err); process.exit(1); });

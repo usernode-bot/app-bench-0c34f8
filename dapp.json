@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Reader screen renders",
+      "path": "/",
+      "expectText": "No feeds yet"
+    },
+    {
+      "name": "Demo list renders",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    },
+    {
+      "id": "reader.demo-list",
+      "name": "Demo list visual",
+      "path": "/?demo=1",
+      "visual": true,
+      "expectSelector": ".list",
+      "impact": ["public/index.html", "server.js", "server/**", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }

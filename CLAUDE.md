@@ -97,27 +97,41 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader in the Feedly style: paste a feed's address, and every
+unread post from your feeds lands in one newest-first list. Tapping a post
+marks it read on the spot and opens an inline preview with the date, an
+excerpt taken from the feed itself, and a link to the full article in the
+browser. Each person's feeds are their own; visitors without an account can
+look around read-only.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by the first version below; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** press orange on warm stone neutrals. Accent `--accent` is a
+  deep burnt orange in the light look (`194 65 12`) and a brighter ember
+  orange in the dark (`251 146 60`), with white on the light accent and
+  near-black `67 20 7` on the dark one; focus ring matches the accent. The
+  neutrals keep the kit's warm stone values. Nothing on screen is coloured
+  except the accent (the Add button, the preview link, the focus ring, the
+  favicon) and the kit's danger red for error text.
+- **Signature element:** the ink dot — a small solid near-black dot at the
+  right edge of every unread row, like an uninked stamp waiting on the page,
+  gone the moment the post is tapped. Backing it, each row carries the feed
+  stamp, a letterpress-style badge with the feed's initial.
+- **Type scale:** the kit's four sizes (`text-title`, `text-heading`,
+  `text-body`, `text-small`), unchanged. Interface text in system sans
+  (`font-sans`); post titles and preview text in system serif
+  (`font-serif`, `ui-serif, Georgia, serif`) because this is reading matter.
+- No fixed look: the screen follows the viewer's Homeroom theme in light and
+  dark, via the template's theme script.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
 (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+`card`, `section-label`, `skeleton`, `state-empty`, `state-error`, plus the
+reader's `feed-stamp`, `unread-dot` and `preview`).
 Re-theme by changing the token values there, keeping every text pair at
 4.5:1 or more in both looks.
 
@@ -126,17 +140,28 @@ Re-theme by changing the token values there, keeping every text pair at
   `text-on-accent`, ...): never a raw hex value or a stock palette class.
 - Tap targets are at least 44 px; the buttons and fields already are.
 - A field's label says what it is; its placeholder, if any, is an example
-  that says so ("e.g. 5.0"), never a bare value that could pass for one
-  already entered.
+  that says so ("e.g. https://blog.example.com/feed.xml"), never a bare
+  value that could pass for one already entered.
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry.
 - Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
+  ("Staging mock data" in the platform conventions). This app does it at
+  request time: staging-only `GET /api/posts?demo=1`, never touching the
+  database.
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are marked `staging:private` (COMMENT ON
+  TABLE): a person's feeds and reading state are personal. The `posts`
+  table is private through its foreign key to `feeds`.
+- Read state lives on `posts.read_at` (per-post), not in a separate table;
+  every feed belongs to one user, so the per-post flag is already per-user.
+- Feed fetching and parsing use only Node built-ins: built-in `fetch` with
+  an 8 s AbortController timeout, and the string reader in
+  `server/feedxml.js`. No new npm packages.
+- At most 100 posts are kept per feed; the merged list returned to the page
+  is capped at 200, newest first.
+- Display times come from `req.now` on the server and `usernode.now()` in
+  the page, forwarded as `x-usernode-now`, never `Date.now()` or SQL `NOW()`.

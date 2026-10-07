@@ -56,6 +56,12 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // System typefaces only: the sans for interface text, the serif for
+      // reading matter (post titles, the preview excerpt).
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        serif: ['ui-serif', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
