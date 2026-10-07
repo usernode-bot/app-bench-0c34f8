@@ -29,30 +29,40 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 249 248 246;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 242 239 234;    /* hovers, badges */
+    --fg: 31 27 22;           /* text */
+    --muted: 98 90 80;        /* secondary text */
+    --line: 228 224 217;      /* borders, dividers, skeletons */
+    --accent: 146 88 10;      /* the one accent: wheat amber, deep golden brown */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 180 110 15;      /* the keyboard focus ring */
+    --dough: 240 214 160;     /* timeline strip: a rise stage, pale dough */
+    --chill: 196 212 222;     /* timeline strip: a cold proof in the fridge */
+    --crust: 120 63 20;       /* timeline strip: the bake, dark crust */
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 22 20 17;
+    --surface: 33 30 26;
+    --raised: 46 42 37;
+    --fg: 245 242 236;
+    --muted: 176 168 156;
+    --line: 66 61 54;
+    --accent: 245 184 70;     /* bright toasted gold */
+    --on-accent: 43 26 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 250 204 110;
+    --dough: 120 92 46;
+    --chill: 62 82 96;
+    --crust: 196 120 52;
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -104,6 +114,20 @@
      screens need none. Never put a card inside a card or a .list. */
   .card {
     @apply rounded-xl border border-line bg-surface p-4;
+  }
+
+  /* A choice chip: <label class="chip"><input type="radio" class="sr-only"
+     …>Label</label>. The checked and focus states follow the input, and the
+     native UI kit's pressed state comes from the un-pressable class in the
+     markup. */
+  .chip {
+    @apply inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-body font-medium text-fg;
+  }
+  .chip:has(input:checked) {
+    @apply border-accent bg-accent text-on-accent;
+  }
+  .chip:has(input:focus-visible) {
+    @apply outline-none ring-2 ring-focus;
   }
 
   /* The label above a section: sentence case, never uppercase or tracked. */

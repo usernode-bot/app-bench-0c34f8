@@ -97,22 +97,32 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: pick a bread (sourdough, bagels, sourdough
+bagels, rye, sandwich loaf), set hydration, count and piece size, and get
+the grams of every ingredient plus a rise-and-bake plan, live as you type.
+Nothing is saved and there is no server state; every number comes from the
+`BREADS` table in `public/index.html` — fixed baker's percentages and
+timing tables, never AI.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** wheat amber accent — deep golden brown (`--accent` 146 88 10)
+  in the light look, bright toasted gold (245 184 70) in the dark — on warm
+  neutral greys (near-white page, white panels in light; dark warm charcoal
+  in dark). Three timeline-strip colours beyond the neutrals: pale dough
+  (`dough`), fridge blue (`chill`), crust brown (`crust`). Chosen fresh for
+  bread, a deliberate move away from the starter's teal.
+- **Signature element:** the proofing-to-oven timeline strip — one bar split
+  into the bread's rise stages and the bake, each segment as wide as its
+  share of the total time (short stages held at a visible minimum),
+  coloured dough/fridge/crust, with a plain label under each part.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  The title and every gram/time figure use the rounded family
+  (`font-rounded`, `ui-rounded` with system fallbacks), figures in
+  `tabular-nums` so columns line up; everything else is the system face.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

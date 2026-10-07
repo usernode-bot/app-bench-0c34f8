@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        dough: token('dough'), // timeline strip: a rise stage
+        chill: token('chill'), // timeline strip: a cold proof in the fridge
+        crust: token('crust'), // timeline strip: the bake
+      },
+      // The rounded family: the title and every gram/time figure.
+      fontFamily: {
+        rounded: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

@@ -2,5 +2,16 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "calculator.default",
+      "name": "Recipe calculator renders",
+      "path": "/",
+      "expectSelector": "[data-ingredients] li",
+      "expectText": "Bulk rise",
+      "visual": true,
+      "impact": ["public/index.html", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }
