@@ -25,7 +25,7 @@
   };
 
   var els = {};
-  ['demo-note', 'count-line', 'refresh-btn', 'mark-all-btn', 'failed-note',
+  ['demo-note', 'toolbar', 'toolbar-actions', 'count-line', 'refresh-btn', 'mark-all-btn', 'failed-note',
    'skeleton-list', 'state-empty', 'state-caught-up', 'state-error',
    'post-list', 'add-feed-btn', 'empty-add-btn', 'caught-up-refresh-btn',
    'retry-btn'].forEach(function (id) {
@@ -128,11 +128,19 @@
   }
 
   function updateToolbar() {
+    // With no feeds there is nothing to count, refresh or mark: the toolbar
+    // goes away and the empty state's Add feed is the one action on the
+    // screen (the header button steps down to secondary).
+    var hasFeeds = state.feedCount > 0;
     // Demo posts are view-only; guests have nothing to refresh or mark.
-    var actions = state.signedIn && !state.demo;
+    var actions = hasFeeds && state.signedIn && !state.demo;
+    els.toolbar.hidden = !hasFeeds;
+    els.toolbarActions.hidden = !actions;
     els.refreshBtn.hidden = !actions;
     els.markAllBtn.hidden = !actions;
     els.demoNote.hidden = !state.demo;
+    els.addFeedBtn.classList.toggle('btn-primary', hasFeeds);
+    els.addFeedBtn.classList.toggle('btn-secondary', !hasFeeds);
   }
 
   function renderFailedNote() {
@@ -176,7 +184,7 @@
       var col = document.createElement('div');
       col.className = 'min-w-0 flex-1';
       var title = document.createElement('p');
-      title.className = 'font-serif text-body font-semibold leading-snug line-clamp-2';
+      title.className = 'font-serif text-body font-semibold line-clamp-2';
       title.textContent = post.title;
       var meta = document.createElement('p');
       meta.className = 'mt-1 text-small text-muted';

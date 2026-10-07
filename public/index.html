@@ -127,10 +127,15 @@
     <!-- Shown only in the staging demo preview (/?demo=1). -->
     <p id="demo-note" hidden class="text-small text-muted">Staging demo feeds, view only.</p>
 
-    <div class="flex flex-wrap items-center gap-2 py-2">
-      <p id="count-line" class="flex-1 text-small text-muted"></p>
-      <button id="refresh-btn" type="button" class="btn-secondary" hidden>Refresh</button>
-      <button id="mark-all-btn" type="button" class="btn-secondary" hidden>Mark all read</button>
+    <!-- Hidden until there are feeds: with none, the empty state's own
+         Add feed button is the one action on the screen. The count gets its
+         own full-width line above the buttons so it never wraps. -->
+    <div id="toolbar" hidden class="flex flex-col gap-2 py-2">
+      <p id="count-line" class="w-full text-small text-muted"></p>
+      <div id="toolbar-actions" hidden class="flex flex-wrap items-center gap-2">
+        <button id="refresh-btn" type="button" class="btn-secondary" hidden>Refresh</button>
+        <button id="mark-all-btn" type="button" class="btn-secondary" hidden>Mark all read</button>
+      </div>
     </div>
 
     <!-- Named above the list when a feed could not be refreshed. -->
@@ -147,6 +152,11 @@
 
       <!-- Empty, only after a successful load that found no feeds. -->
       <div id="state-empty" class="state-empty" hidden>
+        <div class="flex items-center gap-2" aria-hidden="true">
+          <span class="feed-dot tone-1 opacity-40"></span>
+          <span class="feed-dot tone-2 opacity-40"></span>
+          <span class="feed-dot tone-3 opacity-40"></span>
+        </div>
         <h2 class="text-heading font-serif">No feeds yet</h2>
         <p class="text-body text-muted">Add an RSS or Atom feed and its new posts show up here.</p>
         <button id="empty-add-btn" type="button" class="btn-primary mt-2">Add feed</button>

@@ -148,7 +148,7 @@
   }
   .state-empty,
   .state-error {
-    @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+    @apply flex flex-col items-center gap-2 px-4 pb-8 pt-[30vh] text-center;
   }
 
   /* The feed dot — this app's signature element: a small round dot in one
