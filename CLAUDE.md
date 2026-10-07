@@ -97,22 +97,32 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+RSS Reader is a personal feed reader: you paste an RSS or Atom feed's
+address, and one screen lists every unread post from all of your feeds,
+newest first. Tapping a post opens a short plain-text preview with a link
+out to the full article in the browser. Feeds are fetched server-side and
+posts are cached in the app database; subscriptions and read state are
+per-user, so each person's feeds stay theirs.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** a warm amber accent (`--accent` 180 83 9 light / 251 191 36
+  dark) over the kit's warm ink greys, unchanged. The starter's teal was
+  replaced on purpose. The focus ring follows the accent (217 119 6 light /
+  252 211 109 dark); dark on-accent is 69 26 3. All text pairs keep 4.5:1
+  or more in both looks.
+- **Signature element:** the unread-dot newspaper index. Every row of
+  Unread posts leads with a small amber dot (`h-2.5 w-2.5 rounded-full
+  bg-accent`), like a ticked-off index of what you have not read; reading a
+  post clears its dot and the row leaves the list.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (the kit's defaults, unchanged).
+- One job per screen: the reader screen shows everything unread in one
+  scrolling list, and its one primary action is **Add feed**. Both looks
+  follow the viewer's Homeroom theme; no fixed look and no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +147,30 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **Public cache tables, private per-user tables.** `feeds` and
+  `feed_items` are a shared public cache: a feed is the same for everyone
+  who subscribes, so two people who add the same address share one cached
+  copy. `subscriptions` and `read_state` hold personal data (who reads
+  what) and are marked `staging:private`. Private tables only reference
+  public ones.
+- **Plain-text-only summaries.** Summaries are stripped of HTML at parse
+  time and capped at 600 characters; the page renders every feed string
+  with `textContent`, never as HTML, so a feed cannot inject markup.
+- **Feed fetching is bounded.** The feed URL is user-supplied: http(s)
+  only, loopback/private/reserved addresses refused (re-checked on each
+  redirect hop), a redirect limit, a 2 MB response cap and a 5 s timeout.
+  On failure a feed's `last_error` is recorded and its cached posts keep
+  serving; `fetched_at` is stamped either way so a broken feed is not
+  hammered more than once per five minutes.
+- **Read marks survive re-subscribing.** Removing a feed only unsubscribes
+  the viewer; cached posts and read marks stay, so re-adding the same feed
+  does not resurface old posts as unread. The unread list shows only
+  unread posts — once read, a post is not reachable anywhere in the
+  interface.
+- **Time flows through the platform.** Read "now" through `req.now`
+  server-side and `usernode.now()` in the page, never `new Date()` or SQL
+  `NOW()`, wherever time decides what shows (feed freshness, post ages).
+- **Demo fixtures are in-memory.** Staging previews with `?demo=1` merge
+  three "Staging demo" feeds and their posts into `/api/posts` and
+  `/api/feeds`, written nowhere and attributed to no one; demo post ids
+  start with `demo-` and are a no-op for read marks.

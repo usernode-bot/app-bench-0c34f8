@@ -1,27 +1,38 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Follow RSS feeds and read them in one place. Add a feed's address, and one
+screen shows every unread post from all of your feeds, newest first. Tap a
+post for a short preview with a link to open the full article in your
+browser. Each person's feeds and read marks are their own.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Sign-in** — the server verifies the platform-issued user token on every
+  request, so the app already knows who is using it. Guests can look but
+  need an account to add feeds or mark posts read.
+- **Feeds** — fetched server-side with Node's `fetch` and parsed with
+  `rss-parser` (RSS and Atom). Posts are cached in the app database and
+  refreshed when someone opens the app (feeds not fetched in the last five
+  minutes are re-fetched then). Addresses that are not readable feeds are
+  refused with a message, and fetching is bounded (public addresses only,
+  timeouts, size cap, redirect limit).
+- **Database** — the app's own Postgres. The `feeds` and `feed_items` tables
+  are a shared public cache; `subscriptions` and `read_state` are private
+  per-user tables, so each person's feeds stay theirs.
+- **Styling** — Tailwind CSS, precompiled by `npm run build` during image
+  creation, in a light and a dark look that follow the viewer's Homeroom
+  theme: a warm amber accent over ink neutrals, with an unread-dot list as
+  the signature element.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Staging previews can show a populated screen with
+[`?demo=1`](README.md#staging-demo-data): three in-memory "Staging demo"
+feeds, written nowhere and attributed to no one.
 
-## Replacing the template
+## Development
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm install
+npm run build   # compiles styles/tailwind-input.css to public/tailwind.css
+npm start
+```
 
-Once the real app exists, rewrite this README to describe it.
+To change this app, ask Homeroom bot, or run Claude Code against this repo;
+`CLAUDE.md` carries the app-specific notes and points at the platform rules.

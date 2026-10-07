@@ -2,5 +2,17 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Reader loads with the empty state",
+      "path": "/",
+      "expectSelector": ".state-empty"
+    },
+    {
+      "name": "Reader loads with staging demo data",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    }
+  ]
 }

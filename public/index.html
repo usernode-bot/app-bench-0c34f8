@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b45309'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,28 +108,311 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+    <div id="reader" class="flex flex-col gap-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <header class="flex items-end justify-between gap-4">
+        <div>
+          <h1 class="text-title">RSS Reader</h1>
+          <p id="unread-count" class="text-small text-muted">0 unread</p>
+        </div>
+        <button id="mark-all" type="button" class="btn-secondary shrink-0" hidden>Mark all read</button>
+      </header>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+      <div>
+        <p class="section-label" id="feed-url-label">Feed URL</p>
+        <form id="add-form" class="flex gap-2">
+          <input id="feed-url" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+                 class="field min-w-0 flex-1" aria-labelledby="feed-url-label"
+                 placeholder="e.g. https://example.com/feed.xml">
+          <button id="add-btn" type="submit" class="btn-primary shrink-0">Add feed</button>
+        </form>
+        <p id="add-error" class="mt-2 px-1 text-small text-danger" hidden></p>
+      </div>
+
+      <section aria-labelledby="unread-label">
+        <h2 class="section-label" id="unread-label">Unread posts</h2>
+        <ul id="post-list" class="list" hidden></ul>
+        <div id="posts-skeleton" class="flex flex-col gap-3 py-2">
+          <div class="skeleton h-12"></div>
+          <div class="skeleton h-12"></div>
+          <div class="skeleton h-12"></div>
+        </div>
+        <div id="posts-empty" class="state-empty" hidden>
+          <p class="text-heading">No feeds yet</p>
+          <p class="text-small text-muted">Paste a feed address above and tap Add feed to start following one.</p>
+        </div>
+        <div id="posts-caught-up" class="state-empty" hidden>
+          <p class="text-heading">No unread posts</p>
+          <p class="text-small text-muted">You are all caught up. New posts appear here when your feeds update.</p>
+        </div>
+        <div id="posts-error" class="state-error" hidden>
+          <p class="text-heading">Couldn't load your posts</p>
+          <p class="text-small text-muted">The reader couldn't load your feeds just now. Adding feeds still works above.</p>
+          <button id="retry" type="button" class="btn-secondary">Retry</button>
+        </div>
+      </section>
+
+      <section id="feeds-section" aria-labelledby="feeds-label" hidden>
+        <h2 class="section-label" id="feeds-label">Your feeds</h2>
+        <ul id="feed-list" class="list"></ul>
+      </section>
+
+    </div>
   </main>
+
+  <!-- The preview sheet: shown and hidden by script, never by navigating. -->
+  <div id="sheet-scrim" class="fixed inset-0 z-10 flex items-end justify-center bg-fg/45" hidden>
+    <div id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"
+         class="flex w-full max-w-md flex-col gap-4 rounded-t-2xl border border-b-0 border-line bg-surface p-5 pb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <h2 id="sheet-title" class="text-heading"></h2>
+          <p id="sheet-meta" class="mt-0.5 text-small text-muted"></p>
+        </div>
+        <button id="sheet-close" type="button" class="btn-secondary shrink-0">Close</button>
+      </div>
+      <p id="sheet-summary" class="whitespace-pre-line text-body"></p>
+      <p id="sheet-note" class="text-small text-muted" hidden></p>
+      <a id="sheet-link" class="btn-primary" target="_blank" rel="noopener">Open full article</a>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // The iframe loads the app with ?token=…; every fetch forwards it so the
+    // server can tell who is signed in. Staging previews opened with
+    // ?demo=1 keep that flag on their API calls, and "now" comes from the
+    // bridge so a preview shown as of a chosen moment ages correctly.
+    var params = new URLSearchParams(window.location.search);
+    var TOKEN = params.get('token') || (window.usernode && window.usernode.token) || '';
+    var DEMO = params.get('demo') === '1';
+
+    function api(path, options) {
+      options = options || {};
+      var headers = Object.assign({}, options.headers);
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      var n = window.usernode && typeof window.usernode.now === 'function' ? window.usernode.now() : null;
+      if (n) headers['x-usernode-now'] = n instanceof Date ? n.toISOString() : String(n);
+      return fetch(path, Object.assign({}, options, { headers: headers }));
+    }
+    function getJson(path) {
+      return api(path + (path.indexOf('?') >= 0 ? '&' : '?') + (DEMO ? 'demo=1' : ''))
+        .then(function (res) { if (!res.ok) throw new Error('http ' + res.status); return res.json(); });
+    }
+
+    var $ = function (id) { return document.getElementById(id); };
+    var els = {
+      count: $('unread-count'), markAll: $('mark-all'),
+      form: $('add-form'), input: $('feed-url'), addBtn: $('add-btn'), addError: $('add-error'),
+      list: $('post-list'), skeleton: $('posts-skeleton'),
+      empty: $('posts-empty'), caughtUp: $('posts-caught-up'), error: $('posts-error'),
+      retry: $('retry'),
+      feedsSection: $('feeds-section'), feedList: $('feed-list'),
+      scrim: $('sheet-scrim'), sheetTitle: $('sheet-title'), sheetMeta: $('sheet-meta'),
+      sheetSummary: $('sheet-summary'), sheetNote: $('sheet-note'), sheetLink: $('sheet-link'),
+      sheetClose: $('sheet-close'),
+    };
+    var state = { loaded: false, failed: false, posts: [], feeds: [] };
+
+    function currentNow() {
+      var n = window.usernode && typeof window.usernode.now === 'function' ? window.usernode.now() : null;
+      return n instanceof Date ? n : (n ? new Date(n) : new Date());
+    }
+    function formatAge(publishedAt) {
+      if (!publishedAt) return '';
+      var t = new Date(publishedAt).getTime();
+      if (isNaN(t)) return '';
+      var mins = Math.floor((currentNow().getTime() - t) / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + 'm ago';
+      var hours = Math.floor(mins / 60);
+      if (hours < 24) return hours + 'h ago';
+      if (hours < 48) return 'Yesterday';
+      var days = Math.floor(hours / 24);
+      if (days < 7) return days + 'd ago';
+      return new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    function meta(p) {
+      var age = formatAge(p.published_at);
+      return (p.feed_title || '') + (age ? ' · ' + age : '');
+    }
+    function el(tag, className, text) {
+      var e = document.createElement(tag);
+      if (className) e.className = className;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+    // Every feed string reaches the page through textContent: a feed cannot
+    // inject markup into the app.
+    function render() {
+      var posts = state.posts;
+      els.count.textContent = posts.length + ' unread';
+      els.markAll.hidden = !state.loaded || state.failed || posts.length === 0;
+
+      els.list.hidden = !state.loaded || state.failed || posts.length === 0;
+      els.skeleton.hidden = state.loaded;
+      els.error.hidden = !state.failed;
+      var noFeeds = state.loaded && !state.failed && posts.length === 0 && state.feeds.length === 0;
+      els.empty.hidden = !noFeeds;
+      els.caughtUp.hidden = !(state.loaded && !state.failed && posts.length === 0 && state.feeds.length > 0);
+
+      els.list.replaceChildren.apply(els.list, posts.map(function (p) {
+        var li = el('li');
+        var row = el('button', 'list-row w-full text-left');
+        row.type = 'button';
+        var main = el('span', 'min-w-0 flex-1');
+        main.appendChild(el('span', 'block text-body font-semibold', p.title || 'Untitled'));
+        main.appendChild(el('span', 'block text-small text-muted', meta(p)));
+        row.appendChild(el('span', 'h-2.5 w-2.5 shrink-0 rounded-full bg-accent'));
+        row.appendChild(main);
+        row.addEventListener('click', function () { openSheet(p); });
+        li.appendChild(row);
+        return li;
+      }));
+
+      els.feedsSection.hidden = !(state.loaded && !state.failed && state.feeds.length > 0);
+      els.feedList.replaceChildren.apply(els.feedList, state.feeds.map(function (f) {
+        var li = el('li', 'list-row');
+        var main = el('div', 'min-w-0 flex-1');
+        main.appendChild(el('p', 'text-body font-semibold', f.title || f.url));
+        main.appendChild(el('p', f.last_error ? 'text-small text-danger' : 'text-small text-muted',
+          f.last_error ? 'Update failed · showing saved posts' : f.url));
+        var remove = el('button', 'btn-secondary shrink-0', 'Remove');
+        remove.type = 'button';
+        remove.addEventListener('click', function () { removeFeed(f.id, remove); });
+        li.appendChild(main);
+        li.appendChild(remove);
+        return li;
+      }));
+    }
+
+    function refreshAll(withSkeleton) {
+      if (withSkeleton) { state.loaded = false; state.failed = false; render(); }
+      return Promise.all([getJson('/api/posts'), getJson('/api/feeds')])
+        .then(function (rs) {
+          state.posts = rs[0].posts || [];
+          state.feeds = rs[1].feeds || [];
+          state.loaded = true;
+          state.failed = false;
+          render();
+        })
+        .catch(function () {
+          state.loaded = true;
+          state.failed = true;
+          render();
+        });
+    }
+
+    // ── Preview sheet ─────────────────────────────────────────────────────
+    var sheetPost = null;
+    function openSheet(p) {
+      sheetPost = p;
+      els.sheetTitle.textContent = p.title || 'Untitled';
+      els.sheetMeta.textContent = meta(p);
+      els.sheetSummary.textContent = p.summary || 'This post has no summary. Open the full article to read it.';
+      els.sheetNote.hidden = true;
+      if (p.url) {
+        els.sheetLink.href = p.url;
+        els.sheetLink.hidden = false;
+      } else {
+        els.sheetLink.hidden = true;
+      }
+      els.scrim.hidden = false;
+      els.sheetClose.focus();
+      // Opening a post marks it read; the list updates when the sheet closes.
+      api('/api/posts/' + encodeURIComponent(p.id) + '/read', { method: 'POST' })
+        .then(function (res) {
+          if (res.status === 401) {
+            els.sheetNote.textContent = 'Make a Homeroom account to keep track of what you have read.';
+            els.sheetNote.hidden = false;
+          }
+        })
+        .catch(function () {});
+    }
+    function closeSheet() {
+      if (els.scrim.hidden) return;
+      els.scrim.hidden = true;
+      // The read mark was already sent on open: drop the row here, then let
+      // a background refresh true up the counts. Demo posts have no stored
+      // read mark (fixtures write nothing), so their rows are only dropped
+      // locally.
+      state.posts = state.posts.filter(function (p) { return p !== sheetPost; });
+      var demoOnly = sheetPost && String(sheetPost.id).indexOf('demo-') === 0;
+      sheetPost = null;
+      render();
+      if (!demoOnly) refreshAll(false);
+    }
+    els.sheetClose.addEventListener('click', closeSheet);
+    els.scrim.addEventListener('click', function (e) { if (e.target === els.scrim) closeSheet(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+    // ── Actions ───────────────────────────────────────────────────────────
+    els.retry.addEventListener('click', function () { refreshAll(true); });
+    els.markAll.addEventListener('click', function () {
+      els.markAll.disabled = true;
+      var clear = function () {
+        els.markAll.disabled = false;
+        // Demo posts have no stored read mark, so clear the list locally
+        // rather than refetching the unchanged fixtures.
+        if (DEMO) { state.posts = []; render(); } else { refreshAll(false); }
+      };
+      api('/api/read-all', { method: 'POST' })
+        .then(function () { clear(); })
+        .catch(clear);
+    });
+
+    function showAddError(message) {
+      els.addError.textContent = message;
+      els.addError.hidden = false;
+    }
+    els.form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var url = els.input.value.trim();
+      els.addError.hidden = true;
+      if (!/^https?:\/\//i.test(url)) {
+        showAddError('Enter an http or https address, e.g. https://example.com/feed.xml.');
+        return;
+      }
+      els.addBtn.disabled = true;
+      api('/api/feeds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url }),
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (body) { return { ok: res.ok, body: body }; });
+        })
+        .then(function (r) {
+          els.addBtn.disabled = false;
+          if (!r.ok) {
+            if (r.body && r.body.error === 'account_required') {
+              showAddError('Make a Homeroom account to add feeds.');
+            } else {
+              showAddError((r.body && r.body.error) || 'That address is not a readable feed. Nothing was added.');
+            }
+            return;
+          }
+          els.input.value = '';
+          refreshAll(false);
+        })
+        .catch(function () {
+          els.addBtn.disabled = false;
+          showAddError('The reader could not check that address. Try again.');
+        });
+    });
+
+    function removeFeed(id, button) {
+      button.disabled = true;
+      api('/api/feeds/' + encodeURIComponent(id), { method: 'DELETE' })
+        .then(function () { refreshAll(false); })
+        .catch(function () { button.disabled = false; });
+    }
+
+    refreshAll(true);
+  })();
+  </script>
 </body>
 </html>
