@@ -115,14 +115,14 @@
 <body class="min-h-screen bg-ground text-fg">
   <main class="mx-auto flex min-h-screen w-full max-w-md flex-col gap-4 px-4 pb-16 pt-6">
     <header class="flex items-center justify-between gap-4">
-      <h1 class="text-title font-display">Tier List</h1>
+      <h1 class="text-title font-display font-extrabold">Tier List</h1>
       <button id="add-button" type="button" class="btn-primary">Add</button>
     </header>
     <div role="tablist" aria-label="Board view" class="flex rounded-lg border border-line bg-surface p-0.5">
       <button type="button" role="tab" data-tab="mine" aria-selected="true"
-        class="min-h-10 flex-1 rounded-md px-2 text-body font-medium text-muted">My tiers</button>
+        class="min-h-11 flex-1 rounded-md bg-fg px-2 text-body font-medium text-ground">My tiers</button>
       <button type="button" role="tab" data-tab="crowd" aria-selected="false"
-        class="min-h-10 flex-1 rounded-md px-2 text-body font-medium text-muted">Crowd</button>
+        class="min-h-11 flex-1 rounded-md px-2 text-body font-medium text-muted">Crowd</button>
     </div>
     <!-- The tier board: six .tier-row bands plus the unranked tray. app.js
          renders everything inside this mount and attaches the drag there. -->

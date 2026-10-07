@@ -193,12 +193,23 @@
       row.appendChild(chips);
       board.appendChild(row);
     }
-    return [board];
+    // The tray is part of the settled layout, so it gets a placeholder too
+    // — otherwise the board jumps into place when loading finishes.
+    const trayBlock = el('div');
+    trayBlock.appendChild(el('p', 'section-label',
+      state.tab === 'mine' ? 'Not ranked yet' : 'Nobody has ranked yet'));
+    const tray = el('div',
+      'flex min-h-14 flex-wrap content-start items-start gap-1.5 rounded-xl border border-dashed border-line p-2');
+    tray.dataset.tierRow = 'none';
+    tray.appendChild(el('span', 'skeleton h-11 w-40'));
+    tray.appendChild(el('span', 'skeleton h-11 w-32'));
+    trayBlock.appendChild(tray);
+    return [board, trayBlock];
   }
 
   function buildError() {
-    const box = el('div', 'state-error');
-    box.appendChild(el('p', 'text-body font-medium', "Couldn't load the board"));
+    const box = el('div', 'state-error w-full rounded-xl border border-line bg-surface');
+    box.appendChild(el('p', 'text-heading', "Couldn't load the board"));
     box.appendChild(el('p', 'text-small text-muted', 'Nothing you ranked is lost.'));
     const retry = el('button', 'btn-secondary', 'Retry');
     retry.type = 'button';
