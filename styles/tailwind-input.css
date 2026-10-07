@@ -29,30 +29,30 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
+    --ground: 248 244 235;    /* the page: warm cream */
+    --surface: 255 253 247;   /* lists, cards, fields */
+    --raised: 242 236 224;    /* hovers, badges */
+    --fg: 41 32 22;           /* text: warm near-black */
+    --muted: 110 96 78;       /* secondary text */
+    --line: 226 217 199;      /* borders, dividers, skeletons */
+    --accent: 180 83 9;       /* the one accent: crust amber */
+    --on-accent: 255 253 247; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 180 83 9;        /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 23 18 12;
+    --surface: 36 29 20;
+    --raised: 51 41 29;
+    --fg: 243 236 222;
+    --muted: 199 186 164;
+    --line: 74 61 44;
+    --accent: 245 158 11;
+    --on-accent: 61 34 6;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 245 158 11;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -91,6 +91,21 @@
       placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-focus;
   }
 
+  /* A picker chip (bread type): a toggle, used with aria-pressed. */
+  .chip {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-surface px-4 text-body font-medium text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ground
+      hover:bg-raised;
+  }
+  .chip[aria-pressed='true'] {
+    @apply border-accent bg-accent text-on-accent hover:brightness-95;
+  }
+
+  /* The label above one field: same voice as .section-label, tighter. */
+  .field-label {
+    @apply mb-1 block px-1 text-small font-medium text-muted;
+  }
+
   /* A grouped list: <ul class="list"> of <li class="list-row">. The usual
      way to show several things; prefer it to a stack of cards. */
   .list {
@@ -124,5 +139,11 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The results appearing in answer to the Calculate tap: the screen's one
+     motion, and only when the viewer has not asked for reduced motion. */
+  .reveal {
+    @apply motion-safe:animate-rise-in;
   }
 }

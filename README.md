@@ -1,27 +1,37 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Your personal bread recipe calculator, built on Homeroom. Pick a bread
+(sourdough, bagels, sourdough bagels, rye, sandwich loaf), set the hydration,
+how many loaves and how big, and it tells you how many grams of each
+ingredient to weigh, how long to let the dough rise, and at what temperature
+and for how long to bake it.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- One static screen, `public/index.html`. The ratios per bread type live in a
+  small table in its client script: no database, no network calls, nothing
+  saved between visits. The page works signed in, as a guest, and offline.
+- Water is hydration percent × flour; the other ingredients are standard
+  baker's percentages per bread type (sourdough types use starter, the rest
+  instant yeast). Rows are rounded to whole grams so they add up to the exact
+  dough weight (`loaves × loaf size`).
+- Rye's flour is presented as two rows (70% bread flour, 30% rye flour), but
+  the flour is still one number, so the dough total is unchanged.
+- The proofing timeline draws each rise stage (plus a bagel's boil) sized to
+  its length, never narrower than 12% of the bar; the exact duration is
+  written inside each segment.
 
-## Replacing the template
+## Development
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- `npm run build` compiles `styles/tailwind-input.css` to
+  `public/tailwind.css` at image build time. Colours are token pairs (a light
+  and a dark look that follow the viewer's Homeroom theme); the palette and
+  the screen's design rules live in `CLAUDE.md` under "## Design".
+- The platform's auth, bridge and design conventions are in `CLAUDE.md` and
+  the hosted platform rules it points at.
 
-Once the real app exists, rewrite this README to describe it.
+## Improving the app
+
+Ask Homeroom bot: open the app on Homeroom, tap the Homeroom icon in the
+header, then **Suggest an improvement**. You can also run Claude Code against
+this repo directly; start with `CLAUDE.md`.

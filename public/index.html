@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b45309'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,28 +108,312 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-10">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
+    <header class="flex flex-col gap-1">
+      <h1 class="font-display text-title">Bread Bot</h1>
+      <p class="text-body text-muted">Pick a bread, set your loaf, get every gram.</p>
+    </header>
+
+    <form id="calculator" class="flex flex-col gap-6" novalidate>
+      <div>
+        <h2 class="section-label">Bread type</h2>
+        <div id="chips" role="group" aria-label="Bread type" class="flex flex-wrap gap-2">
+          <button type="button" class="chip" data-type="sourdough" aria-pressed="true">Sourdough</button>
+          <button type="button" class="chip" data-type="bagels" aria-pressed="false">Bagels</button>
+          <button type="button" class="chip" data-type="sourdough-bagels" aria-pressed="false">Sourdough bagels</button>
+          <button type="button" class="chip" data-type="rye" aria-pressed="false">Rye</button>
+          <button type="button" class="chip" data-type="sandwich" aria-pressed="false">Sandwich loaf</button>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="section-label">Your loaf</h2>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label for="hydration" class="field-label">Hydration (%)</label>
+            <input id="hydration" class="field" type="number" inputmode="decimal" min="40" max="100" step="1" value="70" placeholder="e.g. 70">
+          </div>
+          <div>
+            <label for="loaves" class="field-label">Loaves</label>
+            <input id="loaves" class="field" type="number" inputmode="numeric" min="1" max="24" step="1" value="2" placeholder="e.g. 2">
+          </div>
+          <div>
+            <label for="size" class="field-label">Loaf size (g)</label>
+            <input id="size" class="field" type="number" inputmode="numeric" min="200" max="2000" step="10" value="900" placeholder="e.g. 900">
+          </div>
+        </div>
+        <p id="hint" class="mt-2 px-1 text-small text-muted"></p>
+      </div>
+
+      <button type="submit" id="calculate" class="btn-primary w-full">Calculate recipe</button>
+    </form>
+
+    <!-- Before the first calculation: the invitation, not an empty data set. -->
+    <section id="invite" class="state-empty">
+      <p class="text-body font-medium">Your recipe will appear here.</p>
+      <p class="text-body text-muted">Pick a bread, set your loaf, then tap Calculate recipe.</p>
     </section>
-    <!-- /usernode-starter-notice@1 -->
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <section id="error" class="state-error" hidden>
+      <p id="error-msg" class="text-body font-medium text-danger"></p>
+      <p class="text-body text-muted">Fix the values, then calculate again. Nothing has been lost.</p>
+    </section>
+
+    <section id="results" class="reveal flex flex-col gap-6" hidden>
+      <div>
+        <h2 class="section-label">Ingredients</h2>
+        <ul id="ingredients" class="list"></ul>
+      </div>
+      <div>
+        <h2 class="section-label">Rise</h2>
+        <div id="timeline" class="flex items-start gap-0.5"></div>
+        <p id="rise-total" class="mt-2 px-1 text-small text-muted"></p>
+      </div>
+      <div>
+        <h2 class="section-label">Bake</h2>
+        <ul id="bake" class="list"></ul>
+        <p id="bake-note" class="mt-2 px-1 text-small text-muted" hidden></p>
+      </div>
+    </section>
+
   </main>
+
+  <script>
+  // Bread Bot v1: a client-side calculator. No network calls, no writes,
+  // nothing persisted: reloading returns to the defaults.
+  (function () {
+    // The ratios behind each bread. Percentages are baker's percentages,
+    // taken against the flour (F); hydration is what the person sets.
+    // Sourdough types use starter, the rest instant yeast.
+    var TYPES = {
+      'sourdough': {
+        name: 'Sourdough',
+        hint: 'Sourdough usually sits between 70 and 85 percent hydration.',
+        extras: [
+          { name: 'Starter', pct: 20 },
+          { name: 'Salt', pct: 2 },
+        ],
+        stages: [['Mix', 45], ['Bulk rise', 240], ['Proof', 120]],
+        bake: { temp: 230, time: 45, note: 'Start covered, uncover for the last 25 minutes.' },
+      },
+      'bagels': {
+        name: 'Bagels',
+        hint: 'Bagel dough is stiff: around 55 percent hydration works best.',
+        extras: [
+          { name: 'Instant yeast', pct: 1 },
+          { name: 'Honey or malt syrup', pct: 4 },
+          { name: 'Salt', pct: 2 },
+        ],
+        stages: [['Mix', 15], ['Rise', 60], ['Proof', 20], ['Boil', 2]],
+        bake: { temp: 220, time: 20, note: '' },
+      },
+      'sourdough-bagels': {
+        name: 'Sourdough bagels',
+        hint: 'Keep these stiff too: around 55 percent hydration.',
+        extras: [
+          { name: 'Starter', pct: 25 },
+          { name: 'Honey or malt syrup', pct: 4 },
+          { name: 'Salt', pct: 2 },
+        ],
+        stages: [['Mix', 15], ['Bulk rise', 240], ['Cold proof', 480], ['Boil', 2]],
+        bake: { temp: 220, time: 22, note: '' },
+      },
+      'rye': {
+        name: 'Rye',
+        hint: 'Rye handles a wide range: 65 to 80 percent hydration.',
+        ryeSplit: 0.3, // the flour row splits 70/30 across two flours
+        extras: [
+          { name: 'Instant yeast', pct: 2 },
+          { name: 'Salt', pct: 2 },
+        ],
+        stages: [['Mix', 20], ['Rise', 90], ['Proof', 60]],
+        bake: { temp: 210, time: 55, note: '' },
+      },
+      'sandwich': {
+        name: 'Sandwich loaf',
+        hint: 'A soft loaf likes 65 to 70 percent hydration.',
+        extras: [
+          { name: 'Instant yeast', pct: 1 },
+          { name: 'Sugar', pct: 5 },
+          { name: 'Butter', pct: 4 },
+          { name: 'Salt', pct: 2 },
+        ],
+        stages: [['Mix', 15], ['Rise', 90], ['Proof', 60]],
+        bake: { temp: 190, time: 35, note: '' },
+      },
+    };
+
+    var LIMITS = {
+      hydration: { min: 40, max: 100, name: 'Hydration', unit: 'percent' },
+      loaves: { min: 1, max: 24, name: 'Loaves', unit: '' },
+      size: { min: 200, max: 2000, name: 'Loaf size', unit: 'grams' },
+    };
+
+    var numberFormat = new Intl.NumberFormat();
+    function grams(n) { return numberFormat.format(n) + ' g'; }
+    function minutes(m) {
+      var h = Math.floor(m / 60), r = m % 60;
+      if (!h) return r + ' min';
+      return r ? h + ' h ' + r + ' min' : h + ' h';
+    }
+
+    // Round each ingredient to a whole gram so the rows add up to the exact
+    // dough weight: floor everything, hand the leftover grams to the rows
+    // with the largest fractions.
+    function largestRemainder(values, total) {
+      var out = values.map(Math.floor);
+      var left = total - out.reduce(function (a, b) { return a + b; }, 0);
+      var order = values.map(function (v, i) { return [v - Math.floor(v), i]; })
+        .sort(function (a, b) { return b[0] - a[0]; });
+      for (var i = 0; i < left; i++) out[order[i][1]]++;
+      return out;
+    }
+
+    function ingredientRow(name, text, extraClass) {
+      var li = document.createElement('li');
+      li.className = 'list-row justify-between ' + (extraClass || '');
+      var label = document.createElement('span');
+      label.className = 'text-body';
+      label.textContent = name;
+      var value = document.createElement('span');
+      value.className = 'text-body font-medium tabular-nums';
+      value.textContent = text;
+      li.append(label, value);
+      return li;
+    }
+
+    function renderIngredients(type, rows, totalDough) {
+      var list = document.getElementById('ingredients');
+      list.textContent = '';
+      rows.forEach(function (row) {
+        list.append(ingredientRow(row[0], grams(row[1])));
+      });
+      list.append(ingredientRow('Total dough', grams(totalDough), 'bg-raised'));
+    }
+
+    // The proofing timeline: one ribbon, one segment per stage. Each segment
+    // grows with its length but never narrower than 12 percent, so a 2 minute
+    // boil stays legible; the exact duration is written inside it, so the bar
+    // never lies.
+    function renderTimeline(stages) {
+      var timeline = document.getElementById('timeline');
+      timeline.textContent = '';
+      stages.forEach(function (stage) {
+        var col = document.createElement('div');
+        col.className = 'flex min-w-0 flex-col gap-1';
+        col.style.flex = stage[1] + ' 1 0%';
+        col.style.minWidth = '12%';
+        var block = document.createElement('div');
+        block.className = 'flex h-11 items-center justify-center rounded-md bg-accent px-0.5 text-center text-small font-medium leading-tight text-on-accent';
+        block.textContent = minutes(stage[1]);
+        var label = document.createElement('div');
+        label.className = 'text-center text-small leading-tight text-muted';
+        label.textContent = stage[0];
+        col.append(block, label);
+        timeline.append(col);
+      });
+      var total = stages.reduce(function (sum, s) { return sum + s[1]; }, 0);
+      document.getElementById('rise-total').textContent = minutes(total) + ' from mix to oven.';
+    }
+
+    function renderBake(bake) {
+      var list = document.getElementById('bake');
+      list.textContent = '';
+      list.append(ingredientRow('Oven temperature', bake.temp + '°C'));
+      list.append(ingredientRow('Bake time', minutes(bake.time)));
+      var note = document.getElementById('bake-note');
+      note.hidden = !bake.note;
+      note.textContent = bake.note;
+    }
+
+    function readInputs() {
+      for (var key in LIMITS) {
+        var limit = LIMITS[key];
+        var value = Number(document.getElementById(key).value);
+        if (!Number.isFinite(value) || value < limit.min || value > limit.max) {
+          var unit = limit.unit ? ' ' + limit.unit : '';
+          return { error: limit.name + ' must be between ' + limit.min + ' and ' + limit.max + unit + '.' };
+        }
+      }
+      return {
+        hydration: Number(document.getElementById('hydration').value),
+        loaves: Math.round(Number(document.getElementById('loaves').value)),
+        size: Number(document.getElementById('size').value),
+      };
+    }
+
+    function calculate() {
+      var input = readInputs();
+      var invite = document.getElementById('invite');
+      var error = document.getElementById('error');
+      var results = document.getElementById('results');
+      if (input.error) {
+        document.getElementById('error-msg').textContent = input.error;
+        invite.hidden = true;
+        results.hidden = true;
+        error.hidden = false;
+        return;
+      }
+      var type = TYPES[currentType];
+      var totalDough = input.loaves * input.size;
+      var pct = 1 + input.hydration / 100;
+      type.extras.forEach(function (e) { pct += e.pct / 100; });
+      var flour = totalDough / pct;
+      var exact = [['Bread flour', flour], ['Water', flour * input.hydration / 100]];
+      type.extras.forEach(function (e) { exact.push([e.name, flour * e.pct / 100]); });
+      var rounded = largestRemainder(exact.map(function (e) { return e[1]; }), totalDough);
+      var rows = [];
+      for (var i = 0; i < exact.length; i++) {
+        if (exact[i][0] === 'Bread flour' && type.ryeSplit) {
+          // F is still one number: the split only changes how the one flour
+          // row is presented, so the dough total is unchanged.
+          var bread = Math.round(rounded[i] * (1 - type.ryeSplit));
+          rows.push(['Bread flour', bread], ['Rye flour', rounded[i] - bread]);
+        } else {
+          rows.push([exact[i][0], rounded[i]]);
+        }
+      }
+      renderIngredients(type, rows, totalDough);
+      renderTimeline(type.stages);
+      renderBake(type.bake);
+      invite.hidden = true;
+      error.hidden = true;
+      results.hidden = false;
+      // Replay the reveal only when the answer changes, never on page load.
+      results.classList.remove('reveal');
+      void results.offsetWidth;
+      results.classList.add('reveal');
+    }
+
+    var currentType = 'sourdough';
+    var chips = Array.prototype.slice.call(document.querySelectorAll('#chips .chip'));
+    function selectChip(chip) {
+      currentType = chip.dataset.type;
+      chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
+      document.getElementById('hint').textContent = TYPES[currentType].hint;
+      // Keep an already shown recipe in step with the new bread.
+      if (!document.getElementById('results').hidden) calculate();
+    }
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () { selectChip(chip); });
+    });
+
+    document.getElementById('calculator').addEventListener('submit', function (event) {
+      event.preventDefault();
+      calculate();
+      // Bring the fresh answer into view on a phone, unless the viewer has
+      // asked for reduced motion.
+      var results = document.getElementById('results');
+      if (!results.hidden) {
+        var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        results.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+      }
+    });
+
+    // First paint: the invitation, the defaults, the hint for the default bread.
+    document.getElementById('hint').textContent = TYPES[currentType].hint;
+  })();
+  </script>
 </body>
 </html>

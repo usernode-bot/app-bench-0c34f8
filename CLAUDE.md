@@ -97,22 +97,30 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: the person picks a bread type (sourdough, bagels,
+sourdough bagels, rye, sandwich loaf), sets hydration, loaf count and loaf
+size, and gets the recipe in grams, a rise timeline, and the bake temperature
+and time. V1 is one static client-side screen: ratios per bread type live in
+a table in the page's script, nothing is saved, and the page works offline.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
+This app's look: warm bakery. The first real version sets it; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: crust amber (light `#B45309`, dark `#F59E0B`); second
+  colour: none, the neutrals carry it; neutrals: warm cream and cocoa
+  (cream page, warm near-black text in light; deep brown-black ground, warm
+  cream text in dark). Token values live in `styles/tailwind-input.css`.
+- **Signature element:** the proofing timeline — a single amber ribbon
+  segmented by rise stage (plus a bagel's boil), each segment sized to its
+  length with a 12% minimum width and the exact duration written inside, the
+  stage name beneath.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged). The page title alone is set in `font-display` (ui-serif);
+  everything else is the system sans.
+- Amounts are grams only, rounded so the rows add up to the exact dough
+  weight. No cups or ounces.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

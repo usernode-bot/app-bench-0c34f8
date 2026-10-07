@@ -2,5 +2,19 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "calculator screen loads with the picker and button",
+      "path": "/",
+      "expectSelector": "main",
+      "expectText": "Calculate recipe"
+    },
+    {
+      "id": "calculator",
+      "path": "/",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }

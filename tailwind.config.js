@@ -56,12 +56,26 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
-      // The type scale: four sizes, and nothing in between.
+      // The type scale: four sizes, and nothing in between. The page title
+      // is set in a serif system face for a bakery feel; everything else
+      // stays in the system sans.
+      fontFamily: {
+        display: ['ui-serif', 'Georgia', 'Cambria', 'serif'],
+      },
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      // The screen's one motion: the results rising in after Calculate.
+      keyframes: {
+        'rise-in': {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+        },
+      },
+      animation: {
+        'rise-in': 'rise-in 0.2s ease-out',
       },
     },
   },
