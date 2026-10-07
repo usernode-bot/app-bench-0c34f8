@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.name + ': ' + val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,20 +64,19 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
-       Writing class names as whole literals is what keeps this working — a
-       class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
-       is invisible to the compiler. If you genuinely need runtime-generated
-       classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23c2410c'/><g fill='none' stroke='white' stroke-width='9' stroke-linecap='round'><path d='M28 72a20 20 0 0 1 20 20'/><path d='M28 44a48 48 0 0 1 48 48'/></g><circle cx='30' cy='90' r='7' fill='white'/></svg>">
+  <!-- Tailwind, PRECOMPILED for this app. The config moved to
+       tailwind.config.js in the repo root; npm run build compiles it to
+       public/tailwind.css on every image build, so the stylesheet is
+       regenerated from THIS commit's markup every deploy. Writing class
+       names as whole literals is what keeps this working — a class
+       assembled from fragments at runtime is invisible to the compiler. -->
   <link rel="stylesheet" href="/tailwind.css">
+  <!-- The platform's native-feel UI kit (pull-to-refresh, sheets, menus,
+       toasts), centrally hosted and loaded by RELATIVE path. Never vendor
+       it and never write a hostname in front of it. -->
+  <link rel="stylesheet" href="/usernode-native/v1/native.css">
+  <script src="/usernode-native/v1/native.js"></script>
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -107,29 +106,58 @@
     })();
   </script>
 </head>
-<body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+<body class="min-h-screen">
+  <main class="mx-auto flex min-h-screen max-w-md flex-col gap-4 px-4 pb-8 pt-4">
+    <!-- Header: the heading and the one status line, refresh on the right. -->
+    <header class="flex items-start justify-between gap-3">
+      <div>
+        <h1 class="text-title">Unread</h1>
+        <p id="summary" class="sub">&nbsp;</p>
+      </div>
+      <button id="refresh-btn" type="button" class="icon-btn" aria-label="Check for new posts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>
+      </button>
+    </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- The one primary action: add a feed by pasting an address. -->
+    <form id="add-form" novalidate>
+      <label class="section-label" for="feed-url">Feed or website address</label>
+      <div class="add-row">
+        <input id="feed-url" name="url" type="text" class="field" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. example.com/blog">
+        <button id="add-btn" type="submit" class="btn-primary">Add feed</button>
+      </div>
+      <p id="add-error" class="add-error" role="alert" hidden></p>
+    </form>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <!-- One chip per feed; the dots are the legend for the list below. -->
+    <div id="chips" class="chips" hidden></div>
+
+    <!-- The list: every unread post from all feeds, newest first. -->
+    <ul id="posts" class="list" hidden></ul>
+
+    <!-- Under the list: the catching-up block (shown only with rows). -->
+    <div id="end" class="end" hidden>
+      <p>That is everything new from your feeds.</p>
+      <button id="mark-all-btn" type="button" class="btn-secondary">Mark all as read</button>
+    </div>
+
+    <!-- States: exactly one of these shows at a time. -->
+    <div id="loading" class="list" aria-hidden="true">
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-3/4"></span><span class="skeleton h-3 w-1/3"></span></span></div>
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-2/3"></span><span class="skeleton h-3 w-1/4"></span></span></div>
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-4/5"></span><span class="skeleton h-3 w-1/3"></span></span></div>
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-3/5"></span><span class="skeleton h-3 w-1/5"></span></span></div>
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-2/3"></span><span class="skeleton h-3 w-1/4"></span></span></div>
+      <div class="skeleton-row"><span class="skeleton h-2.5 w-2.5 flex-none rounded-full"></span><span class="flex min-w-0 flex-1 flex-col gap-2"><span class="skeleton h-4 w-3/4"></span><span class="skeleton h-3 w-1/3"></span></span></div>
+    </div>
+    <div id="state-empty" class="state-empty" hidden></div>
+    <div id="state-error" class="state-error" hidden>
+      <p class="text-body font-medium">Couldn't load your posts</p>
+      <p class="text-small text-muted">Your feeds are saved. Check your connection and try again.</p>
+      <button id="retry-btn" type="button" class="btn-secondary mt-2">Retry</button>
+    </div>
   </main>
+
+  <script src="/app.js"></script>
 </body>
 </html>

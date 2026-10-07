@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.demo",
+      "name": "Reader shows demo posts",
+      "path": "/?demo=1",
+      "expectSelector": ".post-row",
+      "visual": true,
+      "impact": ["public/**", "server.js", "lib/**", "styles/**", "tailwind.config.js"]
+    },
+    {
+      "name": "Demo feed chips render",
+      "path": "/?demo=1",
+      "expectText": "Staging demo: Slow Kitchen"
+    },
+    {
+      "name": "Empty reader without demo",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

@@ -18,54 +18,81 @@
  * bg-accent with text-on-accent, ...). :root is the light look, and .dark,
  * which the theme script in public/index.html sets on <html>, the dark one.
  *
- * Re-theme the app HERE: change the values, keep the names. The defaults
- * (warm greys, one teal accent) are a quiet starting point, not a look.
- * Keep every text pair at 4.5:1 or more in both looks: fg and muted on
- * ground, surface and raised; accent and danger on ground and surface;
- * on-accent on accent; on-danger on danger.
+ * The palette is cool, paper-like greys with a single RSS-orange action
+ * colour — orange is the colour of the RSS symbol itself, the subject's own
+ * colour rather than a decoration. --src-1 to --src-8 are the feed colours,
+ * given out in order as feeds are added; they reach the screen through the
+ * .s1–.s8 classes, which set `color`, which .feed-dot reads via
+ * currentColor.
  *
- * Adopting the native UI kit later? Point its --un-accent and
- * --un-accent-contrast at the accent and on-accent tokens.
+ * Re-theme the app HERE: change the values, keep the names. Keep every text
+ * pair at 4.5:1 or more in both looks: fg and muted on ground, surface and
+ * raised; accent and danger on ground and surface; on-accent on accent;
+ * on-danger on danger.
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    --ground: 247 247 248;    /* the page: cool paper grey */
+    --surface: 255 255 255;   /* the post list, chips, field */
+    --raised: 239 240 242;    /* hover and pressed rows */
+    --fg: 24 25 28;           /* titles and text */
+    --muted: 92 96 104;       /* feed names, times, counts, read titles */
+    --line: 226 228 232;      /* borders, dividers, skeletons */
+    --accent: 194 65 12;      /* RSS orange: Add feed, Open full post, focus ring */
+    --on-accent: 255 255 255;
+    --danger: 185 28 28;      /* add-feed error line, remove confirm */
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 194 65 12;       /* the keyboard focus ring, the action colour */
+    --src-1: 37 99 235;       /* blue */
+    --src-2: 13 148 136;      /* teal */
+    --src-3: 124 58 237;      /* violet */
+    --src-4: 225 29 72;       /* rose */
+    --src-5: 180 83 9;        /* amber */
+    --src-6: 21 128 61;       /* green */
+    --src-7: 79 70 229;       /* indigo */
+    --src-8: 14 116 144;      /* ocean */
+    /* The native UI kit, pointed at this app's action colour. */
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 17 18 20;
+    --surface: 26 27 30;
+    --raised: 36 38 42;
+    --fg: 236 237 240;
+    --muted: 160 165 174;
+    --line: 50 53 58;
+    --accent: 251 146 60;
+    --on-accent: 41 18 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 146 60;
+    --src-1: 96 165 250;
+    --src-2: 45 212 191;
+    --src-3: 167 139 250;
+    --src-4: 251 113 133;
+    --src-5: 251 191 36;
+    --src-6: 74 222 128;
+    --src-7: 129 140 248;
+    --src-8: 34 211 238;
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
   }
+  body {
+    @apply bg-ground text-fg font-sans text-body antialiased;
+  }
 }
 
 /* ── Components ───────────────────────────────────────────────────────────
- * A small starting kit on the tokens. Use these rather than restyling the
- * same thing by hand, add to them sparingly, and change a component here
- * rather than one copy of it. Type: text-title, text-heading, text-body and
- * text-small (tailwind.config.js), nothing in between.
+ * A small kit on the tokens. Use these rather than restyling the same thing
+ * by hand, add to them sparingly, and change a component here rather than
+ * one copy of it. Type: text-title, text-heading, text-body and text-small
+ * (tailwind.config.js), nothing in between.
  */
 @layer components {
   /* Buttons: one primary per screen, the rest secondary. At least 44 px
@@ -85,7 +112,7 @@
 
   /* Text inputs, selects and textareas: <input class="field">, 44 px tall.
      The placeholder is a faint hint (muted at 60%), so an example such as
-     "5.0" never reads as a value somebody already typed in. */
+     "e.g. example.com/blog" never reads as a value somebody typed in. */
   .field {
     @apply block min-h-11 w-full rounded-lg border border-line bg-surface px-3 py-2 text-body text-fg
       placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-focus;
@@ -98,6 +125,11 @@
   }
   .list-row {
     @apply flex min-h-11 items-center gap-3 px-4 py-3;
+  }
+  /* A post list row stacks its tappable button and its inline preview; the
+     padding lives inside the button, so the preview can run full width. */
+  .post-row {
+    @apply flex-col items-stretch px-0 py-0;
   }
 
   /* A card: one self-contained thing, usually something you tap. Most
@@ -124,5 +156,153 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The add-feed row: field and button side by side, the error line under. */
+  .add-row {
+    @apply flex gap-2;
+  }
+  .add-row .field {
+    @apply min-w-0 flex-1;
+  }
+  /* The label is short; keep it on one line and let the field shrink. */
+  .add-row .btn-primary {
+    @apply flex-none whitespace-nowrap;
+  }
+  .add-error {
+    @apply mt-1.5 px-1 text-small text-danger;
+  }
+  .sub {
+    @apply mt-0.5 text-small text-muted;
+  }
+
+  /* The square refresh control in the header. */
+  .icon-btn {
+    @apply inline-flex h-11 w-11 flex-none items-center justify-center rounded-lg border border-line bg-surface text-fg
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* A feed chip in the sideways-scrolling row; the dot inside is the legend. */
+  .chips {
+    @apply -mx-4 flex gap-2 overflow-x-auto px-4;
+  }
+  .chip {
+    @apply inline-flex h-11 flex-none items-center gap-2 rounded-full border border-line bg-surface px-3.5 text-small text-fg
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .chip-count {
+    @apply text-muted;
+  }
+  .chip-warn {
+    @apply text-danger;
+  }
+
+  /* The feed dot: the signature element. Filled = unread, an outline ring
+     (after .is-read) = opened. Colour comes from the .s1–.s8 class beside
+     it, so dot, chip and post all read the same feed colour. */
+  .feed-dot {
+    @apply h-2.5 w-2.5 flex-none rounded-full border-2 border-current bg-current;
+  }
+  .is-read .feed-dot {
+    @apply bg-transparent;
+  }
+  .s1 { color: rgb(var(--src-1)); }
+  .s2 { color: rgb(var(--src-2)); }
+  .s3 { color: rgb(var(--src-3)); }
+  .s4 { color: rgb(var(--src-4)); }
+  .s5 { color: rgb(var(--src-5)); }
+  .s6 { color: rgb(var(--src-6)); }
+  .s7 { color: rgb(var(--src-7)); }
+  .s8 { color: rgb(var(--src-8)); }
+
+  /* A post row: dot, serif title up to two lines, one muted meta line. */
+  .post {
+    @apply flex w-full items-start gap-3 bg-transparent px-4 py-3 text-left text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus;
+  }
+  .post .feed-dot {
+    margin-top: 0.4375rem; /* level with the first title line */
+  }
+  .pbody {
+    @apply flex min-w-0 flex-1 flex-col gap-1;
+  }
+  .post-title {
+    @apply font-serif font-semibold text-body leading-6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .is-open .post-title {
+    display: block;
+    @apply text-heading;
+  }
+  .is-read .post-title {
+    @apply font-normal text-muted;
+  }
+  .post-meta {
+    @apply flex justify-between gap-3 text-small text-muted;
+  }
+  .post-feedname {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+  }
+  .post-time {
+    @apply flex-none;
+  }
+
+  /* The opened post's inline preview. It expands by growing a grid row, so
+     the height is measured rather than guessed; still under reduced motion. */
+  .post-preview {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms ease;
+  }
+  .is-open > .post-preview {
+    grid-template-rows: 1fr;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post-preview {
+      transition: none;
+    }
+  }
+  .post-preview-inner {
+    overflow: hidden;
+  }
+  /* Collapsed previews stay out of the reading order; the row grows to
+     reveal them. */
+  .post-row:not(.is-open) .post-preview-inner {
+    visibility: hidden;
+  }
+  .post-preview-body {
+    @apply flex flex-col gap-3.5 pl-9 pr-4 pb-4;
+  }
+  .post-byline {
+    @apply text-small text-muted;
+  }
+  .post-text {
+    @apply flex flex-col gap-3 font-serif text-body leading-7;
+  }
+  .post-note {
+    @apply font-sans text-small text-muted;
+  }
+  .btn-primary svg {
+    @apply h-4 w-4 flex-none;
+  }
+  .post-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* Under the list: the catching-up block. */
+  .end {
+    @apply flex flex-col items-center gap-3 pb-2 pt-1 text-center;
+  }
+  .end p {
+    @apply text-small text-muted;
+  }
+
+  /* The loading list: grey placeholder rows where posts will be. */
+  .skeleton-row {
+    @apply flex items-start gap-3 px-4 py-3;
   }
 }

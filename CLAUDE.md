@@ -97,27 +97,45 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader, like Feedly in miniature: you add your own feeds by
+pasting a feed or site address, and read every unread post from all of them
+in one scrolling list, newest first. Tapping a post opens its preview in
+place and marks it read; "Open full post" goes to the article in the
+browser. Feeds, posts and read state are per signed-in person and private
+(`staging:private` tables). The server fetches and parses feeds, since
+browsers cannot fetch other sites directly, through one guarded fetcher
+(`lib/feeds.js`).
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by the first real version (the "Read all your RSS
+feeds as one list of unread posts" build); every later change follows it,
+and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** cool, paper-like greys (ground 247 247 248 light / 17 18 20
+  dark; surface white / 26 27 30; raised; fg; muted; line) with a single
+  action colour, RSS orange (accent 194 65 12 light / 251 146 60 dark) on
+  "Add feed", "Open full post" and the focus ring only, plus danger red for
+  the error line and the remove confirm. Eight feed colours `src-1` to
+  `src-8` (blue, teal, violet, rose, amber, green, indigo, ocean), given
+  out in order as feeds are added; they reach the screen only through the
+  `.s1`-`.s8` classes, which set `color` for `.feed-dot`'s `currentColor`.
+- **Signature element:** the feed dot. Each feed has its own colour; the
+  dot sits beside every post from that feed and on the feed's chip, so the
+  chip row doubles as the legend. The dot is also the read marker: filled
+  means unread, an outline ring (`.is-read .feed-dot`) means opened.
+- **Type scale:** `text-small` 14 px (meta, chips, labels), `text-body`
+  17 px (titles, field, buttons; preview text at `leading-7`),
+  `text-heading` 21 px (an opened post's title), `text-title` 28 px
+  ("Unread"). Reading text (post titles, preview paragraphs) is the device
+  serif (`font-serif`); controls, feed names, times and counts are the
+  device sans (default).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
-a dark value (named in `tailwind.config.js`), and a few components
+a dark value (named in `tailwind.config.js`), and the components
 (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+`card`, `section-label`, `skeleton`, `state-empty`, `state-error`, plus
+this app's `icon-btn`, `chip`, `feed-dot`, `post-row`, `post-preview`).
 Re-theme by changing the token values there, keeping every text pair at
 4.5:1 or more in both looks.
 
@@ -126,8 +144,8 @@ Re-theme by changing the token values there, keeping every text pair at
   `text-on-accent`, ...): never a raw hex value or a stock palette class.
 - Tap targets are at least 44 px; the buttons and fields already are.
 - A field's label says what it is; its placeholder, if any, is an example
-  that says so ("e.g. 5.0"), never a bare value that could pass for one
-  already entered.
+  that says so ("e.g. example.com/blog"), never a bare value that could
+  pass for one already entered.
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry.
@@ -137,6 +155,22 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All three tables (`feeds`, `posts`, `demo_seeds`) are private
+  (`COMMENT ON TABLE ... IS 'staging:private'`): what a person follows and
+  reads is theirs only. No public table references them.
+- All outbound fetching goes through `lib/feeds.js`'s `safeFetch`, never a
+  bare `fetch` to a user-supplied address. Feed content is reduced to
+  plain text by `htmlToText` before storage; the page renders with
+  `textContent` only, so no feed HTML or remote image reaches the DOM.
+- The sample feed has `kind = 'sample'` (`sample:welcome`); staging demo
+  feeds `kind = 'demo'` (`staging-demo:*`), written once per account on a
+  `?demo=1` staging request, read only then, and never fetched.
+  `POST /api/refresh` only ever touches `kind = 'rss'`.
+- Times come from `req.now` server-side and `usernode.now()` client-side,
+  never `new Date()`, wherever they decide what shows.
+- The page maps the add-feed error codes (`invalid_url`, `no_feed_found`,
+  `unreachable`, `already_following`, `too_many_feeds`) to sentences in
+  `ADD_ERROR_COPY` in `public/app.js`.
+- Previews are capped at 8,000 characters (`summary_truncated`), the list
+  at the newest 500 unread posts, and each feed is pruned to its newest
+  200 posts (read ones only).

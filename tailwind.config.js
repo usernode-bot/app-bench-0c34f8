@@ -24,7 +24,11 @@ module.exports = {
 
   // Classes this app builds dynamically (if it ever does) go here, since the
   // extractor cannot see them. Prefer whole literals in the markup instead.
-  safelist: [],
+  // The feed colour classes are assembled as 's' + colorIndex in app.js, so
+  // they cannot be whole literals.
+  safelist: [
+    { pattern: /^s[1-8]$/ },
+  ],
 
   // dark: variants key off a "dark" class on <html>, which public/index.html
   // sets from the viewer's Homeroom theme (the platform bridge reports it),
@@ -55,13 +59,29 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // Feed colours, given out in order as feeds are added. Used through
+        // the .s1–.s8 dot classes (they set `color`, which .feed-dot reads
+        // via currentColor), so the same eight values tint dot, chip and
+        // legend alike.
+        'src-1': token('src-1'),
+        'src-2': token('src-2'),
+        'src-3': token('src-3'),
+        'src-4': token('src-4'),
+        'src-5': token('src-5'),
+        'src-6': token('src-6'),
+        'src-7': token('src-7'),
+        'src-8': token('src-8'),
       },
-      // The type scale: four sizes, and nothing in between.
+      // The type scale: four sizes, and nothing in between. Reading text
+      // (titles, previews) is serif; controls, meta and counts stay sans.
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        serif: ['ui-serif', 'Charter', 'Iowan Old Style', 'Georgia', 'serif'],      },
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
-        body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        body: ['1.0625rem', { lineHeight: '1.5rem' }],
+        heading: ['1.3125rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+        title: ['1.75rem', { lineHeight: '2.125rem', fontWeight: '700' }],
       },
     },
   },
