@@ -1,27 +1,38 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A bread recipe calculator for home bakers. Pick a bread — sourdough,
+bagels, sourdough bagels, rye or a sandwich loaf — set the hydration,
+the number of loaves and the loaf size, and tap Calculate. Bread Bot
+weighs every ingredient in grams, lays out the rise steps with their
+times, and gives the bake temperature and duration. Recipes can be
+saved, reopened and deleted.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **The formulas live in one place** — `public/bread.js` holds every
+  bread's flour blend, extras, leaven, rise plan and bake plan, plus
+  the grams math. The browser uses it to render the result and the
+  server uses it to validate saved input, so what you see and what is
+  stored can never disagree.
+- **Only inputs are stored** — a saved recipe keeps the bread,
+  hydration, loaf count and size, never the computed grams. Results
+  are always recalculated, so a formula fix updates every saved
+  recipe the next time it is opened.
+- **Saved per person** — recipes belong to the signed-in Homeroom
+  user, in the app's own Postgres database (`saved_recipes` table,
+  created on boot).
 
-## Replacing the template
+## Development
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- `npm run build` — precompiles the Tailwind stylesheet into
+  `public/tailwind.css` (the image build does this too).
+- `npm test` — unit tests for the formula module (`node --test`).
+- `npm start` — run the server; needs `DATABASE_URL` and, outside the
+  platform, `USERNODE_JWT_PUBLIC_KEY` + `USERNODE_APP_ID` to accept
+  sign-ins.
 
-Once the real app exists, rewrite this README to describe it.
+Staging has a populated demo: append `?demo=1` to the URL and each
+viewer sees a handful of sample recipes on first view (staging only).
+
+Start with `CLAUDE.md` for the app's design rules and the pointer to
+the platform conventions.

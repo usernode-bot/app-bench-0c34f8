@@ -55,6 +55,10 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the crumb fill, the suggested-range band
+      },
+      fontFamily: {
+        sans: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

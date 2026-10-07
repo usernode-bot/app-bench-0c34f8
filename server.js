@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -31,6 +32,38 @@ const APP_AUDIENCE = process.env.USERNODE_APP_ID
 const GUEST_AUDIENCE = APP_AUDIENCE ? APP_AUDIENCE + ':guest' : null;
 const GUEST_PUBLIC_KEY = (process.env.USERNODE_GUEST_JWT_PUBLIC_KEY || '')
   .replace(/\\n/g, '\n');
+
+// In-loop check sign-in (declared as `inLoopCheckAuth` in dapp.json).
+// The platform's proposal checks open the app as a platform account, but
+// when the same declared checks are exercised locally
+// (`usernode-run-checks`) there is no platform identity to sign in with.
+// Staging mode therefore also answers POST /api/check-session: it signs
+// the browser in as one fixed fake account, `check-user`, whose saved
+// recipes are its own and nobody else's. Production never sees the
+// endpoint; on a real staging preview the account holds nothing worth
+// copying and cannot read anyone's data. This is the documented fake
+// account the check runner expects ("inLoopCheckAuth" in dapp.json,
+// see CLAUDE.md).
+const CHECK_USER_ID = 'check-user';
+const CHECK_COOKIE = 'un_check_session';
+// Per-boot secret: a cookie only this process issued is accepted, so the
+// fixed account cannot be reached by forging a value.
+const CHECK_COOKIE_SECRET = crypto.randomBytes(32).toString('hex');
+function checkCookieValue() {
+  const mac = crypto.createHmac('sha256', CHECK_COOKIE_SECRET).update(CHECK_USER_ID).digest('hex');
+  return CHECK_USER_ID + '.' + mac;
+}
+function readCheckCookie(req) {
+  const pair = String(req.headers.cookie || '').split(/;\s*/)
+    .find(c => c.startsWith(CHECK_COOKIE + '='));
+  if (!pair) return null;
+  const value = pair.slice(CHECK_COOKIE.length + 1);
+  const got = Buffer.from(value);
+  const want = Buffer.from(checkCookieValue());
+  return got.length === want.length && crypto.timingSafeEqual(got, want)
+    ? { id: CHECK_USER_ID }
+    : null;
+}
 
 // Paths that stay open without authentication. Add a path here (and add it
 // with `app.get`/`app.post` below) if you deliberately want it public.
@@ -96,6 +129,14 @@ function requestNow(req) {
   return typeof raw === 'string' && PREVIEW_NOW.test(raw) ? new Date(raw) : new Date();
 }
 
+// The in-loop check sign-in endpoint (staging only). Registered before
+// the auth middleware: it is what creates the session.
+app.post('/api/check-session', (req, res) => {
+  if (!IS_STAGING) return res.status(404).json({ error: 'not_found' });
+  res.cookie(CHECK_COOKIE, checkCookieValue(), { httpOnly: true, sameSite: 'lax' });
+  res.json({ ok: true, user: CHECK_USER_ID });
+});
+
 // Verify platform-issued JWT if one was passed, then enforce auth on
 // anything not explicitly marked public. The iframe adds `?token=…`
 // on load; the frontend script forwards the token via `x-usernode-token`
@@ -129,6 +170,13 @@ app.use((req, res, next) => {
     } catch {}
   }
 
+  // The check runner's cookie session (staging only, fake account) counts
+  // as a user — but a real platform token always wins.
+  if (!req.user && IS_STAGING) {
+    const check = readCheckCookie(req);
+    if (check) req.user = check;
+  }
+
   // Static assets (CSS/JS/images) are always served; the API and the HTML
   // shell are gated so direct hits to the staging/prod subdomain don't
   // leak app data to the public internet. A guest may READ: every GET,
@@ -145,7 +193,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => res.status(shuttingDown ? 503 : 200).json({ status: shuttingDown ? 'shutting-down' : 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +201,136 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// Bread Bot's own API: each person's saved recipe INPUTS. Results are
+// never stored — they are always recomputed by the same formula module the
+// page uses, so a stored recipe can never drift from the formulas.
+const Bread = require('./public/bread.js');
+
+// The schema is created on boot, idempotently, before the app starts
+// listening. `saved_recipes` holds inputs that belong to one person, so it
+// is marked staging:private (schema-only copies to staging).
+async function ensureSchema() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS saved_recipes (
+    id bigserial PRIMARY KEY,
+    user_id text NOT NULL,
+    name text NOT NULL CHECK (char_length(name) BETWEEN 1 AND 60),
+    bread text NOT NULL CHECK (bread IN ('sourdough', 'bagels', 'sourdough_bagels', 'rye', 'sandwich')),
+    hydration int NOT NULL,
+    loaf_count int NOT NULL,
+    size_g int NOT NULL,
+    demo_key text NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (user_id, demo_key)
+  )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS saved_recipes_user_created_idx
+    ON saved_recipes (user_id, created_at DESC)`);
+  await pool.query(`COMMENT ON TABLE saved_recipes IS 'staging:private'`);
+  // Records that a viewer's staging demo rows have been written once, so a
+  // reload changes nothing and the viewer's own saves and deletes stay.
+  await pool.query(`CREATE TABLE IF NOT EXISTS demo_seeds (
+    user_id text PRIMARY KEY,
+    seeded_at timestamptz NOT NULL
+  )`);
+  await pool.query(`COMMENT ON TABLE demo_seeds IS 'staging:private'`);
+}
+
+function recipeRow(r) {
+  return {
+    id: r.id,
+    name: r.name,
+    bread: r.bread,
+    hydration: r.hydration,
+    count: r.loaf_count,
+    size: r.size_g,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
+  };
+}
+
+// The populated staging demo, behind IS_STAGING && ?demo=1 and written
+// once per viewer (the first-first-viewer rule lives in demo_seeds). Rows
+// carry "Staging demo:" names and a spread of dates; nothing is written in
+// production or without ?demo=1.
+const DEMO_RECIPES = [
+  ['demo-1', 'Staging demo: Saturday country loaf', 'sourdough', 75, 2, 800, 3],
+  ['demo-2', 'Staging demo: Big open crumb', 'sourdough', 82, 1, 1000, 5],
+  ['demo-3', 'Staging demo: Weekday sandwich bread', 'sandwich', 65, 2, 800, 7],
+  ['demo-4', 'Staging demo: Brunch bagels', 'bagels', 58, 2, 800, 10],
+  ['demo-5', 'Staging demo: Slow sourdough bagels', 'sourdough_bagels', 60, 1, 1000, 15],
+  ['demo-6', 'Staging demo: Deli rye for the picnic', 'rye', 78, 1, 800, 22],
+  ['demo-7', 'Staging demo: Small test loaf', 'sourdough', 70, 1, 450, 28],
+];
+
+async function seedDemoRecipes(user, now) {
+  const first = await pool.query(
+    `INSERT INTO demo_seeds (user_id, seeded_at) VALUES ($1, $2)
+     ON CONFLICT DO NOTHING RETURNING user_id`,
+    [String(user.id), now]);
+  if (first.rowCount === 0) return;
+  for (const [key, name, bread, hydration, count, size, daysAgo] of DEMO_RECIPES) {
+    await pool.query(
+      `INSERT INTO saved_recipes (user_id, name, bread, hydration, loaf_count, size_g, demo_key, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (user_id, demo_key) DO NOTHING`,
+      [String(user.id), name, bread, hydration, count, size, key,
+        new Date(now.getTime() - daysAgo * 86400000)]);
+  }
+}
+
+app.get('/api/recipes', async (req, res) => {
+  // Guests can look around but have nothing of their own to list.
+  if (!req.user) return res.json({ recipes: [], canSave: false });
+  try {
+    const showDemo = IS_STAGING && req.query.demo === '1';
+    if (showDemo) await seedDemoRecipes(req.user, req.now);
+    // The plain route stays real ("Staging mock data" in the platform
+    // conventions): the seeded demo rows show only under ?demo=1, so a
+    // viewer's own list is never polluted by preview furniture.
+    const rows = await pool.query(
+      `SELECT id, name, bread, hydration, loaf_count, size_g, created_at
+       FROM saved_recipes WHERE user_id = $1${showDemo ? '' : ' AND demo_key IS NULL'}
+       ORDER BY created_at DESC LIMIT 200`,
+      [String(req.user.id)]);
+    res.json({ canSave: true, recipes: rows.rows.map(recipeRow) });
+  } catch (err) {
+    console.error('GET /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
+
+app.post('/api/recipes', async (req, res) => {
+  const b = req.body || {};
+  const inputs = { bread: b.bread, hydration: b.hydration, count: b.count, size: b.size };
+  if (!Bread.validInputs(inputs)) return res.status(400).json({ error: 'invalid_inputs' });
+  let name = typeof b.name === 'string' ? b.name.trim().slice(0, 60) : '';
+  if (!name) name = Bread.autoName(inputs);
+  try {
+    const row = await pool.query(
+      `INSERT INTO saved_recipes (user_id, name, bread, hydration, loaf_count, size_g)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, name, bread, hydration, loaf_count, size_g, created_at`,
+      [String(req.user.id), name, inputs.bread, inputs.hydration, inputs.count, inputs.size]);
+    res.status(201).json(recipeRow(row.rows[0]));
+  } catch (err) {
+    console.error('POST /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
+
+app.delete('/api/recipes/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const row = await pool.query(
+      `DELETE FROM saved_recipes WHERE id = $1 AND user_id = $2`,
+      [id, String(req.user.id)]);
+    if (row.rowCount === 0) return res.status(404).json({ error: 'not_found' });
+    res.status(204).end();
+  } catch (err) {
+    console.error('DELETE /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +369,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Set by shutdown() below; /health answers 503 while draining.
+let shuttingDown = false;
+
 async function start() {
+  await ensureSchema();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Every container is SIGTERM'd on each deploy: stop accepting
+  // connections, drain a literal 3 s, end the pool, exit. Idempotent for
+  // the SIGTERM-then-SIGINT pair, with an unref'd timer as the backstop.
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log('Shutting down: draining connections');
+    server.close();
+    if (typeof server.closeIdleConnections === 'function') server.closeIdleConnections();
+    setTimeout(() => {
+      pool.end().then(() => process.exit(0)).catch(() => process.exit(0));
+    }, 3_000);
+    setTimeout(() => process.exit(0), 10_000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

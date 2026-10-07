@@ -29,30 +29,41 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    /* Flour-pale page, white surfaces, dark crust-brown for the one
+       primary action, wheat gold for the crumb. */
+    --ground: 247 245 240;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 240 236 228;    /* hovers, badges */
+    --fg: 38 31 25;           /* text */
+    --muted: 107 96 84;       /* secondary text */
+    --line: 226 220 209;      /* borders, dividers, skeletons */
+    --accent: 122 69 24;      /* the one accent: crust brown */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 160 98 30;       /* the keyboard focus ring */
+    --wheat: 222 178 98;      /* the suggested-range band, the crumb fill;
+                                 never a text colour */
+    /* The native UI kit (save prompt, toasts, swipe tray) takes the app's
+       action colour. */
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;
+    --surface: 35 30 26;
+    --raised: 48 41 36;
+    --fg: 245 239 230;
+    --muted: 184 172 158;
+    --line: 64 56 49;
+    --accent: 232 170 92;
+    --on-accent: 43 24 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 240 190 120;
+    --wheat: 168 124 56;
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -124,5 +135,92 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* Bread choice: a single-choice chip group. Selected state comes from
+     aria-checked, which the page sets as state changes. */
+  .chip {
+    @apply inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-body font-medium text-fg hover:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ground;
+  }
+  .chip[aria-checked='true'] {
+    @apply border-fg bg-fg text-ground;
+  }
+
+  /* Loaf size: a three-part segmented control. */
+  .segmented {
+    @apply flex gap-0.5 rounded-lg border border-line bg-surface p-0.5;
+  }
+  .segmented > button {
+    @apply flex min-h-11 flex-1 items-center justify-center rounded-md px-2 text-body font-medium text-fg hover:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .segmented > button[aria-checked='true'] {
+    @apply bg-fg text-ground hover:bg-fg;
+  }
+
+  /* Loaf count: a stepper. */
+  .stepper {
+    @apply flex items-center rounded-lg border border-line bg-surface;
+  }
+  .stepper > button {
+    @apply flex h-11 w-11 items-center justify-center rounded-lg text-fg hover:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus;
+  }
+  .stepper > span {
+    @apply min-w-9 text-center text-body font-semibold tabular-nums;
+  }
+
+  /* Hydration: a slider over a rail, with the suggested range shaded on
+     the rail in wheat. The input is transparent and covers the whole 44 px
+     wrap, so the thumb stays easy to grab. */
+  .range-wrap {
+    @apply relative h-11;
+  }
+  .range-rail {
+    @apply absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-line;
+  }
+  .range-band {
+    @apply absolute top-1/2 h-3 -translate-y-1/2 rounded-full bg-wheat;
+  }
+  .range {
+    @apply absolute inset-0 h-full w-full appearance-none bg-transparent;
+  }
+  .range:focus-visible {
+    outline: 2px solid rgb(var(--focus));
+    outline-offset: 4px;
+    border-radius: 9999px;
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: rgb(var(--accent));
+    border: 3px solid rgb(var(--surface));
+    box-shadow: 0 0 0 1px rgb(var(--line));
+    cursor: pointer;
+  }
+  .range::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: rgb(var(--accent));
+    border: 3px solid rgb(var(--surface));
+    box-shadow: 0 0 0 1px rgb(var(--line));
+    cursor: pointer;
+  }
+
+  /* Gram amounts and times: heading size, semibold, even-width figures so
+     the columns line up like a kitchen scale's readout. */
+  .num {
+    @apply whitespace-nowrap text-heading tabular-nums;
+  }
+
+  /* The bin button on a saved-recipe row. */
+  .icon-btn {
+    @apply flex h-11 w-11 flex-none items-center justify-center rounded-lg text-muted hover:text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
   }
 }

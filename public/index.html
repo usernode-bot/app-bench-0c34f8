@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.name + ': ' + val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,33 +64,20 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
-       Writing class names as whole literals is what keeps this working — a
-       class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
-       is invisible to the compiler. If you genuinely need runtime-generated
-       classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'><path d='M8 84 C4 48 20 12 60 9 C100 12 116 48 112 84 Z' fill='%23deb262' stroke='%237a4518' stroke-width='10'/></svg>">
+  <!-- Tailwind, PRECOMPILED for this app. The config lives in
+       tailwind.config.js in the repo root; npm run build compiles it to
+       public/tailwind.css on every image build, so the stylesheet is
+       regenerated from THIS commit's markup every deploy. Writing class
+       names as whole literals is what keeps this working. -->
   <link rel="stylesheet" href="/tailwind.css">
-  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
-       handler in server.js serves it under a plain "node server.js"; the
-       platform's edge answers it everywhere else). Never vendor it and never
-       write a hostname in front of it.
-       It is NOT conditional on this app calling a bridge API: it is also how
-       the app ANSWERS the shell, so a scaffold without it is invisible to
-       anything that asks the frame a question. Offline launch is one of those.
-       Another is the page's colour: the bridge reports this document's opaque
-       ground to the shell (#1581), which is what makes the platform bar above
-       the app take the app's tone instead of the viewer's theme (#1945).
-       The bridge is also where the app learns the viewer's light/dark theme:
-       the script below reads it. -->
+  <!-- The platform's native UI kit (save prompt, toasts, swipe-to-delete,
+       press feedback), centrally hosted and loaded by RELATIVE path. -->
+  <link rel="stylesheet" href="/usernode-native/v1/native.css">
+  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path.
+       Never vendor it and never write a hostname in front of it. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
+  <script src="/usernode-native/v1/native.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
   <script>
@@ -106,30 +93,92 @@
       media.addEventListener('change', applyTheme);
     })();
   </script>
+  <script defer src="/bread.js"></script>
+  <script defer src="/app.js"></script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex max-w-md flex-col gap-7 px-4 pb-10 pt-3">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
+    <header class="flex items-center justify-between">
       <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <button id="saved-jump" type="button" class="btn-secondary gap-2 px-3">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+        <span id="saved-jump-label">Saved</span>
+      </button>
+    </header>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <section>
+      <p class="section-label" id="bread-label">Bread</p>
+      <div id="bread-chips" class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="bread-label"></div>
+    </section>
+
+    <section>
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="section-label mb-0 px-0" id="hydration-label">Hydration</p>
+          <p class="text-title tabular-nums" id="hydration-value">75%</p>
+          <p class="text-small text-muted" id="hydration-hint">Suggested for sourdough: 68 to 82%</p>
+        </div>
+        <svg id="crumb" class="w-28 flex-none" viewBox="0 0 120 90" role="img" aria-labelledby="crumb-title">
+          <title id="crumb-title">Crumb at 75% hydration</title>
+          <path d="M8 84 C4 48 20 12 60 9 C100 12 116 48 112 84 Z" class="fill-wheat stroke-accent" stroke-width="5"/>
+          <g id="crumb-holes" class="fill-ground"></g>
+        </svg>
+      </div>
+      <div class="range-wrap mt-2">
+        <div class="range-rail" aria-hidden="true"></div>
+        <div id="range-band" class="range-band" aria-hidden="true"></div>
+        <input id="hydration" class="range" type="range" min="50" max="90" step="1" value="75" aria-labelledby="hydration-label">
+      </div>
+      <div class="flex justify-between text-small text-muted">
+        <span>50%, stiffer dough</span><span>wetter dough, 90%</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center justify-between gap-3">
+        <p class="section-label mb-0 px-0" id="count-label">Loaves</p>
+        <div class="stepper" role="group" aria-labelledby="count-label">
+          <button id="count-minus" type="button" aria-label="Fewer">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <span id="count-value" aria-live="polite">2</span>
+          <button id="count-plus" type="button" aria-label="More">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="section-label mb-2 mt-4 px-0" id="size-label">Loaf size</p>
+      <div id="size-segments" class="segmented" role="radiogroup" aria-labelledby="size-label"></div>
+    </section>
+
+    <button id="calculate" type="button" class="btn-primary min-h-12">Calculate</button>
+
+    <section id="results" class="flex flex-col gap-7" aria-live="polite">
+      <p id="stale-note" class="px-1 text-small text-muted" hidden>You changed the settings. Tap Calculate to update.</p>
+      <div id="result-body" class="flex flex-col gap-7"></div>
+    </section>
+
+    <button id="save" type="button" class="btn-secondary w-full gap-2">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+      <span id="save-label">Save recipe</span>
+    </button>
+
+    <section id="saved" class="scroll-mt-4">
+      <p class="section-label">Saved recipes</p>
+      <ul id="saved-list" class="list" hidden></ul>
+      <ul id="saved-skeleton" class="list" hidden aria-hidden="true">
+        <li class="list-row"><div class="grow min-w-0"><div class="skeleton h-4 w-44"></div><div class="skeleton mt-1 h-3 w-28"></div></div></li>
+        <li class="list-row"><div class="grow min-w-0"><div class="skeleton h-4 w-36"></div><div class="skeleton mt-1 h-3 w-24"></div></div></li>
+        <li class="list-row"><div class="grow min-w-0"><div class="skeleton h-4 w-40"></div><div class="skeleton mt-1 h-3 w-32"></div></div></li>
+      </ul>
+      <div id="saved-empty" class="state-empty text-small text-muted" hidden>No saved recipes yet. Calculate a recipe, then tap Save recipe to keep it here.</div>
+      <div id="saved-error" class="state-error text-small text-muted" hidden>
+        <span>Couldn't load your saved recipes. The calculator still works.</span>
+        <button id="saved-retry" type="button" class="btn-secondary mt-2">Retry</button>
+      </div>
+    </section>
+
   </main>
 </body>
 </html>

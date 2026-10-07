@@ -2,5 +2,34 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "inLoopCheckAuth": {
+    "path": "/api/check-session",
+    "body": { "user": "check" }
+  },
+  "tests": [
+    {
+      "name": "Calculator shows a recipe",
+      "path": "/",
+      "expectText": "Bulk rise"
+    },
+    {
+      "name": "Saved recipes empty without demo",
+      "path": "/",
+      "expectSelector": "#saved-empty:not([hidden])"
+    },
+    {
+      "id": "calculator.demo",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectSelector": "#saved-list .list-row",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**",
+        "tailwind.config.js",
+        "server.js"
+      ]
+    }
+  ]
 }

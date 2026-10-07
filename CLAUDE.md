@@ -60,32 +60,12 @@ the platform fixes the base commit, and none of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+Replaced by the real app (the recipe calculator). The
+`usernode-starter-notice@1` block is gone from `public/index.html`; the
+`usernode-dev-console@1` forwarder `<script>`, the bridge `<script>` and
+the theme `<script>` right after it are platform infrastructure — keep
+all three. The app follows the viewer's Homeroom theme (light and dark);
+do not add a theme picker.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -97,27 +77,34 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator for home bakers. The user picks
+one of five breads (sourdough, bagels, sourdough bagels, rye, sandwich
+loaf), sets hydration, loaf count and loaf size, taps Calculate, and
+gets every ingredient in grams, the rise steps with times, and the
+bake plan. Recipes can be saved, reopened with one tap, and deleted.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent is crust brown (light `122 69 24`, dark
+  `232 170 92` — a warm gold in the dark look), second colour is wheat
+  gold (the crumb fill and the suggested-range band), on a flour-pale
+  ground with warm grey-brown neutrals. Both values live in
+  `styles/tailwind-input.css` as `--accent` / `--wheat` / the neutrals.
+- **Signature element:** the crumb slice — a small SVG slice of bread
+  beside the hydration readout whose holes grow and multiply as
+  hydration rises (r = baseR × (0.35 + 1.3 × (h−50)/40)), so the
+  slider's effect is visible at a glance.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  — four sizes, nothing in between.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
 (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+`card`, `section-label`, `skeleton`, `state-empty`, `state-error`), plus
+the app's own controls (`.chip`, `.segmented`, `.stepper`, `.range-wrap`).
 Re-theme by changing the token values there, keeping every text pair at
 4.5:1 or more in both looks.
 
@@ -132,11 +119,32 @@ Re-theme by changing the token values there, keeping every text pair at
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry.
 - Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
+  ("Staging mock data" in the platform conventions). Here: seven recipes
+  named "Staging demo: …", behind `IS_STAGING && ?demo=1`, written once
+  per viewer.
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **All bread math lives in `public/bread.js`** (shared by browser and
+  server). Never compute ingredient grams, rise times or bake plans
+  anywhere else, and keep the server-side validation reading the same
+  module's `validInputs`.
+- **Saved recipes store inputs, never results.** The `saved_recipes`
+  table holds bread, hydration, loaf count and size; the result is
+  always recomputed on open, so a formula fix reaches every saved
+  recipe.
+- `saved_recipes` and `demo_seeds` are marked `staging:private`
+  (schema-only staging copies): they hold per-user data with nothing
+  worth copying into a staging demo except the seeded rows the app
+  writes itself.
+- **Check sign-in:** `dapp.json` declares `inLoopCheckAuth` pointing at
+  `POST /api/check-session`, a staging-only endpoint that signs the
+  browser in as one fixed fake account (`check-user`) so
+  `usernode-run-checks` can exercise the protected routes locally. Keep
+  it staging-only, keep it fixed to that one account, and never let it
+  read anyone else's data.
+- Gram values round to whole grams, except anything under 10 g (salt,
+  yeast) which keeps one decimal.
+- No new npm dependencies without a strong reason; the app currently
+  needs only express, pg and jsonwebtoken.
