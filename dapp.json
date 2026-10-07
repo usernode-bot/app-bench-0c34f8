@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "🥖"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "calculator.default",
+      "name": "Calculator renders",
+      "path": "/",
+      "expectSelector": ".btn-primary",
+      "expectText": "Calculate",
+      "visual": true,
+      "impact": [
+        "public/index.html",
+        "public/app.js",
+        "styles/tailwind-input.css",
+        "tailwind.config.js"
+      ]
+    }
+  ]
 }

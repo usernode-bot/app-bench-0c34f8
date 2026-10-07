@@ -97,22 +97,36 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator for a Homeroom group. Pick a bread
+type (sourdough, bagels, sourdough bagels, rye, sandwich loaf), set the
+hydration, how many loaves and how big, and it works out every ingredient
+in grams plus a rise, oven and bake plan with a proofing timeline. The
+maths is pure client-side from standard baking ratios (flour from dough
+weight and hydration, 2% salt, leaven or starter per type); there is no
+saving, sharing or accounts — each calculation is fresh. `server.js` is
+untouched platform plumbing.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version filled it in; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: toasted crust amber — a deep baked-bronze
+  (`158 80 15`) in the light look, a brighter honey gold (`234 179 8`) in
+  the dark, with dark brown (`41 24 4`) as on-accent text in the dark look;
+  neutrals: the kit's warm stone tokens, values unchanged. Focus rings
+  follow the accent (light `180 83 9`, dark `250 204 21`).
+- **Signature element:** the proofing timeline strip — a thin accent bar
+  above the ingredient list, one segment per stage from Mix to Bake, widths
+  sized by stage duration (6% minimum so a 2-minute boil stays legible),
+  with each stage's name and time listed beneath. Long stages solid accent,
+  short stages tinted `bg-accent/60`.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  unchanged sizes; a system serif (`font-display`, `ui-serif` stack) for
+  the screen title and the Recipe and Baking plan headings, system sans for
+  everything else.
+- **Amounts and words:** grams with a plain g (`837 g`), temperatures as
+  `240°C`, sentence case throughout, no emoji as icons beyond the app icon.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

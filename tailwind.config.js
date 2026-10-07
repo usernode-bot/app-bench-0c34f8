@@ -43,6 +43,13 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      // Typefaces, set once: a system serif display stack for the screen
+      // title and the Recipe and Baking plan headings (font-display), and
+      // the system sans for everything else. Downloaded fonts: none.
+      fontFamily: {
+        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        display: ['ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

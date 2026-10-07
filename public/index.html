@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%239e500f'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,28 +108,64 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- Built from the design kit in styles/tailwind-input.css; CLAUDE.md's
+       "## Design" records the palette, type and signature element this
+       screen follows. The calculator logic lives in /app.js below. -->
+  <main class="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-10">
+    <h1 class="text-title font-display">Bread Bot</h1>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🥖</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
+    <form id="calculator" class="flex flex-col gap-5" novalidate>
+      <div>
+        <p class="section-label" id="type-label">Bread type</p>
+        <div id="type-pills" class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="type-label"></div>
+      </div>
+
+      <div>
+        <label class="section-label block" for="hydration">Hydration</label>
+        <div class="flex items-center gap-3">
+          <input id="hydration" name="hydration" class="h-11 w-full accent-accent" type="range" min="55" max="90" step="1" value="70">
+          <span id="hydration-readout" class="min-w-12 text-right text-body font-semibold" aria-live="polite">70%</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="section-label block" for="loaves">Loaves</label>
+          <input id="loaves" name="loaves" class="field" type="number" inputmode="numeric" min="1" max="12" step="1" value="2">
+          <p id="loaves-error" class="mt-1 px-1 text-small text-danger" hidden></p>
+        </div>
+        <div>
+          <label class="section-label block" for="loaf-size">Loaf size (g)</label>
+          <input id="loaf-size" name="loaf-size" class="field" type="number" inputmode="numeric" min="100" max="3000" step="1" value="800">
+          <p id="loaf-size-error" class="mt-1 px-1 text-small text-danger" hidden></p>
+        </div>
+      </div>
+
+      <div id="size-pills" class="flex flex-wrap gap-2"></div>
+
+      <button type="submit" class="btn-primary w-full">Calculate</button>
+    </form>
+
+    <section id="invite" class="state-empty rounded-xl border border-dashed border-line">
+      <p class="text-body text-muted">Set your bread type, hydration, loaves and loaf size, then tap Calculate for the recipe.</p>
     </section>
-    <!-- /usernode-starter-notice@1 -->
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <section id="result" class="flex flex-col gap-6" hidden>
+      <section class="card flex flex-col gap-3">
+        <h2 class="text-heading font-display">Recipe</h2>
+        <p id="recipe-summary" class="text-small text-muted"></p>
+        <div id="timeline" class="flex h-2.5 gap-0.5 overflow-hidden rounded-full" aria-hidden="true"></div>
+        <ul id="timeline-key" class="flex flex-wrap gap-x-4 gap-y-1 text-small text-muted"></ul>
+        <ul id="ingredients" class="list"></ul>
+        <p class="text-small text-muted">Amounts are rounded to the nearest gram, so the rows may sit a gram or two away from the dough weight.</p>
+      </section>
+
+      <section class="card flex flex-col gap-3">
+        <h2 class="text-heading font-display">Baking plan</h2>
+        <ul id="plan" class="list"></ul>
+      </section>
+    </section>
   </main>
+  <script src="/app.js" defer></script>
 </body>
 </html>
