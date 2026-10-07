@@ -147,6 +147,426 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── Data model ─────────────────────────────────────────────────────────────
+// All tables are public (usernames are already public on the platform and
+// votes are shown by name), so nothing is marked 'staging:private' and no
+// public-to-private foreign key arises. Applied idempotently on boot.
+const TIERS = ['S', 'A', 'B', 'C', 'D'];
+
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS lists (
+      id serial PRIMARY KEY,
+      title text NOT NULL,
+      created_by text NOT NULL,
+      created_by_name text NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS items (
+      id serial PRIMARY KEY,
+      list_id int NOT NULL REFERENCES lists ON DELETE CASCADE,
+      name text NOT NULL,
+      added_by text NOT NULL,
+      added_by_name text NOT NULL,
+      created_at timestamptz NOT NULL
+    )`);
+  // Duplicate names differing only in case or spacing are refused, not stored.
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS items_list_name_key
+      ON items (list_id, lower(name))`);
+  // One vote per person per item; unranked means no row.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS placements (
+      item_id int NOT NULL REFERENCES items ON DELETE CASCADE,
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier char(1) NOT NULL CHECK (tier IN ('S','A','B','C','D')),
+      placed_at timestamptz NOT NULL,
+      PRIMARY KEY (item_id, user_id)
+    )`);
+  // Marks that a viewer's staging demo votes were written once.
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS demo_viewers (
+      user_id text PRIMARY KEY,
+      seeded_at timestamptz
+    )`);
+}
+
+// An item name: trimmed, inner whitespace collapsed, 1 to 60 characters.
+function cleanItemName(raw) {
+  if (typeof raw !== 'string') return null;
+  const name = raw.replace(/\s+/g, ' ').trim();
+  return name.length >= 1 && name.length <= 60 ? name : null;
+}
+
+// ── Staging demo data ──────────────────────────────────────────────────────
+// Written only in staging, only behind IS_STAGING. Fake identities only
+// ("staging-demo-*"); the viewing account gets its own votes on its first
+// ?demo=1 request, once, below. Fixed ids far above the serial sequence, so
+// real rows never collide and setval needs no touching.
+const DEMO_RESTAURANTS = [
+  'Tartine Bakery', 'La Taqueria', 'Burma Superstar', 'Swan Oyster', 'Kin Khao',
+  'Zuni Café', 'Souvla', "Mitchell's Ice Cream", 'Super Duper', 'House of Prime Rib',
+  "Mister Jiu's", 'Nopa', 'Delfina', 'Arizmendi', 'Good Mong Kok',
+  'Ramen Nagi', 'Hog Island Oyster', 'Kitchen Story',
+];
+const DEMO_MOVIES = [
+  'Spirited Away', 'Paddington 2', 'The Princess Bride', 'Ratatouille',
+  'Up', 'Inside Out', 'Mamma Mia!', 'The Grand Budapest Hotel',
+];
+// Shorthand for the six made-up voters.
+const DEMO_VOTERS = {
+  M: 'staging-demo-maya',
+  D: 'staging-demo-devon',
+  P: 'staging-demo-priya',
+  K: 'staging-demo-kai',
+  L: 'staging-demo-lena',
+  O: 'staging-demo-omar',
+};
+// Who voted where, per item. Crowd tiers spread over S to D, and Zuni Café
+// is fixed by the request: priya S; maya, devon, omar A; kai B; lena C.
+const DEMO_VOTES = {
+  restaurants: [
+    'S:MDP B:O', // Tartine Bakery
+    'A:MDK B:LO', // La Taqueria
+    'A:MDO B:PK C:L', // Burma Superstar
+    'S:MDP B:L A:O', // Swan Oyster
+    'B:MDK A:P C:LO', // Kin Khao
+    'A:MDO S:P B:K C:L', // Zuni Café — 7 votes, crowd A
+    'B:MDK A:PL C:O', // Souvla
+    'A:MDPL B:K C:O', // Mitchell's Ice Cream
+    'C:MDK B:PL D:O', // Super Duper
+    'B:MDP A:K D:LO', // House of Prime Rib
+    'A:MDP B:K C:LO', // Mister Jiu's
+    'B:MDK A:PL D:O', // Nopa
+    'A:MDO B:P S:K C:L', // Delfina
+    'C:MDP B:KL D:O', // Arizmendi
+    'C:MDK B:P D:LO', // Good Mong Kok
+    'B:MDP C:KL A:O', // Ramen Nagi
+    'S:MDK A:PL B:O', // Hog Island Oyster
+    'D:MPL C:KO B:D', // Kitchen Story
+  ],
+  movies: [
+    'S:MDP A:KL B:O', // Spirited Away
+    'A:MDK B:PL C:O', // Paddington 2
+    'S:MDO A:PKL', // The Princess Bride
+    'A:MDP B:K C:LO', // Ratatouille
+    'B:MDK A:PL C:O', // Up
+    'A:MDO B:PK C:L', // Inside Out
+    'C:MLO B:KD D:P', // Mamma Mia!
+    'B:MDP A:K C:LO', // The Grand Budapest Hotel
+  ],
+};
+
+function parseDemoVotes(spec) {
+  const votes = [];
+  spec.split(' ').forEach((group) => {
+    if (!group) return;
+    const m = /^([SABCD]):(.+)$/.exec(group);
+    if (!m) return;
+    m[2].split('').forEach((k) => {
+      const username = DEMO_VOTERS[k];
+      if (username) votes.push({ username, tier: m[1] });
+    });
+  });
+  return votes;
+}
+
+async function seedStagingDemo() {
+  const base = new Date('2026-10-01T12:00:00.000Z');
+
+  await pool.query(
+    `INSERT INTO lists (id, title, created_by, created_by_name, is_demo, created_at)
+     VALUES (900001, 'Staging demo: Bay Area restaurants', 'staging-demo-maya', 'staging-demo-maya', true, $1),
+            (900002, 'Staging demo: Movies for movie night', 'staging-demo-maya', 'staging-demo-maya', true, $2)
+     ON CONFLICT (id) DO NOTHING`,
+    [base, new Date(base.getTime() + 3600_000)]
+  );
+
+  const seedItems = async (listId, startId, names) => {
+    for (let i = 0; i < names.length; i++) {
+      await pool.query(
+        `INSERT INTO items (id, list_id, name, added_by, added_by_name, created_at)
+         VALUES ($1, $2, $3, 'staging-demo-maya', 'staging-demo-maya', $4)
+         ON CONFLICT (id) DO NOTHING`,
+        [startId + i, listId, names[i], new Date(base.getTime() + (i + 2) * 600_000)]
+      );
+    }
+  };
+  await seedItems(900001, 900101, DEMO_RESTAURANTS);
+  await seedItems(900002, 900201, DEMO_MOVIES);
+
+  const seedVotes = async (startId, specs) => {
+    for (let i = 0; i < specs.length; i++) {
+      const votes = parseDemoVotes(specs[i]);
+      for (let v = 0; v < votes.length; v++) {
+        await pool.query(
+          `INSERT INTO placements (item_id, user_id, username, tier, placed_at)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (item_id, user_id) DO NOTHING`,
+          [startId + i, votes[v].username, votes[v].username, votes[v].tier,
+            new Date(base.getTime() + (i * 6 + v + 20) * 600_000)]
+        );
+      }
+    }
+  };
+  await seedVotes(900101, DEMO_VOTES.restaurants);
+  await seedVotes(900201, DEMO_VOTES.movies);
+}
+
+// The viewing account's own demo votes: written once per account, on its
+// first ?demo=1 request in staging. 11 of the 18 restaurants, spread over
+// all five tiers, so the viewer's ladder is full and differs from the
+// crowd's in places. A reload changes nothing, and what the viewer did
+// afterwards stays.
+const VIEWER_DEMO_PLACEMENTS = [
+  // S
+  { name: 'Tartine Bakery', tier: 'S' },
+  { name: 'La Taqueria', tier: 'S' },
+  // A
+  { name: 'Burma Superstar', tier: 'A' },
+  { name: 'Swan Oyster', tier: 'A' },
+  { name: 'Kin Khao', tier: 'A' },
+  // B
+  { name: 'Zuni Café', tier: 'B' },
+  { name: 'Souvla', tier: 'B' },
+  { name: "Mitchell's Ice Cream", tier: 'B' },
+  // C
+  { name: 'Super Duper', tier: 'C' },
+  { name: 'Kitchen Story', tier: 'C' },
+  // D
+  { name: 'House of Prime Rib', tier: 'D' },
+];
+
+async function seedDemoViewer(req) {
+  const inserted = await pool.query(
+    `INSERT INTO demo_viewers (user_id, seeded_at)
+     VALUES ($1, $2)
+     ON CONFLICT (user_id) DO NOTHING
+     RETURNING user_id`,
+    [req.user.id, req.now]
+  );
+  if (inserted.rowCount === 0) return; // already seeded: leave later edits alone
+  for (let i = 0; i < VIEWER_DEMO_PLACEMENTS.length; i++) {
+    const p = VIEWER_DEMO_PLACEMENTS[i];
+    await pool.query(
+      `INSERT INTO placements (item_id, user_id, username, tier, placed_at)
+       SELECT id, $1, $2, $3, $4 FROM items WHERE id >= 900101 AND id < 900119 AND name = $5
+       ON CONFLICT (item_id, user_id) DO NOTHING`,
+      [req.user.id, req.user.username, p.tier, new Date(req.now.getTime() + i * 60_000), p.name]
+    );
+  }
+}
+
+// The demo gate: demo rows exist only in staging, and are touched (read or
+// written) only when the request itself carries ?demo=1.
+function demoAllowed(req) {
+  return IS_STAGING && req.query.demo === '1';
+}
+
+// ── API ────────────────────────────────────────────────────────────────────
+// Reads work for a signed-in member or a guest; writes need an account
+// (the auth middleware above answers guests 401 account_required). Reads
+// use `req.user ? req.user.id : null`; GET routes must not assume req.user.
+
+app.get('/api/lists', async (req, res) => {
+  try {
+    const withDemo = demoAllowed(req);
+    // The viewer's demo votes are written once, here, behind the same gate.
+    if (withDemo && req.user) await seedDemoViewer(req);
+
+    const { rows } = await pool.query(
+      `SELECT l.id, l.title, l.created_by, l.created_by_name, l.is_demo, l.created_at,
+              (SELECT count(*) FROM items i WHERE i.list_id = l.id)::int AS item_count,
+              (SELECT count(DISTINCT p.username) FROM placements p
+                 JOIN items i2 ON i2.id = p.item_id WHERE i2.list_id = l.id)::int AS voter_count,
+              GREATEST(l.created_at,
+                       (SELECT max(i.created_at) FROM items i WHERE i.list_id = l.id),
+                       (SELECT max(p.placed_at) FROM placements p
+                          JOIN items i3 ON i3.id = p.item_id WHERE i3.list_id = l.id))
+                AS last_activity
+       FROM lists l
+       ${withDemo ? '' : 'WHERE NOT l.is_demo'}
+       ORDER BY l.id DESC`
+    );
+    const lists = rows.filter((l) => !l.is_demo || withDemo);
+    // Demo lists first during a demo view, then by last activity.
+    lists.sort((a, b) => {
+      if (withDemo && a.is_demo !== b.is_demo) return a.is_demo ? -1 : 1;
+      return new Date(b.last_activity) - new Date(a.last_activity);
+    });
+    res.json({ lists });
+  } catch (err) {
+    console.warn('GET /api/lists failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/lists', async (req, res) => {
+  const title = typeof req.body.title === 'string' ? req.body.title.replace(/\s+/g, ' ').trim() : '';
+  if (title.length < 1 || title.length > 60) {
+    return res.status(400).json({ error: 'bad_title' });
+  }
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO lists (title, created_by, created_by_name, is_demo, created_at)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id, title, is_demo, created_at`,
+      [title, req.user.id, req.user.username, demoAllowed(req), req.now]
+    );
+    res.status(201).json({ list: rows[0] });
+  } catch (err) {
+    console.warn('POST /api/lists failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Look up one list, applying the demo gate; 404 when missing or gated.
+async function loadList(req, res) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  const { rows } = await pool.query(
+    `SELECT id, title, created_by, created_by_name, is_demo, created_at
+     FROM lists WHERE id = $1`, [id]
+  );
+  const list = rows[0];
+  if (!list || (list.is_demo && !demoAllowed(req))) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  return list;
+}
+
+// Look up one item, applying the demo gate through its list.
+async function loadItem(req, res) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  const { rows } = await pool.query(
+    `SELECT i.id, i.list_id, i.name, i.added_by, i.added_by_name, i.created_at,
+            l.is_demo
+     FROM items i JOIN lists l ON l.id = i.list_id WHERE i.id = $1`, [id]
+  );
+  const item = rows[0];
+  if (!item || (item.is_demo && !demoAllowed(req))) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  return item;
+}
+
+app.get('/api/lists/:id', async (req, res) => {
+  try {
+    const list = await loadList(req, res);
+    if (!list) return;
+    const { rows } = await pool.query(
+      `SELECT i.id, i.name, i.added_by, i.added_by_name, i.created_at,
+              p.user_id, p.username, p.tier, p.placed_at
+       FROM items i
+       LEFT JOIN placements p ON p.item_id = i.id
+       WHERE i.list_id = $1
+       ORDER BY i.created_at ASC, i.id ASC`, [list.id]
+    );
+    const items = [];
+    const byId = new Map();
+    for (const r of rows) {
+      let item = byId.get(r.id);
+      if (!item) {
+        item = { id: r.id, name: r.name, added_by: r.added_by, added_by_name: r.added_by_name,
+          created_at: r.created_at, votes: [] };
+        byId.set(r.id, item);
+        items.push(item);
+      }
+      if (r.user_id !== null) {
+        item.votes.push({ user_id: r.user_id, username: r.username, tier: r.tier, placed_at: r.placed_at });
+      }
+    }
+    res.json({
+      list,
+      viewerId: req.user ? req.user.id : null,
+      items,
+    });
+  } catch (err) {
+    console.warn('GET /api/lists/:id failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/lists/:id/items', async (req, res) => {
+  const name = cleanItemName(req.body && req.body.name);
+  if (!name) return res.status(400).json({ error: 'bad_name' });
+  try {
+    const list = await loadList(req, res);
+    if (!list) return;
+    const dup = await pool.query(
+      `SELECT id FROM items WHERE list_id = $1 AND lower(name) = lower($2)`, [list.id, name]
+    );
+    if (dup.rowCount > 0) return res.status(409).json({ error: 'duplicate' });
+    const { rows } = await pool.query(
+      `INSERT INTO items (list_id, name, added_by, added_by_name, created_at)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, added_by, added_by_name, created_at`,
+      [list.id, name, req.user.id, req.user.username, req.now]
+    );
+    res.status(201).json({ item: { ...rows[0], votes: [] } });
+  } catch (err) {
+    console.warn('POST /api/lists/:id/items failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/items/:id', async (req, res) => {
+  try {
+    const item = await loadItem(req, res);
+    if (!item) return;
+    if (item.added_by !== req.user.id) return res.status(403).json({ error: 'forbidden' });
+    await pool.query(`DELETE FROM items WHERE id = $1`, [item.id]); // votes go with it (cascade)
+    res.json({ ok: true });
+  } catch (err) {
+    console.warn('DELETE /api/items/:id failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.put('/api/items/:id/placement', async (req, res) => {
+  const tier = req.body && req.body.tier;
+  if (!TIERS.includes(tier)) return res.status(400).json({ error: 'bad_tier' });
+  try {
+    const item = await loadItem(req, res);
+    if (!item) return;
+    await pool.query(
+      `INSERT INTO placements (item_id, user_id, username, tier, placed_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (item_id, user_id)
+       DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username, placed_at = EXCLUDED.placed_at`,
+      [item.id, req.user.id, req.user.username, tier, req.now]
+    );
+    res.json({ ok: true, tier });
+  } catch (err) {
+    console.warn('PUT /api/items/:id/placement failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/items/:id/placement', async (req, res) => {
+  try {
+    const item = await loadItem(req, res);
+    if (!item) return;
+    await pool.query(`DELETE FROM placements WHERE item_id = $1 AND user_id = $2`,
+      [item.id, req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.warn('DELETE /api/items/:id/placement failed: ' + err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +612,31 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // Schema first, then the staging seed: nothing may listen before the
+  // tables exist and the demo data is in place.
+  await ensureSchema();
+  if (IS_STAGING) await seedStagingDemo();
+
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop accepting, let in-flight requests finish (3 s at most), close the
+  // pool and exit — so a redeploy never cuts a request mid-write.
+  let closing = false;
+  const shutdown = () => {
+    if (closing) return;
+    closing = true;
+    server.close(() => {
+      pool.end().then(() => process.exit(0), () => process.exit(0));
+    });
+    setTimeout(() => {
+      console.warn('shutdown drain timed out, exiting');
+      pool.end().finally(() => process.exit(0));
+    }, 3000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

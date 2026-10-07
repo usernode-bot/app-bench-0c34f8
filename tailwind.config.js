@@ -55,13 +55,24 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The five tier colours, the subject's own: S red through D green.
+        'tier-s': token('tier-s'),
+        'tier-a': token('tier-a'),
+        'tier-b': token('tier-b'),
+        'tier-c': token('tier-c'),
+        'tier-d': token('tier-d'),
+      },
+      // The tier letters and the list name use the system's rounded face
+      // (SF Pro Rounded on Apple devices), falling back to the system face.
+      fontFamily: {
+        rounded: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
-        small: ['0.875rem', { lineHeight: '1.25rem' }],
+        small: ['0.8125rem', { lineHeight: '1.125rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '800' }],
       },
     },
   },

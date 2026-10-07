@@ -1,27 +1,43 @@
 # Tier List
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Rank anything with your group, from Bay Area restaurants to movie night
+picks. Anyone can create a list and add items to it; everyone drags each
+item into their own S to D tiers, and the crowd's ranking sits beside
+yours. Open any item to see exactly who put it where.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **Lists** — one per topic ("Bay Area restaurants", "Movies for movie
+  night"). The name at the top is a button: tap it to switch lists or start
+  a new one.
+- **Your tiers** — the ladder runs S (red) through D (green). Every item
+  starts in the "Not ranked yet" tray; drag it into a row to rank it, drag
+  it again to change your mind, or drag it back to unrank it. Everything a
+  drag does can also be done by tapping an item and using the tier buttons.
+- **Crowd** — the same ladder showing the tier most people picked for each
+  item, with your own choice beside it.
+- **Who put it where** — every item opens to its votes by name, tier by
+  tier.
+- Other people's votes appear every 20 seconds, when you come back to the
+  app, and on pull to refresh.
 
-## Replacing the template
+## Try it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+The staging preview opens with `?demo=1` on a ready-made demo: two fake
+lists with votes from made-up people, and 11 restaurants already ranked by
+you, so the ladder is full and differs from the crowd's in places. Without
+the demo, a fresh app opens on "Start your first tier list".
 
-Once the real app exists, rewrite this README to describe it.
+## Plumbing
+
+- **Sign-in** — the server verifies the platform-issued user token (an
+  RS256 JWT) on every request, so the app already knows who is using it.
+  Writes need an account; guests can look around read-only.
+- **Database** — the app's own Postgres: `lists`, `items`, `placements`
+  (one vote per person per item) and `demo_viewers` for the staging demo.
+- **Styling** — Tailwind CSS, precompiled by `npm run build` during image
+  creation, in a light and a dark look that follow the viewer's Homeroom
+  theme. The design kit lives in `styles/tailwind-input.css`; the app's
+  look is written down in `CLAUDE.md` under "## Design".
+- **Tests** — `npm test` runs the crowd-tally unit tests;
+  `dapp.json`'s `tests` run as browser checks on every proposal.

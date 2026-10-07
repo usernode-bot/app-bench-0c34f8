@@ -97,22 +97,37 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for a Homeroom group: separate lists per topic
+(restaurants, movies), anyone adds items, everyone drags each item into
+their own S to D tiers, and every item opens to show the crowd's tally and
+who voted where, by name. The crowd's tier is a simple tally (see
+"App-specific conventions"), not a weighted score.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by its first version. Every later change follows it,
+and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** cool grey neutrals (ground, surface, raised, line) so the
+  tier colours stay the loudest thing on screen; one cobalt ink accent
+  (`accent`, the only filled button colour, and the focus ring) that the
+  ladder never uses, so an action reads as ink, not as a tier. The five
+  tier colours are the subject's own, light pastel bands and dark deep
+  bands: `tier-s` warm red, `tier-a` orange, `tier-b` yellow, `tier-c`
+  lime green, `tier-d` green.
+- **Signature element:** the tier ladder. Five stacked rows, each a solid
+  label cell on the left holding the tier letter in large heavy rounded
+  type on the tier's full colour, beside a row area tinted with the same
+  colour at about a third strength. The same five colours, as 22 px letter
+  squares (`mark`), mark the crowd's tier or yours beside every item and
+  back the tally bars in an opened item, so one colour always means one
+  tier. Text on a tier colour is always `text-fg`, never white.
+- **Type scale:** `text-title` (28, weight 800, rounded face), `text-heading`
+  (20), `text-body` (16), `text-small` (13/18). Tier letters, the list name
+  and an opened item's name use `font-rounded` (the system's rounded face,
+  SF Pro Rounded on Apple devices); everything else is the system face.
+- Both looks follow the viewer's Homeroom theme and switch live; there is
+  no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +152,21 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Tier letters are the fixed set S, A, B, C, D on every list; lists do not
+  get custom tier names.
+- The crowd's tier is a plain tally of who placed each item where, no
+  weighted scoring. Ties go to the tier nearest the median vote, then to
+  the higher tier. That logic lives only in `public/crowd.js`, shared by
+  the page (`window.TierCrowd`), the server and the tests — never
+  reimplement it.
+- Demo rows (lists, items, votes from the made-up `staging-demo-*` people)
+  are `is_demo = true` / seeded behind `IS_STAGING`, and are read or
+  written only on requests carrying `?demo=1` in staging. The viewer's own
+  demo votes are written once per account (tracked in `demo_viewers`);
+  edits the viewer makes afterwards stay.
+- A vote is one row per person per item (`placements`); "not ranked" means
+  no row. Within a tier, a person's items keep the order they were placed;
+  no finer order is kept.
+- Item names are text only, trimmed and whitespace-collapsed, 1 to 60
+  characters, unique per list ignoring case and spacing.
+- Timestamps come from `req.now`, never `NOW()`.

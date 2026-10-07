@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "ladder.demo",
+      "name": "Demo list shows your tier ladder",
+      "path": "/?demo=1",
+      "expectSelector": "[data-drop=\"S\"] .chip",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**", "tailwind.config.js"]
+    },
+    {
+      "name": "Demo list shows the Not ranked tray",
+      "path": "/?demo=1",
+      "expectText": "Not ranked yet"
+    },
+    {
+      "name": "Fresh app shows the first-list empty state",
+      "path": "/",
+      "expectText": "Start your first tier list"
+    }
+  ]
 }
