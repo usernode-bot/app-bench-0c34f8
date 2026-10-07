@@ -97,27 +97,37 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for a group of friends: anyone adds a thing to rank
+(a Bay Area restaurant, say), everyone drags it into their own S to F
+tiers, and a Crowd tab shows the tier most people picked. Tapping a thing
+shows who voted and what they chose. One shared board; nothing here is
+per-list.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by the first real version; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent is tomato red (deep tomato in the light look, a
+  brighter tomato in the dark), used only for the Add button and the
+  active drop target. The neutrals are the kit's own warm greys, kept on
+  purpose because they let the tier colours carry the screen. The second
+  colour family is the six tier colours: coral S, orange A, butter-yellow
+  B, lime C, sky-teal D and stone F, each with dark `on-tier` lettering,
+  slightly deeper in the dark look.
+- **Signature element:** the tier board itself — six coloured bands from
+  S down to F, each led by a big rounded tier letter, with pill-shaped
+  item chips that move between bands. The band under a drag lights up
+  with a tomato outline.
+- **Type scale:** `text-title`, `text-heading`, `text-body`,
+  `text-small`. The title and the tier letters use `font-display`
+  (ui-rounded, heavy weight); everything else uses `font-sans`.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
 (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+`card`, `section-label`, `skeleton`, `state-empty`, `state-error`,
+`chip`, `tier-row`).
 Re-theme by changing the token values there, keeping every text pair at
 4.5:1 or more in both looks.
 
@@ -137,6 +147,21 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Tables, created idempotently in `server.js`: `items` (public), `votes`
+  (public, one vote per person per thing), `item_reports`
+  (`staging:private` — private tables may reference public ones, never
+  the reverse).
+- Tiers are fixed: S, A, B, C, D, F. The Crowd tie goes to the higher tier.
+- A thing hides for everyone once 3 different people have reported it;
+  hidden rows are never returned and can't be voted on. A thing also
+  disappears for its reporter alone immediately.
+- Item names: 1–60 characters, unique ignoring capitals and repeated
+  whitespace (`lower(name)` unique index, 409 on collision).
+- Nobody edits or deletes a thing, the person who added it included;
+  reporting is the only removal.
+- Staging seeds seven fake "Staging demo …" Bay Area spots (ids 900001+,
+  so the serial sequence never collides) with votes from three fake
+  people; production starts empty.
+- Words: "thing" (an item), "tier" (a row), "My tiers" / "Crowd" (the
+  tabs), "Not ranked yet", "Nobody has ranked yet", "Your tier",
+  "Unrank", "How everyone voted", "Added by", "Report".

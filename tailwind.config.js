@@ -55,6 +55,21 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The six tier bands, S down to F — the board's second colour family.
+        // Dark lettering (on-tier) sits on every one of them, both looks.
+        'tier-s': token('tier-s'),
+        'tier-a': token('tier-a'),
+        'tier-b': token('tier-b'),
+        'tier-c': token('tier-c'),
+        'tier-d': token('tier-d'),
+        'tier-f': token('tier-f'),
+        'on-tier': token('on-tier'),
+      },
+      // The title and the tier letters use the system's rounded face;
+      // everything else the plain system face.
+      fontFamily: {
+        display: ['ui-rounded', 'system-ui', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

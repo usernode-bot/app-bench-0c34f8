@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "board.default",
+      "name": "Tier board renders with staging spots",
+      "path": "/",
+      "expectSelector": "[data-tier-row] [data-item-chip]",
+      "expectText": "Staging demo taco truck",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**", "tailwind.config.js"]
+    },
+    {
+      "name": "Not ranked yet tray shows",
+      "path": "/",
+      "expectText": "Not ranked yet"
+    }
+  ]
 }

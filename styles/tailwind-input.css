@@ -29,30 +29,47 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 250 249;    /* the page: warm near-white */
     --surface: 255 255 255;   /* lists, cards, fields */
     --raised: 245 245 244;    /* hovers, badges */
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 200 54 36;      /* deep tomato: Add button + drop target only */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 200 54 36;       /* the keyboard focus ring */
+    /* The six tier bands, S down to F, each taking the dark on-tier
+       lettering. Slightly deeper than their dark-look values so chips read
+       against the white board. */
+    --tier-s: 255 127 102;    /* coral */
+    --tier-a: 255 168 92;     /* orange */
+    --tier-b: 255 214 102;    /* butter yellow */
+    --tier-c: 196 222 112;    /* lime */
+    --tier-d: 125 200 214;    /* sky-teal */
+    --tier-f: 196 186 178;    /* stone */
+    --on-tier: 28 25 23;      /* lettering on every tier colour */
   }
   .dark {
-    --ground: 12 10 9;
+    --ground: 20 17 15;       /* warm near-black */
     --surface: 28 25 23;
     --raised: 41 37 36;
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 255 112 87;     /* brighter tomato, readable on near-black */
+    --on-accent: 40 10 6;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 255 140 120;
+    --tier-s: 240 112 88;
+    --tier-a: 236 150 74;
+    --tier-b: 230 192 84;
+    --tier-c: 172 200 92;
+    --tier-d: 104 180 196;
+    --tier-f: 170 160 152;
+    --on-tier: 28 25 23;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -111,6 +128,22 @@
     @apply mb-2 px-1 text-small font-medium text-muted;
   }
 
+  /* The tier board: one .tier-row per band, chips inside it. .is-target is
+     the active drop target the drag lights up (2 px tomato outline). */
+  .tier-row {
+    @apply flex border-t border-line first:border-t-0;
+  }
+  .tier-row.is-target {
+    @apply outline-2 outline-accent -outline-offset-2;
+  }
+  .chip {
+    @apply inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-ground
+      px-3 text-small font-medium text-fg;
+  }
+  .chip em {
+    @apply font-normal not-italic text-muted;
+  }
+
   /* The states of anything that loads data. Show exactly one at a time:
      - loading: .skeleton shapes where the data will be, never a blank;
      - empty, only when the load WORKED and found nothing: a title, one
@@ -125,4 +158,28 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+}
+
+/* ── Native UI kit theming ────────────────────────────────────────────────
+ * The hosted native.css sets its own --un-* values on unlayered :root and
+ * .dark, and unlayered rules beat anything in @layer (it also loads after
+ * this stylesheet). Overriding here with html-qualified selectors wins the
+ * cascade, so the kit's sheets, alerts and toasts take this app's accent
+ * and surfaces instead of platform violet-tinted chrome.
+ */
+html:root {
+  --un-accent: rgb(var(--accent));
+  --un-accent-contrast: rgb(var(--on-accent));
+  --un-sheet-bg: rgb(var(--surface));
+  --un-group-bg: rgb(var(--surface));
+  --un-hairline: rgb(var(--line));
+  --un-muted: rgb(var(--muted));
+}
+html.dark {
+  --un-accent: rgb(var(--accent));
+  --un-accent-contrast: rgb(var(--on-accent));
+  --un-sheet-bg: rgb(var(--surface));
+  --un-group-bg: rgb(var(--surface));
+  --un-hairline: rgb(var(--line));
+  --un-muted: rgb(var(--muted));
 }

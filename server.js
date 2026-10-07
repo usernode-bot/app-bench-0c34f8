@@ -37,6 +37,10 @@ const GUEST_PUBLIC_KEY = (process.env.USERNODE_GUEST_JWT_PUBLIC_KEY || '')
 // Everything else requires a valid platform-issued JWT.
 const PUBLIC_API_PATHS = new Set(['/health']);
 
+// Set once the shutdown handler starts draining; /health answers 503 from
+// then on so readiness polling sees the container leaving rotation.
+let shuttingDown = false;
+
 app.use(express.json());
 
 // The platform's three centrally hosted files — the bridge, the native UI
@@ -145,7 +149,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting_down' });
+  res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +160,192 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// ── Tier List API ─────────────────────────────────────────────────────────
+// One shared board. items are the things to rank, votes are one per person
+// per thing (upserted), item_reports hide a thing once 3 different people
+// have reported it. Hidden rows are never returned anywhere.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+const TIER_RANK = { S: 0, A: 1, B: 2, C: 3, D: 4, F: 5 };
+
+// The tier most people picked; a tie goes to the higher tier (S beats A).
+function crowdTierOf(votes) {
+  const counts = new Map();
+  for (const v of votes) counts.set(v.tier, (counts.get(v.tier) || 0) + 1);
+  let best = null;
+  for (const t of TIERS) {
+    if (counts.has(t) && (best === null || counts.get(t) > counts.get(best))) best = t;
+  }
+  return best;
+}
+
+function positiveInt(raw) {
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+// Sort: best tier first, then username.
+function byTierThenName(a, b) {
+  return (TIER_RANK[a.tier] - TIER_RANK[b.tier]) || a.username.localeCompare(b.username);
+}
+
+app.get('/api/board', async (req, res) => {
+  const viewerId = req.user ? req.user.id : null;
+  try {
+    // Guests may read; `viewerId` stays null for them, so they get no
+    // myTier and nothing they "reported" (they can't) is filtered.
+    const params = viewerId !== null ? [viewerId] : [];
+    const notReportedByViewer = viewerId !== null
+      ? 'AND NOT EXISTS (SELECT 1 FROM item_reports r WHERE r.item_id = i.id AND r.user_id = $1)'
+      : '';
+    const items = await pool.query(
+      `SELECT id, name, created_by_username FROM items i
+       WHERE i.hidden_at IS NULL ${notReportedByViewer}
+       ORDER BY i.created_at, i.id`,
+      params
+    );
+    const ids = items.rows.map(r => r.id);
+    const votesByItem = new Map();
+    if (ids.length) {
+      const votes = await pool.query(
+        'SELECT item_id, user_id, username, tier FROM votes WHERE item_id = ANY($1::int[])',
+        [ids]
+      );
+      for (const v of votes.rows) {
+        if (!votesByItem.has(v.item_id)) votesByItem.set(v.item_id, []);
+        votesByItem.get(v.item_id).push(v);
+      }
+    }
+    res.json({
+      me: req.user ? { id: req.user.id, username: req.user.username } : null,
+      items: items.rows.map(r => {
+        const votes = (votesByItem.get(r.id) || []).sort(byTierThenName);
+        const mine = viewerId !== null ? votes.find(v => v.user_id === viewerId) : null;
+        return {
+          id: r.id,
+          name: r.name,
+          createdBy: r.created_by_username,
+          myTier: mine ? mine.tier : null,
+          crowdTier: crowdTierOf(votes),
+          voteCount: votes.length,
+          votes: votes.map(v => ({
+            username: v.username,
+            tier: v.tier,
+            isMe: viewerId !== null && v.user_id === viewerId,
+          })),
+        };
+      }),
+    });
+  } catch (err) {
+    console.error('GET /api/board failed: ' + err.message);
+    res.status(500).json({ error: 'board_failed' });
+  }
+});
+
+app.post('/api/items', async (req, res) => {
+  const raw = req.body && typeof req.body.name === 'string' ? req.body.name : '';
+  const name = raw.trim().replace(/\s+/g, ' ');
+  if (!name) return res.status(400).json({ error: 'name_required' });
+  if (name.length > 60) return res.status(400).json({ error: 'name_too_long' });
+  try {
+    const result = await pool.query(
+      `INSERT INTO items (name, created_by_id, created_by_username)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, created_by_username`,
+      [name, req.user.id, req.user.username]
+    );
+    const r = result.rows[0];
+    res.status(201).json({
+      id: r.id,
+      name: r.name,
+      createdBy: r.created_by_username,
+      myTier: null,
+      crowdTier: null,
+      voteCount: 0,
+      votes: [],
+    });
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'duplicate' });
+    console.error('POST /api/items failed: ' + err.message);
+    res.status(500).json({ error: 'item_failed' });
+  }
+});
+
+app.put('/api/items/:id/vote', async (req, res) => {
+  const id = positiveInt(req.params.id);
+  if (id === null) return res.status(400).json({ error: 'bad_id' });
+  const tier = req.body ? req.body.tier : undefined;
+  if (!TIERS.includes(tier)) return res.status(400).json({ error: 'bad_tier' });
+  try {
+    const found = await pool.query(
+      'SELECT id FROM items WHERE id = $1 AND hidden_at IS NULL',
+      [id]
+    );
+    if (!found.rowCount) return res.status(404).json({ error: 'not_found' });
+    // One vote per person per thing; ranking again replaces it (and the
+    // stored username, so a rename shows up on their next vote).
+    await pool.query(
+      `INSERT INTO votes (item_id, user_id, username, tier)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (item_id, user_id)
+       DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username, updated_at = now()`,
+      [id, req.user.id, req.user.username, tier]
+    );
+    res.status(204).end();
+  } catch (err) {
+    console.error('PUT /api/items/:id/vote failed: ' + err.message);
+    res.status(500).json({ error: 'vote_failed' });
+  }
+});
+
+app.delete('/api/items/:id/vote', async (req, res) => {
+  const id = positiveInt(req.params.id);
+  if (id === null) return res.status(400).json({ error: 'bad_id' });
+  try {
+    await pool.query('DELETE FROM votes WHERE item_id = $1 AND user_id = $2', [id, req.user.id]);
+    res.status(204).end();
+  } catch (err) {
+    console.error('DELETE /api/items/:id/vote failed: ' + err.message);
+    res.status(500).json({ error: 'vote_failed' });
+  }
+});
+
+app.post('/api/items/:id/report', async (req, res) => {
+  const id = positiveInt(req.params.id);
+  if (id === null) return res.status(400).json({ error: 'bad_id' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const found = await client.query(
+      'SELECT id FROM items WHERE id = $1 AND hidden_at IS NULL FOR UPDATE',
+      [id]
+    );
+    if (!found.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'not_found' });
+    }
+    await client.query(
+      'INSERT INTO item_reports (item_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [id, req.user.id]
+    );
+    const count = await client.query(
+      'SELECT count(*)::int AS n FROM item_reports WHERE item_id = $1',
+      [id]
+    );
+    if (count.rows[0].n >= 3) {
+      await client.query('UPDATE items SET hidden_at = now() WHERE id = $1', [id]);
+    }
+    await client.query('COMMIT');
+    res.status(204).end();
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('POST /api/items/:id/report failed: ' + err.message);
+    res.status(500).json({ error: 'report_failed' });
+  } finally {
+    client.release();
+  }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +384,129 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
-  // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
-  server.keepAliveTimeout = 75_000;
+// ── Schema, applied idempotently on boot ──────────────────────────────────
+// `items` and `votes` are public (board content every viewer already sees).
+// `item_reports` is staging:private — who reported what is one person's
+// moderation action, not board content. Private tables may reference public
+// ones, never the reverse.
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS items (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      created_by_id text NOT NULL,
+      created_by_username text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      hidden_at timestamptz
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS items_live_name_key
+      ON items (lower(name)) WHERE hidden_at IS NULL;
+    CREATE TABLE IF NOT EXISTS votes (
+      item_id int REFERENCES items ON DELETE CASCADE,
+      user_id text,
+      username text NOT NULL,
+      tier char(1) NOT NULL CHECK (tier IN ('S','A','B','C','D','F')),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );
+    CREATE TABLE IF NOT EXISTS item_reports (
+      item_id int REFERENCES items ON DELETE CASCADE,
+      user_id text,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );
+    COMMENT ON TABLE item_reports IS 'staging:private';
+  `);
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Staging previews start from an empty database; seed seven obviously fake
+// Bay Area spots and votes from three made-up people so the populated board
+// can be seen. Production gets no seed. Ids sit far above the serial
+// sequence so real inserts never collide.
+async function seedStaging() {
+  if (!IS_STAGING) return;
+  const items = [
+    [900001, 'Staging demo taco truck'],
+    [900002, 'Staging demo ramen bar'],
+    [900003, 'Staging demo dim sum spot'],
+    [900004, 'Staging demo burrito place'],
+    [900005, 'Staging demo pizza slice shop'],
+    [900006, 'Staging demo boba stand'],
+    [900007, 'Staging demo bakery'],
+  ];
+  for (const [id, name] of items) {
+    await pool.query(
+      `INSERT INTO items (id, name, created_by_id, created_by_username)
+       VALUES ($1, $2, 'staging-demo-1', 'staging-demo-ana')
+       ON CONFLICT DO NOTHING`,
+      [id, name]
+    );
+  }
+  // Crowd should read: taco truck S, ramen bar A, dim sum B, boba stand B,
+  // burrito C, pizza slice F, bakery unvoted.
+  const votes = [
+    [900001, 'staging-demo-1', 'staging-demo-ana', 'S'],
+    [900001, 'staging-demo-2', 'staging-demo-ben', 'S'],
+    [900001, 'staging-demo-3', 'staging-demo-cy', 'A'],
+    [900002, 'staging-demo-1', 'staging-demo-ana', 'A'],
+    [900002, 'staging-demo-2', 'staging-demo-ben', 'A'],
+    [900002, 'staging-demo-3', 'staging-demo-cy', 'B'],
+    [900003, 'staging-demo-1', 'staging-demo-ana', 'B'],
+    [900003, 'staging-demo-2', 'staging-demo-ben', 'B'],
+    [900004, 'staging-demo-1', 'staging-demo-ana', 'C'],
+    [900004, 'staging-demo-2', 'staging-demo-ben', 'C'],
+    [900005, 'staging-demo-1', 'staging-demo-ana', 'F'],
+    [900005, 'staging-demo-2', 'staging-demo-ben', 'F'],
+    [900006, 'staging-demo-1', 'staging-demo-ana', 'B'],
+    [900006, 'staging-demo-2', 'staging-demo-ben', 'B'],
+  ];
+  for (const [itemId, userId, username, tier] of votes) {
+    await pool.query(
+      `INSERT INTO votes (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)
+       ON CONFLICT DO NOTHING`,
+      [itemId, userId, username, tier]
+    );
+  }
+}
+
+// ── Boot and graceful shutdown ────────────────────────────────────────────
+// Schema and seed finish before the app accepts traffic.
+
+let server = null;
+
+ensureSchema()
+  .then(seedStaging)
+  .then(() => new Promise((resolve) => {
+    server = app.listen(port, () => {
+      console.log(`Listening on :${port}`);
+      resolve();
+    });
+    // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
+    server.keepAliveTimeout = 75_000;
+  }))
+  .catch(err => { console.error(err); process.exit(1); });
+
+const DRAIN_MS = 3000;
+
+async function shutdown(signal) {
+  if (shuttingDown) return; // idempotent: SIGTERM then SIGINT must not double-run
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  if (server) {
+    server.close(() => {});
+    if (server.closeIdleConnections) server.closeIdleConnections();
+    const t = setTimeout(() => {
+      if (server.closeAllConnections) server.closeAllConnections();
+    }, DRAIN_MS);
+    t.unref();
+  }
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed', e.message);
+  }
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
