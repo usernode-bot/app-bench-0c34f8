@@ -43,6 +43,11 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      // A rounded system family: this is a friendly game played with
+      // friends, so the letters soften. No downloaded fonts.
+      fontFamily: {
+        sans: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

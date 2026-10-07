@@ -97,22 +97,31 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier board for a Homeroom group: anyone adds a thing to rank (a
+bay area restaurant, a film, anything — a name is enough) and everyone drags
+items into tiers from S to F. Each person keeps their own placement; the
+Crowd view averages everyone's placements into one shared ranking; tapping
+an item shows who placed it where. One placement per person per item, always
+changeable by dragging again.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** a warm pimento red as the single accent (`rgb(178 44 38)`
+  light, brightened to `rgb(235 105 84)` in the dark look, where text on it
+  turns deep maroon `rgb(46 12 8)`), on the kit's warm stone greys. The
+  focus ring follows the accent.
+- **Signature element:** the tier rows. Each of the six rows (S, A, B, C, D,
+  F) is led by a big square letter tile (`.tier-letter`) filled with the
+  accent red — the one loud thing on screen; everything around it is quiet.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  in a rounded system family (`ui-rounded`, SF Pro Rounded, then
+  `system-ui`, set in `tailwind.config.js`). Rounded letters suit a friendly
+  game played with friends.
+- **No fixed look:** light and dark follow the viewer's Homeroom theme and
+  switch live.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +146,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **Vocabulary:** an *item* is anything being ranked; the *To rank* pile
+  holds unplaced items; the *tier rows* are S, A, B, C, D, F; the views are
+  *My tiers* and *Crowd*; *Add item* adds one; a person's choice is their
+  *placement*; the item sheet's sections are *Your placement* and *How
+  friends placed it*. Reuse these words exactly.
+- Tiers are the classic set: S, A, B, C, D, F, stored as those letters. The
+  crowd average scores S=0 through F=5 and rounds half up to the later
+  letter.
+- Duplicate item names are allowed; ids and per-item sheets disambiguate.
+- Items are a name only (1 to 80 characters) and cannot be renamed or
+  deleted in this version.

@@ -2,5 +2,30 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Tier board renders",
+      "path": "/",
+      "expectText": "To rank"
+    },
+    {
+      "name": "Add item is present",
+      "path": "/",
+      "expectText": "Add item"
+    },
+    {
+      "name": "Crowd toggle is present",
+      "path": "/",
+      "expectText": "Crowd"
+    },
+    {
+      "id": "tier-board",
+      "name": "Tier board (visual)",
+      "path": "/",
+      "expectSelector": "#tier-board",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js"]
+    }
+  ]
 }

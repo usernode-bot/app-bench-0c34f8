@@ -145,7 +145,159 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'closing' });
+  res.json({ status: 'ok' });
+});
+
+// ── The tier board ────────────────────────────────────────────────────────
+// Two public tables: items are the things being ranked, placements are one
+// person's tier choice per item (the primary key enforces one each). Reads
+// work for guests, so neither route assumes req.user; the auth middleware
+// above already answers a guest's writes with 401 account_required.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+// The crowd's average treats the tiers as even steps, S = 0 through F = 5,
+// and rounds half up to the later letter (a 1.5 lands on B, not A).
+function crowdTier(avg) {
+  if (avg === null || avg === undefined) return null;
+  return TIERS[Math.min(Math.round(avg), TIERS.length - 1)];
+}
+
+const TIER_SCORE_SQL =
+  "AVG(CASE tier WHEN 'S' THEN 0 WHEN 'A' THEN 1 WHEN 'B' THEN 2 " +
+  "WHEN 'C' THEN 3 WHEN 'D' THEN 4 WHEN 'F' THEN 5 END)";
+
+function rowToItem(row) {
+  return {
+    // pg hands bigints back as text; the board's ids are plain numbers.
+    id: Number(row.id),
+    name: row.name,
+    added_by: row.added_by,
+    created_at: row.created_at,
+    mine: row.mine || null,
+    crowd: crowdTier(row.crowd_score),
+    votes: row.votes || 0,
+  };
+}
+
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS items (
+      id bigserial PRIMARY KEY,
+      name text NOT NULL,
+      added_by text NOT NULL,
+      created_at timestamptz NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS placements (
+      item_id bigint NOT NULL REFERENCES items(id),
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier text NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      updated_at timestamptz NOT NULL,
+      PRIMARY KEY (item_id, user_id)
+    );
+  `);
+}
+
+app.get('/api/items', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT i.id, i.name, i.added_by, i.created_at,
+              m.tier AS mine,
+              c.crowd_score,
+              c.votes
+         FROM items i
+         LEFT JOIN placements m
+           ON m.item_id = i.id AND m.user_id = $1
+         LEFT JOIN (
+           SELECT item_id, ${TIER_SCORE_SQL} AS crowd_score, COUNT(*)::int AS votes
+             FROM placements
+            GROUP BY item_id
+         ) c ON c.item_id = i.id
+        ORDER BY i.created_at, i.id`,
+      [req.user ? req.user.id : null]
+    );
+    res.json(rows.map(rowToItem));
+  } catch (err) {
+    console.error('GET /api/items failed: ' + err.message);
+    res.status(500).json({ error: 'Could not load the board.' });
+  }
+});
+
+app.post('/api/items', async (req, res) => {
+  const name = typeof (req.body && req.body.name) === 'string' ? req.body.name.trim() : '';
+  if (!name || name.length > 80) {
+    return res.status(400).json({ error: 'Name must be 1 to 80 characters.' });
+  }
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO items (name, added_by, created_at)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, added_by, created_at`,
+      [name, req.user.id, req.now]
+    );
+    res.status(201).json(rowToItem({ ...rows[0], mine: null, crowd_score: null, votes: 0 }));
+  } catch (err) {
+    console.error('POST /api/items failed: ' + err.message);
+    res.status(500).json({ error: 'Could not add the item.' });
+  }
+});
+
+app.put('/api/items/:id/placement', async (req, res) => {
+  const tier = req.body && req.body.tier;
+  if (!TIERS.includes(tier)) {
+    return res.status(400).json({ error: 'Tier must be one of S, A, B, C, D, F.' });
+  }
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(404).json({ error: 'Item not found.' });
+  }
+  try {
+    const found = await pool.query('SELECT id FROM items WHERE id = $1', [id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'Item not found.' });
+    // One placement per person per item: the primary key upserts, so a new
+    // drag replaces the earlier tier.
+    await pool.query(
+      `INSERT INTO placements (item_id, user_id, username, tier, updated_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (item_id, user_id)
+       DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username,
+                     updated_at = EXCLUDED.updated_at`,
+      [id, req.user.id, req.user.username || '', tier, req.now]
+    );
+    res.json({ item_id: id, mine: tier });
+  } catch (err) {
+    console.error('PUT /api/items/:id/placement failed: ' + err.message);
+    res.status(500).json({ error: 'Could not save the placement.' });
+  }
+});
+
+app.get('/api/items/:id/placements', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(404).json({ error: 'Item not found.' });
+  }
+  try {
+    const found = await pool.query('SELECT id FROM items WHERE id = $1', [id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'Item not found.' });
+    const { rows } = await pool.query(
+      `SELECT user_id, username, tier, updated_at
+         FROM placements
+        WHERE item_id = $1
+        ORDER BY updated_at, user_id`,
+      [id]
+    );
+    const avg = rows.length
+      ? rows.reduce((sum, r) => sum + TIERS.indexOf(r.tier), 0) / rows.length
+      : null;
+    res.json({ placements: rows, crowd: crowdTier(avg) });
+  } catch (err) {
+    console.error('GET /api/items/:id/placements failed: ' + err.message);
+    res.status(500).json({ error: 'Could not load the votes.' });
+  }
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -191,10 +343,103 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Staging seed ──────────────────────────────────────────────────────────
+// A fresh staging database would show an empty board, so seed eight obviously
+// fake bay area restaurants and a few placements attributed to fixed demo
+// users — never a real user, and never whoever opens the preview: their own
+// My tiers view starts empty, which is what production looks like.
+// Idempotent: explicit ids with ON CONFLICT DO NOTHING, so every boot is a
+// no-op once the rows exist.
+const SEED_ITEMS = [
+  'Fog City Burrito',
+  'Golden Gate Bagels',
+  'Sourdough Shack',
+  'Cable Car Coffee',
+  'Bay Bridge Bistro',
+  'Presidio Poke',
+  'Mission Melt',
+  'Berkeley Boba',
+];
+
+const SEED_PLACEMENTS = [
+  ['staging-demo-ada', { 1: 'S', 2: 'A', 3: 'B', 4: 'B', 7: 'C' }],
+  ['staging-demo-bruno', { 1: 'A', 2: 'A', 3: 'B', 4: 'A', 6: 'D', 7: 'C' }],
+  ['staging-demo-cleo', { 1: 'S', 2: 'B', 4: 'S', 5: 'C', 7: 'D' }],
+];
+
+async function seedStaging() {
+  const seededAt = new Date();
+  await pool.query('BEGIN');
+  try {
+    for (let i = 0; i < SEED_ITEMS.length; i++) {
+      await pool.query(
+        `INSERT INTO items (id, name, added_by, created_at)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (id) DO NOTHING`,
+        [i + 1, 'Staging demo: ' + SEED_ITEMS[i], 'staging-demo-requester', seededAt]
+      );
+    }
+    for (const [userId, tiers] of SEED_PLACEMENTS) {
+      for (const [itemId, tier] of Object.entries(tiers)) {
+        await pool.query(
+          `INSERT INTO placements (item_id, user_id, username, tier, updated_at)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (item_id, user_id) DO NOTHING`,
+          [Number(itemId), userId, userId, tier, seededAt]
+        );
+      }
+    }
+    // The seed inserts explicit ids; push the sequence past them so the next
+    // real item does not collide.
+    await pool.query(
+      `SELECT setval(pg_get_serial_sequence('items', 'id'),
+                     (SELECT COALESCE(MAX(id), 1) FROM items))`
+    );
+    await pool.query('COMMIT');
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    throw err;
+  }
+}
+
 async function start() {
+  await ensureSchema();
+  if (IS_STAGING) await seedStaging();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  return server;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// ── Graceful shutdown ─────────────────────────────────────────────────────
+// Containers are stopped and replaced on every deploy: stop accepting
+// connections, let in-flight requests finish under a hard deadline, close
+// the pool, exit. A repeat signal during the drain is a no-op.
+const DRAIN_MS = 3000;
+let shuttingDown = false;
+let currentServer = null;
+
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  if (currentServer) {
+    currentServer.close(() => {});
+    currentServer.closeIdleConnections?.();
+    const t = setTimeout(() => currentServer.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+  }
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed: ' + e.message);
+  }
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+start()
+  .then(server => { currentServer = server; })
+  .catch(err => { console.error(err); process.exit(1); });

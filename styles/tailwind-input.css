@@ -35,11 +35,11 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 178 44 38;      /* pimento red, the one accent */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 178 44 38;       /* the keyboard focus ring */
   }
   .dark {
     --ground: 12 10 9;
@@ -48,11 +48,11 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 235 105 84;     /* brighter red, so it still reads on dark */
+    --on-accent: 46 12 8;     /* deep maroon text on the brighter red */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 240 116 100;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -125,4 +125,57 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* The tier board's own parts. The letter tile is the app's signature
+     element: the one loud thing on screen, everything around it quiet. */
+  .tier-row {
+    @apply mb-2 flex items-start gap-3 rounded-xl border border-line bg-surface p-2.5;
+  }
+  .tier-row.drop-hint {
+    @apply border-accent bg-accent/5;
+  }
+  .tier-letter {
+    @apply flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-accent text-heading font-bold text-on-accent;
+  }
+  .row-chips {
+    @apply flex min-h-11 flex-1 flex-wrap content-start gap-2;
+  }
+  .chip {
+    @apply inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-body text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  /* The pile is a drop target too: a transparent dashed edge that lights up
+     on hover, so the hint costs no layout. */
+  #pool {
+    @apply rounded-xl border border-dashed border-transparent;
+  }
+  #pool.drop-hint {
+    @apply border-accent bg-accent/5;
+  }
+  .chip-ghost {
+    @apply pointer-events-none fixed z-50 opacity-90;
+  }
+  /* Only your own tiers take drops, so only there do chips opt out of the
+     page's touch scrolling (a drag must not scroll the board instead). */
+  .can-drag .chip {
+    @apply touch-none;
+  }
+
+  /* The My tiers / Crowd toggle: one group, the active segment in the
+     accent, the other quiet. */
+  .seg {
+    @apply min-h-11 flex-1 rounded-lg px-3 text-body font-medium text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus
+      hover:bg-raised;
+  }
+  .seg[aria-pressed='true'] {
+    @apply bg-accent text-on-accent hover:bg-accent;
+  }
+}
+/* The native UI kit's own accent, pointed at this app's tokens. Unlayered
+   (outside @layer above) so it wins over the kit's defaults, and html:root
+   so it wins in both looks — it re-reads --accent, which .dark flips. */
+html:root {
+  --un-accent: rgb(var(--accent));
+  --un-accent-contrast: rgb(var(--on-accent));
 }
