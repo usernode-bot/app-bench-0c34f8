@@ -2,5 +2,20 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.unread-list",
+      "name": "Unread list shows demo posts",
+      "path": "/?demo=1",
+      "expectSelector": ".post-row",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "tailwind.config.js", "routes/**", "lib/**", "server.js"]
+    },
+    {
+      "name": "Reader with no feeds offers Add feed",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

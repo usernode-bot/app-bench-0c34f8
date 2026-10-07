@@ -97,22 +97,39 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style RSS reader: you add RSS or Atom feeds, see every unread
+post from all of them in one newest-first list, tap a post for a preview
+(the text the feed itself provides), and open the full article in the
+browser. Feeds and reading state belong to one person — the `feeds` and
+`posts` tables are `staging:private`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: deep petrol teal (light `14 94 102`, dark sea-glass
+  `110 200 204`) — the ink of a printed masthead; neutrals: warm greys, an
+  off-white page with white surfaces in the light look, charcoal with
+  slightly lighter surfaces in the dark. Three muted extra tones (ochre
+  `tone-2`, plum `tone-3`, slate blue `tone-4`) exist only to tell feeds
+  apart in their dots. Danger is red; focus is the accent.
+- **Signature element:** the feed dot — a small round dot in one of four
+  tones carrying the feed's first letter (taken after a "Label: name"
+  prefix when there is one). Feeds take tones in the order you added them
+  (`((rank of feed by id) mod 4) + 1`, computed server-side as `tone`), so
+  the same feed always has the same dot. The preview repeats it beside the
+  feed name.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (sizes unchanged in `tailwind.config.js`). Post titles, the app name and
+  the article preview use the device serif (`font-serif`: ui-serif,
+  Iowan Old Style, Georgia); buttons, dates and feed names use the plain
+  system sans (the default, set once in the config).
+- **Words:** feed (never "subscription" or "source"), post (never "item"
+  or "article" in the list), "Add feed", "Feed address", "Name (optional)",
+  "Refresh", "Mark all read", "Open in browser", "Close", "Cancel",
+  "No feeds yet", "You're all caught up", "Couldn't load your posts",
+  "Retry".
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +154,20 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- `feeds` and `posts` are `staging:private` (COMMENT ON TABLE): what a
+  person follows and reads is personal. Both were seeded for the staging
+  demo with the fake `user_id 'staging-demo-user'` and fixed ids 900001+
+  — seed data is never a real visitor's.
+- Summaries are stored and rendered as plain text only. The parser
+  (`lib/feed-parser.js`) strips tags and decodes entities once, at fetch
+  time; the client inserts preview text with `textContent`, never
+  `innerHTML`, and only renders `http(s)` links.
+- No new npm dependencies: feeds are fetched with Node's built-in `fetch`
+  (guarded in `lib/feed-fetch.js` against loopback/private hosts and
+  redirects) and parsed by hand.
+- Tone classes (`tone-1`…`tone-4`) are whole literals in markup and
+  safelisted in `tailwind.config.js`; the server returns `tone`, the
+  client never assembles the class from fragments.
+- The preview shows the text the feed provides — no re-fetching of the
+  article page. Posts show the newest 200 unread; adding a feed brings
+  its newest 50 items; 100 feeds per person.

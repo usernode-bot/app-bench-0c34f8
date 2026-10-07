@@ -136,6 +136,14 @@ app.use((req, res, next) => {
   // `req.user ? req.user.id : null`). Every write needs an account.
   if (req.method !== 'GET' || req.path.startsWith('/api/')) {
     if (PUBLIC_API_PATHS.has(req.path)) return next();
+    // Reading the list anonymously is safe: it holds only per-person data,
+    // and the route answers the signed-out view (an empty list) when no
+    // token is carried. The staging demo's one-post read shows seeded fake
+    // data, view-only, so the preview works wherever it is opened.
+    // Everything writable stays behind authentication.
+    if (req.method === 'GET' && req.path === '/api/posts') return next();
+    if (IS_STAGING && req.method === 'GET' && req.query.demo === '1' &&
+        /^\/api\/posts\/\d+$/.test(req.path)) return next();
     if (!req.user && req.guest) {
       if (req.method === 'GET' || req.method === 'HEAD') return next();
       return res.status(401).json({ error: 'account_required' });
@@ -145,7 +153,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting_down' });
+  return res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +164,10 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// The reader's API: feeds and posts, scoped to the signed-in person.
+// Mounted before the catch-all below, which would otherwise swallow /api/*.
+require('./routes/feeds').register(app, pool, { IS_STAGING });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +206,168 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Schema ────────────────────────────────────────────────────────────────
+// Feeds and posts are personal data: subscriptions and reading state belong
+// to one person, so both tables are marked 'staging:private' and staging
+// copies carry schema only — they are seeded below. Every statement is
+// idempotent, so booting against an existing database is a no-op.
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      feed_url text NOT NULL,
+      title text NOT NULL,
+      site_url text,
+      fetched_at timestamptz,
+      last_error text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS posts (
+      id serial PRIMARY KEY,
+      feed_id int NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      guid text NOT NULL,
+      title text NOT NULL,
+      link text,
+      summary text,
+      published_at timestamptz NOT NULL,
+      read boolean NOT NULL DEFAULT false,
+      fetched_at timestamptz NOT NULL
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_feed_url_idx
+      ON feeds (user_id, feed_url);
+    CREATE UNIQUE INDEX IF NOT EXISTS posts_feed_guid_idx
+      ON posts (feed_id, guid);
+    CREATE INDEX IF NOT EXISTS posts_user_read_published_idx
+      ON posts (user_id, read, published_at DESC);
+    COMMENT ON TABLE feeds IS 'staging:private';
+    COMMENT ON TABLE posts IS 'staging:private';
+  `);
+}
+
+// ── Staging seed ──────────────────────────────────────────────────────────
+// Three obviously fake demo feeds owned by a fake user (never a visitor),
+// so the populated list can be seen at /?demo=1 in the staging preview.
+// Fixed ids and guids plus ON CONFLICT DO NOTHING keep re-booting
+// idempotent. The demo user's feeds are never refreshed: refresh only
+// touches the caller's own feeds.
+const DEMO_USER_ID = 'staging-demo-user';
+
+const DEMO_FEEDS = [
+  { id: 900001, title: 'Staging demo: Garden notes',
+    url: 'https://staging-demo.invalid/garden-notes/feed.xml',
+    site: 'https://staging-demo.invalid/garden-notes' },
+  { id: 900002, title: 'Staging demo: Bike workshop',
+    url: 'https://staging-demo.invalid/bike-workshop/feed.xml',
+    site: 'https://staging-demo.invalid/bike-workshop' },
+  { id: 900003, title: 'Staging demo: City library',
+    url: 'https://staging-demo.invalid/city-library/feed.xml',
+    site: 'https://staging-demo.invalid/city-library' },
+];
+
+const DEMO_POSTS = [
+  { feedId: 900001, guid: 'staging-demo-garden-1',
+    title: 'Planting garlic before the first frost',
+    link: 'https://staging-demo.invalid/garden-notes/planting-garlic',
+    publishedAt: '2026-10-07T11:45:00Z',
+    summary: 'Garlic wants a few cold weeks in the ground before it starts to grow, so the best time to plant is about a month before the soil freezes.\n\nBreak the bulb into cloves the day you plant, keep the papery skins on, and push each one in pointy end up, about two knuckles deep.\n\nCover the bed with straw once the first frost arrives and leave it alone until spring.' },
+  { feedId: 900002, guid: 'staging-demo-bike-1',
+    title: 'Truing a wheel at home with two zip ties',
+    link: 'https://staging-demo.invalid/bike-workshop/truing-a-wheel',
+    publishedAt: '2026-10-07T08:40:00Z',
+    summary: 'A wheel that wobbles a little can be trued without a stand. Zip two ties to the fork or the frame so the ends sit close to the rim, one on each side.\n\nSpin the wheel and watch where it touches. Where the rim moves toward a tie, loosen the spokes on that side a quarter turn at a time.\n\nSmall moves. If a spoke nipple starts to resist, stop and leave the wheel for another day.' },
+  { feedId: 900003, guid: 'staging-demo-library-1',
+    title: 'New reading room hours from next week',
+    link: 'https://staging-demo.invalid/city-library/reading-room-hours',
+    publishedAt: '2026-10-06T10:00:00Z',
+    summary: 'From next Monday the reading room opens an hour earlier, at eight in the morning, and closes at nine in the evening on weekdays.\n\nWeekend hours stay the same. The silent study room keeps its own schedule, posted at the door.' },
+  { feedId: 900001, guid: 'staging-demo-garden-2',
+    title: 'Saving tomato seeds for next spring',
+    link: 'https://staging-demo.invalid/garden-notes/saving-tomato-seeds',
+    publishedAt: '2026-10-04T09:00:00Z',
+    summary: 'Choose seeds from your healthiest plant, not just your best-looking fruit. Scoop the seeds into a jar of water and leave them on a windowsill for three days.\n\nThe good seeds sink; the pulp and the duds float. Rinse, dry on a plate for a week, and store them in a paper envelope somewhere cool.' },
+  { feedId: 900002, guid: 'staging-demo-bike-2',
+    title: 'What tyre pressure to run in winter',
+    link: 'https://staging-demo.invalid/bike-workshop/winter-tyre-pressure',
+    publishedAt: '2026-10-03T12:00:00Z',
+    summary: 'Cold mornings lower the gauge reading, so check pressure outside rather than in a warm hallway. A few psi less than your summer number buys grip on wet roads.\n\nDo not go so low that the tyre squirms in corners. If you can flatten the sidewall with your thumb, there is not enough air in it.' },
+  { feedId: 900003, guid: 'staging-demo-library-2',
+    title: 'The autumn programme of evening talks',
+    link: 'https://staging-demo.invalid/city-library/autumn-talks',
+    publishedAt: '2026-10-05T14:30:00Z',
+    summary: 'The autumn programme of evening talks starts this month. This year the themes are local history, night-sky watching and the city’s old shopfronts.\n\nTalks are free, and seats can be reserved at the front desk from the Monday of each week.' },
+  { feedId: 900001, guid: 'staging-demo-garden-3',
+    title: 'Compost that never smells',
+    link: 'https://staging-demo.invalid/garden-notes/compost-that-never-smells',
+    publishedAt: '2026-10-02T15:00:00Z',
+    summary: 'A smelly heap has too many soft green scraps and not enough dry material. Keep a bag of dead leaves, torn cardboard or straw next to the bin.\n\nEvery bucket of peelings gets a layer of the dry stuff on top. Turn the heap when you remember, not on a schedule, and it will smell of nothing but rain.' },
+  { feedId: 900002, guid: 'staging-demo-bike-3',
+    title: 'Fixing a puncture by the roadside',
+    link: 'https://staging-demo.invalid/bike-workshop/roadside-puncture',
+    publishedAt: '2026-10-01T17:20:00Z',
+    summary: 'Keep the wheel on the bike while you find the hole: spin it and listen, or hold it close to your cheek and feel for the escaping air.\n\nThen take the wheel off, ease one bead from the rim with your thumbs only, and check the inside of the tyre with a finger before fitting the new tube. Whatever punctured the tube is usually still stuck in the rubber.' },
+  { feedId: 900001, guid: 'staging-demo-garden-4',
+    title: 'When to bring the lemon tree indoors',
+    link: 'https://staging-demo.invalid/garden-notes/lemon-tree-indoors',
+    publishedAt: '2026-10-01T08:30:00Z',
+    summary: 'Citrus sulk at anything near freezing, so the tree moves indoors before the first cold night, not after it.\n\nGive it your brightest window, water it less than you did outside, and expect a few leaves to drop while it adjusts. It is sulking, not dying.' },
+];
+
+async function seedStagingDemo() {
+  for (const feed of DEMO_FEEDS) {
+    await pool.query(
+      `INSERT INTO feeds (id, user_id, feed_url, title, site_url, fetched_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, '2026-10-07T09:00:00Z', now())
+       ON CONFLICT (id) DO NOTHING`,
+      [feed.id, DEMO_USER_ID, feed.url, feed.title, feed.site]);
+  }
+  for (const post of DEMO_POSTS) {
+    await pool.query(
+      `INSERT INTO posts (feed_id, user_id, guid, title, link, summary,
+                          published_at, read, fetched_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, false, '2026-10-07T09:00:00Z')
+       ON CONFLICT (feed_id, guid) DO NOTHING`,
+      [post.feedId, DEMO_USER_ID, post.guid, post.title, post.link,
+       post.summary, post.publishedAt]);
+  }
+}
+
+// ── Start and shutdown ────────────────────────────────────────────────────
+let shuttingDown = false;
+
 async function start() {
+  await ensureSchema();
+  if (IS_STAGING) {
+    try {
+      await seedStagingDemo();
+    } catch (err) {
+      // Seed data is a preview convenience, not a service: boot anyway.
+      console.warn('staging seed skipped: ' + err.message);
+    }
+  }
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log('Shutting down: draining connections');
+    // /health answers 503 while this runs, so the load balancer stops
+    // sending new requests before the process goes away.
+    const drainTimer = setTimeout(() => {
+      try { server.closeAllConnections?.(); } catch { /* already gone */ }
+    }, 3000);
+    server.close(() => {
+      clearTimeout(drainTimer);
+      pool.end().catch(() => {}).finally(() => process.exit(0));
+    });
+    // Belt and braces: the drain above can hang on a stuck socket.
+    setTimeout(() => process.exit(0), 4000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

@@ -24,7 +24,9 @@ module.exports = {
 
   // Classes this app builds dynamically (if it ever does) go here, since the
   // extractor cannot see them. Prefer whole literals in the markup instead.
-  safelist: [],
+  // The feed-dot tones are picked per feed at runtime (tone-1…tone-4), so
+  // they must be safelisted even though app.js writes them as literals.
+  safelist: ['tone-1', 'tone-2', 'tone-3', 'tone-4'],
 
   // dark: variants key off a "dark" class on <html>, which public/index.html
   // sets from the viewer's Homeroom theme (the platform bridge reports it),
@@ -55,6 +57,18 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The four feed-dot tones (tone 1 is the accent itself).
+        'tone-1': token('tone-1'),
+        'tone-2': token('tone-2'),
+        'tone-3': token('tone-3'),
+        'tone-4': token('tone-4'),
+        'on-tone': token('on-tone'),
+      },
+      // A reading app: titles and article text in the device's serif,
+      // controls, dates and feed names in the plain sans.
+      fontFamily: {
+        serif: ['ui-serif', '"Iowan Old Style"', 'Georgia', 'serif'],
+        sans: ['system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
