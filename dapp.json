@@ -1,6 +1,18 @@
 {
+  "name": "tier-list",
+  "description": "Rank anything with friends, from S to F tier",
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "board.default",
+      "path": "/",
+      "expectSelector": ".tier-board",
+      "expectText": "Bay Area restaurants",
+      "visual": true,
+      "impact": ["server.js", "public/**", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }

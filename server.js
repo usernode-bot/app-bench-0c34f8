@@ -147,6 +147,224 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── Tier board data ────────────────────────────────────────────────────────
+// Three public tables: one list per topic board, the things to rank on it,
+// and one placement row per member per thing — the newest placement is an
+// upsert on (item_id, user_id), never an append. Everything here is meant to
+// be seen by the whole group (usernames on votes are the point), so the
+// tables stay public.
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+// Wraps an async route so a thrown error answers 500 JSON instead of
+// crashing the process or hanging the request.
+const wrap = (fn) => (req, res) => {
+  Promise.resolve(fn(req, res)).catch(err => {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong.' });
+  });
+};
+
+// A name the group types (list or thing): trimmed text, at most 80
+// characters. Returns the cleaned name, or null when it should be rejected.
+function cleanName(raw) {
+  if (typeof raw !== 'string') return null;
+  const name = raw.trim();
+  if (!name || name.length > 80) return null;
+  return name;
+}
+
+app.get('/api/me', (req, res) => {
+  res.json({
+    user: req.user ? { id: req.user.id, username: req.user.username } : null,
+    guest: !!req.guest,
+  });
+});
+
+app.get('/api/lists', wrap(async (_req, res) => {
+  const { rows } = await pool.query(`
+    SELECT l.id, l.name, l.created_by, l.created_by_name, l.created_at,
+           COUNT(i.id) AS item_count
+    FROM lists l LEFT JOIN items i ON i.list_id = l.id
+    GROUP BY l.id
+    ORDER BY l.created_at ASC, l.id ASC`);
+  res.json(rows.map(r => ({ ...r, item_count: Number(r.item_count) })));
+}));
+
+app.post('/api/lists', wrap(async (req, res) => {
+  const name = cleanName(req.body && req.body.name);
+  if (!name) {
+    return res.status(400).json({ error: 'Give the list a name of at most 80 characters.' });
+  }
+  const { rows } = await pool.query(
+    'INSERT INTO lists (name, created_by, created_by_name, created_at) VALUES ($1, $2, $3, $4) RETURNING *',
+    [name, req.user.id, req.user.username, req.now]);
+  res.status(201).json(rows[0]);
+}));
+
+// One payload for the whole board: the list, each thing with every
+// placement on it, the caller's own tier, and the crowd tally per tier.
+app.get('/api/lists/:id', wrap(async (req, res) => {
+  const listId = Number(req.params.id);
+  if (!Number.isInteger(listId)) return res.status(404).json({ error: 'List not found.' });
+  const lists = await pool.query('SELECT * FROM lists WHERE id = $1', [listId]);
+  if (!lists.rows.length) return res.status(404).json({ error: 'List not found.' });
+  const items = await pool.query(
+    'SELECT * FROM items WHERE list_id = $1 ORDER BY lower(name), id', [listId]);
+  const itemIds = items.rows.map(r => r.id);
+  const placements = itemIds.length
+    ? await pool.query(
+        'SELECT item_id, user_id, username, tier, updated_at FROM placements WHERE item_id = ANY($1)',
+        [itemIds])
+    : { rows: [] };
+  const byItem = new Map();
+  for (const p of placements.rows) {
+    let arr = byItem.get(p.item_id);
+    if (!arr) byItem.set(p.item_id, (arr = []));
+    arr.push(p);
+  }
+  res.json({
+    list: lists.rows[0],
+    items: items.rows.map(it => {
+      const ps = byItem.get(it.id) || [];
+      const tally = { S: 0, A: 0, B: 0, C: 0, D: 0, F: 0 };
+      for (const p of ps) if (tally[p.tier] !== undefined) tally[p.tier] += 1;
+      const mine = req.user ? ps.find(p => p.user_id === req.user.id) : null;
+      return {
+        id: it.id,
+        name: it.name,
+        added_by: it.added_by,
+        added_by_name: it.added_by_name,
+        created_at: it.created_at,
+        placements: ps.map(p => ({
+          user_id: p.user_id, username: p.username, tier: p.tier, updated_at: p.updated_at,
+        })),
+        my_tier: mine ? mine.tier : null,
+        tally,
+      };
+    }),
+  });
+}));
+
+app.post('/api/lists/:id/items', wrap(async (req, res) => {
+  const listId = Number(req.params.id);
+  if (!Number.isInteger(listId)) return res.status(404).json({ error: 'List not found.' });
+  const lists = await pool.query('SELECT id FROM lists WHERE id = $1', [listId]);
+  if (!lists.rows.length) return res.status(404).json({ error: 'List not found.' });
+  const name = cleanName(req.body && req.body.name);
+  if (!name) {
+    return res.status(400).json({ error: 'Give the thing a name of at most 80 characters.' });
+  }
+  // Duplicates are allowed: two people can rank the same place under
+  // slightly different spellings.
+  const { rows } = await pool.query(
+    'INSERT INTO items (list_id, name, added_by, added_by_name, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    [listId, name, req.user.id, req.user.username, req.now]);
+  res.status(201).json(rows[0]);
+}));
+
+app.put('/api/items/:id/placement', wrap(async (req, res) => {
+  const itemId = Number(req.params.id);
+  if (!Number.isInteger(itemId)) return res.status(404).json({ error: 'Thing not found.' });
+  const tier = req.body && req.body.tier;
+  if (!TIERS.includes(tier)) {
+    return res.status(400).json({ error: 'Tier must be one of S, A, B, C, D, F.' });
+  }
+  const items = await pool.query('SELECT id FROM items WHERE id = $1', [itemId]);
+  if (!items.rows.length) return res.status(404).json({ error: 'Thing not found.' });
+  // Upsert: the newest placement wins. `updated_at` comes from req.now, not
+  // SQL NOW(), so a staging preview shown as of a chosen moment keeps its
+  // time.
+  const { rows } = await pool.query(`
+    INSERT INTO placements (item_id, user_id, username, tier, updated_at)
+    VALUES ($1, $2, $3, $4, $5)
+    ON CONFLICT (item_id, user_id)
+    DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username, updated_at = EXCLUDED.updated_at
+    RETURNING *`,
+    [itemId, req.user.id, req.user.username, tier, req.now]);
+  res.json(rows[0]);
+}));
+
+// ── Boot-time schema and seed data ─────────────────────────────────────────
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS lists (
+      id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      name text NOT NULL,
+      created_by text,
+      created_by_name text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS items (
+      id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      list_id integer NOT NULL REFERENCES lists(id),
+      name text NOT NULL,
+      added_by text,
+      added_by_name text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS placements (
+      item_id integer NOT NULL REFERENCES items(id),
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier text NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );`);
+}
+
+// Product intent, not staging mock data: the app opens on a sample list so
+// the board can be tried right away. Idempotent — it only ever fires when
+// the lists table is completely empty — and attributed to the app itself,
+// never to a user.
+const SAMPLE_LIST_NAME = 'Bay Area restaurants';
+const SAMPLE_ITEMS = [
+  'Zuni Café', 'Tartine Bakery', 'La Taqueria', 'State Bird Provisions',
+  'Swan Oyster Depot', 'Chez Panisse', "Ike's Love & Sandwiches", 'In-N-Out Burger',
+];
+const APP_NAME = 'Tier List';
+
+async function seedSampleList() {
+  const { rowCount } = await pool.query('SELECT 1 FROM lists LIMIT 1');
+  if (rowCount) return;
+  const list = await pool.query(
+    'INSERT INTO lists (name, created_by_name) VALUES ($1, $2) RETURNING id',
+    [SAMPLE_LIST_NAME, APP_NAME]);
+  const listId = list.rows[0].id;
+  for (const name of SAMPLE_ITEMS) {
+    await pool.query(
+      'INSERT INTO items (list_id, name, added_by_name) VALUES ($1, $2, $3)',
+      [listId, name, APP_NAME]);
+  }
+}
+
+// Staging only: placements by clearly fake demo members so the crowd view
+// and the votes sheet can be seen in the preview. Fixed identities, never
+// whoever opens the preview, and nothing reads their existence.
+const STAGING_DEMO_VOTERS = ['staging-demo-maya', 'staging-demo-luis', 'staging-demo-priya'];
+const STAGING_DEMO_VOTES = [
+  { item: 'Zuni Café', tiers: ['S', 'S', 'A'] },
+  { item: 'Tartine Bakery', tiers: ['A', 'A', 'S'] },
+  { item: 'La Taqueria', tiers: ['C', 'C', 'S'] },
+  { item: 'In-N-Out Burger', tiers: ['S', 'A', 'C'] },
+];
+
+async function seedStagingDemo() {
+  const list = await pool.query('SELECT id FROM lists WHERE name = $1', [SAMPLE_LIST_NAME]);
+  if (!list.rows.length) return;
+  for (const vote of STAGING_DEMO_VOTES) {
+    const item = await pool.query(
+      'SELECT id FROM items WHERE list_id = $1 AND name = $2', [list.rows[0].id, vote.item]);
+    if (!item.rows.length) continue;
+    for (let i = 0; i < vote.tiers.length; i++) {
+      await pool.query(`
+        INSERT INTO placements (item_id, user_id, username, tier)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (item_id, user_id) DO NOTHING`,
+        [item.rows[0].id, STAGING_DEMO_VOTERS[i], STAGING_DEMO_VOTERS[i], vote.tiers[i]]);
+    }
+  }
+}
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,6 +410,9 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await migrate();
+  await seedSampleList();
+  if (IS_STAGING) await seedStagingDemo();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;

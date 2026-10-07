@@ -97,22 +97,39 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared board where a group ranks anything, one list per topic, from S to
+F tier. Anyone can add new things to a list; everyone drags them into the
+tier they think they belong in (or uses the Move to buttons in the thing's
+sheet). Each member sees their own placements and the crowd's view, and
+every thing's sheet records who voted for which tier. Members can change
+their placement any time; the newest one wins. Guests can look around but
+need an account to add things or vote. Nothing is editable or deletable yet
+(no renaming lists or things, no clearing a vote) — deferred, not decided
+against.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set in the first version. Every later change follows it,
+and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** a warm honey-gold accent (darker in the light look, brighter
+  in the dark) over warm stone-grey neutrals, so the quiet parts read as
+  paper and ink rather than tech grey. Six tier tokens, one per band letter,
+  a ladder that gets calmer as it descends: S crimson, A orange, B mustard,
+  C green, D blue, F grey — each with light and dark values that carry
+  white (`text-on-tier`) at 4.5:1 or more.
+- **Signature element:** the tier ladder itself — six full-width bands
+  stacked S at the top to F at the bottom, each led by a single oversized
+  letter tile in its own colour (`tier-band`, `tier-tile`). No other screen
+  looks like this.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  The tier letter tiles are the one place type is display: big, bold,
+  single letters.
+- **Words:** a *list* is one board; a *thing* is one entry on it; the bands
+  are *tiers* named by their letters; the views are *Yours* and *Crowd*;
+  the record of who put what where is *Votes*; unplaced things wait in *Not
+  ranked yet*; the actions are *Add a thing*, *Add*, *New list* and *Move
+  to*. Keep these exact words everywhere.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +154,12 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Tier colours are written as whole literals (the `TIER_BG` map in
+  `public/index.html`), never assembled from fragments — runtime-built
+  class names are invisible to the Tailwind compiler.
+- Placements are upserts on (`item_id`, `user_id`): one row per member per
+  thing, newest wins. Never append vote history.
+- All three tables (`lists`, `items`, `placements`) are public on purpose:
+  usernames on votes are the point of the app.
+- No new npm dependencies: the client is one page of vanilla JS, the server
+  is Express + pg + jsonwebtoken as shipped.

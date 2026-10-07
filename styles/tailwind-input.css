@@ -29,30 +29,48 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 250 249;    /* the page: warm stone paper */
     --surface: 255 255 255;   /* lists, cards, fields */
     --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
+    --fg: 28 25 23;           /* text: warm ink */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 161 98 7;       /* honey, darker in the light look */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 161 98 7;        /* the keyboard focus ring */
+    /* The tier ladder, calmest at the bottom: each band's letter tile.
+       Every value carries white (on-tier) text at 4.5:1 or more. */
+    --tier-s: 159 18 57;      /* crimson */
+    --tier-a: 194 65 12;      /* orange */
+    --tier-b: 133 77 14;      /* mustard */
+    --tier-c: 21 128 61;      /* green */
+    --tier-d: 30 64 175;      /* blue */
+    --tier-f: 87 83 78;       /* grey */
+    --on-tier: 255 255 255;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
+    --ground: 18 16 14;
+    --surface: 30 27 25;
     --raised: 41 37 36;
     --fg: 245 245 244;
     --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --line: 64 60 56;
+    --accent: 251 191 36;     /* honey, brighter in the dark look */
+    --on-accent: 66 32 6;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 191 36;
+    /* Slightly brighter tier values for the dark look, still 4.5:1 or more
+       with white text. */
+    --tier-s: 190 18 60;
+    --tier-a: 204 74 10;
+    --tier-b: 161 98 7;
+    --tier-c: 21 133 64;
+    --tier-d: 37 80 209;
+    --tier-f: 120 113 108;
+    --on-tier: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -124,5 +142,71 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The tier ladder: a band per letter, led by a coloured tile. Chips
+     (.tier-chip) sit in the dashed drop zone and drag between bands. */
+  .tier-band {
+    @apply flex items-stretch gap-2;
+  }
+  .tier-tile {
+    @apply flex flex-none items-center justify-center rounded-xl font-bold text-on-tier;
+    width: 3.25rem;
+    min-height: 3.25rem;
+    font-size: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .tier-tile { width: 4rem; min-height: 4rem; font-size: 1.5rem; }
+  }
+  .tier-drop {
+    @apply flex flex-1 flex-wrap content-start items-start gap-1.5 rounded-xl border border-dashed border-line bg-surface p-1.5;
+    min-height: 3.25rem;
+  }
+  @media (min-width: 640px) {
+    .tier-drop { min-height: 3.5rem; }
+  }
+  .tier-drop.over {
+    @apply border-accent bg-raised;
+  }
+  .tier-chip {
+    @apply inline-flex max-w-full min-h-11 items-center rounded-lg border border-line bg-surface px-3 py-2 text-body text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
+      focus-visible:ring-offset-ground;
+  }
+  /* A chip while it is being dragged: it follows the pointer. */
+  .tier-chip.lift {
+    @apply pointer-events-none fixed z-50 border-accent;
+  }
+  .tier-pill {
+    @apply inline-flex h-7 min-w-7 items-center justify-center rounded-md px-2 text-small font-bold text-on-tier;
+  }
+  .tier-move {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg text-body font-bold text-on-tier
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
+      focus-visible:ring-offset-ground;
+  }
+  .tier-move.current {
+    @apply ring-2 ring-focus ring-offset-2 ring-offset-surface;
+  }
+
+  /* Yours / Crowd toggle. */
+  .seg {
+    @apply flex self-start rounded-xl border border-line bg-surface p-1;
+    width: 100%;
+  }
+  @media (min-width: 640px) {
+    .seg { width: auto; }
+  }
+  .seg-btn {
+    @apply flex-1 inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-body font-medium text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .seg-btn.on {
+    @apply bg-accent text-on-accent;
+  }
+
+  /* The Not ranked yet tray: things nobody has placed yet. */
+  .tray {
+    @apply rounded-xl border border-dashed border-line p-2;
   }
 }

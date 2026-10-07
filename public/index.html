@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23a16207'/><rect x='16' y='20' width='68' height='14' rx='6' fill='white'/><rect x='26' y='43' width='48' height='14' rx='6' fill='white' opacity='.75'/><rect x='36' y='66' width='28' height='14' rx='6' fill='white' opacity='.5'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -91,6 +91,38 @@
        The bridge is also where the app learns the viewer's light/dark theme:
        the script below reads it. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
+  <!-- The platform's native UI kit: the item sheet, the new-list prompt and
+       the toasts are its components. Relative path, same rule as the bridge. -->
+  <link rel="stylesheet" href="/usernode-native/v1/native.css">
+  <script src="/usernode-native/v1/native.js"></script>
+  <!-- Hook the kit to this app's tokens: the gold accent and the warm
+       neutrals, in both looks. Same specificity as the kit's own :root/.dark
+       blocks, and this style tag comes after the kit's stylesheet, so these
+       win. -->
+  <style>
+    :root {
+      --un-accent: rgb(var(--accent));
+      --un-accent-contrast: rgb(var(--on-accent));
+      --un-surface: rgb(var(--raised));
+      --un-group-bg: rgb(var(--surface));
+      --un-sheet-bg: rgb(var(--surface));
+      --un-hairline: rgb(var(--line));
+      --un-muted: rgb(var(--muted));
+      --un-toast-bg: rgb(var(--fg));
+      --un-toast-text: rgb(var(--ground));
+    }
+    .dark {
+      --un-accent: rgb(var(--accent));
+      --un-accent-contrast: rgb(var(--on-accent));
+      --un-surface: rgb(var(--raised));
+      --un-group-bg: rgb(var(--surface));
+      --un-sheet-bg: rgb(var(--surface));
+      --un-hairline: rgb(var(--line));
+      --un-muted: rgb(var(--muted));
+      --un-toast-bg: rgb(var(--fg));
+      --un-toast-text: rgb(var(--ground));
+    }
+  </style>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
   <script>
@@ -108,28 +140,594 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="tier-board mx-auto w-full max-w-2xl px-4 pb-28 pt-4">
+    <h1 class="sr-only">Tier board</h1>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🏆</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- The list picker with New list beside it, then Add a thing with Add,
+         then the Yours / Crowd toggle. -->
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <select id="list-picker" class="field" aria-label="List"></select>
+        <button id="new-list" type="button" class="btn-secondary shrink-0">New list</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <input id="add-input" type="text" class="field" maxlength="80"
+               placeholder="e.g. Tartine Bakery" aria-label="Add a thing">
+        <button id="add-btn" type="button" class="btn-primary shrink-0">Add</button>
+      </div>
+      <div id="seg" class="seg mt-1" role="group" aria-label="Board view">
+        <button type="button" class="seg-btn on" data-view="yours" aria-pressed="true">Yours</button>
+        <button type="button" class="seg-btn" data-view="crowd" aria-pressed="false">Crowd</button>
+      </div>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <!-- The six tier bands, or the loading / empty / error state. -->
+    <section id="board" class="mt-3 flex flex-col gap-2" aria-label="Tiers"></section>
+    <section id="tray" class="tray mt-3" aria-label="Not ranked yet" hidden></section>
   </main>
+
+  <!-- Toast fallback for runs outside the platform shell, where the native
+       kit's APIs degrade. Announced to screen readers either way. -->
+  <div id="toast-fallback" role="status" aria-live="polite" hidden
+       class="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-fg px-4 py-3 text-center text-body text-ground"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Words and constants ───────────────────────────────────────────────
+    // Class names must be whole literals for the Tailwind compiler, so the
+    // tier colours are looked up in a map of literals, never assembled.
+    var TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+    var TIER_BG = { S: 'bg-tier-s', A: 'bg-tier-a', B: 'bg-tier-b', C: 'bg-tier-c', D: 'bg-tier-d', F: 'bg-tier-f' };
+
+    var TOKEN = new URLSearchParams(location.search).get('token') || '';
+    var state = {
+      phase: 'loading',        // loading | error | empty-lists | ready
+      lists: [],
+      listId: null,
+      detail: null,            // { list, items }
+      view: 'yours',           // yours | crowd
+      me: null,                // { id, username } when signed in
+      guest: false,
+    };
+    var suppressClickUntil = 0;
+
+    function $(sel) { return document.querySelector(sel); }
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined && text !== null) n.textContent = text;
+      return n;
+    }
+
+    // ── API helper: forward the platform token on every call ──────────────
+    function api(path, opts) {
+      opts = opts || {};
+      var headers = {};
+      if (opts.body !== undefined) headers['content-type'] = 'application/json';
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      return fetch(path, {
+        method: opts.method || 'GET',
+        headers: headers,
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      }).then(function (res) {
+        return res.json().catch(function () { return null; }).then(function (data) {
+          return { ok: res.ok, status: res.status, data: data };
+        });
+      }, function () {
+        return { ok: false, status: 0, data: null };
+      });
+    }
+
+    // ── Small wrappers over the native kit, degrading outside the shell ───
+    var toastTimer = null;
+    function toast(message, opts) {
+      try {
+        if (window.unNative && unNative.toast) { unNative.toast(message, opts); return; }
+      } catch (_) {}
+      var t = $('#toast-fallback');
+      t.textContent = message;
+      t.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.hidden = true; }, 4000);
+    }
+
+    function askForAccount() {
+      try {
+        if (window.usernode && window.usernode.askForAccount) { window.usernode.askForAccount(); return; }
+      } catch (_) {}
+      toast('Make a Homeroom account to add things and rank.', { error: true });
+    }
+
+    var sheetHandle = null;
+    function presentSheet(contentEl) {
+      closeSheet();
+      try {
+        if (window.unNative && unNative.presentSheet) {
+          sheetHandle = unNative.presentSheet({
+            contentEl: contentEl,
+            onDismiss: function () { sheetHandle = null; },
+          });
+          return;
+        }
+      } catch (_) {}
+      // Fallback: a plain bottom panel behind a dim.
+      var wrap = el('div', 'fixed inset-0 z-40');
+      var scrim = el('div', 'absolute inset-0 bg-fg/40');
+      var panel = el('div', 'absolute inset-x-0 bottom-0 rounded-t-2xl bg-surface p-4');
+      panel.append(contentEl);
+      wrap.append(scrim, panel);
+      scrim.addEventListener('click', closeSheet);
+      document.body.append(wrap);
+      sheetHandle = { fallback: wrap };
+    }
+    function closeSheet() {
+      if (!sheetHandle) return;
+      if (sheetHandle.fallback) sheetHandle.fallback.remove();
+      else if (sheetHandle.dismiss) { try { sheetHandle.dismiss(); } catch (_) {} }
+      sheetHandle = null;
+    }
+
+    function promptText(title, message, placeholder) {
+      try {
+        if (window.unNative && unNative.alert) {
+          return unNative.alert({
+            title: title,
+            message: message,
+            field: { placeholder: placeholder, maxLength: 80, submitOnEnter: true },
+            buttons: [{ label: 'Cancel', style: 'cancel' }, { label: 'OK', style: 'default' }],
+          }).then(function (res) {
+            if (!res || (res.button && res.button.style === 'cancel')) return null;
+            return typeof res.value === 'string' ? res.value.trim() : null;
+          });
+        }
+      } catch (_) {}
+      var v = window.prompt(message || title) || '';
+      v = v.trim();
+      return Promise.resolve(v || null);
+    }
+
+    // ── Loading data ──────────────────────────────────────────────────────
+    function loadAll() {
+      state.phase = 'loading';
+      render();
+      return api('/api/lists').then(function (r) {
+        if (!r.ok) { state.phase = 'error'; render(); return; }
+        state.lists = Array.isArray(r.data) ? r.data : [];
+        if (!state.lists.length) { state.phase = 'empty-lists'; render(); return; }
+        if (!state.listId || !state.lists.some(function (l) { return l.id === state.listId; })) {
+          state.listId = state.lists[0].id;
+        }
+        return loadBoard();
+      });
+    }
+
+    function loadBoard() {
+      state.phase = 'loading';
+      render();
+      return api('/api/lists/' + state.listId).then(function (r) {
+        if (!r.ok) { state.phase = 'error'; render(); return; }
+        state.detail = r.data;
+        state.phase = 'ready';
+        render();
+      });
+    }
+
+    // ── Views of the board ────────────────────────────────────────────────
+    // Crowd view: the tier with the most votes, ties going to the tier that
+    // comes first in S to F order (strict > keeps the earlier one).
+    function crowdTier(item) {
+      var best = null, bestN = 0;
+      for (var i = 0; i < TIERS.length; i++) {
+        var n = (item.tally && item.tally[TIERS[i]]) || 0;
+        if (n > bestN) { best = TIERS[i]; bestN = n; }
+      }
+      return best;
+    }
+
+    function chipEl(item, tier) {
+      var b = el('button', 'tier-chip' + (canDrag() ? ' cursor-grab active:cursor-grabbing' : ''), item.name);
+      b.type = 'button';
+      b.setAttribute('aria-label', item.name + (tier ? ', tier ' + tier : ', not ranked yet'));
+      if (canDrag()) {
+        // HTML5 drag for mouse pointers only: on touch, a draggable element
+        // hijacks long-press, which is our lift gesture. Devices with a
+        // fine pointer get it up front; hybrid devices get it on the first
+        // mouse pointerdown (see touchPointerDown).
+        if (finePointer) b.draggable = true;
+        b.addEventListener('pointerdown', function (e) { touchPointerDown(e, item, b, tier); });
+        b.addEventListener('pointermove', pointerMove);
+        b.addEventListener('pointerup', pointerUp);
+        b.addEventListener('pointercancel', endDrag);
+        b.addEventListener('dragstart', function (e) { dndStart(e, item); });
+      }
+      b.addEventListener('click', function () {
+        if (Date.now() < suppressClickUntil) return;
+        openSheet(item);
+      });
+      return b;
+    }
+
+    function canDrag() {
+      return state.view === 'yours' && !!state.me;
+    }
+
+    function bandEl(t) {
+      var band = el('section', 'tier-band');
+      band.append(el('div', 'tier-tile ' + TIER_BG[t], t));
+      var drop = el('div', 'tier-drop');
+      drop.dataset.tier = t;
+      drop.setAttribute('role', 'group');
+      drop.setAttribute('aria-label', 'Tier ' + t);
+      if (state.view === 'crowd') {
+        var placedHere = state.detail.items.filter(function (it) { return crowdTier(it) === t; });
+        // The votes behind the chips this band shows: every placement on the
+        // things whose crowd tier this is.
+        var n = 0;
+        placedHere.forEach(function (it) { n += it.placements.length; });
+        if (n > 0) drop.append(el('p', 'tier-count w-full text-small text-muted', n + (n === 1 ? ' vote' : ' votes')));
+      }
+      var placed = state.detail.items.filter(function (it) {
+        return state.view === 'yours' ? it.my_tier === t : crowdTier(it) === t;
+      });
+      placed.forEach(function (it) { drop.append(chipEl(it, t)); });
+      band.append(drop);
+      return band;
+    }
+
+    function renderTray() {
+      var waiting = state.detail.items.filter(function (it) {
+        return state.view === 'yours' ? !it.my_tier : !crowdTier(it);
+      });
+      if (!waiting.length) return;
+      var tray = $('#tray');
+      tray.hidden = false;
+      tray.append(el('p', 'section-label', 'Not ranked yet'));
+      var wrap = el('div', 'flex flex-wrap gap-2');
+      waiting.forEach(function (it) { wrap.append(chipEl(it, null)); });
+      tray.append(wrap);
+    }
+
+    function render() {
+      renderPicker();
+      var board = $('#board');
+      var tray = $('#tray');
+      board.textContent = '';
+      tray.textContent = '';
+      tray.hidden = true;
+
+      if (state.phase === 'loading') {
+        for (var i = 0; i < 6; i++) board.append(el('div', 'skeleton h-14'));
+        return;
+      }
+      if (state.phase === 'error') {
+        var err = el('div', 'state-error');
+        err.append(el('p', 'text-body font-medium', 'The board couldn’t load.'));
+        err.append(el('p', 'text-small text-muted',
+          'Something went wrong talking to the server. Lists you already have open still work: switch to them with the picker above.'));
+        var retry = el('button', 'btn-secondary', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', function () { loadAll(); });
+        err.append(retry);
+        board.append(err);
+        return;
+      }
+      if (state.phase === 'empty-lists') {
+        var box = el('div', 'state-empty');
+        box.append(el('p', 'text-body font-medium', 'No lists yet'));
+        box.append(el('p', 'text-small text-muted', 'Create the first board with New list.'));
+        var create = el('button', 'btn-primary', 'New list');
+        create.type = 'button';
+        create.addEventListener('click', function () { newList(); });
+        box.append(create);
+        board.append(box);
+        return;
+      }
+
+      // Ready.
+      var items = state.detail.items;
+      if (!items.length) {
+        var empty = el('div', 'state-empty');
+        empty.append(el('p', 'text-body font-medium', 'Nothing to rank yet'));
+        empty.append(el('p', 'text-small text-muted',
+          'Add the first thing with Add a thing above, then drag it into the tier it belongs in.'));
+        board.append(empty);
+        return;
+      }
+      TIERS.forEach(function (t) { board.append(bandEl(t)); });
+      renderTray();
+    }
+
+    function renderPicker() {
+      var picker = $('#list-picker');
+      picker.textContent = '';
+      state.lists.forEach(function (l) {
+        var o = el('option', '', l.name);
+        o.value = l.id;
+        picker.append(o);
+      });
+      picker.value = state.listId != null ? String(state.listId) : '';
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────
+    function addItem() {
+      var input = $('#add-input');
+      var name = input.value.trim();
+      if (!name) return;
+      if (!state.me) { askForAccount(); return; }
+      if (name.length > 80) { toast('Keep it to 80 characters or fewer.', { error: true }); return; }
+      api('/api/lists/' + state.listId + '/items', { method: 'POST', body: { name: name } })
+        .then(function (r) {
+          if (!r.ok) {
+            toast(r.status === 401 ? 'Make an account to add things.' : 'Could not add that. Try again.', { error: true });
+            return;
+          }
+          input.value = '';
+          return loadBoard();
+        });
+    }
+
+    function newList() {
+      promptText('New list', 'What will this board rank?', 'e.g. Pizza places').then(function (name) {
+        if (!name) return;
+        if (!state.me) { askForAccount(); return; }
+        api('/api/lists', { method: 'POST', body: { name: name } }).then(function (r) {
+          if (!r.ok) {
+            toast(r.status === 401 ? 'Make an account to create lists.' : 'Could not create the list. Try again.', { error: true });
+            return;
+          }
+          if (r.data && r.data.id) state.listId = r.data.id;
+          return loadAll();
+        });
+      });
+    }
+
+    // Optimistic move: the chip moves at once; a failed save tells you and
+    // puts the thing back where it was.
+    function savePlacement(item, tier, prevTier) {
+      item.my_tier = tier;
+      render();
+      api('/api/items/' + item.id + '/placement', { method: 'PUT', body: { tier: tier } })
+        .then(function (r) {
+          if (r.ok) return;
+          item.my_tier = prevTier;
+          render();
+          if (r.status === 401) { askForAccount(); return; }
+          toast('Could not save your placement. ' + item.name + ' is back in ' +
+            (prevTier ? 'tier ' + prevTier : 'Not ranked yet') + '.', { error: true });
+        });
+    }
+
+    // ── The item sheet: votes and the tap-to-move fallback ────────────────
+    function openSheet(item) {
+      var c = el('div', 'flex flex-col gap-3');
+      c.append(el('h2', 'text-heading', item.name));
+
+      c.append(el('p', 'section-label', 'Votes'));
+      if (!item.placements.length) {
+        c.append(el('p', 'text-body text-muted', 'No votes yet. Move it to a tier to be the first.'));
+      } else {
+        var list = el('ul', 'list');
+        item.placements
+          .slice()
+          .sort(function (a, b) {
+            return (TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier)) ||
+              String(a.username).localeCompare(String(b.username));
+          })
+          .forEach(function (p) {
+            var row = el('li', 'list-row');
+            row.append(el('span', 'min-w-0 flex-1 truncate text-body', p.username));
+            row.append(el('span', 'tier-pill ' + TIER_BG[p.tier], p.tier));
+            list.append(row);
+          });
+        c.append(list);
+      }
+
+      c.append(el('p', 'section-label', 'Move to'));
+      var moves = el('div', 'grid grid-cols-6 gap-1.5');
+      TIERS.forEach(function (t) {
+        var b = el('button', 'tier-move ' + TIER_BG[t] + (item.my_tier === t ? ' current' : ''), t);
+        b.type = 'button';
+        b.setAttribute('aria-label', 'Move to tier ' + t);
+        b.addEventListener('click', function () {
+          if (!state.me) { askForAccount(); return; }
+          if (t === item.my_tier) { closeSheet(); return; }
+          closeSheet();
+          savePlacement(item, t, item.my_tier);
+        });
+        moves.append(b);
+      });
+      c.append(moves);
+
+      presentSheet(c);
+    }
+
+    // ── Drag and drop ─────────────────────────────────────────────────────
+    // Desktop mouse: HTML5 drag events (chips are draggable). Touch and pen:
+    // pointer events with a long-press lift, so scrolling still works until
+    // the chip is up. Both join the native kit's gesture arbiter; dropping
+    // anywhere outside a band returns the chip where it was.
+
+    var drag = null; // touch/pen drag
+    var dnd = null;  // HTML5 drag
+    var overEl = null;
+    var gestureSeq = 0;
+    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    function claimGesture() {
+      try {
+        if (window.unNative && unNative.gestures) {
+          gestureSeq += 1;
+          drag.seq = gestureSeq;
+          return unNative.gestures.claim(gestureSeq, 'tier-chip-drag') !== false;
+        }
+      } catch (_) {}
+      return true;
+    }
+    function releaseGesture() {
+      try {
+        if (drag && drag.seq != null && window.unNative && unNative.gestures) {
+          unNative.gestures.release(drag.seq);
+        }
+      } catch (_) {}
+    }
+
+    function touchPointerDown(e, item, chip, tier) {
+      if (e.pointerType === 'mouse') { chip.draggable = true; return; } // HTML5 drag handles the mouse
+      if (drag) return;
+      drag = { item: item, chip: chip, from: tier, pointerId: e.pointerId, x0: e.clientX, y0: e.clientY, lifted: false };
+      try { chip.setPointerCapture(e.pointerId); } catch (_) {}
+      drag.timer = setTimeout(liftDrag, 240);
+    }
+
+    function liftDrag() {
+      if (!drag) return;
+      if (!claimGesture()) { endDrag(); return; }
+      drag.lifted = true;
+      var r = drag.chip.getBoundingClientRect();
+      drag.rect = { left: r.left, top: r.top };
+      drag.chip.classList.add('lift');
+      drag.chip.style.left = r.left + 'px';
+      drag.chip.style.top = r.top + 'px';
+      drag.offX = null;
+      drag.offY = null;
+      document.addEventListener('touchmove', blockTouchMove, { passive: false });
+      highlightAt(drag.x0, drag.y0);
+    }
+
+    function blockTouchMove(e) { if (drag && drag.lifted) e.preventDefault(); }
+
+    function pointerMove(e) {
+      if (!drag || e.pointerId !== drag.pointerId) return;
+      if (!drag.lifted) {
+        if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 12) endDrag();
+        return;
+      }
+      if (drag.offX == null) drag.offX = e.clientX - drag.rect.left;
+      if (drag.offY == null) drag.offY = e.clientY - drag.rect.top;
+      drag.chip.style.left = (e.clientX - drag.offX) + 'px';
+      drag.chip.style.top = (e.clientY - drag.offY) + 'px';
+      highlightAt(e.clientX, e.clientY);
+    }
+
+    function pointerUp(e) {
+      if (!drag || e.pointerId !== drag.pointerId) return;
+      if (!drag.lifted) { endDrag(); return; }
+      var x = e.clientX, y = e.clientY;
+      var target = null;
+      var under = document.elementFromPoint(x, y);
+      if (under) target = under.closest('.tier-drop');
+      var tier = target && target.dataset ? target.dataset.tier : null;
+      var item = drag.item, from = drag.from;
+      endDrag();
+      suppressClickUntil = Date.now() + 400;
+      if (tier && tier !== from) savePlacement(item, tier, from);
+    }
+
+    function endDrag() {
+      if (!drag) return;
+      clearTimeout(drag.timer);
+      releaseGesture();
+      if (drag.chip) {
+        drag.chip.classList.remove('lift');
+        drag.chip.style.left = '';
+        drag.chip.style.top = '';
+      }
+      clearOver();
+      document.removeEventListener('touchmove', blockTouchMove);
+      drag = null;
+    }
+
+    function highlightAt(x, y) {
+      var under = document.elementFromPoint(x, y);
+      var drop = under ? under.closest('.tier-drop') : null;
+      if (drop !== overEl) {
+        if (overEl) overEl.classList.remove('over');
+        if (drop) drop.classList.add('over');
+        overEl = drop;
+      }
+    }
+    function clearOver() {
+      if (overEl) overEl.classList.remove('over');
+      overEl = null;
+    }
+
+    function dndStart(e, item) {
+      if (!canDrag()) { e.preventDefault(); return; }
+      dnd = { item: item, from: item.my_tier };
+      try {
+        e.dataTransfer.setData('text/plain', String(item.id));
+        e.dataTransfer.effectAllowed = 'move';
+      } catch (_) {}
+    }
+
+    function wireBoardDnd() {
+      var board = $('#board');
+      board.addEventListener('dragover', function (e) {
+        if (!dnd) return;
+        var drop = e.target.closest('.tier-drop');
+        if (!drop) return;
+        e.preventDefault();
+        try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+        if (drop !== overEl) { clearOver(); overEl = drop; drop.classList.add('over'); }
+      });
+      board.addEventListener('dragleave', function (e) {
+        if (!dnd) return;
+        if (!e.relatedTarget || !board.contains(e.relatedTarget)) clearOver();
+      });
+      board.addEventListener('drop', function (e) {
+        if (!dnd) return;
+        e.preventDefault();
+        var drop = e.target.closest('.tier-drop');
+        var tier = drop && drop.dataset ? drop.dataset.tier : null;
+        var d = dnd;
+        dnd = null;
+        clearOver();
+        if (tier && tier !== d.from) savePlacement(d.item, tier, d.from);
+      });
+      board.addEventListener('dragend', function () { dnd = null; clearOver(); });
+    }
+
+    // ── Wire up static controls ───────────────────────────────────────────
+    function wire() {
+      $('#list-picker').addEventListener('change', function (e) {
+        var id = Number(e.target.value);
+        if (!Number.isInteger(id) || id === state.listId) return;
+        state.listId = id;
+        loadBoard();
+      });
+      $('#new-list').addEventListener('click', function () { newList(); });
+      $('#add-btn').addEventListener('click', function () { addItem(); });
+      $('#add-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); addItem(); }
+      });
+      document.querySelectorAll('.seg-btn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (b.dataset.view === state.view) return;
+          state.view = b.dataset.view;
+          document.querySelectorAll('.seg-btn').forEach(function (o) {
+            var on = o.dataset.view === state.view;
+            o.classList.toggle('on', on);
+            o.setAttribute('aria-pressed', String(on));
+          });
+          render();
+        });
+      });
+      wireBoardDnd();
+    }
+
+    wire();
+    // Signed-in or guest comes from the server, never the URL: the platform
+    // injects identity on the iframe load.
+    api('/api/me').then(function (r) {
+      if (r.ok && r.data) {
+        state.me = r.data.user || null;
+        state.guest = !!r.data.guest;
+      }
+      return loadAll();
+    });
+  })();
+  </script>
 </body>
 </html>

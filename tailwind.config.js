@@ -55,6 +55,15 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The tier ladder: one colour per band letter (S crimson → F grey),
+        // with on-tier as the text drawn on every tier colour.
+        'tier-s': token('tier-s'),
+        'tier-a': token('tier-a'),
+        'tier-b': token('tier-b'),
+        'tier-c': token('tier-c'),
+        'tier-d': token('tier-d'),
+        'tier-f': token('tier-f'),
+        'on-tier': token('on-tier'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
