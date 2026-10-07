@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader",
+      "name": "Reader loads with the empty state",
+      "path": "/",
+      "expectText": "No unread posts",
+      "expectSelector": "#add-feed",
+      "visual": true,
+      "impact": ["server.js", "feed-parse.js", "public/**", "styles/**"]
+    },
+    {
+      "name": "Demo unread list renders",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    }
+  ]
 }

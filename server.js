@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const feedParse = require('./feed-parse');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -90,6 +91,10 @@ app.get(/^\/usernode-(?:bridge|native|tailwind)\//, async (req, res) => {
 // staging container reads either. See "Time-dependent features" in the
 // platform conventions.
 const IS_STAGING = process.env.USERNODE_ENV === 'staging';
+
+// Set while the shutdown handler is draining; /health answers 503 so
+// readiness polls see the container leaving rotation.
+let shuttingDown = false;
 const PREVIEW_NOW = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 function requestNow(req) {
   const raw = IS_STAGING ? (req.headers['x-usernode-now'] || req.query['un-now']) : null;
@@ -145,7 +150,258 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting-down' });
+  res.json({ status: 'ok' });
+});
+
+// ── The reader: feeds and posts ──────────────────────────────────────────
+//
+// Each person's feeds are personal, so both tables are marked
+// 'staging:private': a stranger opening a staging preview sees the schema
+// but never the rows. Both are private, so the foreign key between them is
+// allowed. Applied idempotently on boot.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id          bigserial PRIMARY KEY,
+      user_id     text NOT NULL,
+      url         text NOT NULL,
+      title       text NOT NULL,
+      site_url    text,
+      last_error  text,
+      fetched_at  timestamptz,
+      created_at  timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_url_idx ON feeds (user_id, url);
+    CREATE TABLE IF NOT EXISTS posts (
+      id            bigserial PRIMARY KEY,
+      feed_id       bigint NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
+      guid          text NOT NULL,
+      title         text NOT NULL,
+      url           text,
+      content_html  text NOT NULL DEFAULT '',
+      published_at  timestamptz,
+      read_at       timestamptz,
+      created_at    timestamptz NOT NULL DEFAULT now(),
+      UNIQUE (feed_id, guid)
+    );
+    COMMENT ON TABLE feeds IS 'staging:private';
+    COMMENT ON TABLE posts IS 'staging:private';
+  `);
+}
+
+// Store a parsed feed's items, skipping ones already stored. `guid` falls
+// back to the item's link, then a hash of its title, so re-fetching the
+// same feed does not duplicate rows.
+const MAX_ITEMS_PER_FETCH = 100;
+
+async function insertPosts(feedId, items) {
+  for (const item of items.slice(0, MAX_ITEMS_PER_FETCH)) {
+    await pool.query(
+      `INSERT INTO posts (feed_id, guid, title, url, content_html, published_at)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (feed_id, guid) DO NOTHING`,
+      [feedId, item.guid, item.title, item.url, item.contentHtml, item.publishedAt]);
+  }
+}
+
+async function refreshFeed(feedRow, now) {
+  // A feed that fails must not break the pass: its error is recorded and
+  // its already-stored posts keep showing.
+  try {
+    const parsed = await feedParse.fetchFeed(feedRow.url);
+    await insertPosts(feedRow.id, parsed.items);
+    await pool.query(
+      'UPDATE feeds SET title = $2, site_url = $3, last_error = NULL, fetched_at = $4 WHERE id = $1',
+      [feedRow.id, parsed.title, parsed.siteUrl, now]);
+  } catch (err) {
+    await pool.query(
+      'UPDATE feeds SET last_error = $2, fetched_at = $3 WHERE id = $1',
+      [feedRow.id, err.message, now]);
+  }
+}
+
+// Who is signed in, asked plainly: a guest gets { guest: true } rather than
+// a 401, so the page can skip its write calls instead of popping the
+// make-an-account sheet on load.
+app.get('/api/me', (req, res) => {
+  if (req.user) return res.json({ user: { id: req.user.id, username: req.user.username || null } });
+  res.json({ guest: true });
+});
+
+// ── Staging demo data (request-time, behind ?demo=1) ─────────────────────
+//
+// The feeds and posts tables are private, so a fresh staging preview starts
+// empty and the viewer would only ever see the empty state. Instead of
+// boot-time seeding, the read routes answer an in-memory payload when
+// IS_STAGING and the page asks for demo=1: nothing is written to the
+// database, and the page never calls a write route in demo mode.
+const DEMO_FEEDS = [
+  { key: 'sky', title: 'Staging demo feed: Sky Watch', url: 'https://demo.example/sky-watch/feed.xml', siteUrl: 'https://demo.example/sky-watch' },
+  { key: 'kitchen', title: 'Staging demo feed: Tiny Kitchen', url: 'https://demo.example/tiny-kitchen/feed.xml', siteUrl: 'https://demo.example/tiny-kitchen' },
+  { key: 'trail', title: 'Staging demo feed: Trail Notes', url: 'https://demo.example/trail-notes/feed.xml', siteUrl: 'https://demo.example/trail-notes' },
+];
+
+const DEMO_POSTS = [
+  { feed: 'sky', hoursAgo: 2, title: 'Staging demo: A slow morning at the harbour market',
+    html: '<p>The stalls opened early today. Fog sat on the water until mid morning, and by the time it lifted the fish counters were already half cleared.</p><p>We stayed for coffee, watched the boats come in, and bought more apples than we meant to.</p>' },
+  { feed: 'kitchen', hoursAgo: 5, title: 'Staging demo: Bread, and what kneading taught me',
+    html: '<p>Week six of Saturday loaves. The dough still sticks to everything I own, but the crumb has finally started to look like the picture.</p><p>Today’s lesson: patience beats muscle. A longer rest did what an hour of kneading could not.</p>' },
+  { feed: 'trail', hoursAgo: 8, title: 'Staging demo: Crossing the ridge before noon',
+    html: '<p>Left the car park at seven to beat the heat. The ridge path was quiet all the way to the saddle, with only a pair of ravens for company.</p><p>Down by the reservoir the shade was a relief. Notes for next time: more water, earlier start.</p>' },
+  { feed: 'sky', hoursAgo: 26, title: 'Staging demo: What the rain gauge said this week',
+    html: '<p>Eighteen millimetres since Monday, most of it in one squally hour on Wednesday evening. The garden has not needed the hose once.</p><p>The week ahead looks drier, so the barrels get a rest and the beds get a mulch.</p>' },
+  { feed: 'kitchen', hoursAgo: 30, title: 'Staging demo: A short list of autumn apples',
+    html: '<p>The market had six varieties this week. Cox for eating, Bramley for the pie, and a bag of something unlabelled that turned out to be the best of the lot.</p><p>Apple notes, as usual, written on the train home with juice on the page.</p>' },
+  { feed: 'trail', hoursAgo: 50, title: 'Staging demo: Reading a map when the fog comes down',
+    html: '<p>The forecast said clear; the summit disagreed. Fog rolled in halfway up and the last two hundred metres were navigated by fence posts and luck.</p><p>A good reminder to keep the compass in a pocket, not in the pack.</p>' },
+];
+
+function demoPayload(now) {
+  const feedIds = {};
+  const feeds = DEMO_FEEDS.map((feed, i) => {
+    const id = 900001 + i;
+    feedIds[feed.key] = id;
+    return {
+      id, url: feed.url, title: feed.title, site_url: feed.siteUrl,
+      last_error: null, fetched_at: new Date(now.getTime() - 10 * 60_000),
+    };
+  });
+  const posts = DEMO_POSTS
+    .map((post, i) => {
+      const feed = DEMO_FEEDS.find((f) => f.key === post.feed);
+      return {
+        id: 910001 + i,
+        feed_id: feedIds[post.feed],
+        feed_title: feed.title,
+        guid: 'staging-demo-' + i,
+        title: post.title,
+        url: feed.siteUrl + '/posts/' + (i + 1),
+        content_html: post.html,
+        published_at: new Date(now.getTime() - post.hoursAgo * 3_600_000),
+        read_at: null,
+      };
+    })
+    .sort((a, b) => b.published_at - a.published_at);
+  return { feeds, posts };
+}
+
+// ── API routes ───────────────────────────────────────────────────────────
+//
+// Reads answer guests with an empty list (they have no user id); every
+// write needs an account, which the middleware above already enforces.
+
+app.get('/api/feeds', async (req, res) => {
+  if (IS_STAGING && req.query.demo === '1') {
+    return res.json({ feeds: demoPayload(req.now).feeds });
+  }
+  if (!req.user) return res.json({ feeds: [] });
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, url, title, site_url, last_error, fetched_at
+       FROM feeds WHERE user_id = $1 ORDER BY created_at, id`,
+      [req.user.id]);
+    res.json({ feeds: rows });
+  } catch (err) {
+    console.error('GET /api/feeds failed:', err.message);
+    res.status(500).json({ message: "Couldn't load your feeds." });
+  }
+});
+
+app.post('/api/feeds', async (req, res) => {
+  try {
+    const url = req.body && typeof req.body.url === 'string' ? req.body.url.trim() : '';
+    if (!url) return res.status(400).json({ message: 'Enter a feed address.' });
+    let parsed;
+    try {
+      parsed = await feedParse.fetchFeed(url);
+    } catch (err) {
+      // Unreachable, not a feed, too large, too slow: say so, store nothing.
+      return res.status(400).json({ message: err.message });
+    }
+    const inserted = await pool.query(
+      `INSERT INTO feeds (user_id, url, title, site_url, fetched_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id, url) DO NOTHING
+       RETURNING id, url, title, site_url, last_error, fetched_at`,
+      [req.user.id, url, parsed.title, parsed.siteUrl, req.now]);
+    if (!inserted.rows.length) {
+      return res.status(409).json({ message: "You're already following that feed." });
+    }
+    await insertPosts(inserted.rows[0].id, parsed.items);
+    res.json({ feed: inserted.rows[0] });
+  } catch (err) {
+    console.error('POST /api/feeds failed:', err.message);
+    res.status(500).json({ message: "Couldn't add that feed." });
+  }
+});
+
+app.post('/api/feeds/refresh', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id, url FROM feeds WHERE user_id = $1', [req.user.id]);
+    // One failing feed records its own error and never fails the pass.
+    await Promise.allSettled(rows.map((row) => refreshFeed(row, req.now)));
+    res.json({ refreshed: rows.length });
+  } catch (err) {
+    console.error('POST /api/feeds/refresh failed:', err.message);
+    res.status(500).json({ message: "Couldn't refresh your feeds." });
+  }
+});
+
+app.delete('/api/feeds/:id', async (req, res) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(id)) return res.status(400).json({ message: 'Unknown feed.' });
+    const deleted = await pool.query(
+      'DELETE FROM feeds WHERE id = $1 AND user_id = $2 RETURNING id',
+      [id, req.user.id]);
+    if (!deleted.rows.length) return res.status(404).json({ message: 'Feed not found.' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/feeds/:id failed:', err.message);
+    res.status(500).json({ message: "Couldn't remove that feed." });
+  }
+});
+
+app.get('/api/posts/unread', async (req, res) => {
+  if (IS_STAGING && req.query.demo === '1') {
+    return res.json({ posts: demoPayload(req.now).posts });
+  }
+  if (!req.user) return res.json({ posts: [] });
+  try {
+    const { rows } = await pool.query(
+      `SELECT p.id, p.feed_id, f.title AS feed_title, p.title, p.url,
+              p.content_html, p.published_at, p.read_at
+       FROM posts p JOIN feeds f ON f.id = p.feed_id
+       WHERE f.user_id = $1 AND p.read_at IS NULL
+       ORDER BY p.published_at DESC NULLS LAST
+       LIMIT 500`,
+      [req.user.id]);
+    res.json({ posts: rows });
+  } catch (err) {
+    console.error('GET /api/posts/unread failed:', err.message);
+    res.status(500).json({ message: "Couldn't load your unread posts." });
+  }
+});
+
+app.post('/api/posts/:id/read', async (req, res) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(id)) return res.status(400).json({ message: 'Unknown post.' });
+    const updated = await pool.query(
+      `UPDATE posts p SET read_at = $2
+       FROM feeds f
+       WHERE p.feed_id = f.id AND p.id = $1 AND f.user_id = $3
+       RETURNING p.id`,
+      [id, req.now, req.user.id]);
+    if (!updated.rows.length) return res.status(404).json({ message: 'Post not found.' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/posts/:id/read failed:', err.message);
+    res.status(500).json({ message: "Couldn't mark that post read." });
+  }
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -192,9 +448,31 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Graceful shutdown: stop accepting connections, let in-flight requests
+  // finish under a hard deadline, close the pool, exit.
+  const DRAIN_MS = 3000;
+  async function shutdown(signal) {
+    if (shuttingDown) return; // SIGTERM then SIGINT must not double-run
+    shuttingDown = true;
+    console.log(`[shutdown] ${signal} received, draining`);
+    server.close(() => {});
+    server.closeIdleConnections?.();
+    const t = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+    try {
+      await pool.end();
+    } catch (err) {
+      console.error('[shutdown] pool.end failed', err.message);
+    }
+    process.exit(0);
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,6 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +63,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%230c544e'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -78,6 +77,10 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <!-- The native-feel UI kit, centrally hosted like the bridge: bottom
+       sheets for the preview and the Feeds list, a centered modal for Add
+       feed, pull-to-refresh, and toasts. -->
+  <link rel="stylesheet" href="/usernode-native/v1/native.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -91,6 +94,7 @@
        The bridge is also where the app learns the viewer's light/dark theme:
        the script below reads it. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
+  <script src="/usernode-native/v1/native.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
   <script>
@@ -106,30 +110,459 @@
       media.addEventListener('change', applyTheme);
     })();
   </script>
+  <!-- Styles for feed HTML the app renders inside the preview. Feed HTML is
+       sanitized server-side before storage, so only plain elements reach
+       here; this just tames their spacing and keeps images inside the
+       sheet. Colours come from the kit's tokens. -->
+  <style>
+    .feed-body p { margin: 0 0 1em; }
+    .feed-body p:last-child { margin-bottom: 0; }
+    .feed-body img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+    .feed-body a { color: rgb(var(--accent)); text-decoration: underline; }
+    .feed-body ul, .feed-body ol { margin: 0 0 1em; padding-left: 1.25em; }
+    .feed-body blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 2px solid rgb(var(--line)); color: rgb(var(--muted)); }
+    .feed-body pre { overflow-x: auto; background: rgb(var(--raised)); border-radius: 0.5rem; padding: 0.75rem 1rem; }
+    .feed-body h1, .feed-body h2, .feed-body h3 { font-size: 1rem; font-weight: 600; margin: 0 0 0.5em; }
+    .feed-body hr { border: 0; border-top: 1px solid rgb(var(--line)); margin: 1.5em 0; }
+  </style>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
+    <header class="flex items-center justify-between gap-3">
+      <div class="flex items-baseline gap-2">
+        <h1 class="text-title">Unread</h1>
+        <span id="unread-count" class="hidden rounded-full bg-accent px-2.5 py-0.5 text-small font-semibold text-on-accent">0</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="feeds-button" type="button" class="btn-secondary px-3 text-small">Feeds</button>
+        <button id="add-feed" type="button" class="btn-primary">Add feed</button>
+      </div>
+    </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- The one list this screen has: unread posts, or the one state
+         (loading, empty, error) it is in right now. -->
+    <section id="content" aria-live="polite"></section>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <p class="text-center text-small text-muted">Feeds refresh when you open the app, or pull the list down.</p>
   </main>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Setup ────────────────────────────────────────────────────────────
+
+    var params = new URLSearchParams(window.location.search);
+    // Demo mode: ?demo=1 on the page's own URL (staging only, server-side
+    // gated). Read calls carry it along; write calls never happen, so a
+    // demo post marked read lasts only for the session.
+    var DEMO = params.get('demo') === '1';
+    var contentEl = document.getElementById('content');
+    var countEl = document.getElementById('unread-count');
+
+    var state = { posts: [], loading: true, loadError: null, signedIn: false };
+
+    function nowMs() {
+      try {
+        if (window.usernode && typeof window.usernode.now === 'function') {
+          return window.usernode.now().getTime();
+        }
+      } catch (e) { /* fall through to the clock */ }
+      return Date.now();
+    }
+
+    // One fetch helper: forwards the platform token, tells the server the
+    // preview's "now", and turns failures into Errors with readable
+    // messages.
+    function api(path, opts) {
+      opts = opts || {};
+      var headers = {};
+      if (opts.body) headers['Content-Type'] = 'application/json';
+      var token = params.get('token');
+      if (token) headers['x-usernode-token'] = token;
+      if (window.usernode && window.usernode.previewNow && typeof window.usernode.now === 'function') {
+        headers['x-usernode-now'] = window.usernode.now().toISOString();
+      }
+      var url = path;
+      var isRead = !opts.method || opts.method === 'GET';
+      if (DEMO && isRead && path.indexOf('/api/') === 0) {
+        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'demo=1';
+      }
+      return fetch(url, { method: opts.method || 'GET', headers: headers, body: opts.body })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            if (!res.ok) {
+              var err = new Error(data.message || data.error || 'Something went wrong.');
+              err.status = res.status;
+              err.code = data.error;
+              throw err;
+            }
+            return data;
+          });
+        });
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function toast(message) {
+      if (window.unNative && typeof unNative.toast === 'function') unNative.toast(message);
+    }
+
+    // Present a content element as a bottom sheet, a centered modal, or —
+    // where the native kit is not reachable (offline dev) — a plain fixed
+    // overlay built from the same tokens.
+    function present(el, kind, onDismiss) {
+      if (window.unNative) {
+        if (kind === 'sheet' && typeof unNative.presentSheet === 'function') {
+          return unNative.presentSheet({ contentEl: el, onDismiss: onDismiss });
+        }
+        if (kind === 'modal' && typeof unNative.presentModal === 'function') {
+          return unNative.presentModal({ contentEl: el, onDismiss: onDismiss });
+        }
+      }
+      var backdrop = document.createElement('div');
+      backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center bg-fg/40 p-4';
+      var card = document.createElement('div');
+      card.className = 'max-h-svh w-full max-w-md overflow-y-auto rounded-2xl border border-line bg-surface';
+      card.appendChild(el);
+      backdrop.appendChild(card);
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) close();
+      });
+      function onKey(e) { if (e.key === 'Escape') close(); }
+      function close() {
+        document.removeEventListener('keydown', onKey);
+        backdrop.remove();
+        if (onDismiss) onDismiss();
+      }
+      document.addEventListener('keydown', onKey);
+      document.body.appendChild(backdrop);
+      return { dismiss: close };
+    }
+
+    // ── Time stamps ──────────────────────────────────────────────────────
+
+    function relTime(iso) {
+      if (!iso) return '';
+      var time = new Date(iso).getTime();
+      if (!isFinite(time)) return '';
+      var seconds = Math.max(0, Math.round((nowMs() - time) / 1000));
+      if (seconds < 60) return 'just now';
+      var minutes = Math.round(seconds / 60);
+      if (minutes < 60) return minutes + 'm ago';
+      var hours = Math.round(minutes / 60);
+      if (hours < 24) return hours + 'h ago';
+      var days = Math.round(hours / 24);
+      if (days < 30) return days + 'd ago';
+      var months = Math.round(days / 30);
+      if (months < 12) return months + 'mo ago';
+      return Math.round(months / 12) + 'y ago';
+    }
+
+    // ── Rendering ────────────────────────────────────────────────────────
+
+    // Loading: skeleton shapes where the rows will be. Never the empty
+    // state, and never a blank screen.
+    function renderLoading() {
+      var rows = '';
+      for (var i = 0; i < 6; i++) {
+        rows += '<li class="flex flex-col gap-2 px-4 py-3">' +
+          '<div class="skeleton h-4 w-3/4"></div>' +
+          '<div class="skeleton h-3 w-1/3"></div></li>';
+      }
+      contentEl.innerHTML = '<ul class="list" aria-hidden="true">' + rows + '</ul>';
+      countEl.classList.add('hidden');
+    }
+
+    // Failure of the list load itself: what failed, what still works, and
+    // Retry. Feed-level errors live in the Feeds sheet.
+    function renderError() {
+      contentEl.innerHTML =
+        '<div class="state-error">' +
+        '<p class="text-body font-semibold">Couldn’t load your posts</p>' +
+        '<p class="text-small text-muted">Your feeds and their posts are still saved. Check your connection and try again.</p>' +
+        '<button type="button" data-retry-load class="btn-secondary mt-2">Retry</button>' +
+        '</div>';
+    }
+
+    // A successful load that found nothing: an invitation to act.
+    function renderEmpty() {
+      contentEl.innerHTML =
+        '<div class="state-empty">' +
+        '<h2 class="text-heading">No unread posts</h2>' +
+        '<p class="text-small text-muted">Add a feed and its new posts will appear here.</p>' +
+        '<button type="button" data-add-feed class="btn-primary mt-2">Add feed</button>' +
+        '</div>';
+      countEl.classList.add('hidden');
+    }
+
+    function metaHtml(post) {
+      var bits = [escapeHtml(post.feed_title || '')];
+      var when = relTime(post.published_at);
+      if (when) bits.push(escapeHtml(when));
+      return bits.join(' ');
+    }
+
+    function rowHtml(post) {
+      return '<li>' +
+        '<button type="button" data-post-id="' + escapeHtml(String(post.id)) +
+        '" class="flex min-h-11 w-full items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">' +
+        '<span class="mt-2 h-2 w-2 flex-none rounded-full bg-accent" aria-hidden="true"></span>' +
+        '<span class="min-w-0">' +
+        '<span class="block font-serif text-body font-semibold leading-snug">' + escapeHtml(post.title) + '</span>' +
+        '<span class="mt-0.5 block text-small text-muted">' + metaHtml(post) + '</span>' +
+        '</span></button></li>';
+    }
+
+    function renderList() {
+      contentEl.innerHTML = '<ul class="list">' + state.posts.map(rowHtml).join('') + '</ul>';
+      updateCount();
+    }
+
+    function updateCount() {
+      var count = state.posts.length;
+      countEl.textContent = String(count);
+      countEl.classList.toggle('hidden', count === 0);
+    }
+
+    function render() {
+      if (state.loading) return renderLoading();
+      if (state.loadError) return renderError();
+      if (!state.posts.length) return renderEmpty();
+      renderList();
+    }
+
+    // Remove one row in place, so the person keeps their place in the list.
+    function removePost(id) {
+      state.posts = state.posts.filter(function (p) { return String(p.id) !== String(id); });
+      var all = contentEl.querySelectorAll('[data-post-id]');
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].getAttribute('data-post-id') === String(id)) {
+          var li = all[i].closest('li');
+          if (li) li.remove();
+          break;
+        }
+      }
+      updateCount();
+      if (!state.posts.length && !state.loading && !state.loadError) render();
+    }
+
+    // ── Actions ──────────────────────────────────────────────────────────
+
+    function markRead(id) {
+      return api('/api/posts/' + encodeURIComponent(id) + '/read', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    }
+
+    // Tapping a row marks the post read and opens the preview; the row
+    // leaves the list when the preview closes, so the place is kept.
+    function openPreview(post) {
+      if (!DEMO) markRead(post.id).catch(function () { /* the bridge asks for an account where needed */ });
+      var el = document.createElement('div');
+      el.className = 'flex flex-col gap-3 px-5 pb-8 pt-1';
+      el.innerHTML =
+        '<p class="text-small text-muted">' + metaHtml(post) + '</p>' +
+        '<h2 class="font-serif text-heading leading-snug">' + escapeHtml(post.title) + '</h2>' +
+        '<div class="feed-body font-serif text-body">' +
+        (post.content_html || '<p class="text-muted">This post has no preview text.</p>') + '</div>' +
+        (post.url
+          ? '<a class="btn-secondary text-accent" href="' + escapeHtml(post.url) +
+            '" target="_blank" rel="noopener noreferrer">Open full article</a>'
+          : '');
+      present(el, 'sheet', function () { removePost(post.id); });
+    }
+
+    function refreshFeeds() {
+      if (DEMO) return Promise.resolve();
+      return api('/api/feeds/refresh', { method: 'POST', body: JSON.stringify({}) });
+    }
+
+    function loadUnread() {
+      return api('/api/posts/unread').then(function (data) {
+        state.posts = data.posts || [];
+        state.loadError = null;
+      }).catch(function (err) {
+        if (state.posts.length) {
+          // Keep the list the person is reading; say the refresh failed.
+          toast('Couldn’t refresh your posts.');
+          return;
+        }
+        state.loadError = err;
+      }).then(function () {
+        state.loading = false;
+        render();
+      });
+    }
+
+    // ── Add feed ─────────────────────────────────────────────────────────
+
+    function openAddFeed() {
+      var el = document.createElement('form');
+      el.className = 'flex flex-col gap-3 p-5';
+      el.innerHTML =
+        '<h2 class="text-heading">Add feed</h2>' +
+        '<label class="text-small font-medium text-muted" for="feed-url">Feed address</label>' +
+        '<input id="feed-url" name="url" type="url" required class="field" placeholder="e.g. https://example.com/feed.xml">' +
+        '<p data-error class="hidden text-small text-danger" role="alert"></p>' +
+        '<div class="mt-1 flex justify-end gap-2">' +
+        '<button type="button" data-cancel class="btn-secondary">Cancel</button>' +
+        '<button type="submit" class="btn-primary">Add feed</button></div>';
+      var handle = present(el, 'modal');
+      var urlEl = el.querySelector('#feed-url');
+      var errorEl = el.querySelector('[data-error]');
+      var submitBtn = el.querySelector('button[type="submit"]');
+      el.addEventListener('click', function (e) {
+        if (e.target.closest('[data-cancel]')) handle.dismiss();
+      });
+      el.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errorEl.classList.add('hidden');
+        submitBtn.disabled = true;
+        api('/api/feeds', { method: 'POST', body: JSON.stringify({ url: urlEl.value.trim() }) })
+          .then(function () {
+            handle.dismiss();
+            toast('Feed added.');
+            loadUnread();
+          })
+          .catch(function (err) {
+            errorEl.textContent = err.message;
+            errorEl.classList.remove('hidden');
+          })
+          .then(function () { submitBtn.disabled = false; });
+      });
+      try { urlEl.focus({ preventScroll: true }); } catch (e) { urlEl.focus(); }
+    }
+
+    // ── Feeds sheet ──────────────────────────────────────────────────────
+
+    function feedRowHtml(feed) {
+      var error = '';
+      if (feed.last_error) {
+        error = '<p class="mt-1 text-small text-danger">' + escapeHtml(feed.last_error) + '</p>';
+        if (!DEMO) {
+          error += '<button type="button" data-retry="' + escapeHtml(String(feed.id)) +
+            '" class="btn-secondary mt-2 px-3 text-small">Retry</button>';
+        }
+      }
+      var remove = DEMO ? '' :
+        '<button type="button" data-remove="' + escapeHtml(String(feed.id)) +
+        '" class="btn-secondary flex-none px-3 text-small">Remove feed</button>';
+      return '<div class="flex items-start justify-between gap-3 border-t border-line py-3 first:border-t-0">' +
+        '<div class="min-w-0">' +
+        '<p class="text-body font-medium">' + escapeHtml(feed.title) + '</p>' +
+        '<p class="truncate text-small text-muted">' + escapeHtml(feed.url) + '</p>' +
+        error + '</div>' + remove + '</div>';
+    }
+
+    function openFeeds() {
+      var el = document.createElement('div');
+      el.className = 'flex flex-col gap-2 px-5 pb-8 pt-1';
+      el.innerHTML = '<h2 class="text-heading">Feeds</h2>' +
+        '<div data-list class="flex flex-col"><div class="skeleton h-12 w-full"></div></div>';
+      present(el, 'sheet');
+      var listEl = el.querySelector('[data-list]');
+
+      function renderFeeds() {
+        return api('/api/feeds').then(function (data) {
+          var feeds = data.feeds || [];
+          if (!feeds.length) {
+            listEl.innerHTML = '<p class="text-small text-muted">No feeds yet. Add one to start reading.</p>';
+            return;
+          }
+          listEl.innerHTML = feeds.map(feedRowHtml).join('');
+        }).catch(function () {
+          listEl.innerHTML = '<p class="text-small text-danger">Couldn’t load your feeds.</p>';
+        });
+      }
+
+      listEl.addEventListener('click', function (e) {
+        var removeBtn = e.target.closest('[data-remove]');
+        if (removeBtn) {
+          removeBtn.disabled = true;
+          api('/api/feeds/' + encodeURIComponent(removeBtn.getAttribute('data-remove')), { method: 'DELETE' })
+            .then(function () {
+              toast('Feed removed.');
+              loadUnread();
+              return renderFeeds();
+            })
+            .catch(function (err) { toast(err.message); removeBtn.disabled = false; });
+          return;
+        }
+        var retryBtn = e.target.closest('[data-retry]');
+        if (retryBtn) {
+          retryBtn.disabled = true;
+          refreshFeeds().then(renderFeeds).then(loadUnread)
+            .catch(function (err) { toast(err.message); retryBtn.disabled = false; });
+        }
+      });
+
+      renderFeeds();
+    }
+
+    // ── Wiring ───────────────────────────────────────────────────────────
+
+    contentEl.addEventListener('click', function (e) {
+      var retry = e.target.closest('[data-retry-load]');
+      if (retry) {
+        state.loading = true;
+        render();
+        loadUnread();
+        return;
+      }
+      var addBtn = e.target.closest('[data-add-feed]');
+      if (addBtn) { openAddFeed(); return; }
+      var row = e.target.closest('[data-post-id]');
+      if (row) {
+        var id = row.getAttribute('data-post-id');
+        var post = null;
+        for (var i = 0; i < state.posts.length; i++) {
+          if (String(state.posts[i].id) === id) { post = state.posts[i]; break; }
+        }
+        if (post) openPreview(post);
+      }
+    });
+
+    document.getElementById('add-feed').addEventListener('click', openAddFeed);
+    document.getElementById('feeds-button').addEventListener('click', openFeeds);
+
+    // Pull the list down to refresh by hand (no-op on desktop, no-op where
+    // the kit is not loaded).
+    if (window.unNative && typeof unNative.attachPullToRefresh === 'function') {
+      unNative.attachPullToRefresh(
+        document.scrollingElement || document.documentElement,
+        function () {
+          var refresh = state.signedIn
+            ? refreshFeeds().catch(function () { })
+            : Promise.resolve();
+          return refresh.then(loadUnread);
+        });
+    }
+
+    // Open: render cached unread posts immediately, then refresh in the
+    // background and update the list when it settles. Guests skip the
+    // refresh, so nobody is asked to make an account just for opening.
+    function init() {
+      renderLoading();
+      var mePromise = api('/api/me').catch(function () { return { guest: true }; });
+      loadUnread().then(function () {
+        return mePromise;
+      }).then(function (me) {
+        state.signedIn = !!(me && me.user);
+        if (!state.signedIn) return null;
+        return refreshFeeds()
+          .catch(function () { })
+          .then(loadUnread);
+      }).catch(function () { });
+    }
+
+    init();
+  })();
+  </script>
 </body>
 </html>

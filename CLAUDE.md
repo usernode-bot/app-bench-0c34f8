@@ -97,22 +97,42 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader on the Feedly model: you add your own RSS or Atom
+feeds and see every unread post from all of them in one scrolling list,
+newest first. Tapping a post marks it read (for good) and opens a preview
+with the article's text and images from the feed itself, plus an **Open
+full article** link out to the browser. Feeds are private per person: the
+`feeds` and `posts` tables are per-user (`req.user.id`) and both are marked
+`staging:private`, so a staging preview starts empty — the populated screen
+is behind `?demo=1` (request-time demo injection, nothing written to the
+database). Feed fetching and parsing live in `feed-parse.js`, written for
+this app so there are no new npm dependencies; feed HTML is sanitized at
+parse time and never trusted at render time.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, decided by its first version. Every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** a deep teal accent over warm neutrals. Light accent
+  rgb(12 84 78) with white text on it; dark accent rgb(94 214 202) with
+  very dark teal rgb(5 46 43) on it. The neutrals are the kit's warm stone
+  greys, unchanged. The focus ring follows the accent. Every text pair
+  stays at 4.5:1 or more in both looks.
+- **Signature element:** the unread dot — every unread row leads with a
+  solid teal dot, the only saturated colour at rest besides the Add feed
+  button, and the dot is gone once the post is read.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  unchanged. Post titles and preview text are set in `font-serif`
+  (ui-serif, Georgia) — the reading voice of the app; the header, buttons
+  and meta lines stay in the default system sans.
+- **Words:** the list is *Unread*; things in it are *posts*; subscriptions
+  are *feeds*. The actions are Add feed, Feeds, Remove feed, Retry, and
+  Open full article. The empty state is No unread posts. A feed error
+  reads Couldn't reach.
+
+Both looks (light and dark) follow the viewer's Homeroom theme; there is
+no fixed look and no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
