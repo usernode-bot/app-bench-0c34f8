@@ -35,11 +35,20 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 190 18 60;      /* the one accent: tomato red */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 190 18 60;       /* the keyboard focus ring */
+    /* The tier letter chips, S down to F: tomato red stepping through
+       orange, amber and green to slate, then stone grey for F. */
+    --tier-s: 190 18 60;
+    --tier-a: 194 65 12;
+    --tier-b: 161 98 7;
+    --tier-c: 21 128 61;
+    --tier-d: 71 85 105;
+    --tier-f: 87 83 78;
+    --on-tier: 255 255 255;   /* the letter on any tier chip */
   }
   .dark {
     --ground: 12 10 9;
@@ -48,11 +57,18 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 251 113 133;    /* tomato red, lifted for the dark look */
+    --on-accent: 76 5 25;     /* near-black rose */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 113 133;
+    --tier-s: 251 113 133;
+    --tier-a: 251 146 60;
+    --tier-b: 250 204 21;
+    --tier-c: 74 222 128;
+    --tier-d: 148 163 184;
+    --tier-f: 168 162 158;
+    --on-tier: 12 10 9;       /* a dark letter on the lifted chips */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -124,5 +140,34 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The tier board's own parts: a lane per tier led by its letter chip, and
+     the pills people drag between them. Chip colours come from the tier
+     tokens (bg-tier-s … bg-tier-f), never raw values. */
+  .tier-lane {
+    @apply mb-2 flex items-stretch overflow-hidden rounded-xl border border-line bg-surface;
+  }
+  .tier-chip {
+    @apply flex w-12 flex-none items-center justify-center bg-tier-s text-heading text-on-tier;
+  }
+  .tier-chip-sm {
+    @apply flex h-7 w-7 flex-none items-center justify-center rounded-md bg-tier-s text-small text-on-tier;
+  }
+  .tier-drop {
+    @apply flex min-h-11 flex-1 flex-wrap content-start items-center gap-1.5 p-2;
+  }
+  /* Where a dragged thing would land, while it hovers over the lane. */
+  .tier-drop-hot {
+    @apply bg-raised ring-2 ring-inset ring-focus;
+  }
+  .pill {
+    @apply inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-line bg-raised px-3 text-body text-fg;
+  }
+  .pill-count {
+    @apply flex-none text-small font-semibold text-accent;
+  }
+  .pill-hint {
+    @apply px-2 text-small text-muted;
   }
 }

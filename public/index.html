@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23be123c'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,28 +108,503 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🏆</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
+    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <div class="inline-flex overflow-hidden rounded-lg border border-line bg-surface" role="tablist" aria-label="Board view">
+        <button id="tab-mine" type="button" role="tab" aria-selected="true">My board</button>
+        <button id="tab-crowd" type="button" role="tab" aria-selected="false">Crowd view</button>
+      </div>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <form id="add-form" class="mt-4 flex gap-2" novalidate>
+      <div class="min-w-0 flex-1">
+        <label for="add-name" class="sr-only">Add a thing to rank</label>
+        <input id="add-name" name="name" type="text" class="field" maxlength="60"
+               placeholder="e.g. a burrito place in the Mission" autocomplete="off">
+      </div>
+      <button id="add-btn" type="submit" class="btn-primary shrink-0">Add thing</button>
+    </form>
+
+    <p id="notice" hidden class="mt-2 flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 text-small text-fg" aria-live="polite"></p>
+
+    <div id="state-loading" hidden class="mt-6 flex flex-col gap-6 md:flex-row md:flex-row-reverse md:items-start md:gap-8" aria-hidden="true">
+      <div class="md:w-72 md:flex-none">
+        <div class="skeleton mb-2 h-5 w-32"></div>
+        <div class="skeleton h-40 w-full rounded-xl"></div>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="skeleton mb-2 h-5 w-24"></div>
+        <div class="skeleton mb-2 h-16 w-full rounded-xl"></div>
+        <div class="skeleton mb-2 h-16 w-full rounded-xl"></div>
+        <div class="skeleton h-16 w-full rounded-xl"></div>
+      </div>
+    </div>
+
+    <div id="state-empty" hidden class="mt-6 state-empty">
+      <p class="text-heading">Nothing to rank yet</p>
+      <p class="text-body text-muted">Add the first thing above.</p>
+    </div>
+
+    <div id="state-error" hidden class="mt-6 state-error">
+      <p class="text-heading">Couldn't load the board</p>
+      <p class="text-body text-muted">The page loaded, but the board did not. Adding a thing above still works.</p>
+      <button id="retry-btn" type="button" class="btn-secondary">Retry</button>
+    </div>
+
+    <div id="board-wrap" hidden class="mt-6">
+      <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
+        <aside class="md:order-2 md:w-72 md:flex-none">
+          <h2 class="section-label">Things to rank</h2>
+          <ul id="pool" class="list"></ul>
+          <p class="mt-2 px-1 text-small text-muted">Drag a thing into a lane, or tap it to see how everyone voted.</p>
+        </aside>
+        <section class="min-w-0 flex-1 md:order-1">
+          <h2 id="lanes-label" class="section-label">My board</h2>
+          <div id="lanes" data-tier-lanes></div>
+        </section>
+      </div>
+    </div>
   </main>
+
+  <!-- How everyone voted: a small dialog built from the design kit. -->
+  <div id="votes-root" hidden class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+    <div id="votes-veil" class="absolute inset-0 bg-fg/40"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="votes-title" class="card relative w-full max-w-sm">
+      <h2 id="votes-title" class="text-heading">How everyone voted</h2>
+      <p id="votes-item" class="mt-1 text-body text-muted"></p>
+      <div id="votes-list" class="mt-3"></div>
+      <button id="votes-close" type="button" class="btn-secondary mt-4 w-full">Close</button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+    // Whole literal class names, so the Tailwind compiler sees them.
+    var CHIP_BG = { S: 'bg-tier-s', A: 'bg-tier-a', B: 'bg-tier-b', C: 'bg-tier-c', D: 'bg-tier-d', F: 'bg-tier-f' };
+    var TAB_BASE = 'min-h-11 px-4 text-body font-medium';
+    var HOLD_MS = 250; // press-and-hold before a touch drag lifts a pill
+
+    var state = { items: [], mine: {}, crowd: {}, signedIn: false, view: 'mine', loaded: false };
+
+    function $(id) { return document.getElementById(id); }
+    function el(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function api(path, options) {
+      return fetch(path, options).then(function (res) {
+        return res.json().catch(function () { return null; }).then(function (body) {
+          if (!res.ok) {
+            var err = new Error('HTTP ' + res.status);
+            err.status = res.status;
+            err.body = body;
+            throw err;
+          }
+          return body;
+        });
+      });
+    }
+    var JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+    // ── Inline notice ──────────────────────────────────────────────────────
+    var noticeTimer = null;
+    function setNotice(text, retry) {
+      clearTimeout(noticeTimer);
+      var node = $('notice');
+      node.replaceChildren();
+      if (!text) { node.hidden = true; return; }
+      node.hidden = false;
+      node.append(el('span', 'min-w-0', text));
+      if (retry) {
+        var btn = el('button', 'btn-secondary', 'Retry');
+        btn.type = 'button';
+        btn.addEventListener('click', function () { setNotice(null); retry(); });
+        node.append(btn);
+      }
+      noticeTimer = setTimeout(function () { setNotice(null); }, 8000);
+    }
+
+    // Guests can look around; adding and ranking ask them for an account.
+    // The bridge turns account_required answers into its own sheet; this is
+    // the ask-before-they-try path (and the fallback outside the platform).
+    function askAccount(action) {
+      if (window.usernode && typeof window.usernode.askForAccount === 'function') {
+        window.usernode.askForAccount({ action: action });
+      } else {
+        setNotice('Make an account to ' + action + '.');
+      }
+    }
+
+    // ── Data ───────────────────────────────────────────────────────────────
+    function load() {
+      showState('loading');
+      api('/api/items').then(function (data) {
+        state.items = data.items || [];
+        state.signedIn = Boolean(data.viewer && data.viewer.signedIn);
+        if (!state.signedIn) return null;
+        return api('/api/board').then(function (b) { state.mine = b.board || {}; });
+      }).then(function () {
+        state.loaded = true;
+        render();
+      }).catch(function () {
+        state.loaded = false;
+        showState('error');
+      });
+    }
+
+    function setView(view) {
+      state.view = view;
+      paintTabs();
+      render();
+      if (view === 'crowd') {
+        api('/api/crowd').then(function (data) {
+          state.crowd = data.crowd || {};
+          render();
+        }).catch(function () { /* the counts that came with the list still show */ });
+      }
+    }
+
+    // ── Rendering ──────────────────────────────────────────────────────────
+    function showState(name) {
+      $('state-loading').hidden = name !== 'loading';
+      $('state-empty').hidden = name !== 'empty';
+      $('state-error').hidden = name !== 'error';
+      $('board-wrap').hidden = name !== 'board';
+    }
+
+    function render() {
+      if (!state.loaded) return;
+      if (state.items.length === 0) { showState('empty'); return; }
+      showState('board');
+      $('lanes-label').textContent = state.view === 'mine' ? 'My board' : 'Crowd view';
+      renderLanes();
+      renderPool();
+    }
+
+    // The tier a thing sits in for the current view, or null for the pool.
+    function itemTier(item) {
+      if (state.view === 'mine') {
+        var mine = state.mine[item.id];
+        return mine ? mine.tier : null;
+      }
+      return crowdFor(item).lead || null;
+    }
+
+    function crowdFor(item) {
+      return state.crowd[item.id] || { counts: item.counts || {}, lead: item.lead || null };
+    }
+
+    function totalVotes(item) {
+      var counts = crowdFor(item).counts || {};
+      return Object.keys(counts).reduce(function (sum, tier) { return sum + counts[tier]; }, 0);
+    }
+
+    function renderLanes() {
+      var lanes = $('lanes');
+      lanes.replaceChildren();
+      TIERS.forEach(function (tier) {
+        var lane = el('div', 'tier-lane');
+        lane.append(el('span', 'tier-chip ' + CHIP_BG[tier], tier));
+        var drop = el('div', 'tier-drop');
+        drop.dataset.tier = tier;
+        var inTier = state.items.filter(function (item) { return itemTier(item) === tier; });
+        if (inTier.length) {
+          inTier.sort(byNewestFirst).forEach(function (item) { drop.append(pillFor(item, tier)); });
+        } else {
+          drop.append(el('span', 'pill-hint', 'Drop things here'));
+        }
+        lane.append(drop);
+        lanes.append(lane);
+      });
+    }
+
+    // Within a lane on my board, newest placement first. On the crowd view
+    // the list's own order (newest thing first) stands.
+    function byNewestFirst(a, b) {
+      if (state.view !== 'mine') return state.items.indexOf(a) - state.items.indexOf(b);
+      var ta = placedAt(a), tb = placedAt(b);
+      return ta < tb ? 1 : ta > tb ? -1 : 0;
+    }
+    function placedAt(item) {
+      var mine = state.mine[item.id];
+      return mine && mine.placed_at ? String(mine.placed_at) : '';
+    }
+
+    function pillFor(item, tier) {
+      var draggable = state.view === 'mine' && state.signedIn;
+      var pill = el('button', 'pill' + (draggable ? '' : ' cursor-default'));
+      pill.type = 'button';
+      pill.dataset.item = item.id;
+      pill.title = 'How everyone voted';
+      pill.append(el('span', 'min-w-0 flex-1 truncate text-left', item.name));
+      if (state.view === 'crowd') {
+        var counts = crowdFor(item).counts || {};
+        var n = counts[tier] || 0;
+        if (n) pill.append(el('b', 'pill-count', String(n)));
+      }
+      if (draggable) { pill.dataset.draggable = ''; pill.draggable = true; }
+      return pill;
+    }
+
+    function renderPool() {
+      var pool = $('pool');
+      pool.replaceChildren();
+      var rest = state.items.filter(function (item) { return !itemTier(item); });
+      if (!rest.length) {
+        pool.append(el('li', 'px-4 py-3 text-small text-muted', 'Nothing here right now.'));
+        return;
+      }
+      rest.forEach(function (item) {
+        var li = el('li');
+        var row = el('button', 'flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left text-body');
+        row.type = 'button';
+        row.dataset.item = item.id;
+        row.title = 'How everyone voted';
+        row.append(el('span', 'flex-none text-muted', '≡'));
+        row.append(el('span', 'min-w-0 flex-1 truncate', item.name));
+        if (state.view === 'crowd') {
+          var votes = totalVotes(item);
+          if (votes) row.append(el('b', 'pill-count', String(votes)));
+        }
+        if (state.view === 'mine' && state.signedIn) {
+          row.dataset.draggable = '';
+          row.draggable = true;
+        }
+        li.append(row);
+        pool.append(li);
+      });
+    }
+
+    // ── Tabs ───────────────────────────────────────────────────────────────
+    function paintTabs() {
+      var on = ' bg-accent text-on-accent';
+      var off = ' text-muted hover:bg-raised';
+      var mine = $('tab-mine'), crowd = $('tab-crowd');
+      mine.className = TAB_BASE + (state.view === 'mine' ? on : off);
+      crowd.className = TAB_BASE + (state.view === 'crowd' ? on : off);
+      mine.setAttribute('aria-selected', String(state.view === 'mine'));
+      crowd.setAttribute('aria-selected', String(state.view === 'crowd'));
+    }
+    $('tab-mine').addEventListener('click', function () { setView('mine'); });
+    $('tab-crowd').addEventListener('click', function () { setView('crowd'); });
+
+    // ── Add a thing ────────────────────────────────────────────────────────
+    $('add-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = $('add-name');
+      var name = input.value.trim();
+      if (!name) { setNotice('Type a name first.'); return; }
+      if (name.length > 60) { setNotice('Keep the name under 60 characters.'); return; }
+      var btn = $('add-btn');
+      btn.disabled = true;
+      api('/api/items', { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ name: name }) })
+        .then(function (data) {
+          state.items.unshift(data.item);
+          input.value = '';
+          setNotice(null);
+          if (state.loaded) render(); else load();
+        })
+        .catch(function (err) {
+          if (err.status === 401) askAccount('add a thing');
+          else setNotice((err.body && err.body.error) || 'Could not add that thing. Try again.');
+        })
+        .finally(function () { btn.disabled = false; });
+    });
+
+    // ── Moving a thing (optimistic, one appended row per move) ─────────────
+    function moveItem(itemId, tier) {
+      if (!TIERS.includes(tier)) return;
+      var id = Number(itemId);
+      var prev = state.mine[id] ? { tier: state.mine[id].tier, placed_at: state.mine[id].placed_at } : null;
+      state.mine[id] = { tier: tier, placed_at: new Date().toISOString() };
+      setNotice(null);
+      render();
+      api('/api/placements', { method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify({ item_id: id, tier: tier }) })
+        .catch(function (err) {
+          if (prev) state.mine[id] = prev;
+          else delete state.mine[id];
+          render();
+          if (err.status === 401) askAccount('rank things');
+          else setNotice('Your move was not saved.', function () { moveItem(id, tier); });
+        });
+    }
+
+    // ── Drag with a mouse ──────────────────────────────────────────────────
+    document.addEventListener('dragstart', function (e) {
+      var row = e.target.closest && e.target.closest('[data-draggable]');
+      if (!row) return;
+      if (!state.signedIn || state.view !== 'mine') { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', row.dataset.item);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    document.addEventListener('dragover', function (e) {
+      var drop = e.target.closest && e.target.closest('.tier-drop');
+      if (!drop || state.view !== 'mine' || !state.signedIn) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      clearHot();
+      drop.classList.add('tier-drop-hot');
+    });
+    document.addEventListener('dragleave', function (e) {
+      var drop = e.target.closest && e.target.closest('.tier-drop');
+      if (drop) drop.classList.remove('tier-drop-hot');
+    });
+    document.addEventListener('drop', function (e) {
+      var drop = e.target.closest && e.target.closest('.tier-drop');
+      clearHot();
+      if (!drop) return;
+      e.preventDefault();
+      var id = Number(e.dataTransfer.getData('text/plain'));
+      if (id) moveItem(id, drop.dataset.tier);
+    });
+
+    function clearHot() {
+      document.querySelectorAll('.tier-drop-hot').forEach(function (node) {
+        node.classList.remove('tier-drop-hot');
+      });
+    }
+
+    // ── Drag with touch: press and hold lifts, release over a lane drops ───
+    var touch = null;
+
+    document.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      var row = e.target.closest && e.target.closest('[data-draggable]');
+      if (!row || !state.signedIn || state.view !== 'mine') return;
+      var t = e.touches[0];
+      touch = {
+        itemId: Number(row.dataset.item),
+        x: t.clientX, y: t.clientY,
+        row: row, ghost: null, lifted: false,
+        timer: setTimeout(function () { liftTouch(); }, HOLD_MS),
+      };
+    }, { passive: true });
+
+    function liftTouch() {
+      if (!touch) return;
+      touch.lifted = true;
+      var rect = touch.row.getBoundingClientRect();
+      var ghost = touch.row.cloneNode(true);
+      ghost.style.cssText += 'position:fixed;margin:0;z-index:60;pointer-events:none;opacity:0.9;';
+      ghost.style.left = rect.left + 'px';
+      ghost.style.top = rect.top + 'px';
+      ghost.style.width = rect.width + 'px';
+      document.body.append(ghost);
+      touch.ghost = ghost;
+      touch.row.style.opacity = '0.4';
+    }
+
+    document.addEventListener('touchmove', function (e) {
+      if (!touch) return;
+      var t = e.touches[0];
+      if (!touch.lifted) {
+        // A finger that travels is a scroll, not a hold.
+        if (Math.abs(t.clientX - touch.x) + Math.abs(t.clientY - touch.y) > 12) {
+          clearTimeout(touch.timer);
+          touch = null;
+        }
+        return;
+      }
+      e.preventDefault();
+      touch.ghost.style.left = (t.clientX - touch.ghost.offsetWidth / 2) + 'px';
+      touch.ghost.style.top = (t.clientY - touch.ghost.offsetHeight / 2) + 'px';
+      clearHot();
+      var drop = laneAt(t.clientX, t.clientY);
+      if (drop) drop.classList.add('tier-drop-hot');
+    }, { passive: false });
+
+    document.addEventListener('touchend', function (e) {
+      if (!touch) return;
+      endTouch(e, e.changedTouches[0]);
+    });
+    document.addEventListener('touchcancel', function (e) {
+      if (touch) endTouch(e, null);
+    });
+
+    function endTouch(e, point) {
+      var wasLifted = touch.lifted;
+      var itemId = touch.itemId;
+      var drop = wasLifted && point ? laneAt(point.clientX, point.clientY) : null;
+      clearTimeout(touch.timer);
+      if (touch.ghost) touch.ghost.remove();
+      if (touch.row) touch.row.style.opacity = '';
+      touch = null;
+      if (!wasLifted) return; // a tap: the click below opens the vote dialog
+      e.preventDefault();     // a drag must not end as a click
+      clearHot();
+      if (drop) moveItem(itemId, drop.dataset.tier);
+    }
+
+    function laneAt(x, y) {
+      var node = document.elementFromPoint(x, y);
+      return node && node.closest ? node.closest('.tier-drop') : null;
+    }
+
+    // ── How everyone voted ─────────────────────────────────────────────────
+    var lastFocus = null;
+
+    document.addEventListener('click', function (e) {
+      var row = e.target.closest && e.target.closest('[data-item]');
+      if (row && row.dataset.item) openVotes(Number(row.dataset.item), row);
+    });
+
+    function openVotes(id, invoker) {
+      lastFocus = invoker || document.activeElement;
+      $('votes-item').textContent = 'Loading…';
+      $('votes-list').replaceChildren();
+      $('votes-root').hidden = false;
+      $('votes-close').focus();
+      api('/api/items/' + id + '/votes').then(function (data) {
+        $('votes-item').textContent = data.item.name;
+        renderVotes(data.groups || []);
+      }).catch(function (err) {
+        $('votes-item').textContent = '';
+        renderVotes([(err.body && err.body.error) || 'Could not load the votes. Try again.']);
+      });
+    }
+
+    function renderVotes(groups) {
+      var list = $('votes-list');
+      list.replaceChildren();
+      if (!groups.length) {
+        list.append(el('p', 'text-small text-muted', 'No one has ranked this yet.'));
+        return;
+      }
+      groups.forEach(function (group) {
+        if (typeof group === 'string') { // an error message, not a tier group
+          list.append(el('p', 'text-small text-muted', group));
+          return;
+        }
+        var row = el('div', 'flex items-center gap-2.5 border-t border-line py-2 text-small first:border-t-0');
+        row.append(el('span', 'tier-chip-sm ' + CHIP_BG[group.tier], group.tier));
+        row.append(el('span', 'min-w-0 flex-1', group.voters.join(', ')));
+        list.append(row);
+      });
+    }
+
+    function closeVotes() {
+      $('votes-root').hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    $('votes-close').addEventListener('click', closeVotes);
+    $('votes-veil').addEventListener('click', closeVotes);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !$('votes-root').hidden) closeVotes();
+    });
+
+    // ── Start ──────────────────────────────────────────────────────────────
+    $('retry-btn').addEventListener('click', load);
+    paintTabs();
+    load();
+  })();
+  </script>
 </body>
 </html>

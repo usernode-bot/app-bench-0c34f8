@@ -97,22 +97,28 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier list for a Homeroom group: anyone adds things to rank
+(restaurants, films, anything), each person drags them into their own tiers
+from S to F, and everyone can compare their own board with the crowd's view
+and open any thing to see who currently has it where.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by its first real version; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** tomato red accent (a deep rose, `rgb(190 18 60)`, in the
+  light look; a lifted rose, `rgb(251 113 133)`, in the dark) on the kit's
+  warm stone neutrals, which stay on purpose: they suit a food-and-friends
+  app. The six tier chips carry their own colours, tomato red for S stepping
+  down through orange, amber and green to slate for D and stone grey for F
+  (`bg-tier-s` … `bg-tier-f`, with `text-on-tier` for the letter).
+- **Signature element:** the tier lanes themselves: full-width stacked
+  rows, each led by a big coloured letter chip.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  unchanged.
+- The app follows the viewer's Homeroom theme in both looks; no theme
+  picker, no fixed look.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +143,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- `placements` is append-only: a move INSERTs one row, nothing is ever
+  updated or deleted. A person's current tier for a thing is their newest
+  row for it; there is no update or delete route.
+- Thing names are trimmed, capped at 60 characters, and case-insensitively
+  unique (a unique index on `lower(name)` backs the refusal).
+- Staging seed rows use the `Staging demo:` prefix and fake users
+  (`staging-demo-*`), never the identity of whoever opens the preview.

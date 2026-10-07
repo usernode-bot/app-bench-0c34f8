@@ -2,5 +2,26 @@
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "board.default",
+      "name": "Board renders",
+      "path": "/",
+      "expectSelector": "[data-tier-lanes]",
+      "expectText": "Things to rank",
+      "visual": true,
+      "impact": [
+        "public/index.html",
+        "server.js",
+        "styles/tailwind-input.css",
+        "tailwind.config.js"
+      ]
+    },
+    {
+      "name": "Crowd view toggle present",
+      "path": "/",
+      "expectText": "Crowd view"
+    }
+  ]
 }
