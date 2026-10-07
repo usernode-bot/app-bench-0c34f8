@@ -97,22 +97,29 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot turns four choices — bread type, hydration, loaf count and
+loaf size — into a home-baking recipe: ingredient weights in grams, the
+rise stages from mix to bake, and the oven temperature and time. Every
+recipe is computed on the spot and nothing is stored, so the app works
+the same signed in or as a guest.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** crust brown as the accent: warm bread-crust amber
+  (#B45309) in the light look with white text on it, lighter honey gold
+  (#FCD34D) in the dark look with near-black brown text on it. Neutrals
+  are the kit's warm stone greys. Values live in `styles/tailwind-input.css`
+  under the usual token names.
+- **Signature element:** the **rise and bake timeline** — a strip of
+  dots joined by a line, one stage per dot from Mix to Bake with the
+  duration under each. Nothing else on the screen carries it.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (the kit's four sizes, unchanged).
+- Both looks are supported and follow the viewer's Homeroom theme; no
+  theme picker, no fixed look.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
