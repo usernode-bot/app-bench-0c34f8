@@ -60,22 +60,12 @@ the platform fixes the base commit, and none of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+The starter template screen was replaced by the real reader (first
+version, October 2026): the `usernode-starter-notice@1` block is gone from
+`public/index.html` and `README.md` describes the app. Keep the platform
+infrastructure when editing that file: the `usernode-dev-console@1`
+forwarder script, the bridge `<script>`, the theme script after it, and the
+design kit in `styles/tailwind-input.css`.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
@@ -87,32 +77,37 @@ no theme picker: the viewer's Homeroom setting is the control. "The
 platform's light/dark theme inside the app frame" in the platform
 conventions has the details.
 
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
-
 ---
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+The app works like Feedly: each person adds their own RSS feeds and reads
+every unread post from all of them in one scrolling list, newest first.
+Tapping a post opens an inline preview of its summary, with a link to open
+the full article in the browser; opening the preview is what marks the post
+read. Feeds are fetched and parsed server-side, never by the browser.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version filled it in; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** burnt orange accent (light: deep orange `194 65 12`; dark: a
+  brighter orange `251 146 60` on near-black warm brown), chosen because
+  orange is the colour of the RSS mark itself, on the kit's warm stone
+  neutrals. The focus ring follows the accent. Every text pair stays at
+  4.5:1 or more in both looks.
+- **Signature element:** the unread-dot row. Every unread post carries a
+  small orange dot beside a serif title, with its source name and age
+  underneath in muted grey. Opening a post clears the dot, so the list
+  quietly shows what you have and have not read. Nothing else is decorated.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Post titles and the Unread count read in the serif (`font-serif`, the
+  Georgia/`ui-serif` stack); everything else in the system sans.
+- Layout is a phone-width reading column (max-w-2xl), top to bottom: the
+  Unread header with Refresh, the Add feed button, the merged unread list
+  with previews opening inline, My feeds with Remove buttons, Mark all read
+  at the bottom.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +132,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are marked `staging:private`: a person's
+  subscriptions and reading history are personal.
+- A post's dedup key is (`user_id`, `feed_id`, `guid`); the guid falls back
+  to the post URL, then to a hash of its title, for feeds that ship neither.
+- Read state is `posts.read_at` on the row (posts are per-user; no separate
+  read table). Read timestamps and displayed ages use `req.now` and
+  `usernode.now()`, never `new Date()`.
+- One new server dependency: `rss-parser`. Don't add another without reason.
+- Staging demo feeds (seeded behind `?demo=1`) use reserved
+  `https://staging-demo.*` URLs, which the refresh route skips so it never
+  tries to fetch them.

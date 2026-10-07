@@ -2,5 +2,26 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.empty",
+      "name": "Reader loads with empty state",
+      "path": "/",
+      "expectText": "No feeds yet"
+    },
+    {
+      "id": "reader.populated",
+      "name": "Reader shows demo posts in one list",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "expectSelector": ".list",
+      "visual": true,
+      "impact": [
+        "public/index.html",
+        "server.js",
+        "styles/tailwind-input.css"
+      ]
+    }
+  ]
 }

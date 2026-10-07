@@ -1,27 +1,44 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+All your RSS feeds in one scrolling list. Add the feeds you follow, see
+every unread post from all of them in one merged list, newest first, and
+tap a post to preview it with a link to open the full thing in the
+browser. Each person's feeds and posts are their own.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Add a feed** — paste a feed address or just a site's address; the app
+  finds the feed on the site if needed and names it from the feed itself.
+  Adding the same feed twice does nothing except tell you it is already
+  there.
+- **Read** — one list of unread posts across all your feeds, each with an
+  orange unread dot, its source and how long ago it was posted. Opening a
+  post's preview marks it read: the dot clears and the row stays put until
+  the next refresh. **Mark all read** clears the lot at once.
+- **Refresh** — the list refreshes when the app opens and whenever you tap
+  Refresh. A feed that cannot be reached is skipped and named in a one-line
+  note; everything else still loads.
+- **Manage feeds** — My feeds lists what you follow, each with a Remove
+  button. Removing a feed also removes its posts.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+## How it works
 
-## Replacing the template
+Node/Express + Postgres. The server fetches and parses feeds with
+`rss-parser` (10s timeout, 5 MB response cap); the browser never fetches a
+feed itself. Feeds and posts live in two `staging:private` tables owned by
+the viewer's Homeroom user id; a post counts as read when its preview is
+opened (`posts.read_at`).
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+Tailwind CSS is precompiled by `npm run build` during image creation, in a
+light and a dark look that follow the viewer's Homeroom theme. The design
+kit lives in `styles/tailwind-input.css`; the app's look is written down in
+`CLAUDE.md`.
 
-Once the real app exists, rewrite this README to describe it.
+## Development
+
+```sh
+npm install
+npm run build        # compile public/tailwind.css
+npm start            # needs DATABASE_URL
+```
+
+Staging previews seed two obviously fake demo feeds and five unread posts
+behind `/?demo=1`, so the populated screen can be seen without real data.

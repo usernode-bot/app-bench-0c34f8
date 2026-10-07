@@ -63,6 +63,13 @@ module.exports = {
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
+      // Two system families: post titles and the Unread count read in the
+      // Georgia serif stack, everything else in the system sans. No fonts
+      // are downloaded.
+      fontFamily: {
+        sans: ['system-ui', 'sans-serif'],
+        serif: ['Georgia', 'ui-serif', 'serif'],
+      },
     },
   },
   plugins: [],

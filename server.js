@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const Parser = require('rss-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -145,7 +147,265 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+// Set by the shutdown handler at the bottom; /health reports it so anything
+// polling readiness sees the container leaving rotation.
+let shuttingDown = false;
+
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting-down' });
+  res.json({ status: 'ok' });
+});
+
+// ── RSS Reader data model ─────────────────────────────────────────────────
+// A person's subscriptions and reading history are personal, so both tables
+// are marked `staging:private`: staging copies their schema, never their
+// rows. Schema is applied idempotently on boot (see `migrate`).
+//
+// Read state lives on the post row itself (`read_at`): posts are per-user,
+// so no separate read table. The dedup key for refreshes is
+// (user_id, feed_id, guid); a post's guid falls back to its URL, then to a
+// hash of its title, for feeds that ship neither.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      username text,
+      url text NOT NULL,
+      title text NOT NULL,
+      site_url text,
+      last_error text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`COMMENT ON TABLE feeds IS 'staging:private'`);
+  await pool.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_url_idx ON feeds (user_id, url)`);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id serial PRIMARY KEY,
+      feed_id integer NOT NULL REFERENCES feeds(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      guid text NOT NULL,
+      url text,
+      title text,
+      summary text,
+      published_at timestamptz,
+      read_at timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`);
+  await pool.query(`COMMENT ON TABLE posts IS 'staging:private'`);
+  await pool.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS posts_user_feed_guid_idx ON posts (user_id, feed_id, guid)`);
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS posts_user_read_idx ON posts (user_id, read_at)`);
+}
+
+// ── Feed fetching and parsing ─────────────────────────────────────────────
+// The browser never fetches a feed itself: feeds are fetched and parsed
+// here, server-side, with a timeout and a response cap so a slow or huge
+// upstream cannot hang requests.
+const FEED_TIMEOUT_MS = 10_000;
+const FEED_MAX_BYTES = 5 * 1024 * 1024;
+
+// Paste a feed address or just a site's address. Normalise to one canonical
+// form per feed so adding the same feed twice lands on the same row:
+// default to https, drop the fragment, drop a trailing slash on the path.
+function normalizeFeedUrl(raw) {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) return null;
+  const withScheme = /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+  let u;
+  try { u = new URL(withScheme); } catch { return null; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+  u.hash = '';
+  if (u.pathname !== '/' && u.pathname.endsWith('/')) u.pathname = u.pathname.slice(0, -1);
+  return u.href;
+}
+
+async function fetchWithLimit(url) {
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(FEED_TIMEOUT_MS),
+    headers: { 'user-agent': 'RSS Reader (Homeroom app)', accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, text/html' },
+    redirect: 'follow',
+  });
+  if (!res.ok) { const err = new Error('HTTP ' + res.status); err.code = 'unreachable'; throw err; }
+  const reader = res.body.getReader();
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > FEED_MAX_BYTES) {
+      reader.cancel();
+      const err = new Error('Response larger than 5 MB'); err.code = 'unparseable'; throw err;
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return { text: Buffer.concat(chunks).toString('utf8'), finalUrl: res.url || url };
+}
+
+// A site URL without a feed at it: scan the HTML for the standard
+// <link rel="alternate" type="application/rss+xml"> discovery tag.
+function findFeedLinkInHtml(html, baseUrl) {
+  for (const tag of html.match(/<link\b[^>]*>/gi) || []) {
+    if (!/\brel\s*=\s*["']?[^"'>\s]*alternate/i.test(tag)) continue;
+    if (!/\btype\s*=\s*["']?application\/(rss|atom)\+xml/i.test(tag)) continue;
+    const href = tag.match(/\bhref\s*=\s*["']([^"']*)["']/i);
+    if (!href) continue;
+    try { return new URL(href[1], baseUrl).href; } catch { /* a broken href is not ours to fix */ }
+  }
+  return null;
+}
+
+function looksLikeXml(text) {
+  return /^\s*(?:<\?xml|<rss|<feed|<rdf)/i.test(text);
+}
+
+// Fetch `url` as a feed; if it turns out to be an HTML page, follow its
+// discovery link. Throws with a `code` of 'unreachable' (no answer),
+// 'no_feed' (an HTML page with no feed link) or 'unparseable'.
+async function fetchFeed(url) {
+  let { text, finalUrl } = await fetchWithLimit(url);
+  if (!looksLikeXml(text)) {
+    if (!/<html|<!doctype html/i.test(text)) { const err = new Error('Not XML'); err.code = 'unparseable'; throw err; }
+    const discovered = findFeedLinkInHtml(text, finalUrl);
+    if (!discovered) { const err = new Error('No feed link on page'); err.code = 'no_feed'; throw err; }
+    ({ text } = await fetchWithLimit(discovered));
+    if (!looksLikeXml(text)) { const err = new Error('Discovered link is not a feed'); err.code = 'unparseable'; throw err; }
+  }
+  try {
+    const parser = new Parser({ timeout: FEED_TIMEOUT_MS });
+    const parsed = await parser.parseString(text);
+    if (!parsed || !Array.isArray(parsed.items)) { const err = new Error('Feed has no items'); err.code = 'unparseable'; throw err; }
+    return { parsed };
+  } catch (err) {
+    if (err.code) throw err;
+    const wrapped = new Error('Feed could not be parsed'); wrapped.code = 'unparseable'; throw wrapped;
+  }
+}
+
+function fetchErrorMessage(err) {
+  if (err && err.code === 'no_feed') return 'We reached the site but found no feed there. Try pasting the feed address itself.';
+  if (err && err.code === 'unparseable') return 'That address does not look like a feed we can read.';
+  return 'We could not reach that feed. Check the address and try again.';
+}
+
+// Feed content is untrusted: strip tags and cap the summary.
+function summarize(item) {
+  const raw = String(item.contentSnippet || item.summary || item.content || '');
+  const text = raw
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>').replace(/&quot;/gi, '"').replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/\s+/g, ' ').trim();
+  if (text.length <= 300) return text;
+  return text.slice(0, 300).replace(/\s+\S*$/, '') + '…';
+}
+
+function guidFor(item, url) {
+  if (item.guid && String(item.guid).trim()) return String(item.guid).trim();
+  if (url) return url;
+  return 'hash:' + crypto.createHash('sha1').update(String(item.title || '')).digest('hex').slice(0, 20);
+}
+
+async function upsertPosts(feedId, userId, items) {
+  for (const item of items.slice(0, 50)) {
+    const url = item.link && /^https?:\/\//i.test(item.link) ? item.link : null;
+    let publishedAt = item.isoDate ? new Date(item.isoDate) : (item.pubDate ? new Date(item.pubDate) : null);
+    if (!publishedAt || isNaN(publishedAt.getTime())) publishedAt = null;
+    await pool.query(
+      `INSERT INTO posts (feed_id, user_id, guid, url, title, summary, published_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (user_id, feed_id, guid) DO NOTHING`,
+      [feedId, userId, guidFor(item, url), url,
+        (item.title || 'Untitled post').trim().slice(0, 300) || 'Untitled post',
+        summarize(item), publishedAt]);
+  }
+}
+
+// Refetch one feed and record how it went in `last_error` (the one-line
+// note the list shows). A failing feed never fails the request.
+async function refreshFeed(feed) {
+  try {
+    const { parsed } = await fetchFeed(feed.url);
+    await upsertPosts(feed.id, feed.user_id, parsed.items);
+    if (feed.last_error) {
+      await pool.query('UPDATE feeds SET last_error = NULL WHERE id = $1', [feed.id]);
+    }
+    return null;
+  } catch (err) {
+    const message = fetchErrorMessage(err);
+    await pool.query('UPDATE feeds SET last_error = $2 WHERE id = $1', [feed.id, message]);
+    return { title: feed.title, message };
+  }
+}
+
+// ── Staging demo data ─────────────────────────────────────────────────────
+// Behind `?demo=1` on a staging build only, seed two obviously fake feeds
+// and five unread posts for the viewing user, so the populated screen can
+// be seen without real feeds. Idempotent; boot-time seeding inserts
+// nothing, so the unseeded route shows the real empty state.
+const DEMO_FEEDS = [
+  {
+    url: 'https://staging-demo.slowweb.example/feed',
+    title: 'Staging Demo: The Slow Web',
+    siteUrl: 'https://staging-demo.slowweb.example',
+    posts: [
+      { title: 'Staging demo: A calmer way to follow the web', ageMinutes: 120,
+        summary: 'Why plain feeds are quietly coming back, what a good reader should do, and a short reading list to start from.' },
+      { title: 'Staging demo: Reading more by carrying less', ageMinutes: 2 * 24 * 60,
+        summary: 'A pocket notebook, a two-page essay, and the surprising payoff of finishing one short thing a day.' },
+      { title: 'Staging demo: The case for the personal homepage', ageMinutes: 3 * 24 * 60,
+        summary: 'Own a little corner of the web, post when you like, and let the aggregator take care of the rest.' },
+    ],
+  },
+  {
+    url: 'https://staging-demo.kitchennotes.example/rss',
+    title: 'Staging Demo: Kitchen Notes',
+    siteUrl: 'https://staging-demo.kitchennotes.example',
+    posts: [
+      { title: 'Staging demo: Choosing a kettle that lasts', ageMinutes: 5 * 60,
+        summary: 'What to look for: a replaceable element, a lid that opens fully, and why the priciest is rarely the longest-lived.' },
+      { title: 'Staging demo: A week of 20-minute dinners', ageMinutes: 26 * 60,
+        summary: 'Five dinners for busy evenings, each with a short list of ingredients you probably already have.' },
+    ],
+  },
+];
+
+// Demo feeds carry a reserved host so a real refresh never tries to fetch
+// them. Only staging sees them.
+function isDemoFeedUrl(url) { return /^https:\/\/staging-demo\./.test(url || ''); }
+
+async function seedDemoData(req) {
+  if (!IS_STAGING || req.query.demo !== '1' || !req.user) return;
+  const userId = req.user.id;
+  for (const demo of DEMO_FEEDS) {
+    let feedId;
+    const existing = await pool.query('SELECT id FROM feeds WHERE user_id = $1 AND url = $2', [userId, demo.url]);
+    if (existing.rows.length) {
+      feedId = existing.rows[0].id;
+    } else {
+      const inserted = await pool.query(
+        `INSERT INTO feeds (user_id, username, url, title, site_url)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (user_id, url) DO NOTHING RETURNING id`,
+        [userId, req.user.username || null, demo.url, demo.title, demo.siteUrl]);
+      if (!inserted.rows.length) continue;
+      feedId = inserted.rows[0].id;
+    }
+    for (const [i, post] of demo.posts.entries()) {
+      await pool.query(
+        `INSERT INTO posts (feed_id, user_id, guid, url, title, summary, published_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (user_id, feed_id, guid) DO NOTHING`,
+        [feedId, userId, 'demo:' + post.title,
+          demo.siteUrl + '/posts/' + (i + 1), post.title, post.summary,
+          new Date(req.now.getTime() - post.ageMinutes * 60_000)]);
+    }
+  }
+}
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +413,138 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// ── API ───────────────────────────────────────────────────────────────────
+// Every query filters by req.user.id, so each person sees only their own
+// feeds and posts. Guests (no account) read an empty list; every write
+// they attempt is answered 401 `account_required` by the middleware above.
+
+app.post('/api/feeds', async (req, res) => {
+  const url = normalizeFeedUrl(req.body && req.body.url);
+  if (!url) {
+    return res.status(400).json({ error: 'invalid_url', message: 'Enter a valid feed or site URL.' });
+  }
+  try {
+    const dup = await pool.query('SELECT id FROM feeds WHERE user_id = $1 AND url = $2', [req.user.id, url]);
+    if (dup.rows.length) {
+      return res.status(409).json({ error: 'duplicate', message: 'You already follow this feed.' });
+    }
+    let parsed;
+    try {
+      ({ parsed } = await fetchFeed(url));
+    } catch (err) {
+      return res.status(422).json({ error: err.code || 'unreachable', message: fetchErrorMessage(err) });
+    }
+    const feedUrl = url;
+    let siteUrl = null;
+    try { siteUrl = parsed.link ? new URL(parsed.link, feedUrl).href : new URL(feedUrl).origin; } catch { /* keep null */ }
+    const title = (String(parsed.title || '').trim() || new URL(feedUrl).hostname).slice(0, 200);
+    const inserted = await pool.query(
+      `INSERT INTO feeds (user_id, username, url, title, site_url)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id, url) DO NOTHING RETURNING *`,
+      [req.user.id, req.user.username || null, feedUrl, title, siteUrl]);
+    if (!inserted.rows.length) {
+      return res.status(409).json({ error: 'duplicate', message: 'You already follow this feed.' });
+    }
+    await upsertPosts(inserted.rows[0].id, req.user.id, parsed.items);
+    return res.status(201).json({ feed: inserted.rows[0] });
+  } catch (err) {
+    console.warn('POST /api/feeds failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error', message: 'Adding the feed failed. Try again.' });
+  }
+});
+
+app.get('/api/feeds', async (req, res) => {
+  if (!req.user) return res.json({ feeds: [] });
+  try {
+    await seedDemoData(req);
+    const feeds = await pool.query(
+      `SELECT id, url, title, site_url, last_error, created_at
+       FROM feeds WHERE user_id = $1 ORDER BY created_at, id`, [req.user.id]);
+    return res.json({ feeds: feeds.rows });
+  } catch (err) {
+    console.warn('GET /api/feeds failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/feeds/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    const deleted = await pool.query('DELETE FROM feeds WHERE id = $1 AND user_id = $2 RETURNING id', [id, req.user.id]);
+    if (!deleted.rows.length) return res.status(404).json({ error: 'not_found' });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.warn('DELETE /api/feeds failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Refetch every feed the user has. Per-feed failures are recorded in
+// `last_error` and named in the response, never fail the request.
+app.post('/api/feeds/refresh', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    await seedDemoData(req);
+    const feeds = (await pool.query('SELECT * FROM feeds WHERE user_id = $1 ORDER BY created_at, id', [req.user.id])).rows;
+    const failed = [];
+    for (const feed of feeds) {
+      if (isDemoFeedUrl(feed.url)) continue; // staging demo feeds are not real URLs
+      const failure = await refreshFeed(feed);
+      if (failure) failed.push(failure);
+    }
+    return res.json({ failed });
+  } catch (err) {
+    console.warn('POST /api/feeds/refresh failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.get('/api/posts', async (req, res) => {
+  if (!req.user) return res.json({ posts: [] });
+  try {
+    await seedDemoData(req);
+    // A post with no pubDate falls back to created_at for ordering.
+    const posts = await pool.query(
+      `SELECT p.id, p.title, p.summary, p.url, p.published_at, p.created_at,
+              f.title AS feed_title
+       FROM posts p JOIN feeds f ON f.id = p.feed_id
+       WHERE p.user_id = $1 AND p.read_at IS NULL
+       ORDER BY COALESCE(p.published_at, p.created_at) DESC
+       LIMIT 200`, [req.user.id]);
+    return res.json({ posts: posts.rows });
+  } catch (err) {
+    console.warn('GET /api/posts failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Idempotent: reading an already-read post leaves `read_at` as it was.
+app.post('/api/posts/:id/read', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid_id' });
+  try {
+    await pool.query(
+      'UPDATE posts SET read_at = $2 WHERE id = $1 AND user_id = $3 AND read_at IS NULL',
+      [id, req.now, req.user.id]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.warn('POST /api/posts/:id/read failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/posts/read-all', async (req, res) => {
+  try {
+    await pool.query('UPDATE posts SET read_at = $2 WHERE user_id = $1 AND read_at IS NULL', [req.user.id, req.now]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.warn('POST /api/posts/read-all failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +583,38 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const DRAIN_MS = 3000;
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop accepting connections, drain in-flight requests under a hard
+// deadline, close the pool, exit. Idempotent: SIGTERM then SIGINT must not
+// double-run.
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  if (server) {
+    server.close(() => {});
+    server.closeIdleConnections?.();
+    const t = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+  }
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed', e.message);
+  }
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });
