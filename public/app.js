@@ -57,6 +57,12 @@ async function reload({ quiet = false } = {}) {
 }
 
 function renderHeader(checking) {
+  // With no feeds there is nothing to count: the status line and the refresh
+  // button stay out of the way, and the Feeds button keeps its accent down so
+  // the empty state's "Add a feed" is the one accent on the screen.
+  statusEl.hidden = !current.feedCount;
+  refreshBtn.hidden = !current.feedCount;
+  feedsBtn.classList.toggle('icon-muted', !current.feedCount);
   statusEl.textContent = checking
     ? checking
     : `${plural(current.posts.length, 'post')} from ${plural(current.feedCount, 'feed')}`
@@ -247,7 +253,7 @@ function removePost(post, li) {
 let checking = false;
 
 async function refresh({ explicit = false } = {}) {
-  if (checking) return;
+  if (checking || !current.feedCount) return;
   checking = true;
   refreshBtn.disabled = true;
   refreshBtn.setAttribute('aria-busy', 'true');

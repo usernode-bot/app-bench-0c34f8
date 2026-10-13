@@ -40,6 +40,7 @@ body {
 .btn-secondary {display:inline-flex;min-height:44px;align-items:center;gap:8px;border-radius:8px;padding:0 14px;font-size:1rem;font-weight:500;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
 
 .btn-secondary svg {color:rgb(var(--accent))}
+.btn-secondary.icon-muted svg {color:rgb(var(--muted))}
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
