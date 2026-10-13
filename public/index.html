@@ -119,65 +119,35 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <div data-spec-screen="1" id="app">
     <div>
     <div class="app">
       <header class="head">
         <h1>Unread</h1>
-        <button class="btn-icon" aria-label="Your feeds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="19" r="1.4" fill="currentColor"/><path d="M4 12a8 8 0 0 1 8 8"/><path d="M4 5a15 15 0 0 1 15 15"/></svg></button>
-        <button class="btn-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+        <button class="btn-icon" id="feeds-btn" aria-label="Your feeds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="19" r="1.4" fill="currentColor"/><path d="M4 12a8 8 0 0 1 8 8"/><path d="M4 5a15 15 0 0 1 15 15"/></svg></button>
+        <button class="btn-add" id="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
       </header>
-      <p class="count"><span>9 unread from 5 feeds, updated 2 minutes ago</span><button class="link-btn">Refresh</button></p>
-      <h2 class="section-label">Today</h2>
-      <ul class="list">
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Garden Notes Weekly</span><span class="post-time">9:42 AM</span></span><span class="post-title">Why your tomatoes split after a heavy rain, and how to stop it</span><span class="post-sum">Uneven watering is the usual culprit. A deep soak twice a week does more than</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Orbit Digest</span><span class="post-time">8:15 AM</span></span><span class="post-title">A quiet week on the sun, and the best nights to see Saturn</span><span class="post-sum">Saturn rises before ten all month. Look low in the south-east after dusk.</span></span></button></li>
-    <li class="is-read"><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">The Tidy Kitchen</span><span class="post-time">7:30 AM</span></span><span class="post-title">Five pantry jars that earn their shelf space</span><span class="post-sum">Rice, lentils, oats, flour and one jar for whatever you bought too much of.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Trailhead Journal</span><span class="post-time">6:05 AM</span></span><span class="post-title">The ridge loop reopens: what changed on the north switchbacks</span><span class="post-sum">New drainage steps, a wider bridge at the creek and two new benches.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Pixel and Pine</span><span class="post-time">12:48 AM</span></span><span class="post-title">Building a bird feeder camera from spare parts</span><span class="post-sum">An old phone, a plastic box and a little patience. Here is the full parts list.</span></span></button></li>
-      </ul>
-      <h2 class="section-label">Yesterday</h2>
-      <ul class="list">
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Garden Notes Weekly</span><span class="post-time">9:10 PM</span></span><span class="post-title">Saving seeds from this year's beans</span><span class="post-sum">Leave a few pods on the plant until they rattle, then dry them indoors.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">The Tidy Kitchen</span><span class="post-time">6:20 PM</span></span><span class="post-title">One sheet pan, four weeknight dinners</span><span class="post-sum">Roast once on Sunday and the rest of the week mostly assembles itself.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Orbit Digest</span><span class="post-time">2:45 PM</span></span><span class="post-title">How a weather balloon finds its way home</span><span class="post-sum">It mostly does not. Here is how the people who launch them get them back.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Trailhead Journal</span><span class="post-time">11:00 AM</span></span><span class="post-title">Packing list for a first overnight hike</span><span class="post-sum">Twelve things, one bag, and the two you will be glad you did not forget.</span></span></button></li>
-    <li><button class="post"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg></span><span class="post-text"><span class="post-meta"><span class="post-feed">Pixel and Pine</span><span class="post-time">8:30 AM</span></span><span class="post-title">Keeping a small home server cool in summer</span><span class="post-sum">Move it off the carpet first. Then check the fan curve and the dust filter.</span></span></button></li>
-      </ul>
-      <div class="foot"><button class="btn-secondary">Mark all as read</button></div>
+      <p class="count" id="count-line"><span id="count-text">9 unread from 5 feeds, updated 2 minutes ago</span><button class="link-btn" id="refresh-btn">Refresh</button></p>
+      <p class="count" id="failing-line" hidden></p>
+      <div id="posts"></div>
+      <div class="foot" id="readall-foot" hidden><button class="btn-secondary" id="readall-btn">Mark all as read</button></div>
     </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="app">
-        <nav class="bar">
-          <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button>
-          <button class="quiet">Mark as unread</button>
-        </nav>
-        <article class="kit-detail">
-          <header class="kit-detail-head">
-            <p class="feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor" stroke="none"/><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/></svg>Garden Notes Weekly</p>
-            <h1 class="kit-detail-title">Why your tomatoes split after a heavy rain, and how to stop it</h1>
-            <p class="meta">By Rowan Field, today at 9:42 AM</p>
-          </header>
-          <hr class="rule">
-          <div class="kit-detail-body">
-            <p>Uneven watering is the usual culprit. When a dry spell ends in a downpour, the fruit takes up water faster than its skin can stretch, and it splits along the top.</p>
-            <p>A deep soak twice a week does more than a light sprinkle every evening. Water at the base, early in the day, and let the top few centimetres of soil dry between soaks.</p>
-            <p>A layer of straw or shredded leaves keeps the moisture even through hot afternoons. If rain is forecast and your fruit is nearly ripe, pick it a day early and let it finish on the windowsill.</p>
-          </div>
-          <div class="open">
-            <a class="btn-primary" href="https://gardennotes.example/tomatoes-split">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-            <p class="note">Opens gardennotes.example in your browser</p>
-          </div>
-        </article>
-      </div>
-      </div>
+  <!-- The post screen, from the spec's screen 2: the header is static, the
+       detail is filled in by app.js when a post opens at #post/<id>. -->
+  <div id="post-screen" hidden>
+    <div class="app">
+      <nav class="bar">
+        <button class="back" id="post-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button>
+        <button class="quiet" id="post-toggle" hidden>Mark as unread</button>
+      </nav>
+      <article class="kit-detail">
+        <div id="post-states"></div>
+      </article>
     </div>
-  </template>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

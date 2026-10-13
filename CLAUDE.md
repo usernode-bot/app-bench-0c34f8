@@ -95,22 +95,29 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style reader: paste a feed or website address to follow a site,
+read new posts in one Unread list grouped by day, and open previews in
+the app. Opening a preview marks the post read; "Mark as unread" undoes
+it. Each reader's feeds, read posts and subscriptions are private to
+them.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** RSS orange accent over cool reading neutrals (see the
+  token values in `styles/tailwind-input.css`). Orange is for the feed
+  mark and the Add feed / link buttons; `bg-accent` filled is reserved
+  for "Open full article", the one primary button.
+- **Signature element:** the feed mark — a dot with two arcs, like the
+  RSS badge turned into an "unread" flag. Orange on unread rows, hidden
+  once read; it is also the Your feeds button and sits beside the feed
+  name in a preview.
+- **Type scale:** `text-title` (28 px), `text-heading` (20 px),
+  `text-body` (17 px), `text-small` (14 px). Post titles and the preview
+  summary read in a serif (`font-serif`: ui-serif, Charter, Iowan Old
+  Style, Georgia); the UI stays in the system sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +145,19 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Every table (`feeds`, `feed_items`, `subscriptions`, `item_reads`,
+  `demo_seeded`) is per-user data and is commented `staging:private` —
+  keep it that way when adding tables.
+- Feeds and posts with `is_demo = true` are the staging demo (`?demo=1`,
+  staging and signed-in only). They are never fetched and never count as
+  reachable; demo item times are stored as `demo_offset_min` so each
+  viewer's today/yesterday stays populated on every open.
+- Feed fetching is deliberately dependency-free (`lib/feed-parse.js`,
+  `lib/feed-fetch.js`): a tag scanner over RSS/Atom, SSRF-guarded
+  fetching (private/loopback addresses refused, 10 s timeout, 5 MB cap,
+  ports 80/443). Don't add an RSS library or a general HTTP client for
+  this without saying why in the request.
+- `feed_items` keeps the newest 200 posts per feed; the unread list is
+  the last 30 days, capped at 300 posts.
+- Everyday hobby topics only for demo content (gardens, trails, cooking),
+  never news or politics.

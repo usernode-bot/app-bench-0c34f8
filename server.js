@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { mountFeeds } = require('./lib/feeds-api');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -154,32 +155,38 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+async function start() {
+  // The feed API's routes and tables, before the static files and the
+  // catch-all: an API route must never be swallowed by the HTML shell.
+  const feeds = await mountFeeds(app, pool);
+  await feeds.migrate();
 
-// HTML shell: serve the app if authenticated. Unauthenticated top-level
-// visits (share links pasted into a browser — Sec-Fetch-Dest: document)
-// are sent to the platform's chromeless view of this app, where the shell
-// embeds it with a real token so the link just works. Every other
-// tokenless case (iframe loads with an expired token, old browsers
-// without Sec-Fetch-*) gets the "open in Homeroom" landing page instead
-// of a redirect, so the platform shell is never loaded INSIDE its own
-// app iframe and stray visits still don't reveal the app.
-app.get('*', (req, res) => {
-  if (!req.user && !req.guest) {
-    // Deep-link pass-through (platform #743): carry the visited
-    // path+query into the chromeless view so share links land on the
-    // shared screen, not Home. The clean platform route stores `path`
-    // as one encoded query value so an inner ?, &, or = survives. The
-    // shell decodes and validates it as relative-only before use. The
-    // character test keeps the
-    // value attribute-safe for the landing anchor below — anything
-    // unusual falls back to the bare link.
-    const deepPath = /^\/[A-Za-z0-9\-._~!$&()*+,;=:@\/%?]*$/.test(req.originalUrl)
-      ? '?path=' + encodeURIComponent(req.originalUrl) : '';
-    if (PLATFORM_ORIGIN && req.get('sec-fetch-dest') === 'document') {
-      return res.redirect(302, PLATFORM_ORIGIN + '/app/rss-reader/full' + deepPath);
-    }
-    return res.status(401).send(`<!doctype html><meta charset=utf-8><title>Open in Homeroom</title>
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  // HTML shell: serve the app if authenticated. Unauthenticated top-level
+  // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
+  // are sent to the platform's chromeless view of this app, where the shell
+  // embeds it with a real token so the link just works. Every other
+  // tokenless case (iframe loads with an expired token, old browsers
+  // without Sec-Fetch-*) gets the "open in Homeroom" landing page instead
+  // of a redirect, so the platform shell is never loaded INSIDE its own
+  // app iframe and stray visits still don't reveal the app.
+  app.get('*', (req, res) => {
+    if (!req.user && !req.guest) {
+      // Deep-link pass-through (platform #743): carry the visited
+      // path+query into the chromeless view so share links land on the
+      // shared screen, not Home. The clean platform route stores `path`
+      // as one encoded query value so an inner ?, &, or = survives. The
+      // shell decodes and validates it as relative-only before use. The
+      // character test keeps the
+      // value attribute-safe for the landing anchor below — anything
+      // unusual falls back to the bare link.
+      const deepPath = /^\/[A-Za-z0-9\-._~!$&()*+,;=:@\/%?]*$/.test(req.originalUrl)
+        ? '?path=' + encodeURIComponent(req.originalUrl) : '';
+      if (PLATFORM_ORIGIN && req.get('sec-fetch-dest') === 'document') {
+        return res.redirect(302, PLATFORM_ORIGIN + '/app/rss-reader/full' + deepPath);
+      }
+      return res.status(401).send(`<!doctype html><meta charset=utf-8><title>Open in Homeroom</title>
 <body style="font-family:system-ui;background:#09090b;color:#e4e4e7;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0">
   <div style="max-width:24rem;padding:2rem;text-align:center">
     <h1 style="font-size:1.25rem;margin:0 0 0.5rem">Open this app inside Homeroom</h1>
@@ -187,14 +194,27 @@ app.get('*', (req, res) => {
     <a href="${PLATFORM_ORIGIN}/app/rss-reader/full${deepPath}" style="display:inline-block;padding:0.5rem 1rem;background:#7c3aed;color:white;border-radius:0.5rem;text-decoration:none;font-size:0.9rem">Open in Homeroom</a>
   </div>
 </body>`);
-  }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
 
-async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Shut down cleanly: stop taking connections, give in-flight ones a few
+  // seconds, then close the pool.
+  let shuttingDown = false;
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    server.close(() => {
+      pool.end().finally(() => process.exit(0));
+    });
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

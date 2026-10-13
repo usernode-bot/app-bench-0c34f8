@@ -2,5 +2,26 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.unread-demo",
+      "name": "Unread list with demo feeds",
+      "path": "/?demo=1",
+      "expectSelector": "button.post",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**",
+        "lib/**",
+        "server.js"
+      ]
+    },
+    {
+      "id": "reader.no-feeds",
+      "name": "Reader with no feeds",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

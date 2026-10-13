@@ -69,15 +69,27 @@ button {font:inherit;color:inherit}
 
 .btn-secondary {min-height:44px;padding:0 16px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:1.0625rem;font-weight:500}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2 (the post screen, #post-screen): its rules the first screen has not got. */
 
-button,a {font:inherit}
+#post-screen button,#post-screen a {font:inherit}
 
-.app {
+#post-screen .app {
   max-width: 390px;
   margin: 0 auto;
   padding: 0 16px 40px;
 }
+
+/* Your feeds sheet rows. */
+
+.feeds-row {display:flex;align-items:flex-start;gap:8px;justify-content:space-between;padding:12px 4px}
+
+.feeds-row-text {min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+
+.feeds-row-title {font-weight:600;font-size:1.0625rem;line-height:1.5rem}
+
+.feeds-row-sub {font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.feeds-row-actions {display:flex;align-items:center;gap:2px;flex-shrink:0}
 
 .bar {display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;margin-left:-8px}
 
