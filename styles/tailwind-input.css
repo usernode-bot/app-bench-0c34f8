@@ -43,17 +43,18 @@
     --wheat: 214 160 72; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;      /* dark crust */
+    --surface: 36 30 25;
+    --raised: 48 41 34;
+    --fg: 245 238 228;       /* flour white */
+    --muted: 184 170 152;
+    --line: 70 60 50;
+    --accent: 232 170 92;    /* wheat amber */
+    --on-accent: 40 22 6;    /* dark crust text on it */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 232 170 92;
+    --wheat: 232 170 92;     /* from the spec's screens */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

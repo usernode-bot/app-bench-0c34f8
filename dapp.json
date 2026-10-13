@@ -2,5 +2,16 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    { "name": "calculator", "path": "/", "expectText": "Calculate" },
+    {
+      "name": "recipe.demo",
+      "path": "/?demo=1",
+      "expectSelector": ".formula",
+      "id": "recipe.demo",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    }
+  ]
 }

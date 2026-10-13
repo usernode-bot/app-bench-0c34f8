@@ -58,32 +58,10 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter template was replaced by the app's first real screen (the
+calculator). The notes that remain are platform infrastructure: keep the
+`usernode-dev-console@1` forwarder `<script>`, the bridge `<script>` and
+the theme `<script>` in `public/index.html` through any rewrite.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +73,35 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator. The user picks one of five breads
+(sourdough, bagels, sourdough bagels, rye, sandwich loaf), sets hydration,
+loaf count and dough weight per loaf, and taps Calculate to get every
+ingredient in grams with its baker's percentage, the rise steps, and the
+bake temperature and time. Everything is worked out in the browser: no
+database, no accounts, nothing saved. The formulas are the single source
+of truth in `public/breads.js`; `public/app.js` only renders.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look: a baker's notes. Every later change follows it, and
+updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** flour and crust. Neutrals are pale flour white (light
+  ground) through dark crust (dark ground and text); the action colour is
+  a deep baked crust brown in the light look and a wheat amber in the
+  dark, each with cream/dark-crust text on it. A second colour, wheat
+  (`--wheat`), only tints the chosen bread chip. Values live in
+  `styles/tailwind-input.css` (`:root` and `.dark`), named in
+  `tailwind.config.js`.
+- **Signature element:** the recipe card as a baker's formula — flour at
+  100%, every other ingredient a percentage of it, tabular numbers lined
+  up in columns, the total under a double rule like a ledger.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged). Headings use the rounded system face (`fontFamily.rounded`,
+  `ui-rounded` with a system-ui fallback); numbers are tabular so columns
+  line up.
+- **No fixed look:** both looks follow the viewer's Homeroom theme, via
+  the theme `<script>` in `public/index.html`.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -126,11 +117,12 @@ Re-theme by changing the token values there, keeping every text pair at
 - A field's label says what it is; its placeholder, if any, is an example
   that says so ("e.g. 5.0"), never a bare value that could pass for one
   already entered.
-- Every screen that loads data has honest loading, empty and error states.
-  Never show the empty state while loading or after a failure; an error says
-  what failed, what still works, and offers Retry.
-- Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
+- Nothing here loads over the network, so there is no loading state; the
+  recipe card has an honest empty state before the first Calculate, and
+  the dough-weight error shows under its field.
+- The staging demo (`?demo=1` on staging) is just the starting state with
+  the sample recipe already calculated, labelled once with a
+  "Staging demo" line; it stores nothing.
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
 - A header that shows the app's own mark shows the project's icon there
   (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
@@ -138,6 +130,16 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Amounts are shown in grams only (temperatures: Celsius with Fahrenheit
+  in brackets); no ounces or cups unless a request asks.
+- Hydration is the water as a percentage of flour; the starter is its own
+  ingredient line, not part of the hydration.
+- Loaf size is the dough weight per loaf in grams, 50 to 3000; count is
+  1 to 24; hydration 50 to 100 in steps of 1.
+- Bake minutes scale by the cube root of dough weight against each
+  bread's reference size, rounded to 5 min (1 min for bagels); boil time
+  does not scale. Fahrenheit is rounded to the nearest 5.
+- Keep `public/breads.js` pure (no DOM) so the maths stays checkable on
+  its own; `public/app.js` renders the drawn screen in `public/index.html`
+  through `fill.js`, rather than rebuilding its markup.
+- Avoid adding new dependencies; the app has none beyond the template's.

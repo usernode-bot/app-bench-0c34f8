@@ -1,27 +1,34 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Your personal bread recipe calculator. Pick one of five breads — sourdough,
+bagels, sourdough bagels, rye or sandwich loaf — set the hydration, how many
+loaves and how big, and tap Calculate: every ingredient in grams with its
+baker's percentage, the rise steps, and the bake temperature and time, laid
+out like a baker's formula with flour at 100%.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- The five formulas and the calculator live in `public/breads.js` (pure
+  maths, no DOM); `public/app.js` fills and wires the screen.
+- Everything is worked out on the phone itself: no accounts, no database,
+  nothing saved. The server only serves the page (and verifies the
+  platform's token, as every Homeroom app does).
+- Loaf size is the dough weight per loaf in grams; amounts are in grams
+  only. Temperatures show Celsius with Fahrenheit alongside.
+- The staging preview (`?demo=1` on staging) opens with a sample recipe
+  already calculated and a "Staging demo" line; every control works as
+  normal and nothing is stored.
 
-## Replacing the template
+## Styling
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+Tailwind CSS, precompiled by `npm run build` during image creation, in a
+light and a dark look that follow the viewer's Homeroom theme. The palette
+(flour and crust) and the baker's-formula signature are written down in the
+`## Design` section of `CLAUDE.md`.
 
-Once the real app exists, rewrite this README to describe it.
+## Changing the app
+
+Ask Homeroom bot: open the app on Homeroom, tap the Homeroom icon in the
+header, then **Suggest an improvement**. You can also run Claude Code
+against this repo directly; start with `CLAUDE.md`, which carries the
+app-specific notes and points at the platform rules.

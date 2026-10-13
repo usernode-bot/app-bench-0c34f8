@@ -154,7 +154,18 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// index: false keeps the catch-all below serving the HTML shell, so the
+// staging container can add data-env="staging" to <html> (see there).
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+const fs = require('fs');
+// On staging, index.html carries data-env="staging" on <html>: the page's
+// ?demo=1 preview (its "Staging demo" line and starting recipe) only turns
+// on when it is there. Read and tagged once, then served from memory.
+const stagingHtml = IS_STAGING
+  ? fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8')
+      .replace('<html lang="en">', '<html lang="en" data-env="staging">')
+  : null;
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -188,13 +199,31 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
+  if (stagingHtml !== null) return res.type('html').send(stagingHtml);
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// SIGTERM/SIGINT: stop accepting connections, give in-flight ones about
+// 3 s to finish, then close the database pool and exit.
+let shuttingDown = false;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`${signal} received, shutting down`);
+  await new Promise((resolve) => server.close(resolve));
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  try { await pool.end(); } catch {}
+  process.exit(0);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });
