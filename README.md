@@ -1,27 +1,30 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A calm, Feedly-style RSS reader: add the feeds you like, and every unread
+post from all of them shows up in one scrolling list, newest first. Tap a
+post and its article opens right where it sits — text and pictures, with a
+link to the full article on the source site. Reading a post marks it read.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **One unread list** — an orange dot beside every unread post, the site's
+  name beside it, and a count up top. Read posts lose the dot and fade.
+- **Tap to read** — the article opens inline where the post sits, so you
+  never lose your place. One post open at a time.
+- **Your feeds are yours** — feeds and posts are private to each account;
+  guests see an empty list.
+- **Staging demo** — on staging, `?demo=1` shows four made-up feeds and
+  sixteen made-up posts, labelled "Staging demo", so the populated screen
+  can be seen without fetching anything.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Feeds are fetched by the server through a strict guard (http/https only,
+public addresses only, size and time caps) and article HTML is sanitized
+server-side, so pasted feed content can only ever show text, links and
+https pictures.
 
-## Replacing the template
+## Run it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+`npm install`, then `node server.js` (needs `DATABASE_URL` and the platform
+JWT variables — on Homeroom these are injected). `npm run build` compiles
+the Tailwind stylesheet during image build.
 
-Once the real app exists, rewrite this README to describe it.
+Start with `CLAUDE.md` for the app-specific notes; it points at the
+platform rules.

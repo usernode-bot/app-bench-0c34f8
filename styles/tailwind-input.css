@@ -43,17 +43,18 @@
     --unread: 234 88 12; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 17 19 23;
+    --surface: 26 29 35;
+    --raised: 36 40 48;
+    --fg: 236 238 242;
+    --muted: 160 167 179;
+    --line: 52 57 66;
+    --accent: 251 146 60;
+    --on-accent: 40 16 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --unread: 251 146 60;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

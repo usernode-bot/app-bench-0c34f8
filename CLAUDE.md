@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style RSS reader. The viewer adds RSS feeds (Add feed, header),
+sees every unread post in one scrolling list, newest first, and taps a post
+to read the article inline where it sits. Tapping is what marks a post read
+(read posts stay in view, dimmed, until the list reloads). Feeds and posts
+are private to each account. Deliberately not in the first version: removing
+or renaming feeds, OPML import, mark-unread, live refresh, folders. Fetching
+goes through the guard in `feed.js` (public http/https addresses only, size
+and time caps); article HTML is sanitized server-side in `feed.js`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** reading-focused. Accent: burnt orange (`--accent`, white on
+  it); the unread dot a brighter orange (`--unread`); neutrals cool greys on
+  a near-white (light) / near-black (dark) ground. Values live in
+  `styles/tailwind-input.css`.
+- **Signature element:** the orange unread dot beside each post's source
+  badge — hollow ring once read.
+- **Type scale:** `text-title`, `text-heading` (1.125rem/1.5rem),
+  `text-body`, `text-small`. Titles and article text use the system serif
+  (ui-serif/Georgia, `font-serif`); everything else the system sans.
+- **One fixed look:** none — both looks follow the viewer's Homeroom theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +146,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are both commented `staging:private` —
+  per-user data. Never query them without the viewer's `req.user.id`.
+- Feeds and posts are never deleted by a refresh: re-storing items is
+  `ON CONFLICT (feed_id, guid) DO NOTHING`, so `read_at` survives.
+- Demo rows (staging, `?demo=1`) live in the same tables with
+  `feeds.demo = TRUE` and fixed guids; demo feed hosts end `.invalid` and
+  are never fetched.

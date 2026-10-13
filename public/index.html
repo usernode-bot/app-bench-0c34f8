@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round'><path d='M5 11a8 8 0 0 1 8 8'/><path d='M5 5a14 14 0 0 1 14 14'/><circle cx='6' cy='18' r='1.5' fill='%23c2410c' stroke='none'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -127,7 +127,7 @@
     <h1>Unread</h1>
     <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </header>
-    <p class="count"><b>14 unread</b> from 4 feeds</p>
+    <p class="count"></p>
     <ul class="list">
     <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">P</span><span class="srcname">Pocket Garden Weekly</span><span class="time">12 min ago</span></div><h2 class="title">Five herbs that grow happily on a windowsill</h2><p class="snip">Basil, chives and mint need little more than a bright sill and a weekly drink. Here is how to start them from cuttings this month.</p></div></li>
     <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">T</span><span class="srcname">Tinkerbench Notes</span><span class="time">1 h ago</span></div><h2 class="title">Building a tiny weather station from spare parts</h2><p class="snip">A sensor, a microcontroller and an old jam jar make a surprisingly accurate rain gauge. Parts list and wiring inside.</p></div></li>
@@ -135,7 +135,7 @@
     <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">M</span><span class="srcname">Meadow Trail Blog</span><span class="time">Yesterday</span></div><h2 class="title">A quiet loop walk through the sample valley</h2><p class="snip">Six kilometres of gentle paths, two footbridges and a bench with the best view of the made-up river. Map and photos.</p></div></li>
     <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">P</span><span class="srcname">Pocket Garden Weekly</span><span class="time">2 days ago</span></div><h2 class="title">Why your tomato leaves curl, and what to do</h2><p class="snip">Curling leaves are usually heat or uneven watering, rarely disease. Three checks to run before you reach for anything else.</p></div></li>
     </ul>
-    <p class="end">That is everything new for now.</p>
+    <p class="end" hidden>That is everything new for now.</p>
     </div>
     </div>
   </div>
@@ -166,5 +166,6 @@
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

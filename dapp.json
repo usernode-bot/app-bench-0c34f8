@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "checks": [
+    {
+      "id": "unread-list",
+      "name": "Unread list (demo)",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post]",
+      "visual": true,
+      "impact": ["public/**", "server.js", "feed.js"]
+    },
+    {
+      "name": "Empty state with no feeds",
+      "path": "/",
+      "expectText": "Add your first feed"
+    },
+    {
+      "name": "Demo label",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    }
+  ]
 }

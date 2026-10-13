@@ -96,3 +96,7 @@ body {
 .btn-secondary svg {width:18px;height:18px}
 
 .link {color:rgb(var(--accent));font-weight:600}
+
+/* Pictures inside a preview's article text (from the feed's content):
+   same shape and inset as the drawn .art drawing. */
+.article img {display:block;max-width:100%;height:auto;border-radius:8px;background:rgb(var(--raised));margin:12px 0}
