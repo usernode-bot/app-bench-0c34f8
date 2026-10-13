@@ -147,6 +147,16 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// "Staging mock data" convention (?demo=1): one example bake so the populated
+// screen can be seen in a staging preview. Read-only, answers nothing in
+// production, writes nothing.
+app.get('/api/demo', (req, res) => {
+  if (IS_STAGING && req.query.demo === '1') {
+    return res.json({ demo: true, preset: { style: 'sourdough', hydration: 72, count: 2, size: 900 } });
+  }
+  return res.json({ demo: false });
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to

@@ -2,5 +2,17 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "calculator",
+      "path": "/",
+      "text": "Total dough"
+    },
+    {
+      "name": "staging demo",
+      "path": "/?demo=1",
+      "text": "Staging demo"
+    }
+  ]
 }

@@ -55,6 +55,8 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the dough bar's flour half
+        water: token('water'), // the dough bar's water half
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

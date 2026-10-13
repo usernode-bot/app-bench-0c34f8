@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: pick one of five breads (sourdough, bagels,
+sourdough bagels, rye, sandwich loaf), set hydration, count and size, and the
+screen answers live — grams per ingredient, the flour/water dough bar, bake
+temperature and time, and a full mixing-to-cooling timeline with clock
+offsets. Everything is computed in the page; nothing is stored and there are
+no writes. The maths are pure in `public/app/bread.js` and tested in
+`test/bread.test.mjs`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** crust-brown accent (light `138 74 30`, dark `224 150 92` —
+  already the token values); wheat gold (`--wheat`) and water blue
+  (`--water`) are the subject's two fills, for the dough bar and swatches
+  only, never for text; flour-cream neutrals, warm in both looks. The values
+  live in `styles/tailwind-input.css`.
+- **Signature element:** the dough bar — flour in wheat against water in
+  blue — whose split moves with the hydration slider; wheat returns as the
+  dot on each rising step of the timeline.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged; ui-serif for the app name, big values and grams, system sans
+  elsewhere — set in `public/screens.css`).
+- **One fixed look:** none — the screen follows the viewer's Homeroom theme
+  in both looks; no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
