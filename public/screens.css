@@ -1,0 +1,138 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+.app {
+  max-width: 448px;
+  margin: 0 auto;
+  padding: 16px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.top {display:flex;align-items:center;gap:10px;min-height:44px}
+
+.mark {font-size:24px;line-height:1}
+
+h1 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:28px;line-height:36px;font-weight:700}
+
+h2 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:20px;line-height:28px;font-weight:600}
+
+.section-label {margin:0 4px 8px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.kinds {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.kind {display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));font-size:16px;line-height:20px;color:rgb(var(--fg));text-align:left}
+
+.kind svg {width:28px;height:28px;flex:none;color:rgb(var(--muted))}
+
+.kind[aria-checked="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));font-weight:600}
+
+.kind[aria-checked="true"] svg {color:rgb(var(--accent))}
+
+.card {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:16px}
+
+.setting {display:flex;flex-direction:column;gap:8px}
+
+.setting+.setting {margin-top:16px;padding-top:16px;border-top:1px solid rgb(var(--line))}
+
+.srow {display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+
+.lbl {font-size:16px;font-weight:500}
+
+.val {font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.hint {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.foot {margin:8px 4px 0}
+
+.range {position:relative;height:44px}
+
+.track {position:absolute;left:0;right:0;top:20px;height:4px;border-radius:2px;background:rgb(var(--line))}
+
+.fill {position:absolute;left:0;top:20px;height:4px;border-radius:2px;background:rgb(var(--accent));width:50%}
+
+.thumb {position:absolute;top:10px;left:calc(50% - 12px);width:24px;height:24px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;font-size:14px;color:rgb(var(--muted));margin-top:-6px}
+
+.stepper {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px;overflow:hidden}
+
+.stepper button {width:44px;height:44px;border:0;background:rgb(var(--surface));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+
+.stepper button svg {width:20px;height:20px}
+
+.stepper output {min-width:48px;text-align:center;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;border-left:1px solid rgb(var(--line));border-right:1px solid rgb(var(--line));line-height:44px}
+
+.inline {display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+.seg {display:grid;grid-template-columns:repeat(3,1fr) 1.2fr;gap:4px;padding:4px;border-radius:10px;background:rgb(var(--raised))}
+
+.seg span {min-height:40px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:16px;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
+
+.seg span[aria-checked="true"] {background:rgb(var(--surface));color:rgb(var(--fg));font-weight:600;box-shadow:0 0 0 1px rgb(var(--line))}
+
+.loafwrap {display:flex;flex-direction:column;gap:12px}
+
+.loaf {width:100%;height:auto;display:block}
+
+.loaf text {font-family:system-ui,sans-serif;font-size:13px;font-weight:600}
+
+.totals {display:flex;justify-content:space-between;align-items:baseline}
+
+.big {font-size:28px;line-height:36px;font-weight:700;font-variant-numeric:tabular-nums;font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.dot {width:12px;height:12px;border-radius:50%;flex:none}
+
+.d-flour {background:rgb(var(--crumb));box-shadow:inset 0 0 0 1.5px rgb(var(--crust))}
+
+.d-water {background:rgb(var(--water))}
+
+.d-lev {background:rgb(var(--crust))}
+
+.d-salt {background:rgb(var(--muted))}
+
+.ing {flex:1;display:flex;flex-direction:column}
+
+.ing b {font-size:16px;font-weight:500}
+
+.ing small {font-size:14px;color:rgb(var(--muted))}
+
+.g {font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.g em {font-style:normal;font-size:14px;font-weight:400;color:rgb(var(--muted));margin-left:2px}
+
+.step {align-items:flex-start}
+
+.num {width:28px;height:28px;flex:none;border-radius:50%;border:1.5px solid rgb(var(--crust));color:rgb(var(--accent));font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center}
+
+.dur {font-size:16px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.bake {display:grid;grid-template-columns:1fr 1fr}
+
+.bake>div {padding:16px;display:flex;flex-direction:column;gap:2px}
+
+.bake>div+div {border-left:1px solid rgb(var(--line))}
+
+.bake svg {width:24px;height:24px;color:rgb(var(--crust));margin-bottom:4px}
+
+.note {padding:12px 16px;border-top:1px solid rgb(var(--line));font-size:14px;line-height:20px;color:rgb(var(--muted))}
