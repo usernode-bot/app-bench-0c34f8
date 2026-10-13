@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗳️</text></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -120,10 +120,11 @@
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div><main class="app">
+    <div><main class="app" id="app">
     <header class="head"><div><h1 class="app-title">Club Votes</h1><p class="app-sub">Ask the club. Everyone gets a vote.</p></div>
     <button class="btn-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button></header>
-    <p class="section-label">6 questions, newest first</p>
+    <p class="section-label"></p>
+    <div id="questions">
     <ul class="qs">
 
     <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we move the spring meetup to the community hall?</h2><p class="q-meta">Asked by Chioma · 2 hours ago</p></button>
@@ -168,8 +169,11 @@
     </div>
     <div class="q-foot"><span>No votes yet</span><button class="q-talk" type="button">Talk it through<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
 
-    </ul></main></div>
+    </ul></div></main></div>
   </div>
+  <!-- The question page renders here (from the drawn template) when the
+       hash points at one; the list hides while it shows. -->
+  <div id="detail" hidden></div>
   <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
   <template data-spec-screen="2">
     <div data-spec-screen="2">
@@ -195,11 +199,12 @@
       <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Dev</span><span>18 hours ago</span><button class="report" type="button">Report</button></p><p>About five more per booking. I'll ask if they do a block rate.</p></li>
       <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">You</span><span>3 hours ago</span></p><p>Voted yes, but alternate weeks sounds fair to me too.</p></li>
       </ul>
-      <div class="kit-composer"><label class="kit-label">Add a comment</label><textarea class="field">e.g. Thursdays clash with something for me</textarea>
+      <div class="kit-composer"><label class="kit-label">Add a comment</label><textarea class="field" placeholder="e.g. Thursdays clash with something for me"></textarea>
       <div class="kit-composer-actions"><button class="btn-primary" type="button">Post comment</button></div></div></section>
       </article></main></div>
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

@@ -95,29 +95,41 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a yes/no
+question, everyone votes (one vote per person, changeable, takeable
+back), counts show live on the card, and comments sit under each
+question for talking it through. Questions can be reported (hidden for
+the reporter at one report, for everyone at three) and their authors can
+delete them.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
-
-The kit is in `styles/tailwind-input.css`: colour tokens with a light and
-a dark value (named in `tailwind.config.js`), and a few components
-(`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
-Re-theme by changing the token values there, keeping every text pair at
-4.5:1 or more in both looks.
+- **Palette:** warm paper neutrals (off-white ground, warm dark grey
+  text in the light look; warm dark browns in the dark look) with one
+  accent: ballot-ink indigo. Everything carries both looks; the viewer's
+  Homeroom theme is the switch, and no theme picker exists.
+- **Signature element:** the hand-tally marks — votes drawn as tally
+  strokes in gates of five (four strokes plus the slash), capped at 30
+  before the number stands alone. The square ballot mark fills with the
+  accent when yours.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Question titles and the app title set in `font-ballot` (the platform's
+  system serif, named in `tailwind.config.js`); everything else system-ui.
+- The kit is in `styles/tailwind-input.css`: colour tokens with a light
+  and a dark value (named in `tailwind.config.js`), and a few components
+  (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
+  `card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+  Re-theme by changing the token values there, keeping every text pair at
+  4.5:1 or more in both looks.
+- The drawn screens (`data-spec-screen="1"` in `public/index.html`, the
+  screen 2 template) and `public/screens.css` carry the app's own
+  component styles (`.card.q`, `.ballot`, `.kit-vote`, …), token-based.
+  Their class rules are the styling source for those pieces; the screen 2
+  overrides in `screens.css` are scoped to `[data-spec-screen="2"]` so
+  they cannot retune the list screen.
 
 - Colour comes only from the tokens (`bg-ground`, `bg-surface`,
   `text-fg`, `text-muted`, `border-line`, `bg-accent` with
@@ -138,6 +150,16 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Ballot options are fixed: option 0 is Yes, option 1 is No. The kit's
+  `resource` was mounted with `options: ['Yes', 'No']`; do not change the
+  order or the labels.
+- The `reports` table (in `server.js`) is marked `staging:private` and has
+  no foreign key to the questions tables; who reported what must not show
+  anywhere. Hiding is enforced in the `hiddenFor` middleware: one report
+  hides a post for its reporter, three distinct reporters hide it for
+  everyone (a hidden question answers 404 "That question is no longer
+  here."; hidden comments drop out of the detail answer and the list's
+  comment counts).
+- `public/app.js` is the only screen logic; the drawn screens in
+  `public/index.html` stay the shape of their markup — app code fills
+  them (kit `fill.js`), it does not redraw them with `h()`.

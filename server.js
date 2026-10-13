@@ -154,6 +154,136 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Reports ────────────────────────────────────────────────────────────────
+// A question, or another person's comment, can be reported. One report hides
+// it for the reporter; three distinct reporters hide it for everyone. Rows
+// live in a private table with no foreign key from the public ones, and the
+// middleware below keeps hidden items out of the kit's answers.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  const kind = req.body && req.body.kind;
+  const id = Number(req.body && req.body.id);
+  if ((kind !== 'question' && kind !== 'comment') || !Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'That report does not name a question or a comment.' });
+  }
+  try {
+    const owner = kind === 'question'
+      ? await pool.query('SELECT author_id AS owner_id, id AS question_id FROM questions WHERE id = $1', [id])
+      : await pool.query('SELECT author_id AS owner_id, item_id AS question_id FROM questions_comments WHERE id = $1', [id]);
+    if (!owner.rows.length) return res.status(404).json({ error: 'That is no longer here.' });
+    if (owner.rows[0].owner_id === req.user.id) {
+      return res.status(400).json({ error: 'You cannot report your own post.' });
+    }
+    await pool.query(
+      `INSERT INTO reports (kind, target_id, question_id, reporter_id, created_at)
+       VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
+      [kind, id, owner.rows[0].question_id, req.user.id, req.now]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.warn('report failed: ' + err.message);
+    return res.status(500).json({ error: 'That report did not save. Try again.' });
+  }
+});
+
+// What this viewer must not see: targets they reported themselves, and
+// targets at least three distinct people have reported.
+async function hiddenFor(req) {
+  const viewer = req.user ? req.user.id : -1;
+  const { rows } = await pool.query(
+    `SELECT kind, target_id, question_id FROM reports
+     WHERE reporter_id = $1
+        OR (kind, target_id) IN (
+          SELECT kind, target_id FROM reports
+          GROUP BY kind, target_id HAVING COUNT(DISTINCT reporter_id) >= 3)`,
+    [viewer]);
+  const questions = new Set();
+  const comments = new Map(); // comment id -> its question's id
+  const byQuestion = new Map(); // question id -> how many of its comments are hidden
+  for (const r of rows) {
+    if (r.kind === 'question') questions.add(r.target_id);
+    else if (!comments.has(r.target_id)) {
+      comments.set(r.target_id, r.question_id);
+      byQuestion.set(r.question_id, (byQuestion.get(r.question_id) || 0) + 1);
+    }
+  }
+  return { questions, comments, byQuestion };
+}
+
+// Registered BEFORE the kit's routes so it wraps res.json first. Guests get
+// the three-report hiding (their own reporter set is empty).
+app.use(/^\/api\/questions(?:\/\d+)?$/, async (req, res, next) => {
+  if (req.method !== 'GET') return next();
+  let hidden;
+  try {
+    hidden = await hiddenFor(req);
+  } catch (err) {
+    console.warn('report filter failed: ' + err.message);
+    return next();
+  }
+  const m = req.path.match(/^\/api\/questions\/(\d+)$/);
+  if (m && hidden.questions.has(Number(m[1]))) {
+    return res.status(404).json({ error: 'That question is no longer here.' });
+  }
+  const json = res.json.bind(res);
+  res.json = (data) => {
+    try {
+      if (data && Array.isArray(data.items)) {
+        data.items = data.items.filter((q) => !hidden.questions.has(q.id));
+        for (const q of data.items) {
+          const n = hidden.byQuestion.get(q.id) || 0;
+          if (n) q.commentCount = Math.max(0, q.commentCount - n);
+        }
+      } else if (data && data.item && hidden.comments.size) {
+        const n = hidden.byQuestion.get(data.item.id) || 0;
+        if (n) data.item.commentCount = Math.max(0, data.item.commentCount - n);
+        data.comments = (data.comments || []).filter((c) => !hidden.comments.has(c.id));
+      }
+    } catch (err) {
+      console.warn('report filter failed: ' + err.message);
+    }
+    return json(data);
+  };
+  return next();
+});
+
+// The questions resource — its tables, routes and demo rows — from the kit.
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  options: ['Yes', 'No'],
+  demo: {
+    titles: [
+      { title: 'Should we move the spring meetup to the community hall?', body: 'The café room is getting tight, and the hall has space for everyone plus decent parking.' },
+      { title: 'Should we switch our meetings to Thursday evenings?', body: 'Tuesdays keep clashing with the school run for a few of us. Thursday at 7 would free that up, but the hall costs a little more that night.' },
+      { title: 'Should the club start a shared reading list?', body: 'A page where anyone can add a book worth reading, and we pick one each season.' },
+      'Should we raise yearly dues to cover the hall booking?',
+      { title: 'Should we keep a shared club calendar?', body: 'One place for meetups, quizzes and fairs, so we stop double booking.' },
+      { title: 'Should we plan a picnic at Riverside Park in June?', body: 'Covered tables if it rains, and the minigolf next door took the last one well.' },
+      'Should we buy a projector for film nights?',
+      { title: 'Should we start a car-share list for out-of-town members?', body: 'A simple sheet of who is driving when, so nobody travels alone.' },
+      'Should the club enter the regional quiz?',
+      { title: 'Should we try a morning walking group before meetings?', body: 'Half an hour around the park, then the meeting as usual.' },
+      'Should we switch the newsletter to a monthly email?',
+      { title: 'Should we host a swap stall at the autumn fair?', body: 'Books, plants and tools — anything a member no longer needs.' },
+      'Should we invite a guest speaker each season?',
+      'Should we keep meetings to one hour?',
+    ],
+    comments: [
+      'Thursday works much better for me, I can actually make it on time.',
+      'The hall has good parking, which helps more people get there.',
+      'Happy to chip in for the extra cost, it is still less than renting a room.',
+      'I can add the first few books this week if we go ahead.',
+      'Dues have not moved in five years, so this seems fair.',
+      'A shared calendar would stop the double bookings for good.',
+      'June weekends fill up fast, so an early date is a good idea.',
+      'I would come to a walking group, mornings suit me.',
+      'I have choir on Thursdays, so I would miss every meeting. Could we try alternate weeks?',
+      'Monthly is plenty for news like ours, and easier to write.',
+      'I have a projector we can try before we buy one.',
+      'One hour keeps people coming back, short and friendly.',
+    ],
+  },
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -192,9 +322,33 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // Tables first: the kit's questions, votes and comments, then reports.
+  await questions.migrate();
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reports (
+      id serial PRIMARY KEY,
+      kind text NOT NULL CHECK (kind IN ('question', 'comment')),
+      target_id integer NOT NULL,
+      question_id integer NOT NULL,
+      reporter_id integer NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT NOW(),
+      UNIQUE (kind, target_id, reporter_id)
+    )`);
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // On a stop signal: stop accepting, let what is in flight finish (3s),
+  // then close the pool and exit.
+  let closing = false;
+  const shutdown = () => {
+    if (closing) return;
+    closing = true;
+    server.close(() => { pool.end().then(() => process.exit(0)); });
+    setTimeout(() => { pool.end().finally(() => process.exit(0)); }, 3000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

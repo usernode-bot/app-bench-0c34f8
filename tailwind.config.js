@@ -56,6 +56,11 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // The question titles' serif, on the tokens' own terms: the platform
+      // system serif stack, named here as fontFamily.ballot.
+      fontFamily: {
+        ballot: ['ui-serif', '"Iowan Old Style"', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

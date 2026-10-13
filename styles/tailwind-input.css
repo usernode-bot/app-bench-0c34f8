@@ -35,24 +35,24 @@
     --fg: 31 28 24;           /* text */
     --muted: 99 91 80;        /* secondary text */
     --line: 224 216 202;      /* borders, dividers, skeletons */
-    --accent: 43 52 132;     /* the one accent */
+    --accent: 43 52 132;     /* the one accent: ballot ink */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 176 38 30;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 70 82 190;      /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 22 20 17;
+    --surface: 33 30 26;
+    --raised: 46 42 37;
+    --fg: 243 238 228;
+    --muted: 176 166 150;
+    --line: 66 60 52;
+    --accent: 160 170 245;
+    --on-accent: 20 22 60;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 170 180 250;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -183,7 +183,7 @@
       bg-surface px-3 py-2 text-left text-body text-fg hover:border-muted;
   }
   .kit-vote-fill { @apply absolute inset-y-0 left-0 -z-10 bg-raised motion-safe:transition-[width] motion-safe:duration-300; }
-  .kit-vote-mark { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-transparent; }
+  .kit-vote-mark { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-muted/55 bg-surface text-transparent; }
   .kit-vote-label { @apply min-w-0 flex-1 break-words; }
   .kit-vote-count { @apply shrink-0 text-small font-medium tabular-nums text-muted; }
   .kit-vote[aria-pressed="true"] { @apply border-accent font-medium shadow-[inset_0_0_0_1px_rgb(var(--accent))]; }

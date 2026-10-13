@@ -2,5 +2,19 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "questions.list",
+      "path": "/?demo=1",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js", "kit/**"],
+      "expectSelector": ".card.q .kit-vote[aria-pressed='true']"
+    },
+    {
+      "id": "app.loads",
+      "path": "/",
+      "expectSelector": "#app"
+    }
+  ]
 }

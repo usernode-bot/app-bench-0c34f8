@@ -68,9 +68,11 @@
 
 .lead {color:rgb(var(--fg));font-weight:500}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. The four shared classes
+   it retunes (.app, .ballot, .kit-vote, .btn-primary) are scoped to the
+   screen 2 wrapper so the list screen keeps the first block's shape. */
 
-.app {
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -97,9 +99,9 @@
 
 .kit-detail-body {white-space:pre-line}
 
-.ballot {display:flex;flex-direction:column;gap:8px}
+[data-spec-screen="2"] .ballot {display:flex;flex-direction:column;gap:8px}
 
-.kit-vote {position:relative;display:flex;align-items:center;gap:12px;min-height:52px;width:100%;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg));text-align:left}
+[data-spec-screen="2"] .kit-vote {position:relative;display:flex;align-items:center;gap:12px;min-height:52px;width:100%;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg));text-align:left}
 
 .kit-vote-summary {margin-top:8px;padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
@@ -119,8 +121,12 @@
 
 .kit-label {font-size:14px;line-height:20px;font-weight:500}
 
-.field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--muted)/.6)}
+/* The composer's textarea; sheet fields keep the kit's own .field shape.
+   Typed text is foreground; the placeholder is the faint hint. */
+.kit-composer .field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg))}
+
+.field::placeholder {color:rgb(var(--muted)/.6)}
 
 .kit-composer-actions {display:flex;justify-content:flex-end}
 
-.btn-primary {display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-weight:500}
+[data-spec-screen="2"] .btn-primary {display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-weight:500}
