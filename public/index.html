@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,112 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main>
+      <header class="head">
+        <div>
+          <h1 class="text-title">Club Votes</h1>
+          <p class="text-small text-muted">7 open questions</p>
+        </div>
+        <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ask the club</button>
+      </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <section>
+        <h2 class="section-label">Waiting for your vote</h2>
+        <ul class="list">
+          <li><button class="list-row">
+            <span class="q-title"><span class="new-dot"></span>Where should we hold the autumn meetup?</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:58%"></span><span class="t2" style="width:25%"></span><span class="t3" style="width:17%"></span></span>
+            <span class="q-foot"><span class="q-lead"><strong>Riverside café</strong> leads, 58%</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>12</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>5</span></span></span>
+          </button></li>
+          <li><button class="list-row">
+            <span class="q-title"><span class="new-dot"></span>Pick the next group activity</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:40%"></span><span class="t2" style="width:40%"></span><span class="t3" style="width:20%"></span></span>
+            <span class="q-foot"><span class="q-lead"><strong>Tied:</strong> board game night and canal clean-up</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>10</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>8</span></span></span>
+          </button></li>
+          <li><button class="list-row">
+            <span class="q-title"><span class="new-dot"></span>Name for the club newsletter</span>
+            <span class="tally" aria-hidden="true"></span>
+            <span class="q-foot"><span class="q-lead">No votes yet</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>0</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>1</span></span></span>
+          </button></li>
+        </ul>
+      </section>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+      <section>
+        <h2 class="section-label">You voted</h2>
+        <ul class="list">
+          <li><button class="list-row">
+            <span class="q-title">Which evening works for regular meetings?</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:64%"></span><span class="t2" style="width:22%"></span><span class="t3" style="width:14%"></span></span>
+            <span class="q-foot"><span class="q-lead mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You picked Thursday, it leads</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>14</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>3</span></span></span>
+          </button></li>
+          <li><button class="list-row">
+            <span class="q-title">Where should the spring day trip go?</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:50%"></span><span class="t2" style="width:33%"></span><span class="t3" style="width:17%"></span></span>
+            <span class="q-foot"><span class="q-lead mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You picked Coastal walk</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>6</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>2</span></span></span>
+          </button></li>
+          <li><button class="list-row">
+            <span class="q-title">Keep the snack rota for meetings?</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:82%"></span><span class="t2" style="width:18%"></span></span>
+            <span class="q-foot"><span class="q-lead mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You picked Keep it, it leads</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>11</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>6</span></span></span>
+          </button></li>
+          <li><button class="list-row">
+            <span class="q-title">Bring a guest to the December social?</span>
+            <span class="tally" aria-hidden="true"><span class="t1" style="width:71%"></span><span class="t2" style="width:29%"></span></span>
+            <span class="q-foot"><span class="q-lead mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You picked No</span><span class="counts"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>7</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>4</span></span></span>
+          </button></li>
+        </ul>
+      </section>
+    </main>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <main>
+        <button class="btn-secondary back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Questions</button>
+        <header class="kit-detail-head">
+          <h1 class="text-title">Where should we hold the autumn meetup?</h1>
+          <p class="text-small text-muted">Asked by Chioma, 2 days ago</p>
+          <p class="kit-detail-body">We need a room for about 15 people on a weekday evening. Somewhere with tables, and easy to reach by bus.</p>
+        </header>
+
+        <section>
+          <h2 class="section-label">Your vote</h2>
+          <div class="tally" aria-hidden="true"><span class="t1 w62"></span><span class="t2 w23"></span><span class="t3 w15"></span></div>
+          <div class="kit-votes" role="group" aria-label="Vote on Where should we hold the autumn meetup?">
+            <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill w62"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="kit-vote-label">Riverside café</span><span class="kit-vote-count">8</span></button>
+            <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill w23"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="kit-vote-label">Library meeting room B</span><span class="kit-vote-count">3</span></button>
+            <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill w15"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="kit-vote-label">Maple Park pavilion</span><span class="kit-vote-count">2</span></button>
+          </div>
+          <p class="kit-vote-summary">13 votes, Riverside café leads</p>
+          <p class="vote-hint">Tap another choice to change your vote, or tap yours again to take it back.</p>
+        </section>
+
+        <section>
+          <h2 class="section-label">Comments</h2>
+          <ul class="kit-group">
+            <li class="list-row kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Ben</span><time>2 days ago</time><button class="c-report">Report</button></p><p class="kit-comment-body">The café has a back room we can book for free if we buy drinks.</p></li>
+            <li class="list-row kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Hana</span><time>yesterday</time><button class="c-report">Report</button></p><p class="kit-comment-body">Library is quieter, but it closes at 8.</p></li>
+            <li class="list-row kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Ivo</span><time>3 hours ago</time><button class="c-report">Report</button></p><p class="kit-comment-body">Pavilion has no heating in November, so I'd skip it.</p></li>
+          </ul>
+          <form class="kit-composer">
+            <label class="kit-label">Add a comment</label>
+            <textarea class="field" rows="2" placeholder="e.g. The café works for me on Thursdays"></textarea>
+            <div class="kit-composer-actions"><button class="btn-secondary" disabled>Post comment</button></div>
+          </form>
+        </section>
+
+        <button class="q-report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>Report this question</button>
+      </main>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
