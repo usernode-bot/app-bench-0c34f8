@@ -185,14 +185,17 @@ export function calculate({ kind, hydration, count, flour }) {
   }
   if (Object.keys(errors).length) return { errors };
 
-  // Ingredients. Salt is always 2%; water is the hydration itself.
+  // Ingredients, based on the TOTAL flour: count × flour per loaf. Salt is
+  // always 2%; water is the hydration itself. The total is the sum of the
+  // rows, so the card can never contradict itself.
+  const totalFlour = count * flour;
   const ingredients = bread.ingredients.map((ing) => {
     const pct = ing.pct === 'hydration' ? hydration : ing.pct;
-    const raw = flour * pct / 100;
+    const raw = totalFlour * pct / 100;
     const grams = raw < 10 && raw % 1 !== 0 ? Math.round(raw * 10) / 10 : Math.round(raw);
     return { name: ing.name, grams, pct };
   });
-  const total = ingredients.reduce((sum, ing) => sum + ing.grams, 0) * count;
+  const total = ingredients.reduce((sum, ing) => sum + ing.grams, 0);
 
   // Every 5 points of hydration from the bread's start shifts the rises
   // 10%, to the nearest half hour.
