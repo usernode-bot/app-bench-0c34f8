@@ -1,0 +1,262 @@
+/* Input stylesheet for this app's Tailwind build.
+ *
+ * Deliberately OUTSIDE public/ so it is never served — the @tailwind lines
+ * are build-time directives and mean nothing to a browser. npm run build
+ * compiles this to public/tailwind.css with Docker or Paketo.
+ *
+ * "base" is the preflight layer (the cross-browser reset). Keep all three
+ * layers, in this order; dropping base changes every heading, list and form
+ * control.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Colour tokens ────────────────────────────────────────────────────────
+ * This app's palette, defined once. Each value is "R G B"; tailwind.config.js
+ * names them (bg-ground, bg-surface, text-fg, text-muted, border-line,
+ * bg-accent with text-on-accent, ...). :root is the light look, and .dark,
+ * which the theme script in public/index.html sets on <html>, the dark one.
+ *
+ * Re-theme the app HERE: change the values, keep the names. The defaults
+ * (warm greys, one teal accent) are a quiet starting point, not a look.
+ * Keep every text pair at 4.5:1 or more in both looks: fg and muted on
+ * ground, surface and raised; accent and danger on ground and surface;
+ * on-accent on accent; on-danger on danger.
+ *
+ * Adopting the native UI kit later? Point its --un-accent and
+ * --un-accent-contrast at the accent and on-accent tokens.
+ */
+@layer base {
+  :root {
+    --ground: 250 250 249;    /* the page */
+    --surface: 255 255 255;   /* lists, cards, fields */
+    --raised: 245 245 244;    /* hovers, badges */
+    --fg: 28 25 23;           /* text */
+    --muted: 87 83 78;        /* secondary text */
+    --line: 231 229 228;      /* borders, dividers, skeletons */
+    --accent: 15 118 110;     /* the one accent */
+    --on-accent: 255 255 255; /* text on the accent */
+    --danger: 185 28 28;
+    --on-danger: 255 255 255;
+    --focus: 13 148 136;      /* the keyboard focus ring */
+  }
+  .dark {
+    --ground: 12 10 9;
+    --surface: 28 25 23;
+    --raised: 41 37 36;
+    --fg: 245 245 244;
+    --muted: 168 162 158;
+    --line: 68 64 60;
+    --accent: 45 212 191;
+    --on-accent: 4 47 46;
+    --danger: 248 113 113;
+    --on-danger: 69 10 10;
+    --focus: 94 234 212;
+  }
+  /* el.hidden = true hides an element even when a class gives it a display
+     (flex, the components below). */
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+
+/* ── Components ───────────────────────────────────────────────────────────
+ * A small starting kit on the tokens. Use these rather than restyling the
+ * same thing by hand, add to them sparingly, and change a component here
+ * rather than one copy of it. Type: text-title, text-heading, text-body and
+ * text-small (tailwind.config.js), nothing in between.
+ */
+@layer components {
+  /* Buttons: one primary per screen, the rest secondary. At least 44 px
+     each way, so they are easy to tap. */
+  .btn-primary,
+  .btn-secondary {
+    @apply inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-4 text-body font-medium
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
+      focus-visible:ring-offset-ground disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-accent text-on-accent hover:brightness-95;
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-fg hover:bg-raised;
+  }
+
+  /* Text inputs, selects and textareas: <input class="field">, 44 px tall.
+     The placeholder is a faint hint (muted at 60%), so an example such as
+     "5.0" never reads as a value somebody already typed in. */
+  .field {
+    @apply block min-h-11 w-full rounded-lg border border-line bg-surface px-3 py-2 text-body text-fg
+      placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-focus;
+  }
+
+  /* A grouped list: <ul class="list"> of <li class="list-row">. The usual
+     way to show several things; prefer it to a stack of cards. */
+  .list {
+    @apply divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface;
+  }
+  .list-row {
+    @apply flex min-h-11 items-center gap-3 px-4 py-3;
+  }
+
+  /* A card: one self-contained thing, usually something you tap. Most
+     screens need none. Never put a card inside a card or a .list. */
+  .card {
+    @apply rounded-xl border border-line bg-surface p-4;
+  }
+
+  /* The label above a section: sentence case, never uppercase or tracked. */
+  .section-label {
+    @apply mb-2 px-1 text-small font-medium text-muted;
+  }
+
+  /* The states of anything that loads data. Show exactly one at a time:
+     - loading: .skeleton shapes where the data will be, never a blank;
+     - empty, only when the load WORKED and found nothing: a title, one
+       sentence and the action that fills it;
+     - error, only when the load FAILED: what failed, what still works,
+       and a Retry button.
+     Never show the empty state while loading or for a failure. */
+  .skeleton {
+    @apply rounded-md bg-line motion-safe:animate-pulse;
+  }
+  .state-empty,
+  .state-error {
+    @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* ── Kit pieces ──────────────────────────────────────────────────────────
+   * What public/kit/ draws with (its README.md), on the tokens only.
+   * Restyle a piece HERE, never by hand in one place.
+   */
+
+  /* The native UI kit (public/kit/native.js loads it) in this app's tokens.
+     html:root outranks its own :root and .dark values in any order. */
+  html:root {
+    --un-accent: rgb(var(--accent));
+    --un-accent-contrast: rgb(var(--on-accent));
+    --un-switch-track-off: rgb(var(--muted) / 0.4);
+    --un-action-danger: rgb(var(--danger));
+    --un-action-neutral: rgb(var(--muted));
+    --un-action-text: rgb(var(--on-danger));
+    --un-surface: rgb(var(--raised));
+    --un-hairline: rgb(var(--line));
+    --un-muted: rgb(var(--muted));
+    --un-group-bg: rgb(var(--surface));
+    --un-sheet-bg: rgb(var(--surface));
+    --un-navbar-bg: rgb(var(--ground) / 0.85);
+    --un-toast-bg: rgb(var(--fg) / 0.94);
+    --un-toast-text: rgb(var(--ground));
+    --un-toast-action: rgb(var(--ground));
+  }
+
+  /* Lists: ul.un-group.kit-group of li.un-group-row, the native grouped
+     list with this app's edge, and its hairlines without the native kit. */
+  .kit-group { @apply overflow-hidden rounded-xl border border-line bg-surface; }
+  .kit-group > .un-group-row { @apply relative; }
+  .kit-group > .un-group-row + .un-group-row::after { @apply pointer-events-none absolute left-4 right-0 top-0 z-[2] h-px bg-line content-['']; }
+
+  /* A row that is one button: <li><button class="list-row kit-row">. */
+  .kit-row {
+    @apply w-full text-left hover:bg-raised focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-inset focus-visible:ring-focus;
+  }
+  .kit-row-text { @apply flex min-w-0 flex-1 flex-col; }
+  .kit-row-title { @apply line-clamp-2 break-words text-body font-medium text-fg; }
+  .kit-row-sub { @apply truncate text-small text-muted; }
+  .kit-row-meta { @apply shrink-0 text-right text-small text-muted; }
+  .kit-row-chevron { @apply h-5 w-5 shrink-0 text-muted; }
+
+  /* The detail screen and its labelled sections (votes, comments). */
+  .kit-detail { @apply flex flex-col gap-6; }
+  .kit-detail-head { @apply flex flex-col items-start gap-2; }
+  .kit-detail-title { @apply break-words outline-none; }
+  .kit-detail-body { @apply whitespace-pre-line break-words text-body text-fg; }
+  .kit-section { @apply flex flex-col; }
+
+  /* Votes: aria-pressed="true" is the viewer's choice. */
+  .kit-votes { @apply flex flex-col gap-2; }
+  .kit-votes-row { @apply grid auto-cols-fr grid-flow-col; }
+  .kit-vote {
+    @apply relative isolate flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-lg border border-line
+      bg-surface px-3 py-2 text-left text-body text-fg hover:border-muted;
+  }
+  .kit-vote-fill { @apply absolute inset-y-0 left-0 -z-10 bg-raised motion-safe:transition-[width] motion-safe:duration-300; }
+  .kit-vote-mark { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-transparent; }
+  .kit-vote-label { @apply min-w-0 flex-1 break-words; }
+  .kit-vote-count { @apply shrink-0 text-small font-medium tabular-nums text-muted; }
+  .kit-vote[aria-pressed="true"] { @apply border-accent font-medium shadow-[inset_0_0_0_1px_rgb(var(--accent))]; }
+  .kit-vote[aria-pressed="true"] .kit-vote-fill { @apply bg-accent/15; }
+  .kit-vote[aria-pressed="true"] .kit-vote-mark { @apply border-accent bg-accent text-on-accent; }
+  .kit-vote[aria-pressed="true"] .kit-vote-count { @apply text-fg; }
+  .kit-vote:focus-visible { @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-ground; }
+  .kit-vote-summary { @apply mt-2 px-1 text-small text-muted; }
+  .kit-error { @apply text-small text-danger; }
+
+  /* A comment thread, then the composer. */
+  .kit-comment { @apply flex-col items-start gap-1; }
+  .kit-comment-meta { @apply flex flex-wrap items-baseline gap-x-2 text-small text-muted; }
+  .kit-comment-author { @apply font-medium text-fg; }
+  .kit-comment-body { @apply whitespace-pre-line break-words text-body text-fg; }
+  .kit-comments-none { @apply px-1 text-small text-muted; }
+  .kit-composer { @apply mt-4 flex flex-col gap-2; }
+  .kit-composer-actions { @apply flex justify-end; }
+
+  /* Forms: a label over each field, hints and errors under it. */
+  .kit-form { @apply flex flex-col gap-4; }
+  .kit-field { @apply flex min-w-0 flex-col gap-1; }
+  .kit-label { @apply text-small font-medium text-fg; }
+  .kit-optional { @apply font-normal text-muted; }
+  .kit-hint { @apply text-small text-muted; }
+  .field[aria-invalid="true"] { @apply border-danger; }
+  .kit-choices { @apply flex flex-col gap-2; }
+  .kit-choice { @apply flex items-center gap-1; }
+  .kit-switch { @apply flex min-h-11 cursor-pointer items-center justify-between gap-3 accent-accent; }
+  .kit-form-actions { @apply flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end; }
+
+  /* The sheet: the panel sits in the native .un-sheet or .un-modal, or in
+     .kit-sheet without the native kit; in a sheet the body scrolls. */
+  .kit-sheet-head { @apply -mr-2 flex items-center justify-between gap-3 pb-3; }
+  .un-sheet .kit-sheet-body,
+  .kit-sheet .kit-sheet-body { @apply -mx-1 min-h-0 overflow-y-auto overscroll-contain px-1 pb-1; }
+  .un-sheet .kit-sheet-body {
+    max-height: calc(85vh - 5rem);
+  }
+  .kit-sheet .kit-sheet-panel { @apply flex min-h-0 flex-col; }
+  .un-sheet:has(.kit-sheet-panel) {
+    touch-action: pan-y;
+  }
+  .kit-sheet-layer { @apply fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6; }
+  .kit-sheet-backdrop { @apply absolute inset-0 bg-ground/80 backdrop-blur-sm; }
+  .kit-sheet {
+    @apply relative flex max-h-[90vh] w-full flex-col rounded-t-2xl border border-b-0 border-line bg-surface p-4 shadow-xl
+      outline-none sm:max-h-[calc(100vh-3rem)] sm:max-w-lg sm:rounded-2xl sm:border-b;
+    padding-bottom: calc(1rem + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+  html.kit-sheet-open { @apply overflow-hidden; }
+  .kit-icon-button {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted hover:bg-raised hover:text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+
+  /* The toast when the native kit did not load. */
+  .kit-toast {
+    @apply fixed left-1/2 z-50 max-w-[85vw] -translate-x-1/2 rounded-2xl bg-fg px-4 py-2 text-small text-ground shadow-lg;
+    bottom: calc(1rem + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+
+  /* Loading rows, the content holder, the one demo line. */
+  .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
+  .kit-content { @apply flex flex-col gap-6; }
+  .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
+
+  /* A report: a line per option or category, and its bar. */
+  .kit-report { @apply flex flex-col gap-3; }
+  .kit-report-line { @apply flex items-baseline justify-between gap-3 text-small; }
+  .kit-report-label { @apply min-w-0 break-words font-medium text-fg; }
+  .kit-report-count { @apply shrink-0 tabular-nums text-muted; }
+  .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
+  .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
+  .kit-report-total { @apply mt-3 text-small text-muted; }
+}
