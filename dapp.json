@@ -2,5 +2,22 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "path": "/",
+      "expectText": "Add your first feed"
+    },
+    {
+      "path": "/?demo=1",
+      "expectSelector": ".list .list-row",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "path": "/?demo=1",
+      "expectSelector": ".dot"
+    }
+  ]
 }

@@ -95,22 +95,28 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader, like Feedly in miniature: add RSS or Atom feeds, see
+all their unread posts in one scrolling list, tap a post to preview it with
+a link out to the full article. Each person's feeds and read marks are
+their own. The first version's spec is GitHub issue #1; its "Not in this
+version" list (mark all read, search, folders, OPML, …) still applies
+until a request asks for one of them.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** RSS-orange accent (light `194 65 12`, dark `251 146 60`) on
+  warm stone greys; the unread dot is a brighter orange (`234 88 12` /
+  `249 115 22`). Values live in `styles/tailwind-input.css`.
+- **Signature element:** the orange unread dot on every unread row (dimmed
+  to a hollow ring when read), and the RSS wave mark in the header, the
+  favicon and the empty states.
+- **Type scale:** `text-title`, `text-heading` (18 px), `text-body`,
+  `text-small`. Post titles and the preview's body text use the system
+  serif (`ui-serif`, Georgia) via `public/screens.css`; everything else is
+  sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

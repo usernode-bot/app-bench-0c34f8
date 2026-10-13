@@ -60,7 +60,7 @@ module.exports = {
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
     },

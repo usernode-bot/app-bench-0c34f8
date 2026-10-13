@@ -71,9 +71,11 @@ body {
 
 .feeds a {display:inline-flex;align-items:center;min-height:44px;font-size:14px;color:rgb(var(--muted));text-decoration:underline;text-underline-offset:3px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Where a rule would
+   restyle screen 1 too (.app, .meta, .site, .btn-primary), it is scoped to
+   screen 2's own block. */
 
-.app {
+[data-spec-screen="2"] .app {
   padding: 8px 16px 32px;
   max-width: 640px;
   margin: 0 auto;
@@ -87,9 +89,9 @@ body {
 
 .kit-detail {display:flex;flex-direction:column;gap:20px;margin-top:12px}
 
-.meta {display:flex;align-items:center;gap:8px;font-size:14px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .meta {display:flex;align-items:center;gap:8px;font-size:14px;color:rgb(var(--muted))}
 
-.site {font-weight:600;color:rgb(var(--fg))}
+[data-spec-screen="2"] .site {font-weight:600;color:rgb(var(--fg))}
 
 .feedmark {width:18px;height:18px;color:rgb(var(--accent))}
 
@@ -101,6 +103,6 @@ h1 {font-family:ui-serif,Georgia,"Iowan Old Style",serif;font-size:28px;line-hei
 
 .kit-detail-body p+p {margin-top:14px}
 
-.btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;border:0}
+[data-spec-screen="2"] .btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;width:100%;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;border:0}
 
 .note {font-size:13px;color:rgb(var(--muted));text-align:center;margin-top:-10px}
