@@ -39,22 +39,24 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 67 56 202;      /* the keyboard focus ring */
     --yes: 21 128 61; /* from the spec's screens */
     --no: 194 65 12; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 15 17 23;      /* the page */
+    --surface: 24 27 35;     /* lists, cards, fields */
+    --raised: 34 38 48;      /* hovers, badges */
+    --fg: 236 238 243;       /* text */
+    --muted: 160 167 182;    /* secondary text */
+    --line: 52 57 70;        /* borders, dividers, skeletons */
+    --accent: 165 160 255;   /* the one accent (ballot indigo) */
+    --on-accent: 22 18 70;   /* text on the accent */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 165 160 255;    /* the keyboard focus ring */
+    --yes: 74 222 128;       /* Yes, everywhere it appears */
+    --no: 251 146 60;        /* No, everywhere it appears */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -192,6 +194,21 @@
   .kit-vote[aria-pressed="true"] .kit-vote-fill { @apply bg-accent/15; }
   .kit-vote[aria-pressed="true"] .kit-vote-mark { @apply border-accent bg-accent text-on-accent; }
   .kit-vote[aria-pressed="true"] .kit-vote-count { @apply text-fg; }
+  /* The tally bar is the one bar here, so the vote buttons carry no fill of
+     their own, and each side keeps its tally colour: Yes green, No orange. */
+  .kit-vote .kit-vote-fill { @apply hidden; }
+  .kit-vote[data-option="0"] .kit-vote-count { color: rgb(var(--yes)); }
+  .kit-vote[data-option="1"] .kit-vote-count { color: rgb(var(--no)); }
+  .kit-vote[data-option="0"][aria-pressed="true"] {
+    border-color: rgb(var(--yes));
+    box-shadow: inset 0 0 0 1px rgb(var(--yes));
+  }
+  .kit-vote[data-option="1"][aria-pressed="true"] {
+    border-color: rgb(var(--no));
+    box-shadow: inset 0 0 0 1px rgb(var(--no));
+  }
+  .kit-vote[data-option="0"][aria-pressed="true"] .kit-vote-mark { border-color: rgb(var(--yes)); background: rgb(var(--yes)); color: rgb(var(--ground)); }
+  .kit-vote[data-option="1"][aria-pressed="true"] .kit-vote-mark { border-color: rgb(var(--no)); background: rgb(var(--no)); color: rgb(var(--ground)); }
   .kit-vote:focus-visible { @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-ground; }
   .kit-vote-summary { @apply mt-2 px-1 text-small text-muted; }
   .kit-error { @apply text-small text-danger; }

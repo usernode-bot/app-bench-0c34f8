@@ -56,34 +56,15 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## First-version template notes
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The first version was built on the screens the spec drew (the platform
+carried them into `public/index.html` with styles in `public/screens.css`):
+the drawn markup stays, `public/app.js` fills it, and the kit draws the
+votes and the comments. Keep that approach for later changes too — fill
+the drawn elements, don't redraw them. The screen-2-only rules in
+`screens.css` are scoped to `[data-spec-screen="2"]` so they never leak
+onto the list screen.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +76,31 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club's yes-or-no decision board. Anyone signs in and posts a question
+the club needs to decide; everyone votes Yes or No and talks it through in
+comments under the question. Counts only, never names. Reports flag a
+question or comment for a person to look at; nothing is hidden
+automatically.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** ballot indigo accent (`--accent`) on cool grey neutrals;
+  Yes is green (`--yes`), No is orange (`--no`), everywhere those appear.
+- **Signature element:** the tally bar — green fills from the left for
+  Yes, orange follows for No, a small gap between, on a raised track. It
+  fills against the number of people who have voted on any question here
+  (`GET /api/voters`), so a full-length bar means "all of them". A
+  question with no votes shows an empty bar and "No votes yet, be the
+  first"; the detail line says "15 of the 19 people voting here have had
+  their say".
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Question titles and the app name sit in the system serif
+  (`ui-serif`, the `font-title` family); everything else is the system
+  sans.
+- The app follows the viewer's Homeroom light/dark theme; no fixed look.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +128,9 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `reports` table is **staging:private** (`COMMENT ON TABLE reports IS
+  'staging:private'` in server.js): schema copies to staging, rows never
+  do. Never give a public table a foreign key to it.
+- Questions, votes and comments come from the platform's kit resource
+  (`kit/server.js`), never hand-rolled routes; `choice`/option id 0 is
+  Yes, 1 is No.

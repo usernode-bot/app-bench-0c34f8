@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "checks": [
+    {
+      "name": "Question list",
+      "path": "/?demo=1",
+      "expectSelector": ".tally",
+      "id": "list",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Empty list loads",
+      "path": "/",
+      "expectText": "New question"
+    },
+    {
+      "name": "Voters route",
+      "path": "/api/voters?demo=1",
+      "expectText": "voters"
+    }
+  ]
 }

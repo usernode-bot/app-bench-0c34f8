@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        yes: token('yes'), // Yes, everywhere it appears: the tally, the counts, the chosen button
+        no: token('no'), // No, the same
+      },
+      // Question titles and the app name sit in the system serif; the type
+      // scale above is untouched.
+      fontFamily: {
+        title: ['ui-serif', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

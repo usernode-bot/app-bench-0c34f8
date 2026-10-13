@@ -154,6 +154,82 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// The club's questions, votes and comments, from the platform's kit resource
+// (its routes and JSON shapes: public/kit/README.md). Mounted after sign-in
+// and before static files, as the kit asks. Its demo data seeds the staging
+// ?demo=1 view.
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  options: ['Yes', 'No'],
+  demo: {
+    titles: [
+      { title: 'Should we move Thursday meetups to the library annex?', body: 'The café is getting loud and the annex has a big table and free tea. It is a ten minute walk from the station.' },
+      'Picnic or bowling for the spring social?',
+      { title: 'Raise the yearly dues to cover new board games?', body: 'Dues would go from 20 to 25 for the year. The games shelf is down to three boxes and one has two cards missing.' },
+      'Start a second Saturday walking group?',
+      'Quiz night: history or movies?',
+      { title: 'Keep the shared playlist, or start a fresh one each month?', body: 'The current one has 140 songs and nobody agrees on any of them.' },
+      'Move the book club to the first Tuesday of the month?',
+      'Should the club buy its own projector?',
+      'Change the meeting start time from 6 pm to 7 pm?',
+      'Buddy up every new member with a regular?',
+      'Swap the paper newsletter for a short weekly message?',
+      'Enter a club team in the spring quiz league?',
+    ],
+    comments: [
+      'Yes from me, this has dragged on long enough.',
+      'Does it stay open past nine? We sometimes run late.',
+      'Happy either way, whatever most people pick.',
+      'Can we afford it? Someone said the fund is low.',
+      'I can help set up if we do it.',
+      'Count me out for the winter months, back in spring.',
+      'We tried this two years ago and it fizzled out. Worth another go though.',
+      'Works for me, my bus gets in at six.',
+      'Good idea, but can the first one be somewhere quiet?',
+      'I would come to that.',
+    ],
+  },
+});
+
+// How many people have voted on anything here. The tallies fill against
+// this, so a bar always means "everyone who has voted on any question",
+// never a share of the whole club.
+app.get('/api/voters', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT COUNT(DISTINCT user_id)::int AS n FROM questions_votes');
+    return res.json({ voters: rows[0].n });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// A person flags a question or a comment for the club to look at. Nothing is
+// hidden automatically; the row is a record, and a repeat report by the same
+// person is a no-op. The table is staging:private (its schema copies to
+// staging, its rows never do) and no public table points at it.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const kind = req.body && req.body.kind;
+    const id = Number(req.body && req.body.id);
+    if (!['question', 'comment'].includes(kind) || !Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'That report could not be read.' });
+    }
+    const table = kind === 'question' ? 'questions' : 'questions_comments';
+    const found = await pool.query(`SELECT 1 FROM ${table} WHERE id = $1`, [id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'This was removed, or the link is wrong.' });
+    await pool.query(
+      `INSERT INTO reports (kind, target_id, reporter_id, created_at)
+       VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+      [kind, id, req.user.id, req.now]);
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +267,35 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await questions.migrate();
+  // Reports: a record of what a person flagged. staging:private means the
+  // schema copies to staging but the rows never do, so nothing a person
+  // reported is carried out of the environment it was made in.
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    kind TEXT NOT NULL,
+    target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (kind, target_id, reporter_id))`);
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop taking connections, give in-flight requests about three seconds,
+// then close the pool and leave.
+function stop() {
+  if (!server) process.exit(0);
+  const done = () => pool.end().then(() => process.exit(0), () => process.exit(0));
+  server.close(done);
+  setTimeout(done, 3000).unref();
+}
+process.on('SIGTERM', stop);
+process.on('SIGINT', stop);
 
 start().catch(err => { console.error(err); process.exit(1); });
