@@ -71,15 +71,17 @@ function questionRow(q) {
   icEl.setAttribute('aria-label', plural(q.commentCount, 'comment'));
   icEl.querySelector('.n').textContent = String(q.commentCount);
   kids.push(icEl);
+  const tied = t.total && t.leaders.length === 2;
   if (q.votes.mine != null) {
     const label = `You voted ${q.votes.options.find((o) => o.id === q.votes.mine).label}`;
     [...mineEl.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE).forEach((n) => n.remove());
     mineEl.append(label);
     kids.push(mineEl);
+    if (tied) kids.push(h('span', {}, 'Tied'));
+  } else if (tied) {
+    kids.push(h('span', {}, 'Tied'));
   } else if (q.byMe) {
     kids.push(h('span', {}, 'Asked by you'));
-  } else if (t.total && t.leaders.length === 2) {
-    kids.push(h('span', {}, 'Tied'));
   }
   clear(metaEl).append(...kids);
   clear(textEl).append(titleEl, bar, metaEl);
@@ -106,6 +108,7 @@ const view = createStates(questionsEl, {
 
 async function load() {
   return view.run(async (content) => {
+    qCount.textContent = ''; // no count until the list has actually loaded
     const data = await api('GET', '/api/questions');
     items = data.questions;
     if (data.demo) showDemoLabel(app, DEMO_TEXT);
@@ -329,7 +332,7 @@ function openNew() {
     savedMessage: 'Question posted',
     returnFocus: newButton,
     fields: [
-      { name: 'title', label: 'Question', required: true, max: 120, placeholder: 'e.g. Should we meet at the library on Thursdays?' },
+      { name: 'title', label: 'Question', required: true, max: 120, placeholder: 'e.g. Meet at the library on Thursdays?' },
       { name: 'body', label: 'Details', type: 'textarea', max: 2000, placeholder: 'e.g. The hall is raising its rate in January' },
     ],
     onSubmit: async (values) => {
