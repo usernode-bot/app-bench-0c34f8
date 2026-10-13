@@ -1,0 +1,132 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.serif {font-family:ui-serif,Georgia,"Times New Roman",serif}
+
+main {display:flex;flex-direction:column;gap:28px;padding:20px 16px 40px;max-width:448px;margin:0 auto}
+
+h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weight:700}
+
+.lede {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));display:flex;justify-content:space-between;align-items:baseline}
+
+.section-label b {font-weight:500;color:rgb(var(--fg))}
+
+.styles {display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+
+.style {display:flex;flex-direction:column;align-items:center;gap:6px;min-height:84px;padding:10px 2px 8px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-size:13px;line-height:16px;text-align:center}
+
+.style svg {width:28px;height:28px;color:rgb(var(--muted))}
+
+.style[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--raised));font-weight:600}
+
+.style[aria-pressed="true"] svg {color:rgb(var(--accent))}
+
+.card {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:16px}
+
+.hyd-head {display:flex;justify-content:space-between;align-items:baseline}
+
+.hyd-head span {font-weight:500}
+
+.big {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weight:700;font-variant-numeric:tabular-nums}
+
+input[type=range] {width:100%;height:44px;accent-color:rgb(var(--accent));margin:2px 0 0}
+
+.scale {display:flex;justify-content:space-between;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.dough {margin-top:16px;display:flex;height:28px;border-radius:14px;overflow:hidden;border:1px solid rgb(var(--line))}
+
+.dough .flour {background:rgb(var(--wheat))}
+
+.dough .water {background:rgb(var(--water))}
+
+.legend {display:flex;justify-content:space-between;margin-top:8px;font-size:14px;line-height:20px}
+
+.legend span {display:flex;align-items:center;gap:6px}
+
+.sw {width:10px;height:10px;border-radius:5px;display:inline-block}
+
+.ratio {margin-top:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;list-style:none}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.grow {flex:1;min-width:0;display:flex;flex-direction:column}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.stepper {display:flex;align-items:center;gap:4px}
+
+.stepper button {width:44px;height:44px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+
+.stepper button svg {width:20px;height:20px}
+
+.stepper output {min-width:64px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+
+.grams {font-family:ui-serif,Georgia,serif;font-size:20px;line-height:28px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+
+.grams small {font-family:system-ui,sans-serif;font-size:14px;font-weight:400;color:rgb(var(--muted));margin-left:2px}
+
+.ing svg {width:24px;height:24px;color:rgb(var(--muted));flex-shrink:0}
+
+.total {background:rgb(var(--raised))}
+
+.total .grow {font-weight:600}
+
+.bake {display:flex;gap:16px;align-items:center}
+
+.bake svg {width:40px;height:40px;color:rgb(var(--accent));flex-shrink:0}
+
+.bake .f {font-size:14px;color:rgb(var(--muted));font-family:system-ui,sans-serif;font-weight:400;margin-left:6px}
+
+.bake p {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.tl {list-style:none;position:relative}
+
+.tl li {display:grid;grid-template-columns:52px 20px 1fr;align-items:start;min-height:56px}
+
+.tl .at {font-size:14px;line-height:24px;color:rgb(var(--muted));font-variant-numeric:tabular-nums;text-align:right;padding-right:8px}
+
+.tl .rail {position:relative;height:100%;display:flex;justify-content:center}
+
+.tl .rail:before {content:"";position:absolute;top:0;bottom:0;width:2px;background:rgb(var(--line))}
+
+.tl li:first-child .rail:before {top:8px}
+
+.tl li:last-child .rail:before {bottom:auto;height:8px}
+
+.dot {position:relative;margin-top:6px;width:12px;height:12px;border-radius:6px;border:2px solid rgb(var(--accent));background:rgb(var(--surface))}
+
+.dot.rise {background:rgb(var(--wheat));border-color:rgb(var(--wheat))}
+
+.dot.end {background:rgb(var(--accent))}
+
+.tl .step {padding:0 0 16px 8px}
+
+.tl .step b {font-weight:600}
+
+.note {font-size:14px;line-height:20px;color:rgb(var(--muted));padding:0 4px}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.tl {list-style:none}

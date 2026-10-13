@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,152 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main>
+    <header>
+    <h1>Bread Bot</h1>
+    <p class="lede">Pick a bread, shape the dough, get the recipe.</p>
+    </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
+    <section>
+    <h2 class="section-label">Bread</h2>
+    <div class="styles" role="group" aria-label="Bread">
+    <button class="style" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c0-6 4-10 9-10s9 4 9 10z"/><path d="M8 12c2.5-2 5.5-2 8 0"/></svg>Sourdough</button>
+    <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Bagels</button>
+    <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M6.5 8c1.5-1.6 3.3-2.4 5.5-2.4"/></svg>Sourdough bagels</button>
+    <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="9.5" ry="5"/><path d="M7 15l2-4"/><path d="M11 15l2-4"/><path d="M15 15l2-4"/></svg>Rye</button>
+    <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M5 11h14v8H5z"/></svg>Sandwich loaf</button>
+    </div>
     </section>
-    <!-- /usernode-starter-notice@1 -->
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <section>
+    <h2 class="section-label">Dough</h2>
+    <div class="card">
+    <div class="hyd-head"><span>Hydration</span><span class="big">72%</span></div>
+    <input type="range" min="50" max="90" value="72" aria-label="Hydration">
+    <div class="scale"><span>50%, stiff</span><span>90%, slack</span></div>
+    <div class="dough" role="img" aria-label="Flour 1,034 g, water 745 g"><div class="flour" style="width:58%"></div><div class="water" style="width:42%"></div></div>
+    <div class="legend"><span><i class="sw" style="background:rgb(var(--wheat))"></i>Flour 1,034 g</span><span><i class="sw" style="background:rgb(var(--water))"></i>Water 745 g</span></div>
+    <p class="ratio">72 g of water for every 100 g of flour, counting the starter.</p>
+    </div>
+    <ul class="list" style="margin-top:12px">
+    <li class="list-row"><div class="grow">Loaves</div><div class="stepper"><button aria-label="One fewer loaf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button><output>2</output><button aria-label="One more loaf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/><path d="M12 6v12"/></svg></button></div></li>
+    <li class="list-row"><div class="grow">Loaf size<span class="sub">Dough per loaf</span></div><div class="stepper"><button aria-label="50 g smaller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button><output>900 g</output><button aria-label="50 g bigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/><path d="M12 6v12"/></svg></button></div></li>
+    </ul>
+    </section>
+
+    <section>
+    <h2 class="section-label">Ingredients <b>for 2 loaves</b></h2>
+    <ul class="list">
+    <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.5-4-4 2.5 0 4 1.5 4 4z"/><path d="M12 12c2.5 0 4-1.5 4-4-2.5 0-4 1.5-4 4z"/><path d="M12 7c-1.5-1-1.5-3 0-4 1.5 1 1.5 3 0 4z"/></svg><div class="grow">Bread flour<span class="sub">90%</span></div><div class="grams">931<small>g</small></div></li>
+    <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.5 6-11z"/></svg><div class="grow">Water<span class="sub">62%, lukewarm</span></div><div class="grams">641<small>g</small></div></li>
+    <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9h10l-1 11H8z"/><path d="M7 9c0-2 1.5-3 3-3 .5-2 3.5-2 4 0 1.5 0 3 1 3 3"/><circle cx="11" cy="14" r=".6"/><circle cx="13.5" cy="16.5" r=".6"/></svg><div class="grow">Sourdough starter<span class="sub">20%, active, fed 4 to 12 h before</span></div><div class="grams">207<small>g</small></div></li>
+    <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9h8v11H8z"/><path d="M9 9V6h6v3"/><path d="M10 4h4"/></svg><div class="grow">Salt<span class="sub">2%</span></div><div class="grams">21<small>g</small></div></li>
+    <li class="list-row total"><div class="grow">Total dough</div><div class="grams">1,800<small>g</small></div></li>
+    </ul>
+    </section>
+
+    <section>
+    <h2 class="section-label">Bake</h2>
+    <div class="card bake">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M7 6h.01"/><path d="M10 6h.01"/><path d="M8 15c0-2 1.8-3.5 4-3.5s4 1.5 4 3.5z"/></svg>
+    <div><div class="big">250°C<span class="f">480°F</span></div><p>Lid on for 20 min, then lid off at 230°C (450°F) for 25 min. Each loaf on its own.</p></div>
+    </div>
+    </section>
+
+    <section>
+    <h2 class="section-label">Timeline <b>about 18 h 25 min</b></h2>
+    <div class="card">
+    <ol class="tl">
+    <li><span class="at">0:00</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Mix flour and water</b><div class="sub">Rest covered, 45 min</div></div></li>
+    <li><span class="at">0:45</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Add starter and salt</b><div class="sub">Squeeze in until smooth, 10 min</div></div></li>
+    <li><span class="at">0:55</span><span class="rail"><i class="dot rise"></i></span><div class="step"><b>Bulk rise</b><div class="sub">4 h 30 min, 4 sets of folds in the first 2 h</div></div></li>
+    <li><span class="at">5:25</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Divide and shape</b><div class="sub">2 pieces of 900 g, 15 min</div></div></li>
+    <li><span class="at">5:40</span><span class="rail"><i class="dot rise"></i></span><div class="step"><b>Cold proof</b><div class="sub">In the fridge, 12 h (8 to 16 h is fine)</div></div></li>
+    <li><span class="at">17:40</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Bake</b><div class="sub">Preheat 45 min before, bake 45 min</div></div></li>
+    <li><span class="at">18:25</span><span class="rail"><i class="dot end"></i></span><div class="step"><b>Cool on a rack</b><div class="sub">At least 1 h before slicing</div></div></li>
+    </ol>
+    </div>
+    <p class="note" style="margin-top:8px">Rise times assume a kitchen around 24°C (75°F). Warmer dough rises faster, cooler dough slower.</p>
+    </section>
+    </main>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <main>
+      <header>
+      <h1>Bread Bot</h1>
+      <p class="lede">Pick a bread, shape the dough, get the recipe.</p>
+      </header>
+      <section>
+      <h2 class="section-label">Bread</h2>
+      <div class="styles" role="group" aria-label="Bread">
+      <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c0-6 4-10 9-10s9 4 9 10z"/><path d="M8 12c2.5-2 5.5-2 8 0"/></svg>Sourdough</button>
+      <button class="style" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Bagels</button>
+      <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M6.5 8c1.5-1.6 3.3-2.4 5.5-2.4"/></svg>Sourdough bagels</button>
+      <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="9.5" ry="5"/><path d="M7 15l2-4"/><path d="M11 15l2-4"/><path d="M15 15l2-4"/></svg>Rye</button>
+      <button class="style" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3.5 3-6 7-6s7 2.5 7 6"/><path d="M5 11h14v8H5z"/></svg>Sandwich loaf</button>
+      </div>
+      </section>
+      <section>
+      <h2 class="section-label">Dough</h2>
+      <div class="card">
+      <div class="hyd-head"><span>Hydration</span><span class="big">58%</span></div>
+      <input type="range" min="50" max="90" value="58" aria-label="Hydration">
+      <div class="scale"><span>50%, stiff</span><span>90%, slack</span></div>
+      <div class="dough" role="img" aria-label="Flour 533 g, water 309 g"><div class="flour" style="width:63%"></div><div class="water" style="width:37%"></div></div>
+      <div class="legend"><span><i class="sw" style="background:rgb(var(--wheat))"></i>Flour 533 g</span><span><i class="sw" style="background:rgb(var(--water))"></i>Water 309 g</span></div>
+      <p class="ratio">58 g of water for every 100 g of flour. Bagels are usually 55 to 62%.</p>
+      </div>
+      <ul class="list" style="margin-top:12px">
+      <li class="list-row"><div class="grow">Bagels</div><div class="stepper"><button aria-label="One fewer bagel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button><output>8</output><button aria-label="One more bagel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/><path d="M12 6v12"/></svg></button></div></li>
+      <li class="list-row"><div class="grow">Bagel size<span class="sub">Dough per bagel</span></div><div class="stepper"><button aria-label="10 g smaller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button><output>110 g</output><button aria-label="10 g bigger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/><path d="M12 6v12"/></svg></button></div></li>
+      </ul>
+      </section>
+      <section>
+      <h2 class="section-label">Ingredients <b>for 8 bagels</b></h2>
+      <ul class="list">
+      <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.5-4-4 2.5 0 4 1.5 4 4z"/><path d="M12 12c2.5 0 4-1.5 4-4-2.5 0-4 1.5-4 4z"/><path d="M12 7c-1.5-1-1.5-3 0-4 1.5 1 1.5 3 0 4z"/></svg><div class="grow">High-protein bread flour<span class="sub">100%</span></div><div class="grams">533<small>g</small></div></li>
+      <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.5 6-11z"/></svg><div class="grow">Water<span class="sub">58%, lukewarm</span></div><div class="grams">309<small>g</small></div></li>
+      <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6"/><path d="M10 4v3l-4 5v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6l-4-5V4"/><path d="M6 14h12"/></svg><div class="grow">Barley malt syrup<span class="sub">4%, or honey</span></div><div class="grams">21<small>g</small></div></li>
+      <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9h8v11H8z"/><path d="M9 9V6h6v3"/><path d="M10 4h4"/></svg><div class="grow">Salt<span class="sub">2%</span></div><div class="grams">11<small>g</small></div></li>
+      <li class="list-row ing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="10" r="2.5"/><circle cx="15" cy="8" r="2"/><circle cx="14" cy="15" r="3"/><circle cx="7.5" cy="16.5" r="1.5"/></svg><div class="grow">Instant yeast<span class="sub">1%</span></div><div class="grams">5.3<small>g</small></div></li>
+      <li class="list-row total"><div class="grow">Total dough</div><div class="grams">880<small>g</small></div></li>
+      </ul>
+      </section>
+      <section>
+      <h2 class="section-label">Bake</h2>
+      <div class="card bake">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8h16"/><path d="M7 6h.01"/><path d="M10 6h.01"/><path d="M8 15c0-2 1.8-3.5 4-3.5s4 1.5 4 3.5z"/></svg>
+      <div><div class="big">220°C<span class="f">425°F</span></div><p>18 min, until deep golden. Boil first: 30 s a side in 2 L of water with 1 tbsp malt syrup.</p></div>
+      </div>
+      </section>
+      <section>
+      <h2 class="section-label">Timeline <b>about 14 h</b></h2>
+      <div class="card">
+      <ol class="tl">
+      <li><span class="at">0:00</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Mix and knead</b><div class="sub">Stiff and smooth, 10 min</div></div></li>
+      <li><span class="at">0:10</span><span class="rail"><i class="dot rise"></i></span><div class="step"><b>First rise</b><div class="sub">Covered, 1 h</div></div></li>
+      <li><span class="at">1:10</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Divide and shape</b><div class="sub">8 pieces of 110 g into rings, 20 min</div></div></li>
+      <li><span class="at">1:30</span><span class="rail"><i class="dot rise"></i></span><div class="step"><b>Cold proof</b><div class="sub">In the fridge, 12 h</div></div></li>
+      <li><span class="at">13:30</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Boil</b><div class="sub">A few at a time, 15 min</div></div></li>
+      <li><span class="at">13:45</span><span class="rail"><i class="dot"></i></span><div class="step"><b>Bake</b><div class="sub">18 min</div></div></li>
+      <li><span class="at">14:03</span><span class="rail"><i class="dot end"></i></span><div class="step"><b>Cool on a rack</b><div class="sub">At least 20 min</div></div></li>
+      </ol>
+      </div>
+      <p class="note" style="margin-top:8px">Rise times assume a kitchen around 24°C (75°F). Warmer dough rises faster, cooler dough slower.</p>
+      </section>
+      </main>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
