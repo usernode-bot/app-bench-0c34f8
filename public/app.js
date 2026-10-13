@@ -48,7 +48,8 @@ const view = createStates(board, {
   empty: {
     title: 'No questions yet',
     text: 'Ask the club the first thing it needs to decide.',
-    action: { label: 'New question', onClick: openNewQuestion, primary: true },
+    // A secondary button here: the header keeps the one filled New question.
+    action: { label: 'New question', onClick: openNewQuestion },
   },
   error: { title: 'Questions did not load', text: 'Nothing you posted is lost. Try again in a moment.' },
 });
@@ -81,7 +82,8 @@ function questionRow(q) {
     li.querySelector('.tally-count').textContent = plural(t.total, 'vote');
   } else {
     lead.hidden = true;
-    tallyBox.replaceChildren(h('span', { class: 'tally-none' }, 'No votes yet'));
+    // The You-voted tick lives in the tally line; keep it when it is replaced.
+    tallyBox.replaceChildren(h('span', { class: 'tally-none' }, 'No votes yet'), mine);
   }
   mine.hidden = q.votes.mine == null;
   li.querySelector('.author').textContent = `${q.author}, ${timeAgo(q.createdAt)}`;

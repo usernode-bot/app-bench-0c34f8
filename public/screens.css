@@ -16,6 +16,10 @@ body {
 
 main {max-width:42rem;margin:0 auto;padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
+/* The usual section gap between the head and the board, so the list's label
+   reads as a label for the card below it, not a third line of the head. */
+#list-view {display:flex;flex-direction:column;gap:20px}
+
 .head {display:flex;align-items:center;justify-content:space-between;gap:12px}
 
 .text-title {font-size:24px;line-height:30px;font-weight:700;letter-spacing:-.01em}
@@ -28,7 +32,7 @@ main {max-width:42rem;margin:0 auto;padding:20px 16px 32px;display:flex;flex-dir
 
 .btn-primary svg {width:18px;height:18px}
 
-.section-label {margin:0 0 8px;padding:0 4px;font-size:13px;font-weight:500;color:rgb(var(--muted))}
+.section-label {margin:0 0 8px;font-size:13px;font-weight:500;color:rgb(var(--muted))}
 
 .kit-group {list-style:none;padding:0;overflow:hidden;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface))}
 
@@ -60,7 +64,14 @@ main {max-width:42rem;margin:0 auto;padding:20px 16px 32px;display:flex;flex-dir
 
 .meta svg {width:14px;height:14px}
 
-.mine {color:rgb(var(--accent));font-weight:500}
+.mine {display:inline-flex;align-items:center;gap:4px;color:rgb(var(--accent));font-weight:500}
+
+/* The tick rides on the tally line now; keep it at the meta icon size, not
+   the tally mark size. */
+.mine svg {width:14px;height:14px}
+
+/* A text button, the back link's look: for quiet add-another actions. */
+.kit-add {display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 4px;border:0;background:none;color:rgb(var(--accent));font:500 15px system-ui,sans-serif}
 
 .kit-row-chevron {width:20px;height:20px;flex-shrink:0;color:rgb(var(--muted))}
 
@@ -122,7 +133,9 @@ main {max-width:42rem;margin:0 auto;padding:12px 16px 32px;display:flex;flex-dir
 
 .field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:15px system-ui,sans-serif;color:rgb(var(--muted)/.6)}
 
-.btn-secondary {align-self:flex-end;min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));color:rgb(var(--fg));font:500 15px system-ui,sans-serif}
+/* No align-self here: the state buttons centre it, the form's Cancel goes
+   full width, and the add-choice button sets its own self-start. */
+.btn-secondary {min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));color:rgb(var(--fg));font:500 15px system-ui,sans-serif}
 
 label {font-size:13px;font-weight:500;color:rgb(var(--muted));padding:0 4px}
 

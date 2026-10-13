@@ -165,13 +165,13 @@ function fieldRow(f, value) {
   if (f.type === 'choices') {
     const min = f.min ?? 2;
     const list = h('div', { class: 'kit-choices' });
-    const more = h('button', { type: 'button', class: 'btn-secondary self-start', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, 'Add an option');
+    const more = h('button', { type: 'button', class: 'kit-add self-start', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, 'Add a choice');
     const addChoice = (text) => {
       const n = inputs.length + 1;
       const hintText = Array.isArray(f.placeholder) ? f.placeholder[n - 1] : f.placeholder;
-      const box = input({ value: text || null, placeholder: hintText || null, 'aria-label': `${f.label}, option ${n}`, 'aria-describedby': described });
+      const box = input({ value: text || null, placeholder: hintText || null, 'aria-label': `${f.label}, choice ${n}`, 'aria-describedby': described });
       inputs.push(box);
-      const remove = h('button', { type: 'button', class: 'kit-icon-button', 'aria-label': `Remove option ${n}`, on: { click: () => {
+      const remove = h('button', { type: 'button', class: 'kit-icon-button', 'aria-label': `Remove choice ${n}`, on: { click: () => {
         const at = inputs.indexOf(box);
         inputs = inputs.filter((x) => x !== box);
         wrap.remove();
@@ -184,14 +184,16 @@ function fieldRow(f, value) {
     };
     const sync = () => {
       inputs.forEach((x, i) => {
-        x.setAttribute('aria-label', `${f.label}, option ${i + 1}`);
+        x.setAttribute('aria-label', `${f.label}, choice ${i + 1}`);
         x.nextSibling.hidden = inputs.length <= min;
-        x.nextSibling.setAttribute('aria-label', `Remove option ${i + 1}`);
+        x.nextSibling.setAttribute('aria-label', `Remove choice ${i + 1}`);
       });
       more.hidden = inputs.length >= (f.max || 6);
     };
     const start = Array.isArray(value) && value.length ? value : [];
-    for (let i = 0; i < Math.max(min, start.length); i += 1) addChoice(start[i]);
+    // A choices field the asker may leave empty (min 0) still opens with two
+    // blank fields, so the form shows what a choice looks like.
+    for (let i = 0; i < Math.max(min || 2, start.length); i += 1) addChoice(start[i]);
     const el = h('fieldset', { class: 'kit-field' }, h('legend', { class: 'kit-label mb-1' }, label), list, more, hint, error);
     const texts = () => inputs.map((x) => x.value.trim()).filter(Boolean);
     return {
@@ -200,8 +202,8 @@ function fieldRow(f, value) {
       check: () => {
         const t = texts();
         const need = t.length ? Math.max(min, 2) : min;
-        const msg = t.length < need ? `Give at least ${Math.max(min, 2)} options.`
-          : new Set(t.map((x) => x.toLowerCase())).size < t.length ? 'Each option needs a different name.' : '';
+        const msg = t.length < need ? `Give at least ${Math.max(min, 2)} choices.`
+          : new Set(t.map((x) => x.toLowerCase())).size < t.length ? 'Each choice needs a different name.' : '';
         return show(msg, inputs);
       },
     };
