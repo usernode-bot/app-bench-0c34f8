@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,55 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="app">
+    <header class="top">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>
+    <h1>Unread</h1>
+    <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </header>
+    <p class="count"><b>14 unread</b> from 4 feeds</p>
+    <ul class="list">
+    <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">P</span><span class="srcname">Pocket Garden Weekly</span><span class="time">12 min ago</span></div><h2 class="title">Five herbs that grow happily on a windowsill</h2><p class="snip">Basil, chives and mint need little more than a bright sill and a weekly drink. Here is how to start them from cuttings this month.</p></div></li>
+    <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">T</span><span class="srcname">Tinkerbench Notes</span><span class="time">1 h ago</span></div><h2 class="title">Building a tiny weather station from spare parts</h2><p class="snip">A sensor, a microcontroller and an old jam jar make a surprisingly accurate rain gauge. Parts list and wiring inside.</p></div></li>
+    <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">S</span><span class="srcname">Slow Kitchen Journal</span><span class="time">3 h ago</span></div><h2 class="title">The one-pan lentil soup we keep coming back to</h2><p class="snip">Red lentils, a tin of tomatoes and a squeeze of lemon. Twenty-five minutes, one pan, and it freezes well for later.</p></div></li>
+    <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">M</span><span class="srcname">Meadow Trail Blog</span><span class="time">Yesterday</span></div><h2 class="title">A quiet loop walk through the sample valley</h2><p class="snip">Six kilometres of gentle paths, two footbridges and a bench with the best view of the made-up river. Map and photos.</p></div></li>
+    <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">P</span><span class="srcname">Pocket Garden Weekly</span><span class="time">2 days ago</span></div><h2 class="title">Why your tomato leaves curl, and what to do</h2><p class="snip">Curling leaves are usually heat or uneven watering, rarely disease. Three checks to run before you reach for anything else.</p></div></li>
+    </ul>
+    <p class="end">That is everything new for now.</p>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="app">
+      <header class="top">
+      <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>
+      <h1>Unread</h1>
+      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+      </header>
+      <p class="count"><b>13 unread</b> from 4 feeds</p>
+      <ul class="list">
+      <li class="list-row open"><div class="dotcol"><div class="read"></div></div><div class="post"><div class="src"><span class="badge">P</span><span class="srcname">Pocket Garden Weekly</span><span class="time">12 min ago</span></div><h2 class="title">Five herbs that grow happily on a windowsill</h2>
+      <div class="article">
+      <p>Basil, chives and mint need little more than a bright sill and a weekly drink. Start them from cuttings: a finger-length stem in a glass of water roots within two weeks.</p>
+      <svg class="art" viewBox="0 0 320 160" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="0" y="0" width="320" height="160" fill="rgb(239 241 245)" stroke="none"/><path d="M40 130h240"/><path d="M80 130l6-34h40l6 34"/><path d="M188 130l6-34h40l6 34"/><path d="M106 96c0-20-14-30-24-40M106 96c0-22 12-34 26-40M106 96V50"/><path d="M214 96c-6-18-2-34 8-44M214 96c4-16 16-26 28-28"/></svg>
+      <p>Pot them up once the roots are as long as your thumbnail, and pinch off the tips every fortnight so they grow bushy rather than tall.</p>
+      </div>
+      <div class="actions"><a class="btn-secondary link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Read the full article</a><button class="btn-secondary">Close</button></div>
+      </div></li>
+      <li class="list-row"><div class="dotcol"><div class="dot"></div></div><div class="post"><div class="src"><span class="badge">T</span><span class="srcname">Tinkerbench Notes</span><span class="time">1 h ago</span></div><h2 class="title">Building a tiny weather station from spare parts</h2><p class="snip">A sensor, a microcontroller and an old jam jar make a surprisingly accurate rain gauge.</p></div></li>
+      </ul>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
