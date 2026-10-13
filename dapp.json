@@ -2,5 +2,24 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "inLoopCheckAuth": {
+    "path": "/api/staging-login",
+    "body": { "id": "101", "name": "Test Viewer" }
+  },
+  "tests": [
+    {
+      "id": "questions.list-demo",
+      "name": "Questions list with demo",
+      "path": "/?demo=1",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"],
+      "expectSelector": ".q-row .tally"
+    },
+    {
+      "name": "Home renders without demo data",
+      "path": "/",
+      "expectText": "Ask the club"
+    }
+  ]
 }

@@ -95,22 +95,31 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A decisions app for clubs and groups: anyone posts a question with two to
+six choices, everyone votes (one vote per person, changeable or takeable
+back at any time), and the comments under each question are where the
+discussion happens. Home is the list of open questions in two sections —
+the ones waiting for your vote (with a new-dot), and the ones you already
+voted on (showing your pick). The tally bar on every row and at the top of
+each question is the app's signature: it shows at a glance where the club
+is leaning.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** cool paper neutrals with one deep ballot-ink violet accent.
+  Light: cool paper ground `246 246 250`, white surfaces, ink `26 24 38`,
+  muted `84 81 102`, accent `88 28 175` with white text. Dark: near-black
+  indigo ground `14 13 22`, indigo surfaces, pale text, accent `196 170 255`
+  with dark-ink text on it. Danger stays red in both.
+- **Signature element:** the tally bar — a slim rounded bar under each
+  question title, one segment per choice with votes (leader solid accent,
+  runner-up accent at 42%, the rest at 20%), echoed by the full-width vote
+  buttons on the question screen whose fills show each choice's share.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged from the kit)
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +147,22 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `reports` table is private: `COMMENT ON TABLE reports IS
+  'staging:private'`. A question or comment is hidden from everyone once
+  **3 distinct members** have reported it (`HIDE_AFTER_REPORTS` in
+  `server.js`); anything you reported is hidden for you at once.
+- `kit/server.js` and `public/kit/*` are platform-provided and are not
+  edited: the questions/votes/comments API and its client pieces come
+  from them; `server.js` adds reports on top, and `public/app.js` puts
+  the screens together.
+- The demo questions are the eight in `server.js`'s `demo.titles`
+  (staging only, ids 900001–900008); the kit's viewer votes are injected
+  on the second and fifth of them.
+- The declared checks sign in through `dapp.json`'s `inLoopCheckAuth`,
+  which points at the staging-only `POST /api/staging-login` (a fake
+  account carried in an HMAC cookie; `USERNODE_ENV` gates both the route
+  and the cookie read). Run checks with
+  `usernode-run-checks --base-url http://localhost:3100`: the platform
+  bridge probes `app-host` for any host with three or more dot labels,
+  so `127.0.0.1` logs a sandbox-only 404 console error that `localhost`
+  never does. On the real staging gate neither happens.

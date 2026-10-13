@@ -43,17 +43,18 @@
     --tally-2: 88 28 175; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 14 13 22;       /* the page */
+    --surface: 26 24 38;      /* lists, cards, fields */
+    --raised: 38 36 54;       /* hovers, badges */
+    --fg: 243 242 250;        /* text */
+    --muted: 168 165 190;     /* secondary text */
+    --line: 58 55 78;         /* borders, dividers, skeletons */
+    --accent: 196 170 255;    /* the one accent */
+    --on-accent: 38 12 92;    /* text on the accent */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 196 170 255;     /* the keyboard focus ring */
+    --tally-2: 196 170 255;   /* from the spec's screens */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
