@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,121 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main>
+     <div class="head">
+      <div>
+       <h1 class="text-title">Club Votes</h1>
+       <p class="text-small muted">4 open questions</p>
+      </div>
+      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button>
+     </div>
+     <section>
+      <h2 class="section-label">Open questions, newest first</h2>
+      <ul class="kit-group">
+       <li><button class="list-row">
+        <div class="kit-row-text">
+         <span class="kit-row-title">Where should we meet in November?</span>
+         <span class="lead">Leading: <b>Library back room</b>, 7 of 12</span>
+         <div class="tally">
+          <div class="tally-marks">
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12M12 2v12M16.5 2v12M1 12L20 4"/></svg>
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12M12 2v12M16.5 2v12M1 12L20 4"/></svg>
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12"/></svg>
+          </div>
+          <span class="tally-count">12 votes</span>
+         </div>
+         <div class="meta"><span>Pip Lantern, 2 hours ago</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>5 comments</span><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>You voted</span></div>
+        </div>
+        <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+       </button></li>
+       <li><button class="list-row">
+        <div class="kit-row-text">
+         <span class="kit-row-title">Pick our spring outing</span>
+         <span class="lead">Tied: <b>Botanic garden walk</b> and <b>Kite day</b>, 3 each</span>
+         <div class="tally">
+          <div class="tally-marks">
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12M12 2v12M16.5 2v12M1 12L20 4"/></svg>
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12M12 2v12"/></svg>
+          </div>
+          <span class="tally-count">8 votes</span>
+         </div>
+         <div class="meta"><span>Rowan Fernhill, yesterday</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>2 comments</span></div>
+        </div>
+        <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+       </button></li>
+       <li><button class="list-row">
+        <div class="kit-row-text">
+         <span class="kit-row-title">Should we move meetings to Thursday evenings?</span>
+         <span class="lead">Leading: <b>Yes</b>, 4 of 5</span>
+         <div class="tally">
+          <div class="tally-marks">
+           <svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 2v12M7.5 2v12M12 2v12M16.5 2v12M1 12L20 4"/></svg>
+          </div>
+          <span class="tally-count">5 votes</span>
+         </div>
+         <div class="meta"><span>Marlo Quill, 3 days ago</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>7 comments</span><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>You voted</span></div>
+        </div>
+        <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+       </button></li>
+       <li><button class="list-row">
+        <div class="kit-row-text">
+         <span class="kit-row-title">What snack should we bring to the open day?</span>
+         <span class="tally-none">No votes yet</span>
+         <div class="meta"><span>Juniper Okafor-Vale, 5 days ago</span><span>No comments</span></div>
+        </div>
+        <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+       </button></li>
+      </ul>
+     </section>
+    </main>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <main>
+       <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Questions</button>
+       <div class="kit-detail-head">
+        <h1 class="text-heading">Where should we meet in November?</h1>
+        <div class="headrow"><p class="text-small muted">Asked by Pip Lantern, 2 hours ago</p>
+        <button class="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>Report</button></div>
+        <p class="kit-detail-body">The community hall is booked for repairs all month. Which of these works for most of us?</p>
+       </div>
+       <section>
+        <h2 class="section-label">Your vote</h2>
+        <div class="kit-votes">
+         <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:58%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="kit-vote-label">Library back room</span><span class="kit-vote-count">7</span></button>
+         <p class="voters">You, Rowan Fernhill, Marlo Quill, Tamsin Brightwater and 3 more</p>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:25%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Cafe on Elm Street</span><span class="kit-vote-count">3</span></button>
+         <p class="voters">Juniper Okafor-Vale, Bram Tealeaf, Odile Sparrow</p>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:17%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Online call</span><span class="kit-vote-count">2</span></button>
+         <p class="voters">Cass Pebbleton, Wren Hollis</p>
+        </div>
+        <p class="kit-vote-summary">12 votes, Library back room leads. Tap your choice again to take your vote back.</p>
+       </section>
+       <section>
+        <h2 class="section-label">Comments</h2>
+        <ul class="list">
+         <li class="kit-comment"><div class="kit-comment-meta"><span class="kit-comment-author">Rowan Fernhill</span><span>1 hour ago</span><button class="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>Report</button></div><p>The library room has the big table, so we can spread out the maps.</p></li>
+         <li class="kit-comment"><div class="kit-comment-meta"><span class="kit-comment-author">Bram Tealeaf</span><span>45 minutes ago</span><button class="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>Report</button></div><p>The cafe is closer to the bus stop for those of us coming from the east side.</p></li>
+         <li class="kit-comment"><div class="kit-comment-meta"><span class="kit-comment-author">Wren Hollis</span><span>20 minutes ago</span><button class="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>Report</button></div><p>Could we do the call for anyone who cannot travel, alongside the room?</p></li>
+        </ul>
+        <div class="composer">
+         <label>Add a comment</label>
+         <div class="field">e.g. The library works for me on weekends</div>
+         <button class="btn-secondary">Post comment</button>
+        </div>
+       </section>
+      </main>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
