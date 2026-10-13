@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "decisions-demo",
+      "visual": true,
+      "impact": ["public/**", "decisions.js", "server.js", "styles/**", "tailwind.config.js"],
+      "path": "/?demo=1",
+      "expectSelector": ".decision .ballot",
+      "expectText": "Spring outing to the botanical garden"
+    },
+    {
+      "id": "decisions-empty",
+      "path": "/",
+      "expectText": "No decisions yet"
+    },
+    {
+      "id": "health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }

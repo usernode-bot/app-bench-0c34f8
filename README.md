@@ -1,27 +1,52 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+The things a club needs to settle, in one place. Anyone signed in to
+Homeroom posts a **decision** — a title and the details — and the club
+votes on it: **Agree**, **Disagree** or **Abstain**. Votes are not
+secret; the tally shows who chose what. The person who posted the
+decision closes the vote when the club has settled it, which locks the
+result (Agreed, Turned down, Tied, or No votes) but leaves the comments
+open.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **The list** — Open decisions first (newest first), then Decided ones
+  (most recently settled first). Each row carries the ballot bar, the
+  Agree/Disagree/Abstain counts, your vote, and the result once decided.
+- **A decision** — the full title and details, the large ballot bar,
+  one vote button per choice with its count and who voted that way,
+  the comment thread, and — for the poster only — the button to mark it
+  decided.
+- **Reports** — the three-dots menu on other people's decisions and
+  comments hides content for the reporter; three distinct reports hide
+  it for everyone. Hidden content never leaves the server: it is
+  filtered out in SQL before it reaches any list or detail screen.
+- **Guests** — people without a Homeroom account can read everything
+  but cannot post, vote or comment.
 
-## Replacing the template
+## Under the hood
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- Node + Express + Postgres. `server.js` wires the platform middleware
+  (auth, staging time) and mounts the app's routes from `decisions.js`;
+  all five tables are created idempotently in `migrate()`.
+- Votes are stored per person (`decisions_votes`), so taking a vote back
+  or changing it is a plain upsert and names can be shown on the tally.
+- The result is written once, when the poster closes the vote; there is
+  no reopen.
+- The frontend is two drawn screens (`public/index.html`) filled by
+  `public/app.js` from the ES-module pieces in `public/kit/`. The list
+  reuses its rows between the every-30-seconds refreshes, so the ballot
+  bars slide when a tally changes.
+- Staging preview: open with `?demo=1` for a full set of made-up
+  decisions (plus one posted by "you"), and a small "Staging demo" note.
 
-Once the real app exists, rewrite this README to describe it.
+## Develop
+
+```sh
+npm install
+npm run build        # compile Tailwind (styles/tailwind-input.css → public/tailwind.css)
+node server.js       # needs DATABASE_URL; USERNODE_* env for real sign-in
+```
+
+`CLAUDE.md` has the app-specific conventions and points at the Homeroom
+platform rules.

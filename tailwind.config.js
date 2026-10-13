@@ -55,6 +55,9 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        agree: token('agree'), // Agree segments and "Agreed" results
+        disagree: token('disagree'), // Disagree segments and "Turned down" results
+        abstain: token('abstain'), // Abstain segments (never text on its own)
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

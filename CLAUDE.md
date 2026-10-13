@@ -95,22 +95,25 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club's decision log. Anyone signed in posts a decision the club needs
+to settle; the club votes Agree / Disagree / Abstain, with names shown
+on the tally (votes are not secret). The poster closes the vote when the
+club has settled it, locking the result but leaving comments open. The
+vocabulary everywhere is: decision, Agree/Disagree/Abstain, Open/Decided,
+Agreed/Turned down/Tied/No votes, Mark decided, comment, Report.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent and Agree: deep teal (`--accent`/`--agree`);
+  Disagree: warm terracotta (`--disagree`); Abstain: quiet grey
+  (`--abstain`, never used as text colour); neutrals: warm greys.
+- **Signature element:** the ballot bar — one rounded bar split into
+  Agree/Disagree/Abstain segments with hairline gaps, empty (the line
+  colour) when no votes, segments sliding when a tally changes. It
+  appears on every row and enlarged on the detail screen.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +141,19 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Votes are stored per person as `agree` / `disagree` / `abstain` text
+  in `decisions_votes`; counts are never denormalised onto the decision.
+- The result is written once (`decided_at` + `outcome` in
+  `decisions`) when the poster closes the vote, and is never reopened or
+  edited afterwards.
+- Report hiding is SQL, not a read-time filter: list, detail and comment
+  queries share fragments in `decisions.js` that drop content the viewer
+  reported and anything with three or more distinct reporters — no
+  reported or 3×-reported row is ever sent to the client.
+  `decision_reports` is a `staging:private` table.
+- The list screen is drawn in `index.html` and filled in place; rows are
+  reused between the every-30-seconds refreshes so the ballot bars slide.
+  Keep that when changing the list.
+- `fill.js`'s `screen()` coerces its argument with `Number()`, so it
+  cannot open `data-spec-screen="2-detail"` — lift such templates with a
+  direct `querySelector` as `public/app.js` does.

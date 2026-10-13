@@ -145,6 +145,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Club Votes' own routes (decisions, votes, comments, reports). They sit
+// behind the auth middleware above, before express.static.
+const decisions = require('./decisions').mount(app, pool);
+
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
@@ -192,9 +196,16 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await decisions.migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  const drain = () => {
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 5000).unref();
+  };
+  process.on('SIGTERM', drain);
+  process.on('SIGINT', drain);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
