@@ -12,9 +12,14 @@ export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
   const skeleton = h('div', { 'aria-busy': 'true' },
     h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
     h('ul', { class: 'un-group kit-group', 'aria-hidden': 'true' },
-      Array.from({ length: rows }, (_, i) => h('li', { class: 'un-group-row kit-skeleton-row' },
-        h('span', { class: i % 2 ? 'skeleton h-4 w-1/2' : 'skeleton h-4 w-3/4' }),
-        h('span', { class: 'skeleton h-3 w-1/3' })))));
+      // Shaped like the app's post rows: the feed badge's circle, then the
+      // meta, title and summary lines (sizes in tailwind-input.css).
+      Array.from({ length: rows }, () => h('li', { class: 'un-group-row kit-skeleton-row' },
+        h('span', { class: 'skeleton kit-skeleton-badge' }),
+        h('div', { class: 'kit-skeleton-lines' },
+          h('span', { class: 'skeleton h-3 w-1/3' }),
+          h('span', { class: 'skeleton h-4 w-3/4' }),
+          h('span', { class: 'skeleton h-3 w-2/3' }))))));
   const action = empty.action;
   const emptyEl = h('div', { class: 'state-empty' },
     h('h2', { class: 'text-heading' }, empty.title || 'Nothing here yet'),

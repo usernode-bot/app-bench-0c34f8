@@ -259,7 +259,11 @@
   }
 
   /* Loading rows, the content holder, the one demo line. */
-  .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
+  .kit-skeleton-row { @apply flex items-start gap-3 px-4 py-[14px]; }
+  /* The row's badge placeholder: the same 34 px circle a post row starts
+     with. Written after .skeleton so its radius wins. */
+  .kit-skeleton-badge { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; }
+  .kit-skeleton-lines { @apply flex min-w-0 flex-1 flex-col gap-2; }
   .kit-content { @apply flex flex-col gap-6; }
   .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
 

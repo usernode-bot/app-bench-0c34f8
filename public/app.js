@@ -13,6 +13,7 @@ const listMain = screen1.querySelector('main');
 const listEl = screen1.querySelector('.list');
 const footEl = screen1.querySelector('.foot');
 const countLine = document.getElementById('count-line');
+const countSkeleton = document.getElementById('count-skeleton');
 const feedErrors = document.getElementById('feed-errors');
 const previewEl = document.getElementById('post-preview');
 const addBtn = screen1.querySelector('header .btn-primary');
@@ -31,6 +32,7 @@ let previewFeed = null;
 /* ── Head: the count line and per-feed failure notes ────────────────────── */
 
 function renderMeta() {
+  countSkeleton.hidden = true;
   const unread = posts.filter((p) => !p.read).length;
   countLine.hidden = unread === 0;
   if (unread) {
@@ -160,6 +162,11 @@ openArticleBtn.addEventListener('click', () => {
 
 /* ── Your feeds: add one, remove one ────────────────────────────────────── */
 
+// Just the host, so the line under the name fits instead of being cut off.
+function hostOf(url) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
+
 function sheetRow(feed, rerender) {
   const removeBtn = h('button', {
     type: 'button', class: 'btn-secondary',
@@ -168,7 +175,7 @@ function sheetRow(feed, rerender) {
   return h('li', { class: 'un-group-row flex min-h-11 items-center gap-3 px-4 py-3' },
     h('div', { class: 'kit-row-text' },
       h('span', { class: 'kit-row-title' }, feed.title),
-      h('span', { class: 'kit-row-sub' }, feed.url)),
+      h('span', { class: 'kit-row-sub' }, hostOf(feed.url))),
     removeBtn);
 }
 
@@ -200,7 +207,7 @@ async function removeFeed(feed, rerender) {
 
 async function openFeedsSheet() {
   await openSheet({
-    title: 'Your feeds',
+    title: 'Add feed',
     returnFocus: addBtn,
     content: (body) => {
       let listWrap;
@@ -227,7 +234,7 @@ async function openFeedsSheet() {
         },
       });
       listWrap = h('ul', { class: 'un-group kit-group mt-2' });
-      body.append(h('p', { class: 'section-label' }, 'Your feeds'), listWrap);
+      body.append(h('p', { class: 'section-label mt-6 px-0' }, 'Your feeds'), listWrap);
       renderSheetList();
     },
   });
@@ -262,9 +269,20 @@ function setEmpty(title, text, withAction) {
 }
 
 async function loadTask(content) {
-  const data = await api('GET', '/api/posts');
+  // The count line waits for the posts it counts: a skeleton bar takes its
+  // place while loading, and nothing there if the load fails.
+  countSkeleton.hidden = false;
+  let data;
+  try {
+    data = await api('GET', '/api/posts');
+  } catch (err) {
+    countSkeleton.hidden = true;
+    throw err;
+  }
   feeds = data.feeds;
   posts = data.posts;
+  // No feeds yet: the empty state's own Add feed is the one primary action.
+  addBtn.hidden = feeds.length === 0;
   renderMeta();
   if (data.demo) showDemoLabel(screen1, 'Staging demo: these feeds and posts are made up.');
   if (!feeds.length) {
