@@ -263,7 +263,7 @@
   /* Loading rows, the content holder, the one demo line. */
   .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
   .kit-content { @apply flex flex-col gap-6; }
-  .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
+  .kit-demo-label { @apply mb-2 rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
 
   /* A report: a line per option or category, and its bar. */
   .kit-report { @apply flex flex-col gap-3; }
@@ -305,8 +305,9 @@
   .post-actions { @apply mt-4 flex flex-wrap items-center gap-3; }
   .post-host { @apply text-small text-muted; }
 
-  /* One feed that did not update: dot, what happened, Retry. */
-  .feed-note { @apply flex items-center gap-3 rounded-xl border border-line bg-surface py-3 pl-4 pr-3; }
+  /* One feed that did not update: dot (on the first text line), what
+     happened, Retry. */
+  .feed-note { @apply flex items-start gap-3 rounded-xl border border-line bg-surface py-3 pl-4 pr-3; }
   .feed-note p { @apply min-w-0 flex-1 text-small text-muted; }
   .feed-note strong { @apply font-medium text-fg; }
 }

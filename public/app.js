@@ -35,14 +35,15 @@ function startOfDay(ms) {
   return d.getTime();
 }
 
-/** "12 min", "09:48", "Yesterday", "Oct 11". */
+/** "12 min", "09:48" (Today and Yesterday), "Oct 11". */
 function age(post) {
   const d = new Date(post.publishedAt);
   const diff = Date.now() - d.getTime();
   if (diff < 60 * 1000) return 'Just now';
   if (diff < 60 * 60 * 1000) return `${Math.floor(diff / 60000)} min`;
-  if (startOfDay(d.getTime()) === startOfDay(Date.now())) return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  if (startOfDay(d.getTime()) === startOfDay(Date.now()) - DAY_MS) return 'Yesterday';
+  if (startOfDay(d.getTime()) >= startOfDay(Date.now()) - DAY_MS) {
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
   if (d.getFullYear() === new Date().getFullYear()) return `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getDate()}`;
   return `${MONTHS[d.getMonth()].slice(0, 3)} ${d.getDate()}, ${d.getFullYear()}`;
 }
@@ -74,8 +75,8 @@ function rssIcon() {
 
 function updateCount() {
   const total = feeds.reduce((sum, f) => sum + (f.unread || 0), 0);
-  countEl.textContent = String(total);
-  countEl.hidden = total === 0;
+  countEl.textContent = `${plural(total, 'post')} from ${plural(feeds.length, 'feed')}`;
+  countEl.hidden = !feeds.length;
 }
 
 async function markRead(post, row, dot) {
@@ -133,7 +134,7 @@ function renderNotes() {
       h('span', { class: dotFor(feed, false), 'aria-hidden': 'true' }),
       h('p', {},
         h('strong', {}, feed.title),
-        ` did not update: ${feed.error}`),
+        ` did not update: ${feed.error}. Its older posts are still here.`),
       retry));
   }
 }
@@ -215,9 +216,11 @@ function renderList(box) {
   for (const [name, items] of groups) {
     if (!items.length) continue;
     shown += items.length;
-    box.append(
+    // One section per day, so the list's own gap never sits between a
+    // heading and its rows — the label's 8 px margin is the whole gap.
+    box.append(h('section', {},
       h('h2', { class: 'section-label' }, name),
-      h('ul', { class: 'list' }, ...items.map(postRow)));
+      h('ul', { class: 'list' }, ...items.map(postRow))));
   }
 
   if (!shown && feeds.length) {
@@ -336,22 +339,18 @@ function openFeedsSheet() {
 
 const app = document.getElementById('app');
 const demoSlot = h('div');
-const notesEl = h('div', { class: 'flex flex-col gap-2', hidden: true });
+const notesEl = h('div', { class: 'mb-6 flex flex-col gap-2', hidden: true });
 const listEl = h('div', { class: 'flex flex-col gap-4' });
-const countEl = h('span', {
-  class: 'rounded-full bg-raised px-2 py-0.5 text-small font-medium tabular-nums text-muted',
-  hidden: true,
-});
-const feedsBtn = h('button', { class: 'kit-icon-button', type: 'button', 'aria-label': 'Your feeds' });
+const countEl = h('p', { class: 'text-small text-muted', hidden: true });
+const feedsBtn = h('button', { class: 'btn-secondary', type: 'button', 'aria-label': 'Your feeds' });
 feedsBtn.innerHTML = rssIcon();
-const addBtn = h('button', { class: 'kit-icon-button', type: 'button', 'aria-label': 'Add a feed' });
-addBtn.append(icon('plus'));
+const addBtn = h('button', { class: 'btn-secondary', type: 'button' }, icon('plus'), 'Add feed');
 
 const header = h('header', { class: 'flex items-center justify-between gap-3 py-2' },
-  h('div', { class: 'flex items-center gap-3' },
+  h('div', { class: 'min-w-0' },
     h('h1', { class: 'text-title' }, 'Unread'),
     countEl),
-  h('div', { class: 'flex items-center gap-1' }, feedsBtn, addBtn));
+  h('div', { class: 'flex shrink-0 items-center gap-2' }, feedsBtn, addBtn));
 
 app.append(header, demoSlot, notesEl, listEl);
 feedsBtn.addEventListener('click', openFeedsSheet);
@@ -361,8 +360,8 @@ const view = createStates(listEl, {
   rows: 7,
   empty: {
     title: 'No feeds yet',
-    text: 'Add an RSS or Atom feed and its unread posts show up here.',
-    action: { label: 'Add your first feed', onClick: openAddSheet, primary: true },
+    text: 'Add an RSS or Atom feed and its newest posts show up here.',
+    action: { label: 'Add feed', onClick: openAddSheet, primary: false },
   },
   error: {
     title: 'Your posts did not load',
