@@ -1,0 +1,146 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  font-family: ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1230px;
+  box-sizing: border-box;
+}
+
+.s * {box-sizing:border-box}
+
+main {max-width:42rem;margin:0 auto;padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
+
+.head {display:flex;flex-direction:column;gap:4px}
+
+.head-top {display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+.text-title {font-size:1.75rem;line-height:2.25rem;font-weight:700;margin:0}
+
+.text-small {font-size:.875rem;line-height:1.25rem;margin:0}
+
+.muted {color:rgb(var(--muted))}
+
+.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:1rem;line-height:1.5rem;font-weight:500;font-family:inherit;white-space:nowrap}
+
+.btn-primary svg {width:20px;height:20px}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted));display:flex;justify-content:space-between}
+
+.list {list-style:none;margin:0;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list>li+li {border-top:1px solid rgb(var(--line))}
+
+.list-row {display:flex;align-items:center;gap:12px;padding:14px 12px 14px 16px;min-height:44px;width:100%;background:none;border:0;text-align:left;color:inherit;font:inherit}
+
+.kit-row-text {display:flex;flex-direction:column;min-width:0;flex:1;gap:8px}
+
+.kit-row-title {font-size:1rem;line-height:1.375rem;font-weight:600;color:rgb(var(--fg))}
+
+.kit-row-chevron {width:20px;height:20px;flex-shrink:0;color:rgb(var(--muted))}
+
+.tally {display:flex;gap:2px;height:8px;border-radius:999px;overflow:hidden;background:rgb(var(--line))}
+
+.tally-yes {background:rgb(var(--yes))}
+
+.tally-no {background:rgb(var(--no))}
+
+.tally-empty {display:block;height:8px;border-radius:999px;border:1.5px dashed rgb(var(--line))}
+
+.meta {display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.yes {color:rgb(var(--yes));font-weight:600}
+
+.no {color:rgb(var(--no));font-weight:600}
+
+.n {font-variant-numeric:tabular-nums}
+
+.ic {display:inline-flex;align-items:center;gap:4px}
+
+.ic svg {width:16px;height:16px}
+
+.mine {display:inline-flex;align-items:center;gap:4px;padding:0 8px;border-radius:999px;background:rgb(var(--raised));color:rgb(var(--fg));font-weight:500}
+
+.mine svg {width:14px;height:14px;color:rgb(var(--accent))}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.s {
+  font-family: ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1380px;
+  box-sizing: border-box;
+}
+
+main {max-width:42rem;margin:0 auto;padding:16px 16px 32px}
+
+.kit-detail {display:flex;flex-direction:column;gap:24px}
+
+.kit-detail-head {display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:1rem;line-height:1.5rem;font-weight:500;font-family:inherit}
+
+.btn-secondary svg {width:20px;height:20px}
+
+.byline {display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.report {min-height:44px;padding:0 4px;background:none;border:0;font:inherit;color:rgb(var(--muted));text-decoration:underline;text-underline-offset:3px}
+
+.kit-detail-body {margin:0;font-size:1rem;line-height:1.5rem}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted))}
+
+.ballot {display:flex;flex-direction:column;gap:12px}
+
+.tally-big {display:flex;gap:3px;height:14px;border-radius:999px;overflow:hidden}
+
+.tally-key {display:flex;justify-content:space-between;font-size:.875rem;line-height:1.25rem}
+
+.kit-votes-row {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.kit-vote {position:relative;display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font:inherit;font-size:1rem;color:rgb(var(--fg));text-align:left}
+
+.kit-vote-mark {display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;border:2px solid rgb(var(--line));background:rgb(var(--surface));color:transparent;flex-shrink:0}
+
+.kit-vote-mark svg {width:14px;height:14px}
+
+.kit-vote-label {flex:1}
+
+.kit-vote-count {font-size:.875rem;font-weight:500;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
+
+.kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--accent) / .08);font-weight:500}
+
+.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--fg))}
+
+.kit-vote-summary {margin:0;padding:0 4px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.kit-group {list-style:none;margin:0;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.kit-group>li+li {border-top:1px solid rgb(var(--line))}
+
+.kit-comment {display:flex;flex-direction:column;gap:4px;padding:12px 16px}
+
+.kit-comment-meta {display:flex;align-items:center;gap:8px;margin:0;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.kit-comment-author {font-weight:500;color:rgb(var(--fg))}
+
+.kit-comment-meta .report {margin-left:auto;min-height:32px}
+
+.kit-comment-body {margin:0;font-size:1rem;line-height:1.5rem}
+
+.kit-composer {margin-top:16px;display:flex;flex-direction:column;gap:8px}
+
+.kit-label {font-size:.875rem;font-weight:500}
+
+.field {display:block;width:100%;min-height:72px;padding:8px 12px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font:inherit;font-size:1rem;color:rgb(var(--muted) / .6)}
+
+.kit-composer-actions {display:flex;justify-content:flex-end}
+
+.btn-secondary[disabled] {opacity:.5}

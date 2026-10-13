@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,141 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="s">
+    <main>
+      <header class="head">
+        <div class="head-top">
+          <h1 class="text-title">Club Votes</h1>
+          <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button>
+        </div>
+        <p class="text-small muted">What the club is deciding. Open a question to vote and talk it through.</p>
+      </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <section>
+        <h2 class="section-label"><span>Open questions</span><span class="n">8</span></h2>
+        <ul class="list">
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Move our monthly meetup to the library on Thursdays?</span>
+              <span class="tally"><span class="tally-yes" style="flex:9"></span><span class="tally-no" style="flex:3"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">9</span></span> · <span class="no">No <span class="n">3</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">6</span></span><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You voted Yes</span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Raise yearly dues from 10 to 15 to cover the room hire?</span>
+              <span class="tally"><span class="tally-yes" style="flex:5"></span><span class="tally-no" style="flex:6"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">5</span></span> · <span class="no">No <span class="n">6</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">4</span></span><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>You voted No</span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Should the spring outing be a picnic by the canal?</span>
+              <span class="tally"><span class="tally-yes" style="flex:4"></span><span class="tally-no" style="flex:1"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">4</span></span> · <span class="no">No <span class="n">1</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">2</span></span><span>Asked by you</span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Start a second book group on weeknights?</span>
+              <span class="tally"><span class="tally-yes" style="flex:6"></span><span class="tally-no" style="flex:6"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">6</span></span> · <span class="no">No <span class="n">6</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">8</span></span><span>Tied</span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Make the June meeting a potluck?</span>
+              <span class="tally"><span class="tally-yes" style="flex:8"></span><span class="tally-no" style="flex:1"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">8</span></span> · <span class="no">No <span class="n">1</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">3</span></span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Volunteer together at the river clean-up on 8 November?</span>
+              <span class="tally"><span class="tally-yes" style="flex:3"></span><span class="tally-no" style="flex:2"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">3</span></span> · <span class="no">No <span class="n">2</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">1</span></span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Order club t-shirts in forest green?</span>
+              <span class="tally"><span class="tally-yes" style="flex:2"></span><span class="tally-no" style="flex:5"></span></span>
+              <span class="meta"><span><span class="yes">Yes <span class="n">2</span></span> · <span class="no">No <span class="n">5</span></span></span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">4</span></span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+          <li><button class="list-row">
+            <span class="kit-row-text">
+              <span class="kit-row-title">Keep the 7pm start time for winter meetings?</span>
+              <span class="tally-empty"></span>
+              <span class="meta"><span>No votes yet</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><span class="n">0</span></span></span>
+            </span>
+            <svg class="kit-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button></li>
+        </ul>
+      </section>
+    </main>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="s">
+      <main>
+      <article class="kit-detail">
+        <header class="kit-detail-head">
+          <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>All questions</button>
+          <h2 class="text-title">Raise yearly dues from 10 to 15 to cover the room hire?</h2>
+          <div class="byline"><span>Asked by Dev, 4 days ago</span><button class="report">Report</button></div>
+          <p class="kit-detail-body">The hall has put its rate up to 40 a month. At 10 each we fall about 60 short over the year. Raising dues covers it, with a little left for the summer outing.</p>
+        </header>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+        <section>
+          <h3 class="section-label">Your vote</h3>
+          <div class="ballot">
+            <div class="tally-big"><span class="tally-yes" style="flex:5"></span><span class="tally-no" style="flex:6"></span></div>
+            <div class="tally-key"><span class="yes">Yes <span class="n">5</span> · 45%</span><span class="no">No <span class="n">6</span> · 55%</span></div>
+            <div class="kit-votes-row">
+              <button class="kit-vote" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="kit-vote-label">Yes</span><span class="kit-vote-count">5</span></button>
+              <button class="kit-vote" aria-pressed="true"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="kit-vote-label">No</span><span class="kit-vote-count">6</span></button>
+            </div>
+            <p class="kit-vote-summary">11 votes, No leads. You voted No: tap Yes to change it, or No again to take it back.</p>
+          </div>
+        </section>
+
+        <section>
+          <h3 class="section-label">Comments</h3>
+          <ul class="kit-group">
+            <li class="kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Farah</span><span>2 days ago</span><button class="report">Report</button></p><p class="kit-comment-body">The room went up in September, so something has to give. 15 still seems fair for a whole year.</p></li>
+            <li class="kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Gus</span><span>2 days ago</span><button class="report">Report</button></p><p class="kit-comment-body">Could we do 12 and pass a jar round at the summer event for the rest?</p></li>
+            <li class="kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">You</span><span>yesterday</span></p><p class="kit-comment-body">I'd rather keep it at 10 and look for a cheaper room first.</p></li>
+            <li class="kit-comment"><p class="kit-comment-meta"><span class="kit-comment-author">Hana</span><span>5 hours ago</span><button class="report">Report</button></p><p class="kit-comment-body">The community centre quoted half that for Thursday evenings. Worth asking before we decide?</p></li>
+          </ul>
+          <form class="kit-composer">
+            <label class="kit-label">Add a comment</label>
+            <div class="field">e.g. I'd vote yes if we kept a hardship discount</div>
+            <div class="kit-composer-actions"><button class="btn-secondary" disabled>Post comment</button></div>
+          </form>
+        </section>
+      </article>
+      </main>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
