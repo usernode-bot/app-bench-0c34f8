@@ -190,9 +190,10 @@ export function computeRecipe({ type, hydration, count, size }) {
   });
 
   // Flour takes up the rounding, so the rows sum to the dough weight exactly.
-  // The diff can carry a tenth (a sub-10 g row rounds to 0.1 g), so the
-  // absorbing row is adjusted at 0.1 g precision, never re-rounded to whole
-  // grams — that would lose the diff and break the sum again.
+  // The flour row itself only ever carries whole grams: it gets the
+  // whole-gram part of the difference. Any fraction left over comes from a
+  // sub-10 g row (rounded to 0.1 g), so it goes back to one of those — the
+  // flour row never shows a decimal picked up from the correction.
   const diff = dough - rows.reduce((sum, r) => sum + r.grams, 0);
   if (diff !== 0) {
     let biggest = null;
@@ -200,7 +201,20 @@ export function computeRecipe({ type, hydration, count, size }) {
       if ((r.tone === 'flour' || r.tone === 'rye') && (!biggest || r.grams > biggest.grams)) biggest = r;
     }
     if (biggest) {
-      biggest.grams = Math.round((biggest.grams + diff) * 10) / 10;
+      const whole = Math.trunc(diff);
+      const frac = Math.round((diff - whole) * 10) / 10;
+      biggest.grams += whole;
+      if (frac !== 0) {
+        const small = rows.find((r) => r !== biggest && !Number.isInteger(r.grams))
+          || rows.find((r) => r !== biggest && r.grams < 10);
+        if (small) {
+          small.grams = Math.round((small.grams + frac) * 10) / 10;
+        } else {
+          // No sub-10 g row to carry it (a fractional dough weight): the
+          // flour row takes the rest after all.
+          biggest.grams = Math.round((biggest.grams + frac) * 10) / 10;
+        }
+      }
     }
   }
 

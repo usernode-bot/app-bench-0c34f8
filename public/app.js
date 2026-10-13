@@ -70,6 +70,12 @@ function countWord(bread, count) {
   return count === 1 ? `1 ${bread.noun[0]}` : `${count} ${bread.noun[1]}`;
 }
 
+// A number and its unit stay on one line: no lone "h", "min" or "°C"
+// wrapping onto the next line in the step text.
+function glueUnits(text) {
+  return String(text).replace(/(\d)\s+(h|min|s|cm|°C|°F|g)\b/g, '$1 $2');
+}
+
 /* ── Settings ───────────────────────────────────────────────────────────── */
 
 function syncSettings() {
@@ -148,15 +154,15 @@ function renderSteps(recipe) {
   // pieces this batch makes.
   for (const step of bread.steps) {
     const isShape = step.icon === 'shape';
-    const meta = step.meta || (isShape
+    const meta = glueUnits(step.meta || (isShape
       ? (state.count === 1 ? `One ${bread.noun[0]}` : `${state.count} ${bread.shapeUnit} of ${state.size} g`)
-      : null);
+      : null));
     list.append(h('li', { class: 'step' },
       h('span', { class: 'step-ico', 'aria-hidden': 'true' }, draw(step.icon)),
       h('div', { class: 'min-w-0' },
         h('p', { class: 'step-title' }, step.title),
         meta ? h('p', { class: 'step-meta' }, meta) : null,
-        step.sub ? h('p', { class: 'step-sub' }, step.sub) : null),
+        step.sub ? h('p', { class: 'step-sub' }, glueUnits(step.sub)) : null),
     ));
   }
   const bake = bread.bake;
@@ -165,16 +171,16 @@ function renderSteps(recipe) {
     const last = i === bake.phases.length - 1;
     const min = last ? bakeMinutes(phase.min, state.size, bake.refSize) : phase.min;
     panel.append(h('div', { class: 'bake-line' },
-      h('strong', { class: 'whitespace-nowrap' }, `${phase.label}: ${phase.c} °C`),
-      h('small', { class: 'whitespace-nowrap' }, `${min} min · ${toF(phase.c)} °F`),
+      h('strong', { class: 'whitespace-nowrap' }, glueUnits(`${phase.label}: ${phase.c} °C`)),
+      h('small', { class: 'whitespace-nowrap' }, glueUnits(`${min} min · ${toF(phase.c)} °F`)),
     ));
   });
-  panel.append(h('p', { class: 'text-small text-muted' }, bake.done));
+  panel.append(h('p', { class: 'text-small text-muted' }, glueUnits(bake.done)));
   list.append(h('li', { class: 'step step-bake' },
     h('span', { class: 'step-ico', 'aria-hidden': 'true' }, draw('oven')),
     h('div', { class: 'min-w-0' },
       h('p', { class: 'step-title' }, 'Bake'),
-      h('p', { class: 'step-sub' }, bake.sub),
+      h('p', { class: 'step-sub' }, glueUnits(bake.sub)),
       panel),
   ));
 }
