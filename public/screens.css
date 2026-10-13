@@ -1,0 +1,98 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1380px;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.s * {box-sizing:border-box}
+
+.text-title {font-size:28px;line-height:36px;font-weight:700;margin:0;letter-spacing:-.01em}
+
+.text-heading {font-size:20px;line-height:28px;font-weight:600;margin:0}
+
+.text-body {font-size:16px;line-height:24px}
+
+.text-small {font-size:14px;line-height:20px}
+
+.muted {color:rgb(var(--muted))}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.chip {display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));font-size:16px;font-weight:500}
+
+.chip svg {width:24px;height:24px;flex:none;stroke:rgb(var(--muted))}
+
+.chip.on {border:2px solid rgb(var(--accent));background:rgb(var(--crumb));padding:7px 11px}
+
+.chip.on svg {stroke:rgb(var(--accent))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.list-row .lbl {flex:1}
+
+.lbl small {display:block;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:10px;height:44px}
+
+.step b {min-width:64px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.step i {width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+
+.step svg {width:18px;height:18px;stroke:rgb(var(--fg))}
+
+.field {display:flex;align-items:center;justify-content:flex-end;gap:6px;width:112px;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;padding:0 12px;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.field span {font-weight:400;color:rgb(var(--muted))}
+
+.btn-primary {display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;border:0;width:100%}
+
+.card {border:1px solid rgb(var(--line));border-radius:14px;background:rgb(var(--surface));padding:18px 16px}
+
+.rc-head {display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+
+.rc-head .tot {font-size:14px;color:rgb(var(--muted));font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.formula {margin:14px 0 0;padding:0;list-style:none}
+
+.formula li {display:flex;align-items:baseline;gap:8px;padding:7px 0;font-size:16px}
+
+.formula .lead {flex:1;border-bottom:1px dotted rgb(var(--line));transform:translateY(-4px)}
+
+.formula .g {font-weight:700;font-variant-numeric:tabular-nums;min-width:68px;text-align:right}
+
+.formula .pc {font-size:14px;color:rgb(var(--muted));font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+
+.formula .hd {font-size:14px;color:rgb(var(--muted));padding:0 0 4px}
+
+.cut {border:0;border-top:2px dashed rgb(var(--line));margin:16px -16px}
+
+.steps {margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+
+.steps li {display:flex;gap:12px}
+
+.steps .ic {width:36px;height:36px;border-radius:18px;background:rgb(var(--crumb));display:flex;align-items:center;justify-content:center;flex:none}
+
+.steps svg {width:20px;height:20px;stroke:rgb(var(--accent))}
+
+.steps p {margin:0}
+
+.big {font-size:20px;line-height:28px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.note {margin:4px 0 0;font-size:14px;line-height:20px;color:rgb(var(--muted))}
