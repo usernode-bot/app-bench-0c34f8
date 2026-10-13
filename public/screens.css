@@ -17,6 +17,9 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  /* One column, centred on wide screens. */
+  max-width: 560px;
+  margin-inline: auto;
 }
 
 .serif {font-family:ui-serif,Georgia,"Times New Roman",serif}
@@ -91,7 +94,7 @@ h1 {font-size:28px;line-height:36px;font-weight:700}
 
 .part {padding:16px;border-top:1px dashed rgb(var(--line))}
 
-.part h3 {font-size:16px;font-weight:600;margin-bottom:8px}
+.part h3 {font-family:ui-serif,Georgia,"Times New Roman",serif;font-size:16px;line-height:24px;font-weight:600;margin-bottom:8px}
 
 .steps {list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
 
@@ -106,6 +109,14 @@ h1 {font-size:28px;line-height:36px;font-weight:700}
 .oven {border:1px solid rgb(var(--line));border-radius:8px;padding:12px;background:rgb(var(--ground))}
 
 .temp {font-size:28px;line-height:36px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* The slip's ingredient list is the kit's .list, but inside the slip it is
+   not a card in a card: no box of its own, rows run full width with their
+   own hairlines, and the shaded Total row sits flush to the slip's edges.
+   The dashed rules above and below come from .slip-top and .part. */
+.slip .list {border:0;border-radius:0;background:none;overflow:visible}
+
+.slip .list > :not([hidden]) ~ :not([hidden]) {border-top-width:0}
 
 /* ── Behaviour: the real controls under the drawn styles ────────────────── */
 
