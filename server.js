@@ -154,6 +154,270 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── RSS Reader API ────────────────────────────────────────────────────────
+// Feeds and posts are per person and marked private (staging never copies
+// them between viewers). Guests reach only the GET below; every write they
+// try is answered 401 by the auth middleware above.
+const { FeedError, normaliseUrl, safeFetch, parseFeed, findFeedLink } = require('./lib/feeds');
+const { FEEDS } = require('./lib/demo-feeds');
+
+const MAX_POSTS = 300;
+const KEEP_NEW_ITEMS = 50;
+const OLD_IS_READ_DAYS = 14;
+
+function feedRow(row, unread) {
+  return {
+    id: row.id,
+    title: row.title,
+    url: row.url,
+    siteUrl: row.site_url || null,
+    isDemo: !!row.is_demo,
+    unread,
+    lastCheckedAt: row.last_checked_at ? row.last_checked_at.toISOString() : null,
+    lastError: row.last_error || null,
+  };
+}
+
+function postRow(row) {
+  return {
+    id: row.id,
+    feedId: row.feed_id,
+    feedTitle: row.feed_title,
+    title: row.title,
+    link: row.link || null,
+    summary: row.summary || '',
+    author: row.author || null,
+    publishedAt: row.published_at.toISOString(),
+  };
+}
+
+// The demo overlay shows only behind ?demo=1. The plain routes always
+// answer with the viewer's real feeds alone, so made-up rows an earlier
+// demo visit seeded never reach the production-shaped screen. (Outside
+// staging no demo rows exist, so the exclusion is a no-op there.)
+async function viewerData(userId, demo) {
+  const notDemo = demo ? '' : ' AND is_demo = false';
+  const feedRows = (await pool.query(
+    `SELECT id, url, title, site_url, is_demo, last_checked_at, last_error
+       FROM feeds WHERE user_id = $1${notDemo}
+      ORDER BY created_at, id`,
+    [userId],
+  )).rows;
+  const counts = new Map((await pool.query(
+    'SELECT feed_id, count(*)::int AS unread FROM posts WHERE user_id = $1 AND read_at IS NULL GROUP BY feed_id',
+    [userId],
+  )).rows.map((r) => [r.feed_id, r.unread]));
+  const postRows = (await pool.query(
+    `SELECT p.id, p.feed_id, f.title AS feed_title, p.title, p.link, p.summary, p.author, p.published_at
+       FROM posts p JOIN feeds f ON f.id = p.feed_id
+      WHERE p.user_id = $1${demo ? '' : ' AND f.is_demo = false'} AND p.read_at IS NULL
+      ORDER BY p.published_at DESC LIMIT ${MAX_POSTS}`,
+    [userId],
+  )).rows;
+  return {
+    feeds: feedRows.map((row) => feedRow(row, counts.get(row.id) || 0)),
+    posts: postRows.map(postRow),
+    demo,
+    guest: false,
+  };
+}
+
+// Staging only: seed the ?demo=1 preview once per viewer. A removed demo
+// feed stays removed, because the seed happens only when demo_seeds gains a
+// row for this viewer.
+async function seedDemo(userId, now) {
+  const fresh = (await pool.query(
+    'INSERT INTO demo_seeds (user_id, seeded_at) VALUES ($1, $2) ON CONFLICT (user_id) DO NOTHING RETURNING user_id',
+    [userId, now],
+  )).rows;
+  if (!fresh.length) return;
+  for (const feed of FEEDS) {
+    const feedId = (await pool.query(
+      `INSERT INTO feeds (user_id, url, title, site_url, is_demo, last_checked_at)
+       VALUES ($1, $2, $3, $4, true, $5)
+       ON CONFLICT (user_id, url) DO NOTHING RETURNING id`,
+      [userId, feed.url, feed.title, feed.siteUrl, now],
+    )).rows[0];
+    if (!feedId) continue;
+    for (const post of feed.posts) {
+      await pool.query(
+        `INSERT INTO posts (feed_id, user_id, guid, title, link, summary, author, published_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (feed_id, guid) DO NOTHING`,
+        [feedId.id, userId, post.guid, post.title, 'https://example.com/', post.summary,
+          post.author, new Date(now.getTime() - post.age * 60_000)],
+      );
+    }
+  }
+}
+
+function fetchFeedOnce(feed, now) {
+  return safeFetch(feed.url)
+    .then(({ body, type }) => {
+      let parsed;
+      try {
+        parsed = parseFeed(body, feed.url, now);
+      } catch (err) {
+        if (err instanceof FeedError && /html/i.test(type)) {
+          const link = findFeedLink(body, feed.url);
+          if (link && link !== feed.url) {
+            return safeFetch(link).then(({ body: body2 }) => parseFeed(body2, link, now));
+          }
+        }
+        throw err;
+      }
+      return parsed;
+    });
+}
+
+async function refreshFeed(feed, now) {
+  try {
+    const parsed = await fetchFeedOnce(feed, now);
+    const newest = parsed.items.slice(0, KEEP_NEW_ITEMS);
+    for (const item of newest) {
+      await pool.query(
+        `INSERT INTO posts (feed_id, user_id, guid, title, link, summary, author, published_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (feed_id, guid) DO NOTHING`,
+        [feed.id, feed.user_id, item.guid, item.title, item.link, item.summary, item.author, item.publishedAt],
+      );
+    }
+    await pool.query(
+      'UPDATE feeds SET title = $2, site_url = COALESCE($3, site_url), last_checked_at = $4, last_error = NULL WHERE id = $1',
+      [feed.id, parsed.title, parsed.siteUrl, now],
+    );
+    return null;
+  } catch (err) {
+    const reason = err instanceof FeedError ? err.message : 'The feed could not be read just now';
+    await pool.query(
+      'UPDATE feeds SET last_checked_at = $2, last_error = $3 WHERE id = $1',
+      [feed.id, now, reason],
+    );
+    return reason;
+  }
+}
+
+async function refreshAll(userId, now) {
+  const feeds = (await pool.query(
+    'SELECT id, user_id, url FROM feeds WHERE user_id = $1 AND is_demo = false ORDER BY id',
+    [userId],
+  )).rows;
+  const failures = [];
+  const queue = [...feeds];
+  const worker = async () => {
+    for (;;) {
+      const feed = queue.shift();
+      if (!feed) return;
+      const reason = await refreshFeed(feed, now);
+      if (reason) failures.push({ id: feed.id, reason });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, feeds.length) }, worker));
+  return failures;
+}
+
+app.get('/api/posts', async (req, res) => {
+  try {
+    if (!req.user) return res.json({ feeds: [], posts: [], demo: false, guest: true });
+    const demo = IS_STAGING && req.query.demo === '1';
+    if (demo) await seedDemo(String(req.user.id), req.now);
+    res.json(await viewerData(String(req.user.id), demo));
+  } catch (err) {
+    console.warn('GET /api/posts failed:', err.message);
+    res.status(500).json({ error: 'Your posts could not be loaded just now' });
+  }
+});
+
+app.post('/api/refresh', async (req, res) => {
+  try {
+    const userId = String(req.user.id);
+    // Refresh answers in the shape of the screen it was called from: the
+    // demo page passes ?demo=1 on, so its refresh keeps the overlay.
+    const demo = IS_STAGING && req.query.demo === '1';
+    if (demo) await seedDemo(String(userId), req.now);
+    const failures = await refreshAll(userId, req.now);
+    res.json({ ...await viewerData(userId, demo), checkedAt: req.now.toISOString(), failures });
+  } catch (err) {
+    console.warn('POST /api/refresh failed:', err.message);
+    res.status(500).json({ error: 'Your feeds could not be checked just now' });
+  }
+});
+
+app.post('/api/feeds', async (req, res) => {
+  const raw = req.body && typeof req.body.url === 'string' ? req.body.url.trim() : '';
+  if (!raw) return res.status(400).json({ error: 'Paste a feed address, starting with https://' });
+  if (!/^https:\/\//i.test(raw)) {
+    return res.status(400).json({ error: raw.startsWith('http://') || /^\w+:\/\//i.test(raw) && !raw.startsWith('https://')
+      ? 'Use the https address of the feed'
+      : 'Paste a feed address, starting with https://' });
+  }
+  const userId = String(req.user.id);
+  try {
+    let { url, body, type } = await safeFetch(raw);
+    let parsed;
+    try {
+      parsed = parseFeed(body, url, req.now);
+    } catch (err) {
+      if (!(err instanceof FeedError)) throw err;
+      // A website's home page often names its own feed: try that address once.
+      const link = /html/i.test(type) ? findFeedLink(body, url) : null;
+      if (!link) throw err;
+      const again = await safeFetch(link);
+      url = again.url;
+      parsed = parseFeed(again.body, again.url, req.now);
+    }
+    const feedUrl = normaliseUrl(url).href;
+    const existing = await pool.query('SELECT id FROM feeds WHERE user_id = $1 AND url = $2', [userId, feedUrl]);
+    if (existing.rows.length) return res.status(400).json({ error: 'That feed is already in your list' });
+    const cutoff = req.now.getTime() - OLD_IS_READ_DAYS * 24 * 60 * 60 * 1000;
+    const inserted = (await pool.query(
+      `INSERT INTO feeds (user_id, url, title, site_url, last_checked_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, url, title, site_url, is_demo, last_checked_at, last_error`,
+      [userId, feedUrl, parsed.title, parsed.siteUrl, req.now],
+    )).rows[0];
+    for (const item of parsed.items.slice(0, KEEP_NEW_ITEMS)) {
+      await pool.query(
+        `INSERT INTO posts (feed_id, user_id, guid, title, link, summary, author, published_at, read_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (feed_id, guid) DO NOTHING`,
+        [inserted.id, userId, item.guid, item.title, item.link, item.summary, item.author, item.publishedAt,
+          item.publishedAt.getTime() < cutoff ? req.now : null],
+      );
+    }
+    res.status(201).json({ feed: feedRow(inserted, 0) });
+  } catch (err) {
+    const message = err instanceof FeedError
+      ? err.message
+      : 'That site didn\'t answer. Check the address and try again.';
+    res.status(err instanceof FeedError ? 400 : 502).json({ error: message });
+  }
+});
+
+app.delete('/api/feeds/:id', async (req, res) => {
+  try {
+    const gone = await pool.query(
+      'DELETE FROM feeds WHERE id = $1 AND user_id = $2 RETURNING id',
+      [Number(req.params.id) || 0, String(req.user.id)],
+    );
+    if (!gone.rows.length) return res.status(404).json({ error: 'That feed is not in your list' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.warn('DELETE /api/feeds/:id failed:', err.message);
+    res.status(500).json({ error: 'The feed could not be removed just now' });
+  }
+});
+
+app.post('/api/posts/:id/read', async (req, res) => {
+  try {
+    const read = await pool.query(
+      'UPDATE posts SET read_at = $3 WHERE id = $1 AND user_id = $2 AND read_at IS NULL RETURNING id',
+      [Number(req.params.id) || 0, String(req.user.id), req.now],
+    );
+    if (!read.rows.length) return res.status(404).json({ error: 'That post is not in your list' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.warn('POST /api/posts/:id/read failed:', err.message);
+    res.status(500).json({ error: 'The post could not be marked read just now' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +455,65 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// The tables: feeds and posts are per person and private (staging keeps its
+// demo data to the viewer it was seeded for). demo_seeds makes the ?demo=1
+// seed happen once per viewer.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      url text NOT NULL,
+      title text NOT NULL,
+      site_url text,
+      is_demo boolean DEFAULT false,
+      last_checked_at timestamptz,
+      last_error text,
+      created_at timestamptz DEFAULT now()
+    );
+    COMMENT ON TABLE feeds IS 'staging:private';
+    CREATE TABLE IF NOT EXISTS posts (
+      id serial PRIMARY KEY,
+      feed_id int NOT NULL REFERENCES feeds ON DELETE CASCADE,
+      user_id text NOT NULL,
+      guid text NOT NULL,
+      title text NOT NULL,
+      link text,
+      summary text,
+      author text,
+      published_at timestamptz NOT NULL,
+      read_at timestamptz
+    );
+    COMMENT ON TABLE posts IS 'staging:private';
+    CREATE TABLE IF NOT EXISTS demo_seeds (
+      user_id text PRIMARY KEY,
+      seeded_at timestamptz DEFAULT now()
+    );
+    COMMENT ON TABLE demo_seeds IS 'staging:private';
+    CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_url_key ON feeds (user_id, url);
+    CREATE UNIQUE INDEX IF NOT EXISTS posts_feed_guid_key ON posts (feed_id, guid);
+    CREATE INDEX IF NOT EXISTS posts_user_unread_idx ON posts (user_id, read_at, published_at DESC);
+  `);
+}
+
 async function start() {
+  await migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Stop accepting, drain what is in flight, then close the database pool.
+  let closing = false;
+  const shutdown = (signal) => {
+    if (closing) return;
+    closing = true;
+    console.log(`${signal}: draining`);
+    server.close(() => {
+      pool.end().then(() => process.exit(0), () => process.exit(0));
+    });
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

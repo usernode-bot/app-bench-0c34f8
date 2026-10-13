@@ -56,24 +56,13 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## Template already replaced
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+The starter-template screen was removed when the first real feature was
+built (the unread list in `public/index.html`, rendered by
+`public/app.js`); `README.md` describes the actual app. The platform
+infrastructure stays: the bridge `<script>`, the theme `<script>` right
+after it, and the `usernode-dev-console@1` forwarder.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
@@ -95,22 +84,30 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A quiet, unread-first RSS reader. Each viewer adds their own RSS or
+Atom feeds by https address; new posts collect in one list grouped
+Today, Yesterday and Earlier. Opening a post's preview marks it read
+and shows the summary the feed shares, with an "Open in browser"
+button for the full article on the publisher's site. Feeds and read
+state are per person, never shared.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** cool grey neutrals (ground/surface/raised) with one orange
+  accent — burnt orange in the light look (`--accent: 194 65 12`),
+  bright orange in the dark (`251 146 60`); the unread dot uses the
+  brighter `--unread` orange. Danger and focus follow the same warm range.
+- **Signature element:** the orange unread dot on every unread row, and
+  the feed mark in the header — a dot with two radiating waves, the
+  classic feed symbol drawn in the accent. The empty state redraws it
+  over a folded page.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Post titles and preview summaries are serif (the `font-serif` stack:
+  Charter and friends); all app chrome — chips, meta, buttons, labels —
+  is the kit's sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +135,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds`, `posts` and `demo_seeds` tables are marked
+  `staging:private`: feeds and read state are per viewer and never
+  shared between people.
+- Feed text is always put on the page as text, never as HTML:
+  `lib/feeds.js` reduces every summary to plain text and the page
+  inserts it through the kit's `h()` (text nodes only).
+- Feed fetching is https-only with a strict URL guard in
+  `lib/feeds.js` (no private or loopback addresses, redirects
+  re-checked, 8 s timeout, 2 MB cap). Don't weaken it.
+- Demo feeds (staging `?demo=1`) are invented in `lib/demo-feeds.js`
+  and are never fetched from the network.
+- No new npm dependencies: `lib/feeds.js` uses only Node's own modules.
+- A new feed keeps only its 50 newest items; items older than 14 days
+  are stored already read.

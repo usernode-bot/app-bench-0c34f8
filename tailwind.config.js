@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        unread: token('unread'), // the unread dot
+      },
+      fontFamily: {
+        // Post titles and the preview's summary: a reading serif. The app's
+        // own chrome stays on the sans stack screens.css sets.
+        serif: ['Charter', '"Iowan Old Style"', '"Bitstream Charter"', 'ui-serif', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

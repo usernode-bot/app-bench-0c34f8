@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c2410c'/><circle cx='30' cy='70' r='11' fill='white'/><path d='M22 46a32 32 0 0 1 32 32' stroke='white' stroke-width='9' fill='none' stroke-linecap='round'/><path d='M22 24a54 54 0 0 1 54 54' stroke='white' stroke-width='9' fill='none' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,93 +109,23 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+  <!-- Built from the design kit in styles/tailwind-input.css and the screens
+       the spec drew (public/screens.css). The rows, chips, status line, the
+       preview sheet and the Your feeds sheet are rendered by public/app.js;
+       this markup is the frame they land in. -->
   <div data-spec-screen="1">
     <div><div class="app">
     <header class="top">
     <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><circle cx="5.5" cy="18.5" r="2" fill="currentColor" stroke="none"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>
-    <h1>Unread<span class="count">23</span></h1>
-    <button class="btn-secondary icon" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
-    <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    <h1>Unread<span class="count" id="count"></span></h1>
+    <button class="btn-secondary icon" id="refresh-btn" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="btn-secondary" id="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </header>
-    <nav class="chips" aria-label="Filter by feed">
-    <button class="chip" aria-pressed="true">All <b>23</b></button>
-    <button class="chip">Example Garden Weekly <b>7</b></button>
-    <button class="chip">Pretend Transit Blog <b>6</b></button>
-    <button class="chip">Sample Kitchen <b>5</b></button>
-    <button class="chip">Made-up Space News <b>5</b></button>
-    </nav>
-    <section>
-    <h2 class="section-label">Today</h2>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Why the tomatoes on the test plot ripened two weeks early</span><span class="post-meta"><span class="feed">Example Garden Weekly</span><time>2h</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">The night bus that only runs on leap years, explained</span><span class="post-meta"><span class="feed">Pretend Transit Blog</span><time>3h</time></span></div></li>
-    <li class="list-row read"><span class="dot"></span><div class="post"><span class="post-title">A pretend probe sends back its first blurry photo of a moon</span><span class="post-meta"><span class="feed">Made-up Space News</span><time>4h</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Five soups you can make with one sample onion</span><span class="post-meta"><span class="feed">Sample Kitchen</span><time>5h</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Mulch, compost or leaves: what our fake allotment tested this spring</span><span class="post-meta"><span class="feed">Example Garden Weekly</span><time>7h</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">New timetable for the imaginary harbour ferry</span><span class="post-meta"><span class="feed">Pretend Transit Blog</span><time>9h</time></span></div></li>
-    </ul>
-    </section>
-    <section>
-    <h2 class="section-label">Yesterday</h2>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">How long does a placeholder comet tail really get?</span><span class="post-meta"><span class="feed">Made-up Space News</span><time>Mon</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Bread that rises overnight, a sample recipe</span><span class="post-meta"><span class="feed">Sample Kitchen</span><time>Mon</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Saving seeds from beans you never planted</span><span class="post-meta"><span class="feed">Example Garden Weekly</span><time>Mon</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Tram line 0 gets a second stop, in theory</span><span class="post-meta"><span class="feed">Pretend Transit Blog</span><time>Mon</time></span></div></li>
-    </ul>
-    </section>
-    <section>
-    <h2 class="section-label">Earlier</h2>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">A practice launch window, and what we would pack</span><span class="post-meta"><span class="feed">Made-up Space News</span><time>Oct 9</time></span></div></li>
-    <li class="list-row"><span class="dot"></span><div class="post"><span class="post-title">Pickling anything in a sample jar</span><span class="post-meta"><span class="feed">Sample Kitchen</span><time>Oct 8</time></span></div></li>
-    </ul>
-    </section>
-    <p class="foot">Checked your 4 feeds a minute ago</p>
+    <nav class="chips" id="chips" aria-label="Filter by feed"></nav>
+    <div id="posts"></div>
+    <p class="foot" id="status" hidden></p>
     </div></div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div><div class="stage">
-      <div class="behind">
-      <header class="top"><svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="2" fill="currentColor" stroke="none"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg><h1>Unread</h1></header>
-      <ul class="list"><li class="list-row"><span class="dot"></span><span class="ph">Why the tomatoes on the test plot ripened two weeks early</span></li><li class="list-row"><span class="dot"></span><span class="ph">The night bus that only runs on leap years</span></li></ul>
-      </div>
-      <div class="scrim"></div>
-      <section class="sheet" role="dialog" aria-label="Post preview">
-      <div class="grab"></div>
-      <div class="bar">
-      <span class="from"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="2" fill="currentColor" stroke="none"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Example Garden Weekly</span>
-      <button class="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      </div>
-      <div class="body">
-      <h2 class="title">Why the tomatoes on the test plot ripened two weeks early</h2>
-      <p class="byline">By Pat Example, today at 10:14</p>
-      <div class="summary">
-      <p>Our pretend allotment had a warm spell in late summer, and the tomatoes along the south fence turned red a full fortnight ahead of the rest. We kept notes on soil, shade and watering to work out why.</p>
-      <p>The short version: the fence held the afternoon heat, and the plants there were watered less often. In this made-up post we look at what that means for next year's planting plan, and which varieties we would move.</p>
-      </div>
-      <p class="note">This is the summary the feed shares. The full article is on the publisher's site.</p>
-      </div>
-      <div class="actions">
-      <a class="btn-primary" href="https://example.com/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</a>
-      <p class="host">example.com</p>
-      </div>
-      </section>
-      </div></div>
-    </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

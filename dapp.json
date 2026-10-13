@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "empty-list",
+      "title": "Empty reading list",
+      "path": "/",
+      "expectText": "Add your first feed"
+    },
+    {
+      "id": "demo-list",
+      "title": "Staging demo shows posts",
+      "path": "/?demo=1",
+      "expectSelector": ".post-row .unread-dot",
+      "expectText": "Staging demo",
+      "visual": true
+    }
+  ]
 }
