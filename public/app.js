@@ -26,6 +26,37 @@ const drawnList = app.querySelector('.qs');
 const rowMake = rowsFrom(drawnList, '.card.q');
 const listTemplate = drawnList.cloneNode(false); // an empty ul.qs to fill per render
 
+// Thin line icons, drawn the way the drawn screens draw theirs.
+const svgPath = (d, width) => {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', String(width));
+  svg.setAttribute('stroke-linecap', 'round');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  svg.append(path);
+  return svg;
+};
+
+// The list's loading shape: a bar where the section label sits, then three
+// question cards 12 px apart, each with title, meta and two ballot rows.
+function listSkeleton() {
+  const bar = (cls) => h('span', { class: `skeleton block ${cls}` });
+  const rowSkel = () => h('div', { class: 'kit-vote' },
+    h('span', { class: 'skeleton h-6 w-6 rounded-[4px]' }),
+    h('span', { class: 'skeleton h-4 w-20' }));
+  const cardSkel = () => h('div', { class: 'card q', 'aria-hidden': 'true' },
+    bar('h-6 w-3/4'),
+    bar('mt-1 h-4 w-1/3'),
+    h('div', { class: 'ballot' }, rowSkel(), rowSkel()));
+  return h('div', { 'aria-busy': 'true' },
+    h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+    bar('h-4 w-44 mb-2 ml-1'),
+    h('div', { class: 'qs' }, cardSkel(), cardSkel(), cardSkel()));
+}
+
 // Hand-tally marks: gates of five (four strokes plus the slash), then the
 // number stands alone past 30.
 const MARK = '0 0 22 20';
@@ -152,6 +183,7 @@ function cardFor(item) {
 
 const list = createStates(questionsHolder, {
   rows: 3,
+  skeleton: listSkeleton,
   empty: {
     title: 'No questions yet',
     text: 'Ask the club the first thing you need to decide.',
@@ -163,10 +195,15 @@ const list = createStates(questionsHolder, {
   },
 });
 
+// The empty state's New question button carries the header's plus too.
+const emptyAction = questionsHolder.querySelector('.state-empty .btn-primary');
+if (emptyAction) emptyAction.prepend(svgPath('M12 5v14M5 12h14', 2));
+
 async function loadListTask(box) {
   const data = await api('GET', '/api/questions');
   if (data.demo) showDemoLabel(app, 'Staging demo: the people and questions here are made up.');
   sectionLabel.textContent = `${plural(data.items.length, 'question')}, newest first`;
+  sectionLabel.hidden = !data.items.length;
   if (!data.items.length) return false;
   const ul = listTemplate.cloneNode(false);
   for (const item of data.items) ul.append(cardFor(item));

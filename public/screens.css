@@ -16,15 +16,17 @@
 
 .app * {box-sizing:border-box;margin:0}
 
-.head {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:4px 4px 20px}
+.head {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:4px 4px 0}
 
 .app-title {font-family:ui-serif,"Iowan Old Style",Georgia,serif;font-size:28px;line-height:36px;font-weight:700;letter-spacing:-.01em}
 
-.app-sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+/* The subtitle sits below the full-width title row, so it never wraps
+   against the New question button at phone width. */
+.app-sub {display:block;margin:2px 4px 20px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px 0 12px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-weight:500;white-space:nowrap}
 
-.btn-primary svg {width:20px;height:20px}
+.btn-primary svg {width:20px;height:20px;flex-shrink:0}
 
 .section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
 
@@ -46,9 +48,9 @@
 
 .kit-vote-mark svg {width:22px;height:22px}
 
-.kit-vote-label {width:28px;flex-shrink:0}
+.kit-vote-label {width:28px;flex:0 0 auto}
 
-.tally {display:flex;flex:1;gap:5px;min-width:0;color:rgb(var(--muted))}
+.tally {display:flex;flex:1;justify-content:flex-start;gap:5px;min-width:0;color:rgb(var(--muted))}
 
 .tally svg {width:22px;height:20px;flex-shrink:0}
 
@@ -56,7 +58,7 @@
 
 .kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--accent)/.06);font-weight:500}
 
-.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));color:rgb(var(--accent))}
+.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--surface));color:rgb(var(--accent))}
 
 .kit-vote[aria-pressed="true"] .tally,.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--accent))}
 
@@ -67,6 +69,11 @@
 .q-talk svg {width:18px;height:18px;color:rgb(var(--muted))}
 
 .lead {color:rgb(var(--fg));font-weight:500}
+
+/* Empty and error states: the action button sits a clear 16 px under the
+   copy (the kit's own gap plus this margin). */
+.state-empty .btn-primary,.state-empty .btn-secondary,
+.state-error .btn-primary,.state-error .btn-secondary {margin-top:16px}
 
 /* Screen 2: its rules the first screen has not got. The four shared classes
    it retunes (.app, .ballot, .kit-vote, .btn-primary) are scoped to the
