@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,90 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><main class="app">
+    <header class="head"><div><h1 class="app-title">Club Votes</h1><p class="app-sub">Ask the club. Everyone gets a vote.</p></div>
+    <button class="btn-primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button></header>
+    <p class="section-label">6 questions, newest first</p>
+    <ul class="qs">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we move the spring meetup to the community hall?</h2><p class="q-meta">Asked by Chioma · 2 hours ago</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="true"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14"/></svg></span><span class="kit-vote-count">7</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14"/></svg></span><span class="kit-vote-count">3</span></button>
+    </div>
+    <div class="q-foot"><span>10 votes, <span class="lead">Yes leads</span></span><button class="q-talk" type="button">4 comments<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we switch our meetings to Thursday evenings?</h2><p class="q-meta">Asked by Dev · yesterday</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14"/></svg></span><span class="kit-vote-count">4</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg></span><span class="kit-vote-count">5</span></button>
+    </div>
+    <div class="q-foot"><span>9 votes, <span class="lead">No leads</span></span><button class="q-talk" type="button">5 comments<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
+
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should the club start a shared reading list?</h2><p class="q-meta">Asked by Lucia · 2 days ago</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="true"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14"/></svg></span><span class="kit-vote-count">11</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14"/></svg></span><span class="kit-vote-count">1</span></button>
+    </div>
+    <div class="q-foot"><span>12 votes, <span class="lead">Yes leads</span></span><button class="q-talk" type="button">2 comments<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
+
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we raise yearly dues to cover the hall booking?</h2><p class="q-meta">Asked by Ben · 4 days ago</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14"/></svg></span><span class="kit-vote-count">3</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14"/></svg></span><span class="kit-vote-count">3</span></button>
+    </div>
+    <div class="q-foot"><span>6 votes, <span class="lead">a tie so far</span></span><button class="q-talk" type="button">12 comments<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
+
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we keep a shared club calendar?</h2><p class="q-meta">Asked by Hana · 5 days ago</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="true"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14"/></svg></span><span class="kit-vote-count">9</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14"/></svg></span><span class="kit-vote-count">2</span></button>
+    </div>
+    <div class="q-foot"><span>11 votes, <span class="lead">Yes leads</span></span><button class="q-talk" type="button">3 comments<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
+
+    <li class="card q"><button class="q-open" type="button"><h2 class="q-title">Should we plan a picnic at Riverside Park in June?</h2><p class="q-meta">Asked by Gus · 1 week ago</p></button>
+    <div class="ballot" role="group" aria-label="Vote">
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"></span><span class="kit-vote-count">0</span></button>
+    <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"></span><span class="kit-vote-count">0</span></button>
+    </div>
+    <div class="q-foot"><span>No votes yet</span><button class="q-talk" type="button">Talk it through<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></li>
+
+    </ul></main></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><main class="app">
+      <button class="back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Questions</button>
+      <article class="kit-detail">
+      <header class="kit-detail-head"><h1 class="kit-detail-title">Should we switch our meetings to Thursday evenings?</h1>
+      <p class="meta-line"><span>Asked by Dev · yesterday</span><button class="report" type="button">Report</button></p>
+      <p class="kit-detail-body">Tuesdays keep clashing with the school run for a few of us. Thursday at 7 would free that up, but the hall costs a little more that night.</p></header>
+
+      <section><h2 class="section-label">Your vote</h2>
+      <div class="ballot" role="group" aria-label="Vote on Should we switch our meetings to Thursday evenings?">
+      <button class="kit-vote" type="button" aria-pressed="true"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">Yes</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg></span><span class="kit-vote-count">5</span></button>
+      <button class="kit-vote" type="button" aria-pressed="false"><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19.5 6"/></svg></span><span class="kit-vote-label">No</span><span class="tally"><svg viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 3v14M8 3v14M12 3v14M16 3v14M1.5 14L19.5 5"/></svg></span><span class="kit-vote-count">5</span></button>
+      </div>
+      <p class="kit-vote-summary">10 votes, a tie so far. You voted Yes: tap No to change it, or Yes again to take it back.</p></section>
+
+      <section><h2 class="section-label">5 comments</h2>
+      <ul class="list">
+      <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Farah</span><span>yesterday</span><button class="report" type="button">Report</button></p><p>Thursday works much better for me, I can actually make it on time.</p></li>
+      <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ivo</span><span>yesterday</span><button class="report" type="button">Report</button></p><p>I have choir on Thursdays, so I'd miss every meeting. Could we try alternate weeks?</p></li>
+      <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ana</span><span>20 hours ago</span><button class="report" type="button">Report</button></p><p>How much more is the hall that night? If it's small I'm happy to chip in.</p></li>
+      <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Dev</span><span>18 hours ago</span><button class="report" type="button">Report</button></p><p>About five more per booking. I'll ask if they do a block rate.</p></li>
+      <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">You</span><span>3 hours ago</span></p><p>Voted yes, but alternate weeks sounds fair to me too.</p></li>
+      </ul>
+      <div class="kit-composer"><label class="kit-label">Add a comment</label><textarea class="field">e.g. Thursdays clash with something for me</textarea>
+      <div class="kit-composer-actions"><button class="btn-primary" type="button">Post comment</button></div></div></section>
+      </article></main></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

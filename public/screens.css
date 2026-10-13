@@ -1,0 +1,126 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  min-height: 1720px;
+  box-sizing: border-box;
+  padding: 20px 16px 32px;
+}
+
+.app * {box-sizing:border-box;margin:0}
+
+.head {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:4px 4px 20px}
+
+.app-title {font-family:ui-serif,"Iowan Old Style",Georgia,serif;font-size:28px;line-height:36px;font-weight:700;letter-spacing:-.01em}
+
+.app-sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px 0 12px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-weight:500;white-space:nowrap}
+
+.btn-primary svg {width:20px;height:20px}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.qs {display:flex;flex-direction:column;gap:12px;list-style:none;padding:0}
+
+.card {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:16px}
+
+.q-open {display:block;width:100%;text-align:left;background:none;border:0;padding:0;font:inherit;color:inherit}
+
+.q-title {font-family:ui-serif,"Iowan Old Style",Georgia,serif;font-size:20px;line-height:28px;font-weight:600}
+
+.q-meta {margin-top:2px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.ballot {display:flex;flex-direction:column;gap:8px;margin-top:12px}
+
+.kit-vote {position:relative;display:flex;align-items:center;gap:12px;min-height:44px;width:100%;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg));text-align:left}
+
+.kit-vote-mark {display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;border:2px solid rgb(var(--muted)/.55);border-radius:4px;background:rgb(var(--surface));color:transparent}
+
+.kit-vote-mark svg {width:22px;height:22px}
+
+.kit-vote-label {width:28px;flex-shrink:0}
+
+.tally {display:flex;flex:1;gap:5px;min-width:0;color:rgb(var(--muted))}
+
+.tally svg {width:22px;height:20px;flex-shrink:0}
+
+.kit-vote-count {flex-shrink:0;font-size:14px;line-height:20px;font-weight:500;font-variant-numeric:tabular-nums;color:rgb(var(--muted))}
+
+.kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--accent)/.06);font-weight:500}
+
+.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));color:rgb(var(--accent))}
+
+.kit-vote[aria-pressed="true"] .tally,.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--accent))}
+
+.q-foot {display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.q-talk {display:inline-flex;align-items:center;gap:4px;min-height:44px;margin:-12px -8px -12px 0;padding:0 8px;background:none;border:0;font:inherit;color:rgb(var(--fg));font-weight:500}
+
+.q-talk svg {width:18px;height:18px;color:rgb(var(--muted))}
+
+.lead {color:rgb(var(--fg));font-weight:500}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  min-height: 1320px;
+  box-sizing: border-box;
+  padding: 12px 16px 32px;
+}
+
+.back {display:inline-flex;align-items:center;gap:2px;min-height:44px;margin-left:-8px;padding:0 8px;background:none;border:0;font:inherit;color:rgb(var(--accent));font-weight:500}
+
+.back svg {width:22px;height:22px}
+
+.kit-detail {display:flex;flex-direction:column;gap:24px;margin-top:8px}
+
+.kit-detail-head {display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+
+.kit-detail-title {font-family:ui-serif,"Iowan Old Style",Georgia,serif;font-size:28px;line-height:36px;font-weight:700;letter-spacing:-.01em}
+
+.meta-line {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.report {min-height:44px;margin:-12px 0;padding:0 8px;background:none;border:0;font:inherit;font-size:14px;color:rgb(var(--muted));text-decoration:underline;text-underline-offset:3px}
+
+.kit-detail-body {white-space:pre-line}
+
+.ballot {display:flex;flex-direction:column;gap:8px}
+
+.kit-vote {position:relative;display:flex;align-items:center;gap:12px;min-height:52px;width:100%;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg));text-align:left}
+
+.kit-vote-summary {margin-top:8px;padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.list {list-style:none;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;flex-direction:column;gap:4px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.kit-comment-meta {display:flex;align-items:baseline;gap:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.kit-comment-author {font-weight:500;color:rgb(var(--fg))}
+
+.kit-comment-meta .report {margin:-12px -8px -12px auto}
+
+.kit-composer {display:flex;flex-direction:column;gap:8px;margin-top:16px}
+
+.kit-label {font-size:14px;line-height:20px;font-weight:500}
+
+.field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font:inherit;color:rgb(var(--muted)/.6)}
+
+.kit-composer-actions {display:flex;justify-content:flex-end}
+
+.btn-primary {display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-weight:500}
