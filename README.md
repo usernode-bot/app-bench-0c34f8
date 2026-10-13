@@ -1,27 +1,27 @@
-# Bread Bot
+# Bread Bot 🍞
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Turn bread choices into a full recipe: pick one of five breads — sourdough,
+bagels, sourdough bagels, rye or sandwich loaf — set the hydration, the count
+and the size of each piece, and the recipe is there, updating live as you
+move any control. No Calculate button.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Formula sheet** — every ingredient in grams with its baker's percentage,
+  and the total dough weight. Starter breads count the starter's own flour
+  and water in the hydration.
+- **Rise and bake timeline** — each step with its duration, hands-on or
+  rising or baking, oven temperatures where they apply, and a strip drawn to
+  scale that shows where the time really goes. Wet dough rises faster and big
+  batches bake longer: the timeline adjusts for both.
+- **Remembered** — your last choices per bread are kept on the device, so
+  the app opens where you left it.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+There is no database: the whole calculator is maths in the browser
+(`public/bread/recipe.js`), and the server only serves the page. Choices
+live in `localStorage` under `breadbot:v1`.
 
-## Replacing the template
+## Building on it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+Ask Homeroom bot (open the app, tap the Homeroom icon, **Suggest an
+improvement**), or run Claude Code against this repo — start with
+`CLAUDE.md`, which carries the app-specific notes and points at the
+platform rules.

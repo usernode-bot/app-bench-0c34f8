@@ -35,7 +35,7 @@ const GUEST_PUBLIC_KEY = (process.env.USERNODE_GUEST_JWT_PUBLIC_KEY || '')
 // Paths that stay open without authentication. Add a path here (and add it
 // with `app.get`/`app.post` below) if you deliberately want it public.
 // Everything else requires a valid platform-issued JWT.
-const PUBLIC_API_PATHS = new Set(['/health']);
+const PUBLIC_API_PATHS = new Set(['/health', '/api/demo']);
 
 app.use(express.json());
 
@@ -147,6 +147,19 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// The staging demo: a set of example choices the page loads and applies so a
+// visitor to the preview sees a populated screen. With ?demo=1 on a staging
+// container it returns the choices; otherwise null (the page then just shows
+// the calculator's defaults). Read-only and idempotent — nothing is stored,
+// and the page does not persist anything the visitor changes while it is on.
+app.get('/api/demo', (req, res) => {
+  res.json({
+    demo: IS_STAGING && req.query.demo === '1'
+      ? { kind: 'sourdough', hydration: 75, count: 2, size: 900 }
+      : null,
+  });
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -191,10 +204,33 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+
+// Shut down cleanly when the platform stops the container: stop accepting
+// new connections, give in-flight ones a few seconds to drain, then close
+// the database pool and exit.
+async function shutdown(signal) {
+  console.log(`${signal}: shutting down`);
+  const done = (code) => { process.exit(code); };
+  const timer = setTimeout(() => done(0), 3_000);
+  try {
+    await new Promise((resolve) => (server ? server.close(resolve) : resolve()));
+    clearTimeout(timer);
+    await pool.end();
+    done(0);
+  } catch (err) {
+    console.error('shutdown failed: ' + err.message);
+    done(1);
+  }
+}
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });

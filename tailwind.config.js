@@ -55,6 +55,8 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        crumb: token('crumb'), // the timeline strip: rising
+        crust: token('crust'), // the timeline strip: baking
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
@@ -62,6 +64,10 @@ module.exports = {
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      // Serif headings, per the drawn screens.
+      fontFamily: {
+        serif: ['ui-serif', '"New York"', 'Georgia', 'serif'],
       },
     },
   },

@@ -95,22 +95,37 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A one-screen bread recipe calculator. The user picks one of five breads
+(sourdough, bagels, sourdough bagels, rye, sandwich loaf), sets the
+hydration with a slider, the batch count with a stepper and the size of
+each piece with a gram field plus preset chips, and the recipe —
+ingredient grams with baker's percentages, plus a rise-and-bake timeline
+with oven temperatures — updates live as each control moves. There is no
+Calculate button and no database: all the maths is pure functions in
+`public/bread/recipe.js`, and choices persist in `localStorage`
+(`breadbot:v1`). A staging `?demo=1` preview loads example choices from
+`GET /api/demo` and persists nothing while it is on.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** baked gold accent (`--accent`, tomato-free — it is a bread
+  crust colour) on warm bread-crumb neutrals (ground, surface, raised are
+  progressively lighter warm browns in dark, warm off-whites in light);
+  `--crumb` and `--crust` are the two timeline-strip colours (rising and
+  baking). Light values live in `:root`, dark in `.dark`, both in
+  `styles/tailwind-input.css`.
+- **Signature element:** the baker's formula sheet — a list where each
+  ingredient row carries its percentage and grams, under headings set in
+  serif — and the timeline strip drawn to scale, so long rises visibly
+  dwarf the hands-on steps.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (headings in `font-serif`, set in `tailwind.config.js`; numbers in
+  tabular figures).
+- Screens follow the drawn spec screens' classes (`public/screens.css`):
+  pills, `list`/`list-row`, `sheet-head`, `strip`/`legend`/`steps`.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +153,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- No database tables and no new dependencies: the calculator is pure
+  browser maths (`public/bread/recipe.js`, unit-tested by
+  `test/recipe.test.js`), the server only serves the page.
+- All weights are grams; displayed grams are whole above 10 g and one
+  decimal below it (`formatGrams`).
+- Recipe data lives in one table, `BREADS` in `recipe.js`; the page
+  (`public/bread/app.js`) never hardcodes a number from it.

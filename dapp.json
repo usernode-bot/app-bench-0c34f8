@@ -2,5 +2,20 @@
   "icon": {
     "emoji": "🍞"
   },
+  "tests": [
+    {
+      "name": "Calculator renders",
+      "path": "/",
+      "expectText": "Total dough"
+    },
+    {
+      "id": "calculator.demo",
+      "name": "Staging demo shows the example choices",
+      "path": "/?demo=1",
+      "visual": true,
+      "expectText": "Staging demo",
+      "impact": ["public/**", "styles/**", "tailwind.config.js"]
+    }
+  ],
   "secrets": []
 }

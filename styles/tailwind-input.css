@@ -44,17 +44,19 @@
     --crust: 176 98 40; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;       /* the page: dark rye crust */
+    --surface: 34 29 25;      /* lists, cards, fields */
+    --raised: 46 40 34;       /* hovers, badges */
+    --fg: 242 236 226;        /* text: flour white */
+    --muted: 186 172 156;     /* secondary text */
+    --line: 64 56 48;         /* borders, dividers, skeletons */
+    --accent: 226 170 98;     /* the one accent: baked gold */
+    --on-accent: 40 24 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 226 170 98;      /* the keyboard focus ring */
+    --crumb: 110 90 55;       /* the timeline's rising */
+    --crust: 214 128 64;      /* the timeline's baking */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
