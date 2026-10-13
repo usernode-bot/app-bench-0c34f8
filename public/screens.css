@@ -1,0 +1,144 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+main {max-width:28rem;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:28px}
+
+.serif {font-family:ui-serif,"New York",Georgia,serif}
+
+.text-title {font-size:1.75rem;line-height:2.25rem;font-weight:700}
+
+.text-heading {font-size:1.25rem;line-height:1.75rem;font-weight:600}
+
+.text-small {font-size:.875rem;line-height:1.25rem}
+
+.muted {color:rgb(var(--muted))}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;list-style:none}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.field {display:block;min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font:inherit;color:rgb(var(--fg))}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-weight:500}
+
+svg.i {width:24px;height:24px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.breads {display:flex;flex-wrap:wrap;gap:8px}
+
+.bread {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px 8px 10px;border:1px solid rgb(var(--line));border-radius:999px;background:rgb(var(--surface));font:inherit;color:rgb(var(--fg))}
+
+.bread svg {color:rgb(var(--muted))}
+
+.bread[aria-pressed=true] {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500}
+
+.bread[aria-pressed=true] svg {color:rgb(var(--on-accent))}
+
+.set {flex-direction:column;align-items:stretch;gap:6px}
+
+.set-head {display:flex;justify-content:space-between;align-items:baseline}
+
+.val {font-weight:600;font-variant-numeric:tabular-nums}
+
+input[type=range] {width:100%;height:44px;accent-color:rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between}
+
+.stepper {display:flex;align-items:center;gap:4px;margin-left:auto}
+
+.stepper .n {min-width:40px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+
+.size {display:flex;align-items:center;gap:8px}
+
+.size label {flex:1}
+
+.size .field {width:110px;text-align:right;font-variant-numeric:tabular-nums}
+
+.presets {display:flex;flex-wrap:wrap;gap:6px}
+
+.preset {min-height:36px;padding:6px 12px;border:1px solid rgb(var(--line));border-radius:999px;background:rgb(var(--raised));font:inherit;font-size:.875rem;color:rgb(var(--fg))}
+
+.preset[aria-pressed=true] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent))}
+
+.sheet-head {display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 10px}
+
+.ing svg {color:rgb(var(--accent))}
+
+.ing .name {flex:1;min-width:0;display:flex;flex-direction:column}
+
+.ing .pct {width:48px;text-align:right;font-size:.875rem;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
+
+.ing .g {width:76px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+
+.total {background:rgb(var(--raised))}
+
+.total .name {font-weight:600}
+
+.note {padding:8px 4px 0}
+
+.strip {display:flex;height:10px;gap:2px;border-radius:999px;overflow:hidden;margin:4px 0 6px}
+
+.s-hand {background:rgb(var(--line))}
+
+.s-rise {background:rgb(var(--crumb))}
+
+.s-bake {background:rgb(var(--crust))}
+
+.legend {display:flex;gap:14px;font-size:.875rem;color:rgb(var(--muted))}
+
+.legend span {display:inline-flex;align-items:center;gap:6px}
+
+.legend i {width:10px;height:10px;border-radius:3px;display:inline-block}
+
+.steps {list-style:none;margin-top:14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:4px 16px}
+
+.step {display:grid;grid-template-columns:20px 1fr auto;gap:0 12px;padding:12px 0}
+
+.step+.step {border-top:1px solid rgb(var(--line))}
+
+.dot {width:12px;height:12px;border-radius:50%;margin:6px 4px 0;border:2px solid rgb(var(--muted))}
+
+.dot.rise {background:rgb(var(--crumb));border-color:rgb(var(--crust))}
+
+.dot.bake {background:rgb(var(--crust));border-color:rgb(var(--crust))}
+
+.step b {font-weight:600}
+
+.dur {text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.oven {display:inline-block;margin-top:4px;padding:2px 8px;border-radius:6px;background:rgb(var(--raised));font-size:.875rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+.f15 {flex:15}
+
+.f20 {flex:20}
+
+.f30 {flex:30}
+
+.f45 {flex:45}
+
+.f60 {flex:60}
+
+.f270 {flex:270}
+
+.f720 {flex:720}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.f10 {flex:10}
