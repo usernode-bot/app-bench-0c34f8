@@ -161,28 +161,35 @@
   }
   .gauge-input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    @apply h-7 w-7 rounded-full border-[3px] border-accent bg-surface;
+    /* border-style and box-sizing by hand: the preflight reset only reaches
+       *,::before,::after, not this pseudo-element, so border-width alone
+       draws no ring and content-box would add the border outside 28 px. */
+    box-sizing: border-box;
+    @apply h-7 w-7 rounded-full border-[3px] border-solid border-accent bg-surface;
   }
   .gauge-input::-moz-range-thumb {
-    @apply h-7 w-7 rounded-full border-[3px] border-accent bg-surface;
+    box-sizing: border-box;
+    @apply h-7 w-7 rounded-full border-[3px] border-solid border-accent bg-surface;
   }
   .gauge-input:focus-visible::-webkit-slider-thumb,
   .gauge-input:focus-visible::-moz-range-thumb {
     box-shadow: 0 0 0 2px rgb(var(--ground)), 0 0 0 4px rgb(var(--focus));
   }
 
-  /* Minus/plus steppers: a 44 px button either side of an editable number. */
+  /* Minus/plus steppers: a 44 px button either side of an editable number.
+     The border sits outside the 44 px, so the controls themselves measure
+     the full 44 px (min-h, not a fixed row height, or the border eats it). */
   .stepper {
-    @apply flex h-11 items-stretch overflow-hidden rounded-lg border border-line bg-surface;
+    @apply flex min-h-11 items-stretch overflow-hidden rounded-lg border border-line bg-surface;
   }
   .stepper button {
-    @apply flex w-11 shrink-0 items-center justify-center bg-raised text-heading text-fg
+    @apply flex min-h-11 w-11 shrink-0 items-center justify-center bg-raised text-heading text-fg
       hover:bg-line focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2
       focus-visible:ring-inset focus-visible:ring-focus disabled:cursor-not-allowed
       disabled:opacity-40 disabled:hover:bg-raised;
   }
   .stepper input {
-    @apply min-w-0 flex-1 border-0 bg-transparent text-center text-body font-semibold tabular-nums text-fg
+    @apply min-h-11 min-w-0 flex-1 border-0 bg-transparent text-center text-body font-semibold tabular-nums text-fg
       focus:outline-none focus:ring-2 focus:ring-inset focus:ring-focus;
     -moz-appearance: textfield;
     appearance: textfield;
