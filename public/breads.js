@@ -111,9 +111,11 @@ export const KINDS = {
   },
 };
 
-/** Grams on a baker's scale: whole grams from 10 g up, 0.1 g below. */
+/** Grams on a baker's scale: whole grams from 100 g up, 0.1 g below — the
+    spec's drawn formula card shows salt (18.2 g) to a tenth while flour,
+    water and starter stay whole. */
 export function fmtGrams(g) {
-  return g >= 10 ? String(Math.round(g)) : (Math.round(g * 10) / 10).toFixed(1);
+  return g >= 100 ? String(Math.round(g)) : (Math.round(g * 10) / 10).toFixed(1);
 }
 
 /**
