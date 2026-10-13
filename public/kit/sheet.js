@@ -165,13 +165,13 @@ function fieldRow(f, value) {
   if (f.type === 'choices') {
     const min = f.min ?? 2;
     const list = h('div', { class: 'kit-choices' });
-    const more = h('button', { type: 'button', class: 'btn-secondary self-start', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, 'Add an option');
+    const more = h('button', { type: 'button', class: 'btn-secondary w-full', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, 'Add an answer');
     const addChoice = (text) => {
       const n = inputs.length + 1;
       const hintText = Array.isArray(f.placeholder) ? f.placeholder[n - 1] : f.placeholder;
-      const box = input({ value: text || null, placeholder: hintText || null, 'aria-label': `${f.label}, option ${n}`, 'aria-describedby': described });
+      const box = input({ value: text || null, placeholder: hintText || null, 'aria-label': `${f.label}, answer ${n}`, 'aria-describedby': described });
       inputs.push(box);
-      const remove = h('button', { type: 'button', class: 'kit-icon-button', 'aria-label': `Remove option ${n}`, on: { click: () => {
+      const remove = h('button', { type: 'button', class: 'kit-icon-button', 'aria-label': `Remove answer ${n}`, on: { click: () => {
         const at = inputs.indexOf(box);
         inputs = inputs.filter((x) => x !== box);
         wrap.remove();
@@ -184,9 +184,9 @@ function fieldRow(f, value) {
     };
     const sync = () => {
       inputs.forEach((x, i) => {
-        x.setAttribute('aria-label', `${f.label}, option ${i + 1}`);
+        x.setAttribute('aria-label', `${f.label}, answer ${i + 1}`);
         x.nextSibling.hidden = inputs.length <= min;
-        x.nextSibling.setAttribute('aria-label', `Remove option ${i + 1}`);
+        x.nextSibling.setAttribute('aria-label', `Remove answer ${i + 1}`);
       });
       more.hidden = inputs.length >= (f.max || 6);
     };
@@ -200,8 +200,8 @@ function fieldRow(f, value) {
       check: () => {
         const t = texts();
         const need = t.length ? Math.max(min, 2) : min;
-        const msg = t.length < need ? `Give at least ${Math.max(min, 2)} options.`
-          : new Set(t.map((x) => x.toLowerCase())).size < t.length ? 'Each option needs a different name.' : '';
+        const msg = t.length < need ? `Give at least ${Math.max(min, 2)} answers.`
+          : new Set(t.map((x) => x.toLowerCase())).size < t.length ? 'Each answer needs a different name.' : '';
         return show(msg, inputs);
       },
     };

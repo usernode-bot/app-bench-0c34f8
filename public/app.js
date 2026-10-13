@@ -35,7 +35,7 @@ const list = createStates(listBox, {
   empty: {
     title: 'No questions yet',
     text: 'Post the first thing the club should decide.',
-    action: { label: 'Post a question', onClick: openPostSheet, primary: true },
+    action: { label: 'Post a question', onClick: openPostSheet },
   },
   error: {
     title: 'Questions could not be loaded',
@@ -81,7 +81,9 @@ async function loadList(content) {
 function openPostSheet() {
   openFormSheet({
     title: 'Post a question',
-    submitLabel: 'Post question',
+    submitLabel: 'Post a question',
+    // Two empty answer fields to start with; leave them empty for Agree and Disagree.
+    values: { options: ['', ''] },
     savedMessage: 'Question posted',
     fields: [
       { name: 'title', label: 'Question', type: 'text', required: true, max: 120, placeholder: 'e.g. Where should we meet in November?' },

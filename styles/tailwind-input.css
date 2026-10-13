@@ -218,6 +218,8 @@
   .kit-choice { @apply flex items-center gap-1; }
   .kit-switch { @apply flex min-h-11 cursor-pointer items-center justify-between gap-3 accent-accent; }
   .kit-form-actions { @apply flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end; }
+  /* Cancel lines up with the submit button above it on a phone. */
+  .kit-form-actions > .btn-secondary { @apply w-full sm:w-auto; }
 
   /* The sheet: the panel sits in the native .un-sheet or .un-modal, or in
      .kit-sheet without the native kit; in a sheet the body scrolls. */

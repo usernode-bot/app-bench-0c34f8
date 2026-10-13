@@ -22,6 +22,11 @@ body {
   padding: 20px 16px 32px;
 }
 
+/* On a desktop width the column stays phone-shaped: capped and centred. */
+@media (min-width: 640px) {
+  .app {max-width:640px;margin-left:auto;margin-right:auto}
+}
+
 .head {display:flex;align-items:center;gap:12px}
 
 .mark {width:40px;height:40px;border-radius:10px;background:rgb(var(--raised));color:rgb(var(--accent));display:flex;align-items:center;justify-content:center}
@@ -122,4 +127,7 @@ body {
 
 .field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--fg))}
 
-.btn-secondary {align-self:flex-end;min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-weight:500}
+.btn-secondary {min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-weight:500}
+
+/* The composer's Post comment button sits at the end of its row. */
+.composer .btn-secondary,.kit-composer-actions .btn-secondary {align-self:flex-end}
