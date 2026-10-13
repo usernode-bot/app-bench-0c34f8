@@ -58,22 +58,10 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+The screen this app ships was drawn by the first version's spec and put
+in `public/index.html` by the platform (`usernode-spec-screens@1`, styled
+by `public/screens.css`). It is the real app now, not placeholder: change
+it where behaviour needs it, do not redraw it.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
@@ -103,14 +91,15 @@ shared understanding of what this app is for)_
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: toasted-crust brown (light `138 74 28`, dark
+  `226 160 94`); neutrals: warm greys on a warm-white / dark-toast ground;
+  bread colours on top of the kit: crust gold (`crust`), crumb brown
+  (`crumb`), water blue (`water`) — the dough's own palette, used only in
+  the loaf drawing and the ingredient dots.
+- **Signature element:** the loaf cross-section — a cut-open loaf whose
+  dashed blue water line rides up as hydration climbs, with the "Water N%"
+  label travelling with it and the total dough weight in the crumb.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

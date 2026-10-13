@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "calculator-demo-renders",
+      "name": "Calculator renders the loaf and ingredients with demo data",
+      "path": "/?demo=1",
+      "expectSelector": "[data-loaf]",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**",
+        "server.js"
+      ]
+    },
+    {
+      "id": "calculator-demo-ingredients",
+      "name": "Ingredient rows render with demo data",
+      "path": "/?demo=1",
+      "expectSelector": "[data-ingredients] .list-row"
+    }
+  ]
 }

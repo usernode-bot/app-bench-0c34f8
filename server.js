@@ -35,7 +35,7 @@ const GUEST_PUBLIC_KEY = (process.env.USERNODE_GUEST_JWT_PUBLIC_KEY || '')
 // Paths that stay open without authentication. Add a path here (and add it
 // with `app.get`/`app.post` below) if you deliberately want it public.
 // Everything else requires a valid platform-issued JWT.
-const PUBLIC_API_PATHS = new Set(['/health']);
+const PUBLIC_API_PATHS = new Set(['/health', '/api/demo']);
 
 app.use(express.json());
 
@@ -146,6 +146,31 @@ app.use((req, res, next) => {
 });
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Staging demo settings for the calculator (?demo=1), per "Staging demo
+// data" in the platform conventions: obviously fake, read-only, and
+// returned only from staging. Nothing is stored; the browser keeps them in
+// memory for the session. The path is in PUBLIC_API_PATHS because the data
+// is made up and meant for any staging viewer, and the page is often opened
+// without a token in its URL (guest views, proposal checks) — the app's
+// fetch then goes out tokenless and must still reach it.
+const DEMO_SETTINGS = {
+  kind: 'sourdough',
+  byKind: {
+    sourdough: { hydration: 75, count: 2, size: 900 },
+    bagels: { hydration: 60, count: 12, size: 115 },
+    sourdoughBagels: { hydration: 60, count: 8, size: 115 },
+    rye: { hydration: 82, count: 1, size: 800 },
+    sandwich: { hydration: 65, count: 1, size: 900 },
+  },
+};
+
+app.get('/api/demo', (req, res) => {
+  if (IS_STAGING && req.query.demo === '1') {
+    return res.json({ demo: true, settings: DEMO_SETTINGS });
+  }
+  return res.json({ demo: false });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes

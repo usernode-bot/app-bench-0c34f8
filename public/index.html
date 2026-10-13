@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍞</text></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -126,12 +126,12 @@
 
       <section>
         <p class="section-label">Bread</p>
-        <div class="kinds" role="radiogroup">
-          <div class="kind" role="radio" aria-checked="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 16c0-5 4-9 9-9s9 4 9 9"/><path d="M3 16h18"/><path d="M9 9.5l2 2.5M13 8.5l2 2.5"/></svg>Sourdough</div>
-          <div class="kind" role="radio" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="6.5"/><ellipse cx="12" cy="13" rx="3" ry="2"/></svg>Bagels</div>
-          <div class="kind" role="radio" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="6.5"/><ellipse cx="12" cy="13" rx="3" ry="2"/><path d="M5.5 9l1.5 1.5M17 8.5l1.2 1.6"/></svg>Sourdough bagels</div>
-          <div class="kind" role="radio" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 15c0-4 4-7 9-7s9 3 9 7-4 3-9 3-9 1-9-3z"/><circle cx="8" cy="12" r=".6"/><circle cx="12" cy="11" r=".6"/><circle cx="16" cy="12" r=".6"/><circle cx="11" cy="14.5" r=".6"/></svg>Rye</div>
-          <div class="kind" role="radio" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 19V11a4 4 0 0 1 3-3.9A4 4 0 0 1 12 5a4 4 0 0 1 4 2.1A4 4 0 0 1 19 11v8z"/><path d="M5 19h14"/></svg>Sandwich loaf</div>
+        <div class="kinds" role="radiogroup" aria-label="Bread kind">
+          <div class="kind" role="radio" data-kind="sourdough" aria-checked="true" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 16c0-5 4-9 9-9s9 4 9 9"/><path d="M3 16h18"/><path d="M9 9.5l2 2.5M13 8.5l2 2.5"/></svg>Sourdough</div>
+          <div class="kind" role="radio" data-kind="bagels" aria-checked="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="6.5"/><ellipse cx="12" cy="13" rx="3" ry="2"/></svg>Bagels</div>
+          <div class="kind" role="radio" data-kind="sourdoughBagels" aria-checked="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="6.5"/><ellipse cx="12" cy="13" rx="3" ry="2"/><path d="M5.5 9l1.5 1.5M17 8.5l1.2 1.6"/></svg>Sourdough bagels</div>
+          <div class="kind" role="radio" data-kind="rye" aria-checked="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 15c0-4 4-7 9-7s9 3 9 7-4 3-9 3-9 1-9-3z"/><circle cx="8" cy="12" r=".6"/><circle cx="12" cy="11" r=".6"/><circle cx="16" cy="12" r=".6"/><circle cx="11" cy="14.5" r=".6"/></svg>Rye</div>
+          <div class="kind" role="radio" data-kind="sandwich" aria-checked="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 19V11a4 4 0 0 1 3-3.9A4 4 0 0 1 12 5a4 4 0 0 1 4 2.1A4 4 0 0 1 19 11v8z"/><path d="M5 19h14"/></svg>Sandwich loaf</div>
         </div>
       </section>
 
@@ -139,39 +139,51 @@
         <p class="section-label">Dough</p>
         <div class="card">
           <div class="setting">
-            <div class="srow"><span class="lbl">Hydration</span><span class="val">75%</span></div>
-            <div class="range"><div class="track"></div><div class="fill"></div><div class="thumb"></div></div>
+            <div class="srow"><span class="lbl" id="hydrationLabel">Hydration</span><span class="val" id="hydrationVal">75%</span></div>
+            <input type="range" id="hydration" class="range" min="60" max="90" step="1" value="75" aria-labelledby="hydrationLabel">
             <div class="ends"><span>60% stiff</span><span>90% very wet</span></div>
           </div>
           <div class="setting">
-            <div class="inline"><div><div class="lbl">Loaves</div><div class="hint">How many to bake</div></div>
-              <div class="stepper"><button aria-label="One fewer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><output>2</output><button aria-label="One more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div>
+            <div class="inline"><div><div class="lbl" id="countLabel">Loaves</div><div class="hint">How many to bake</div></div>
+              <div class="stepper"><button id="countMinus" aria-label="One fewer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><output id="countVal" aria-live="polite">2</output><button id="countPlus" aria-label="One more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div>
             </div>
           </div>
           <div class="setting">
-            <div class="srow"><span class="lbl">Dough per loaf</span><span class="val">900 g</span></div>
-            <div class="seg" role="radiogroup"><span aria-checked="false">500 g</span><span aria-checked="false">800 g</span><span aria-checked="true">900 g</span><span aria-checked="false">Other</span></div>
+            <div class="srow"><span class="lbl" id="sizeLabel">Dough per loaf</span><span class="val" id="sizeVal">900 g</span></div>
+            <div class="seg" role="radiogroup" aria-label="Dough size">
+              <span role="radio" aria-checked="false" tabindex="-1">500 g</span>
+              <span role="radio" aria-checked="false" tabindex="-1">800 g</span>
+              <span role="radio" aria-checked="true" tabindex="0">900 g</span>
+              <span role="radio" aria-checked="false" tabindex="-1">Other</span>
+            </div>
+            <div id="otherWrap" hidden>
+              <label class="hint" for="sizeOther">Grams each</label>
+              <input type="number" id="sizeOther" class="field" inputmode="numeric" placeholder="e.g. 750">
+              <p class="hint" id="sizeMsg" hidden>Enter a size between 50 and 3,000 g</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="loafwrap">
-        <div class="totals"><h2>Your recipe</h2><span class="hint">2 loaves</span></div>
-        <svg class="loaf" viewBox="0 0 342 158" role="img" aria-label="Water is 75% of the flour by weight">
-          <path d="M14 140V60C14 28 82 12 171 12s157 16 157 48v80q0 6-6 6H20q-6 0-6-6z" fill="rgb(246 234 210)"/>
-          <rect x="17" y="72" width="308" height="71" rx="3" fill="rgb(72 136 190)" fill-opacity=".28"/>
-          <line x1="17" y1="72" x2="325" y2="72" stroke="rgb(72 136 190)" stroke-width="2" stroke-dasharray="5 4"/>
-          <path d="M14 140V60C14 28 82 12 171 12s157 16 157 48v80q0 6-6 6H20q-6 0-6-6z" fill="none" stroke="rgb(196 132 52)" stroke-width="6" stroke-linejoin="round"/>
-          <path d="M118 24l18 10M162 20l18 10M206 24l18 10" stroke="rgb(196 132 52)" stroke-width="3" stroke-linecap="round"/>
-          <text x="32" y="56" fill="rgb(33 28 24)">Flour 100%</text>
-          <text x="32" y="94" fill="rgb(33 28 24)">Water 75%</text>
-          <text x="310" y="132" text-anchor="end" fill="rgb(99 91 84)" font-weight="500">1,800 g of dough</text>
+      <div id="states" hidden></div>
+
+      <section class="loafwrap" id="loafSec">
+        <div class="totals"><h2>Your recipe</h2><span class="hint" id="loavesHint">2 loaves</span></div>
+        <svg class="loaf" id="loafSvg" data-loaf viewBox="0 0 342 158" role="img" aria-label="Water is 75% of the flour by weight">
+          <path d="M14 140V60C14 28 82 12 171 12s157 16 157 48v80q0 6-6 6H20q-6 0-6-6z" fill="rgb(var(--crumb))"/>
+          <rect id="loafWater" x="17" y="72" width="308" height="71" rx="3" fill="rgb(var(--water))" fill-opacity=".28"/>
+          <line id="loafLine" x1="17" y1="72" x2="325" y2="72" stroke="rgb(var(--water))" stroke-width="2" stroke-dasharray="5 4"/>
+          <path d="M14 140V60C14 28 82 12 171 12s157 16 157 48v80q0 6-6 6H20q-6 0-6-6z" fill="none" stroke="rgb(var(--crust))" stroke-width="6" stroke-linejoin="round"/>
+          <path d="M118 24l18 10M162 20l18 10M206 24l18 10" stroke="rgb(var(--crust))" stroke-width="3" stroke-linecap="round"/>
+          <text x="32" y="56" fill="rgb(var(--fg))">Flour 100%</text>
+          <text id="loafWaterLabel" x="32" y="94" fill="rgb(var(--fg))">Water 75%</text>
+          <text id="loafTotal" x="310" y="132" text-anchor="end" fill="rgb(var(--muted))" font-weight="500">1,800 g of dough</text>
         </svg>
       </section>
 
-      <section>
-        <p class="section-label">Ingredients for 2 loaves</p>
-        <div class="list">
+      <section id="ingSec" data-ingredients>
+        <p class="section-label" id="ingLabel">Ingredients for 2 loaves</p>
+        <div class="list" id="ingredientsList">
           <div class="list-row"><span class="dot d-flour"></span><div class="ing"><b>Bread flour</b><small>Strong white</small></div><span class="g">915<em>g</em></span></div>
           <div class="list-row"><span class="dot d-water"></span><div class="ing"><b>Water</b><small>Lukewarm</small></div><span class="g">661<em>g</em></span></div>
           <div class="list-row"><span class="dot d-lev"></span><div class="ing"><b>Active starter</b><small>Fed and bubbly, equal flour and water</small></div><span class="g">203<em>g</em></span></div>
@@ -180,9 +192,9 @@
         <p class="hint foot">Hydration counts the flour and water inside the starter too.</p>
       </section>
 
-      <section>
+      <section id="riseSec">
         <p class="section-label">Rise</p>
-        <div class="list">
+        <div class="list" id="riseList">
           <div class="list-row step"><span class="num">1</span><div class="ing"><b>Mix and rest</b><small>Flour and water first, then starter and salt</small></div><span class="dur">45 min</span></div>
           <div class="list-row step"><span class="num">2</span><div class="ing"><b>Bulk rise</b><small>Stretch and fold every 30 min for 2 h, until about half again as big</small></div><span class="dur">4 to 5 h</span></div>
           <div class="list-row step"><span class="num">3</span><div class="ing"><b>Shape</b><small>Pre-shape, rest 20 min, shape tight</small></div><span class="dur">30 min</span></div>
@@ -190,19 +202,20 @@
         </div>
       </section>
 
-      <section>
+      <section id="bakeSec">
         <p class="section-label">Bake</p>
         <div class="list">
           <div class="bake">
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg><span class="big">250 °C</span><span class="hint">480 °F, preheat 45 min</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 3h4"/></svg><span class="big">45 min</span><span class="hint">20 min lid on, 25 min lid off</span></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg><span class="big" id="bakeTemp">250 °C</span><span class="hint" id="bakeTempHint">480 °F, preheat 45 min</span></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 3h4"/></svg><span class="big" id="bakeTime">45 min</span><span class="hint" id="bakeSplit">20 min lid on, 25 min lid off</span></div>
           </div>
-          <p class="note">In a Dutch oven, one loaf at a time. Done when deep brown and hollow-sounding underneath.</p>
+          <p class="note" id="bakeNote">In a Dutch oven, one loaf at a time. Done when deep brown and hollow-sounding underneath.</p>
         </div>
       </section>
     </div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

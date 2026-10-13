@@ -35,27 +35,30 @@
     --fg: 33 28 24;           /* text */
     --muted: 99 91 84;        /* secondary text */
     --line: 228 224 219;      /* borders, dividers, skeletons */
-    --accent: 138 74 28;     /* the one accent */
+    --accent: 138 74 28;     /* the one accent: toasted crust brown */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --crust: 196 132 52; /* from the spec's screens */
-    --crumb: 246 234 210; /* from the spec's screens */
-    --water: 72 136 190; /* from the spec's screens */
+    --focus: 138 74 28;      /* the keyboard focus ring: the accent */
+    --crust: 196 132 52; /* loaf outline, scoring, levain dots */
+    --crumb: 246 234 210; /* the loaf's inside */
+    --water: 72 136 190; /* the hydration line and wash */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 20 18 16;       /* the page: dark counter top */
+    --surface: 32 29 26;      /* lists, cards, fields */
+    --raised: 45 41 37;       /* hovers, badges */
+    --fg: 242 238 233;        /* text */
+    --muted: 176 168 158;     /* secondary text */
+    --line: 66 61 56;         /* borders, dividers, skeletons */
+    --accent: 226 160 94;     /* the one accent: baked crust */
+    --on-accent: 40 22 6;     /* text on the accent */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 226 160 94;      /* the keyboard focus ring: the accent */
+    --crust: 214 160 82;
+    --crumb: 92 74 52;
+    --water: 96 160 214;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
