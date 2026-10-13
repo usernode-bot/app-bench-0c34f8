@@ -3,14 +3,33 @@
 import { h, clear, uid, timeAgo } from './dom.js';
 import { toast } from './native.js';
 
+/** The three-dot mark of a More button, in the text colour. */
+function dots() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', fill: 'currentColor', 'aria-hidden': 'true' })) {
+    svg.setAttribute(k, v);
+  }
+  for (const cx of [5, 12, 19]) {
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', String(cx));
+    circle.setAttribute('cy', '12');
+    circle.setAttribute('r', '1.6');
+    svg.appendChild(circle);
+  }
+  return svg;
+}
+
 /**
- * renderComments(el, { comments: [{ id, author, body, createdAt }], onAdd, label, placeholder, max, emptyText })
+ * renderComments(el, { comments: [{ id, author, body, createdAt }], onAdd, label, placeholder, max, emptyText, onReport })
  * onAdd(text) saves and resolves with the saved comment.
+ * onReport(comment, button), when given, puts a 44 px More button on every
+ * comment row (report, and anything else a row offers).
  * Returns { add(comment) } for comments that arrive another way.
  */
 export function renderComments(el, {
   comments = [], onAdd, label = 'Add a comment', placeholder = '', max = 1000,
-  emptyText = 'No comments yet.', postLabel = 'Post comment',
+  emptyText = 'No comments yet.', postLabel = 'Post comment', onReport,
 }) {
   const id = uid('kit-comment');
   const list = h('ul', { class: 'un-group kit-group', 'aria-live': 'polite', 'aria-relevant': 'additions' });
@@ -24,11 +43,16 @@ export function renderComments(el, {
   let busy = false;
 
   function row(c) {
+    const more = onReport ? h('button', {
+      type: 'button', class: 'kit-icon-button', 'aria-label': 'More for this comment',
+      on: { click: () => onReport(c, more) },
+    }, dots()) : null;
     return h('li', { class: 'un-group-row list-row kit-comment', 'data-id': c.id },
       h('p', { class: 'kit-comment-meta' },
         h('span', { class: 'kit-comment-author' }, c.author || 'Someone'),
         c.createdAt ? h('time', { datetime: new Date(c.createdAt).toISOString() }, timeAgo(c.createdAt)) : null),
-      h('p', { class: 'kit-comment-body' }, c.body));
+      h('p', { class: 'kit-comment-body' }, c.body),
+      more);
   }
   function add(c) {
     list.append(row(c));

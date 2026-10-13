@@ -154,6 +154,67 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// Club Votes: the questions the club decides, one vote each and the talk
+// under them. Mounted after the auth middleware (guests may read, every
+// write needs an account) and before the static files. The demo config is
+// the staging ?demo=1 board: thirteen made-up questions, three of them
+// already decided, plus the viewer's own question, their vote on two and
+// one comment of theirs (see the viewer gifts in kit/server.js).
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  options: ['Agree', 'Disagree'],
+  demo: {
+    bodies: [
+      'Details on the noticeboard if you want the background.',
+      'Shout if any of this needs changing before the vote.',
+    ],
+    comments: [
+      'Riverside has the long tables, which helps for the map night.',
+      'Café Lindo is closer for those of us coming by bus.',
+      'Thursdays clash with my choir, otherwise fine.',
+      'I can bring the key on the first week.',
+      'Happy to chip in for petrol.',
+      'The garden bed gets sun until four, I checked.',
+      'Can we keep the quiz on Fridays? It works.',
+      'Adding my vote from the sidelines.',
+    ],
+    titles: [
+      'Move meetings to Thursday evenings?',
+      {
+        title: 'Where should we meet in November?',
+        body: 'The library room is booked on two of our dates. Pick the place that works best for you.',
+        options: ['Riverside hall', 'Café Lindo, back room', 'Library room'],
+      },
+      'Start a shared reading list for the club?',
+      'Buy a projector for film nights?',
+      { title: 'Who should coordinate the winter raffle?', options: ['Dev', 'Elif', 'Farah', 'Anyone else who volunteers'] },
+      { title: 'How much should annual membership cost?', options: ['Keep it free', '£5 a year', '£10 a year'] },
+      { title: 'Pick a colour for the club banner', options: ['Forest green', 'Ballot blue', 'Marigold yellow'] },
+      'Plant a club bed in the community garden?',
+      'Replace the worn-out noticeboard in the hall?',
+      { title: 'What should the club enter in the town parade?', options: ['A walking float', 'A banner and drums group', 'Nothing this year'] },
+      'Swap the weekly quiz to the first Saturday?',
+      { title: 'Date for the spring cleanup', options: ['Saturday 12 April', 'Sunday 13 April', 'Saturday 19 April'] },
+      { title: 'Theme for the summer barbecue', options: ['Beach party', 'Country fair', 'Round the world'] },
+    ],
+    // The club has already settled these; the outcome is whichever option
+    // actually led ("leading"), decided daysAgo days before "now".
+    decided: [
+      { id: 900007, choice: 'leading', daysAgo: 6 },
+      { id: 900012, choice: 'leading', daysAgo: 13 },
+      { id: 900013, choice: 'leading', daysAgo: 26 },
+    ],
+    viewer: {
+      question: {
+        title: 'What should we do for the end of year?',
+        body: 'Bring ideas — we will pick one and put it in the diary.',
+        options: ['Board game night', 'Potluck picnic', 'Movie marathon'],
+      },
+      comment: 'Riverside for me. I can bring the key on the first week.',
+    },
+  },
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +252,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await questions.migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
+
+// SIGTERM (the platform stopping the container) and SIGINT: stop accepting
+// new requests, give the running ones three seconds to finish, then close
+// the pool and exit.
+let closing = false;
+async function shutdown(signal) {
+  if (closing) return;
+  closing = true;
+  console.log(`${signal}: finishing what is running, then closing`);
+  if (server) server.close();
+  setTimeout(() => process.exit(0), 3000).unref();
+  try {
+    await pool.end();
+  } catch {}
+  process.exit(0);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

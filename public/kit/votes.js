@@ -9,7 +9,7 @@ import { toast } from './native.js';
  * onVote(id or null) saves; it may resolve the saved { options, mine }.
  * layout: 'stack' or 'row'. Returns { update(state), state() }.
  */
-export function renderVotes(el, { options = [], mine = null, onVote, label = 'Vote', layout = 'stack', summary = true }) {
+export function renderVotes(el, { options = [], mine = null, onVote, label = 'Vote', layout = 'stack', summary = true, disabled = false }) {
   let state = { options, mine };
   let busy = false;
   const group = h('div', { class: layout === 'row' ? 'kit-votes kit-votes-row' : 'kit-votes', role: 'group', 'aria-label': label });
@@ -25,7 +25,7 @@ export function renderVotes(el, { options = [], mine = null, onVote, label = 'Vo
         fill: h('span', { class: 'kit-vote-fill', 'aria-hidden': 'true' }),
         count: h('span', { class: 'kit-vote-count' }),
       };
-      const button = h('button', { type: 'button', class: 'kit-vote', 'data-option': o.id, on: { click: () => pick(o.id) } },
+      const button = h('button', { type: 'button', class: 'kit-vote', 'data-option': o.id, disabled: disabled || null, on: { click: () => pick(o.id) } },
         parts.fill,
         h('span', { class: 'kit-vote-mark', 'aria-hidden': 'true' }, icon('check', 'h-4 w-4')),
         h('span', { class: 'kit-vote-label' }, o.label),
@@ -47,7 +47,7 @@ export function renderVotes(el, { options = [], mine = null, onVote, label = 'Vo
   }
 
   async function pick(id) {
-    if (busy) return;
+    if (busy || disabled) return;
     const before = state;
     state = applyVote(state, id);
     busy = true;

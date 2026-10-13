@@ -63,6 +63,10 @@ module.exports = {
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
+      // ui-rounded where the platform has it, system fonts otherwise.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+      },
     },
   },
   plugins: [],

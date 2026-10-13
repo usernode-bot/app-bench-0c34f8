@@ -95,22 +95,34 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a question —
+with two to six options, or none for an Agree/Disagree vote; everyone
+votes (one vote each, changeable or taken back by tapping again) and
+talks in comments under each question. The person who asked marks it
+decided, saying what the club picked: voting closes (the vote route
+answers 409), the question moves to Decided, comments stay open. Every
+question and comment carries a Report action in its More menu; reports
+go to moderation, and the app itself never hides anything.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** ballot blue accent (`--accent`, light 41 64 160 / dark
+  138 160 255) on warm paper greys; `--ballot` is the grey of the
+  non-leading tally slips.
+- **Signature element:** the ballot tally bar — one small slip per vote,
+  grouped by option, leading option(s) ballot blue and the rest
+  `--ballot` at 55%; above 24 votes the slips merge into one solid block
+  per option, as wide as its share. Under it, the standing line: "Riverside
+  hall leads with 5 of 9 votes", names "…are tied with 3 each", or "No
+  votes yet"; a decided question says "Decided: Forest green, 12 votes".
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  _(change their sizes in `tailwind.config.js` if you must, not their
+  number)_ — ui-rounded falling back to system-ui, counts in
+  tabular-nums.
+- Both looks required, as everywhere.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +150,19 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The screens the spec drew (`public/index.html` screen 1, and the
+  screen-2 template it once carried) are the app's markup: render data
+  into the drawn rows, don't redraw them. Screen 2's styles in
+  `public/screens.css` are scoped to `[data-spec-screen="2"]` so they
+  never touch screen 1.
+- `questions_reports` is marked `staging:private` — who reported what is
+  not for other previewers to see. Report tables get no foreign keys to
+  other private tables.
+- The app never sets `hidden_at`; that is moderation's column. Every read
+  (lists, counts included) skips hidden rows.
+- One vote per person per question (`questions_votes` primary key); a
+  decided question's vote route answers 409.
+- Demo data lives only in staging under `?demo=1`, ids from 900001,
+  written once (`ON CONFLICT DO NOTHING`), plus the viewer's own question
+  (900101), one comment (900201) and two gift votes, once per viewer
+  (`kit_demo_viewers`).

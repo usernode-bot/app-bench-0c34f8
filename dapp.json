@@ -2,5 +2,9 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    { "name": "The decision board loads", "path": "/", "expectText": "Post a question" },
+    { "name": "The demo board fills in", "path": "/?demo=1", "expectText": "Staging demo", "expectSelector": ".tally", "visual": true, "impact": ["public/**"] }
+  ]
 }

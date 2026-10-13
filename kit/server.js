@@ -39,10 +39,12 @@ function resource(app, pool, opts = {}) {
     }
   };
 
+  // Moderation-hidden rows (hidden_at) never show: not in lists, not in
+  // counts. The app itself never sets hidden_at; only moderation does.
   const ITEM = `SELECT i.*,
       COALESCE((SELECT json_object_agg(choice, n) FROM (SELECT choice, COUNT(*)::int AS n FROM ${V} v WHERE v.item_id = i.id GROUP BY choice) c), '{}') AS counts,
       (SELECT choice FROM ${V} v WHERE v.item_id = i.id AND v.user_id = $1::int) AS my_vote,
-      (SELECT COUNT(*)::int FROM ${C} c WHERE c.item_id = i.id) AS comment_count
+      (SELECT COUNT(*)::int FROM ${C} c WHERE c.item_id = i.id AND c.hidden_at IS NULL) AS comment_count
     FROM ${T} i`;
   const itemOut = (r, uid) => {
     const labels = Array.isArray(r.options) && r.options.length ? r.options : defaults;
@@ -50,11 +52,12 @@ function resource(app, pool, opts = {}) {
       id: r.id, title: r.title, body: r.body, category: r.category, author: r.author_name,
       byMe: uid != null && r.author_id === uid, createdAt: r.created_at, commentCount: r.comment_count,
       votes: { options: labels.map((label, k) => ({ id: k, label, count: Number(r.counts[k]) || 0 })), mine: r.my_vote ?? null },
+      decided: r.decided_at ? { at: r.decided_at, choice: labels[r.decided_choice] ?? null } : null,
     };
   };
   const commentOut = (c, uid) => ({ id: c.id, author: c.author_name, body: c.body, createdAt: c.created_at, byMe: uid != null && c.author_id === uid });
   async function one(id, uid) {
-    const { rows } = await pool.query(`${ITEM} WHERE i.id = $2`, [uid, id]);
+    const { rows } = await pool.query(`${ITEM} WHERE i.id = $2 AND i.hidden_at IS NULL`, [uid, id]);
     return rows[0] ? itemOut(rows[0], uid) : null;
   }
 
@@ -69,6 +72,16 @@ function resource(app, pool, opts = {}) {
       id SERIAL PRIMARY KEY, item_id INTEGER NOT NULL REFERENCES ${T}(id) ON DELETE CASCADE,
       author_id INTEGER NOT NULL, author_name TEXT NOT NULL, body TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS ${C}_item_idx ON ${C} (item_id, created_at)`);
+    await pool.query(`ALTER TABLE ${T} ADD COLUMN IF NOT EXISTS decided_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS decided_choice INTEGER, ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ`);
+    await pool.query(`ALTER TABLE ${C} ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ`);
+    // One report per person per question (or comment). It says who flagged
+    // what, so it is private: staging gets the schema only, never the rows.
+    await pool.query(`CREATE TABLE IF NOT EXISTS ${T}_reports (
+      id SERIAL PRIMARY KEY, item_id INTEGER NOT NULL REFERENCES ${T}(id) ON DELETE CASCADE,
+      comment_id INTEGER REFERENCES ${C}(id) ON DELETE CASCADE, reporter_id INTEGER NOT NULL, created_at TIMESTAMPTZ NOT NULL)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS ${T}_reports_once ON ${T}_reports (reporter_id, item_id, COALESCE(comment_id, 0))`);
+    await pool.query(`COMMENT ON TABLE ${T}_reports IS 'staging:private'`);
     await pool.query('CREATE TABLE IF NOT EXISTS kit_demo_viewers (resource TEXT NOT NULL, user_id INTEGER NOT NULL, PRIMARY KEY (resource, user_id))');
   }
 
@@ -87,12 +100,46 @@ function resource(app, pool, opts = {}) {
         rowsIn.flatMap((r) => r.votes.map((v) => ({ item_id: r.id, user_id: v.userId, choice: v.optionId, created_at: v.createdAt }))));
       await put(C, 'id int, item_id int, author_id int, author_name text, body text, created_at timestamptz',
         rowsIn.flatMap((r) => r.comments.map((c) => ({ id: c.id, item_id: r.id, author_id: c.authorId, author_name: c.author, body: c.body, created_at: c.createdAt }))));
+      // Questions the club has already settled: made-up outcomes, decided a
+      // few days before "now" ({ id, choice, daysAgo }). choice
+      // "leading" means whichever option actually led.
+      for (const d of opts.demo.decided || []) {
+        const counts = new Map();
+        for (const row of rowsIn) {
+          if (row.id !== d.id) continue;
+          for (const v of row.votes) counts.set(v.optionId, (counts.get(v.optionId) || 0) + 1);
+        }
+        let choice = d.choice;
+        if (choice === 'leading') {
+          choice = 0;
+          let best = -1;
+          for (const [opt, n] of [...counts].sort((a, b) => a[0] - b[0])) {
+            if (n > best) { choice = opt; best = n; }
+          }
+        }
+        await pool.query(`UPDATE ${T} SET decided_at = $2, decided_choice = $3 WHERE id = $1`,
+          [d.id, new Date(req.now.getTime() - (d.daysAgo || 3) * 86400000), choice]);
+      }
     }
     if (req.user) {
       const first = await pool.query('INSERT INTO kit_demo_viewers (resource, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING user_id', [T, viewer(req)]);
       if (first.rows.length) {
         await pool.query(`INSERT INTO ${V} (item_id, user_id, choice, created_at)
           SELECT id, $1, 0, $2 FROM ${T} WHERE id IN ($3, $4) ON CONFLICT DO NOTHING`, [viewer(req), req.now, DEMO_ID + 1, DEMO_ID + 4]);
+        // The viewer's own question to try the app with (they can mark it
+        // decided), and one comment of theirs on the first question.
+        const mine = opts.demo.viewer && opts.demo.viewer.question;
+        if (mine) {
+          await pool.query(`INSERT INTO ${T} (id, title, body, options, author_id, author_name, created_at)
+            VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7) ON CONFLICT DO NOTHING`,
+            [DEMO_ID + 100, mine.title, mine.body || '', JSON.stringify(mine.options || defaults), viewer(req), String(req.user.username || 'You'), req.now]);
+        }
+        const said = opts.demo.viewer && opts.demo.viewer.comment;
+        if (said) {
+          await pool.query(`INSERT INTO ${C} (id, item_id, author_id, author_name, body, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+            [DEMO_ID + 101, DEMO_ID, viewer(req), String(req.user.username || 'You'), said, new Date(req.now.getTime() - 3 * 3600000)]);
+        }
       }
     }
     return true;
@@ -100,7 +147,7 @@ function resource(app, pool, opts = {}) {
 
   app.get(base, route(false, async (req, res) => {
     const demo = await seedDemo(req);
-    const { rows } = await pool.query(`${ITEM} ORDER BY i.created_at DESC, i.id DESC LIMIT 200`, [viewer(req)]);
+    const { rows } = await pool.query(`${ITEM} WHERE i.hidden_at IS NULL ORDER BY i.created_at DESC, i.id DESC LIMIT 200`, [viewer(req)]);
     res.json({ items: rows.map((r) => itemOut(r, viewer(req))), demo });
   }));
 
@@ -109,7 +156,7 @@ function resource(app, pool, opts = {}) {
     const demo = await seedDemo(req);
     const item = id && await one(id, viewer(req));
     if (!item) return bad(res, 404, GONE);
-    const { rows } = await pool.query(`SELECT * FROM ${C} WHERE item_id = $1 ORDER BY created_at, id LIMIT 500`, [id]);
+    const { rows } = await pool.query(`SELECT * FROM ${C} WHERE item_id = $1 AND hidden_at IS NULL ORDER BY created_at, id LIMIT 500`, [id]);
     return res.json({ item, comments: rows.map((c) => commentOut(c, viewer(req))), demo });
   }));
 
@@ -137,6 +184,7 @@ function resource(app, pool, opts = {}) {
     const id = idOf(req);
     const item = id && await one(id, viewer(req));
     if (!item) return bad(res, 404, GONE);
+    if (item.decided) return bad(res, 409, 'This question is decided, so voting is closed.');
     const choice = (req.body || {}).option;
     if (choice === null) {
       await pool.query(`DELETE FROM ${V} WHERE item_id = $1 AND user_id = $2`, [id, viewer(req)]);
@@ -147,6 +195,43 @@ function resource(app, pool, opts = {}) {
       return bad(res, 400, 'Pick one of the options.');
     }
     return res.json({ item: await one(id, viewer(req)) });
+  }));
+
+  // Mark decided: the author says what the club picked, voting closes,
+  // comments stay open.
+  app.post(`${base}/:id/decide`, route(true, async (req, res) => {
+    const id = idOf(req);
+    const item = id && await one(id, viewer(req));
+    if (!item) return bad(res, 404, GONE);
+    if (!item.byMe) return bad(res, 403, 'Only the person who posted this can mark it decided.');
+    if (item.decided) return bad(res, 409, 'This question is already decided.');
+    const choice = (req.body || {}).choice;
+    if (!Number.isInteger(choice) || choice < 0 || choice >= item.votes.options.length) {
+      return bad(res, 400, 'Pick one of the options.');
+    }
+    await pool.query(`UPDATE ${T} SET decided_at = $2, decided_choice = $3 WHERE id = $1`, [id, req.now, choice]);
+    return res.json({ item: await one(id, viewer(req)) });
+  }));
+
+  // Report a question, or one of its comments ({ commentId }). One report
+  // per person per target; a repeat does nothing. Moderation reads the
+  // reports table and hides what breaks the rules (hidden_at) — this app
+  // never hides anything itself.
+  app.post(`${base}/:id/report`, route(true, async (req, res) => {
+    const id = idOf(req);
+    const item = id && await one(id, viewer(req));
+    if (!item) return bad(res, 404, GONE);
+    const raw = (req.body || {}).commentId;
+    let commentId = null;
+    if (raw != null) {
+      const { rows } = await pool.query(`SELECT 1 FROM ${C} WHERE id = $1 AND item_id = $2 AND hidden_at IS NULL`,
+        [Number(raw), id]);
+      if (!rows.length) return bad(res, 404, GONE);
+      commentId = Number(raw);
+    }
+    await pool.query(`INSERT INTO ${T}_reports (item_id, comment_id, reporter_id, created_at) VALUES ($1, $2, $3, $4)
+      ON CONFLICT DO NOTHING`, [id, commentId, viewer(req), req.now]);
+    return res.json({ ok: true });
   }));
 
   app.post(`${base}/:id/comments`, route(true, async (req, res) => {

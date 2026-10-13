@@ -74,9 +74,10 @@
 
 .chev {width:20px;height:20px;color:rgb(var(--muted));flex:none}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Every selector is
+   scoped to the question screen's root so none of it touches screen 1. */
 
-.app {
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font-family: ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -85,68 +86,77 @@
   box-sizing: border-box;
 }
 
-.bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+[data-spec-screen="2"] .bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 
-.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-size:15px;font-weight:500}
+[data-spec-screen="2"] .btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-size:15px;font-weight:500;cursor:pointer}
 
-.btn-secondary svg,.kit-icon-button svg {width:20px;height:20px}
+[data-spec-screen="2"] .btn-secondary svg,[data-spec-screen="2"] .kit-icon-button svg {width:20px;height:20px}
 
-.kit-icon-button {display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:10px;background:none;color:rgb(var(--muted))}
+[data-spec-screen="2"] .kit-icon-button {display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:10px;background:none;color:rgb(var(--muted));cursor:pointer}
 
-.kit-detail-title {font-size:28px;line-height:34px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+[data-spec-screen="2"] .kit-detail-title {font-size:28px;line-height:34px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
 
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 12px}
+[data-spec-screen="2"] .meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 12px;font-variant-numeric:tabular-nums}
 
-.kit-detail-body {font-size:16px;line-height:24px;margin:0 0 20px}
+[data-spec-screen="2"] .kit-detail-body {font-size:16px;line-height:24px;margin:0 0 20px}
 
-.tally {display:flex;gap:2px;height:14px;margin-bottom:8px}
+[data-spec-screen="2"] .tally {display:flex;gap:2px;height:14px;margin-bottom:8px}
 
-.standing {font-size:14px;line-height:20px;margin:0 0 24px}
+[data-spec-screen="2"] .standing {font-size:14px;line-height:20px;margin:0 0 24px}
 
-.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--muted))}
+[data-spec-screen="2"] .section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--muted))}
 
-.kit-votes {display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+[data-spec-screen="2"] .kit-votes {display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
 
-.kit-vote {position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--fg));text-align:left;width:100%}
+[data-spec-screen="2"] .kit-vote {position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--fg));text-align:left;width:100%;cursor:pointer}
 
-.kit-vote-fill {position:absolute;top:0;bottom:0;left:0;background:rgb(var(--raised))}
+[data-spec-screen="2"] .kit-vote:disabled {cursor:default;opacity:.6}
 
-.kit-vote>*:not(.kit-vote-fill) {position:relative}
+[data-spec-screen="2"] .kit-vote-fill {position:absolute;top:0;bottom:0;left:0;background:rgb(var(--raised))}
 
-.kit-vote-mark {width:24px;height:24px;flex:none;border-radius:50%;border:2px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center;color:transparent}
+[data-spec-screen="2"] .kit-vote>*:not(.kit-vote-fill) {position:relative}
 
-.kit-vote-mark svg {width:16px;height:16px}
+[data-spec-screen="2"] .kit-vote-mark {width:24px;height:24px;flex:none;border-radius:50%;border:2px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center;color:transparent}
 
-.kit-vote-label {flex:1}
+[data-spec-screen="2"] .kit-vote-mark svg {width:16px;height:16px}
 
-.kit-vote-count {font-size:14px;font-weight:600;color:rgb(var(--muted))}
+[data-spec-screen="2"] .kit-vote-label {flex:1}
 
-.kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));font-weight:600}
+[data-spec-screen="2"] .kit-vote-count {font-size:14px;font-weight:600;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
 
-.kit-vote[aria-pressed="true"] .kit-vote-fill {background:rgb(var(--accent)/.15)}
+[data-spec-screen="2"] .kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));font-weight:600}
 
-.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--accent));color:rgb(var(--on-accent))}
+[data-spec-screen="2"] .kit-vote[aria-pressed="true"] .kit-vote-fill {background:rgb(var(--accent)/.15)}
 
-.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--fg))}
+[data-spec-screen="2"] .kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--accent));color:rgb(var(--on-accent))}
 
-.list-row {display:flex;gap:4px;padding:10px 4px 10px 16px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--fg))}
 
-.c {flex:1;min-width:0;padding-top:2px}
+[data-spec-screen="2"] .list-row {display:flex;gap:4px;padding:10px 4px 10px 16px;border-top:1px solid rgb(var(--line))}
 
-.c p {margin:0}
+[data-spec-screen="2"] .c {flex:1;min-width:0;padding-top:2px}
 
-.kit-comment-meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .c p {margin:0}
 
-.kit-comment-author {font-weight:600;color:rgb(var(--fg));margin-right:6px}
+[data-spec-screen="2"] .kit-comment-meta {font-size:14px;line-height:20px;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
 
-.kit-comment-body {font-size:16px;line-height:23px}
+[data-spec-screen="2"] .kit-comment-author {font-weight:600;color:rgb(var(--fg));margin-right:6px}
 
-.kit-composer {margin-top:16px;display:flex;flex-direction:column;gap:6px}
+[data-spec-screen="2"] .kit-comment-body {font-size:16px;line-height:23px}
 
-.kit-label {font-size:14px;font-weight:600}
+[data-spec-screen="2"] .kit-composer {margin-top:16px;display:flex;flex-direction:column;gap:6px}
 
-.field {display:block;width:100%;min-height:68px;padding:10px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--muted)/.6);resize:none}
+[data-spec-screen="2"] .kit-label {font-size:14px;font-weight:600}
 
-.kit-composer-actions {display:flex;justify-content:flex-end}
+[data-spec-screen="2"] .field {display:block;width:100%;min-height:68px;padding:10px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--muted)/.6);resize:none}
 
-.btn-secondary[disabled] {opacity:.5}
+[data-spec-screen="2"] .kit-composer-actions {display:flex;justify-content:flex-end}
+
+[data-spec-screen="2"] .btn-secondary[disabled] {opacity:.5}
+
+/* Anything a screen's own rules have not drawn: the numbers in the standing
+   lines line up, and the tappable rows show they are tappable. */
+.standing span {font-variant-numeric:tabular-nums}
+.meta .ic {font-variant-numeric:tabular-nums}
+.card {cursor:pointer}
+.list-row[role="button"] {cursor:pointer}
