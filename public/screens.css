@@ -41,7 +41,7 @@ body {
 
 .list-row {display:flex;gap:10px;padding:14px 16px 14px 12px;min-height:44px;align-items:flex-start}
 
-.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+.list>li+li {border-top:1px solid rgb(var(--line))}
 
 .dot {flex:none;width:8px;height:8px;border-radius:50%;background:rgb(var(--accent));margin-top:7px}
 
@@ -59,31 +59,16 @@ body {
 
 .foot {text-align:center}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: the preview. It renders inside the kit sheet (openSheet), so
+   only its content rules carry over — they apply to the drawn markup the
+   preview is built from, .kit-preview. */
 
-.behind {
-  padding: 16px 20px;
-  opacity: .5;
-}
+.kit-preview {display:flex;flex-direction:column;gap:16px}
 
-.text-title {font-size:28px;line-height:34px;font-weight:700}
+.kit-preview .sheet-bar {display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-.scrim {position:absolute;inset:0;background:rgb(0 0 0 / .32)}
+.kit-preview .feed-tag {font-family:ui-serif,Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:15px;border-bottom:2px solid rgb(var(--accent) / .45)}
 
-.sheet {position:absolute;left:0;right:0;bottom:0;top:96px;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column;gap:16px}
+.kit-preview .body {font-family:ui-serif,Georgia,"Times New Roman",serif;font-size:17px;line-height:27px;max-width:34em}
 
-.grab {width:36px;height:5px;border-radius:3px;background:rgb(var(--line));margin:0 auto 4px}
-
-.sheet-bar {display:flex;align-items:center;justify-content:space-between;gap:8px}
-
-.feed-tag {font-family:ui-serif,Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;font-size:15px;border-bottom:2px solid rgb(var(--accent) / .45)}
-
-.close {width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:22px;background:rgb(var(--raised));color:rgb(var(--fg))}
-
-.close svg {width:20px;height:20px}
-
-.title {font-size:22px;line-height:28px;font-weight:700}
-
-.body {font-family:ui-serif,Georgia,"Times New Roman",serif;font-size:17px;line-height:27px;max-width:34em}
-
-.btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:4px;border:0;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px/1 system-ui,sans-serif;text-decoration:none}
+.kit-preview .btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:4px;border:0;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px/1 system-ui,sans-serif;text-decoration:none}

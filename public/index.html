@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23c2410c'/><circle cx='30' cy='70' r='10' fill='white'/><path d='M25 46a29 29 0 0 1 29 29' fill='none' stroke='white' stroke-width='11' stroke-linecap='round'/><path d='M25 21a54 54 0 0 1 54 54' fill='none' stroke='white' stroke-width='11' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -125,10 +125,12 @@
       <header class="head">
         <div class="head-text">
           <h1 class="text-title">Unread</h1>
-          <p class="text-small muted">23 posts from 4 feeds</p>
+          <p class="text-small muted" id="count"></p>
         </div>
-        <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+        <button id="add-feed" class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
       </header>
+      <div id="feed-failures" hidden></div>
+      <div id="list-area">
       <ul class="list">
         <li class="list-row"><span class="dot"></span><div class="post">
           <div class="masthead"><span class="feed-tag">Pretend Garden Weekly</span><span class="when">12 min</span></div>
@@ -161,6 +163,7 @@
           <p class="summary">Toast, more toast, and three ideas we invented for this preview.</p>
         </div></li>
       </ul>
+      </div>
       <p class="foot text-small muted">That's every unread post. Read ones leave the list.</p>
     </main>
     </div>
@@ -189,5 +192,6 @@
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

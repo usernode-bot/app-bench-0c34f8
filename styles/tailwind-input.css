@@ -29,30 +29,30 @@
  */
 @layer base {
   :root {
-    --ground: 246 247 249;    /* the page */
+    --ground: 246 247 249;    /* the page: cool paper grey */
     --surface: 255 255 255;   /* lists, cards, fields */
     --raised: 238 241 245;    /* hovers, badges */
     --fg: 22 27 34;           /* text */
-    --muted: 82 90 102;        /* secondary text */
+    --muted: 82 90 102;       /* secondary text */
     --line: 223 227 233;      /* borders, dividers, skeletons */
-    --accent: 194 65 12;     /* the one accent */
+    --accent: 194 65 12;      /* the one accent: RSS orange */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 194 65 12;       /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 15 17 21;
+    --surface: 24 27 33;
+    --raised: 34 38 46;
+    --fg: 236 238 241;
+    --muted: 160 168 180;
+    --line: 52 58 68;
+    --accent: 251 146 60;     /* RSS orange, dark look */
+    --on-accent: 41 18 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 146 60;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

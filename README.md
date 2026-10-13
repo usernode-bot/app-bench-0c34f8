@@ -1,27 +1,45 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A small RSS reader in the Feedly style: add the RSS or Atom feeds you
+follow, see all their unread posts in one scrolling list, newest first.
+Tap a post to read a preview and open the full article in your browser.
+Every person's feeds and reading state are their own.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **Unread list** — `GET /api/posts` refreshes each of your feeds (in
+  parallel), adds any posts not stored yet, and returns your unread
+  posts newest first, with a count line and per-feed failures.
+- **Add feed** — `POST /api/feeds` fetches and parses the address before
+  saving it: not reachable or not a feed answers 400 with a plain
+  reason, a feed you already have answers 409.
+- **Read state** — tapping a post marks it read immediately
+  (`POST /api/posts/:id/read`) and opens the preview; on close the post
+  leaves the list. Reads are idempotent and per viewer.
+- **Fetch guard** — `feed.js` fetches feeds through a guard: web
+  addresses only (ports 80/443), no addresses with a password in them,
+  no loopback, private, link-local or metadata addresses (checked at the
+  DNS step, with the connection pinned to an address that passed), at
+  most three redirects (each re-checked), 8 s timeout, 2 MB cap.
+- **Staging demo** — on staging, `/?demo=1` stands in four made-up feeds
+  with 23 unread posts so the populated screen can be seen. Demo feeds
+  are never fetched and demo posts carry no link.
 
-## Replacing the template
+## Data
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+Two tables, both per person and both `staging:private` (staging's shared
+database must not seed or copy them):
 
-Once the real app exists, rewrite this README to describe it.
+- `feeds` — url, title, site_url, whether it is a demo stand-in, and
+  `last_error` (the failure line above the list). Unique per viewer per
+  url.
+- `posts` — guid, title, link, summary, author, published_at, fetched_at
+  and read_at, one row per feed item. Unique per feed per guid.
+
+## Design
+
+The look is described in `CLAUDE.md` under "## Design": cool paper-grey
+neutrals with one RSS orange accent, a serif masthead tag per post, and
+the four-size type scale from `tailwind.config.js`. Colour tokens live
+in `styles/tailwind-input.css`, in a light and a dark look that follow
+the viewer's Homeroom theme.

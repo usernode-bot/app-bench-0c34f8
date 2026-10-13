@@ -2,5 +2,22 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "unread.demo",
+      "name": "Unread list demo",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post]",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "tailwind.config.js"]
+    },
+    {
+      "id": "unread.empty",
+      "name": "Empty list",
+      "path": "/",
+      "expectText": "Add your first feed",
+      "impact": ["public/**", "styles/**", "tailwind.config.js"]
+    }
+  ]
 }
