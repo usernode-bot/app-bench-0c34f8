@@ -1,0 +1,144 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+  min-height: 1960px;
+  padding: 20px 16px 40px;
+  box-sizing: border-box;
+}
+
+.app * {box-sizing:border-box}
+
+.r {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif}
+
+h1 {font-size:28px;line-height:36px;font-weight:700;margin:0}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0}
+
+.blk {margin-top:24px}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px 0 10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:999px;font-size:15px;color:rgb(var(--fg))}
+
+.chip svg {width:24px;height:24px;stroke:rgb(var(--muted));fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600}
+
+.chip.on svg {stroke:rgb(var(--on-accent))}
+
+.card {border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px}
+
+.hyd {display:flex;gap:16px;align-items:center}
+
+.jar {width:84px;height:112px;flex:none}
+
+.big {font-size:52px;line-height:56px;font-weight:700;letter-spacing:-1px}
+
+.big small {font-size:28px;font-weight:600;margin-left:2px}
+
+.hint {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:4px 0 0}
+
+.slide {margin-top:16px;display:flex;align-items:center;gap:10px}
+
+.sb {width:44px;height:44px;flex:none;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));display:flex;align-items:center;justify-content:center}
+
+.sb svg {width:20px;height:20px;stroke:rgb(var(--fg));stroke-width:2;stroke-linecap:round;fill:none}
+
+.track {position:relative;flex:1;height:44px}
+
+.track .t {position:absolute;left:0;right:0;top:19px;height:6px;border-radius:3px;background:rgb(var(--line))}
+
+.track .f {position:absolute;left:0;width:50%;top:19px;height:6px;border-radius:3px;background:rgb(var(--accent))}
+
+.track .k {position:absolute;left:calc(50% - 13px);top:9px;width:26px;height:26px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;font-size:13px;color:rgb(var(--muted));padding:0 54px}
+
+.typ {font-size:13px;line-height:18px;color:rgb(var(--muted));margin-top:10px;padding-top:10px;border-top:1px solid rgb(var(--line))}
+
+.two {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.lab {font-size:14px;font-weight:500;margin:0 0 4px 2px}
+
+.step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));height:48px;overflow:hidden}
+
+.step .sb {border:0;border-radius:0;height:46px}
+
+.step .v {flex:1;text-align:center;font-size:20px;font-weight:600}
+
+.step .v span {font-size:14px;font-weight:500;color:rgb(var(--muted));margin-left:2px}
+
+.tot {display:flex;justify-content:space-between;font-size:14px;color:rgb(var(--muted));margin:10px 4px 0}
+
+.tot b {color:rgb(var(--fg));font-weight:600}
+
+.btn-primary {display:flex;width:100%;min-height:52px;align-items:center;justify-content:center;border:0;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:17px;font-weight:600;margin-top:20px}
+
+.rh {display:flex;align-items:baseline;justify-content:space-between;padding:0 4px;margin-bottom:8px}
+
+.rh h2 {font-size:20px;line-height:28px;font-weight:600;margin:0}
+
+.rh span {font-size:14px;color:rgb(var(--muted))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.ic {width:24px;height:24px;flex:none;stroke:rgb(var(--crust));fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.tx {flex:1;min-width:0}
+
+.tx b {display:block;font-weight:500}
+
+.tx i {display:block;font-style:normal;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.g {font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.g span {font-size:14px;font-weight:500;color:rgb(var(--muted));margin-left:2px}
+
+.sum {background:rgb(var(--raised))}
+
+.sum .tx b,.sum .g {font-weight:600}
+
+.note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 4px 0}
+
+.n {width:28px;height:28px;flex:none;border-radius:50%;border:1.5px solid rgb(var(--crust));color:rgb(var(--accent));font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.when {font-size:15px;font-weight:600;white-space:nowrap;text-align:right}
+
+.oven {display:flex;gap:12px;align-items:stretch}
+
+.temp {flex:1;border-radius:10px;background:rgb(var(--raised));padding:12px}
+
+.temp .tt {font-size:28px;line-height:32px;font-weight:700}
+
+.temp .tf {font-size:14px;color:rgb(var(--muted))}
+
+.temp .tl {font-size:14px;margin-top:6px}
+
+.done {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:12px 0 0}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+  min-height: 2040px;
+  padding: 20px 16px 40px;
+  box-sizing: border-box;
+}
+
+.track .f {position:absolute;left:0;width:16%;top:19px;height:6px;border-radius:3px;background:rgb(var(--accent))}
+
+.track .k {position:absolute;left:calc(16% - 13px);top:9px;width:26px;height:26px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}

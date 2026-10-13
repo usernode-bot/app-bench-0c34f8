@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,108 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="app">
+    <h1 class="r">Bread Bot</h1>
+    <p class="sub">Grams, rise and bake for your bake</p>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <div class="blk"><p class="section-label">Bread</p>
+    <div class="chips">
+    <span class="chip on"><svg viewBox="0 0 24 24"><path d="M3 16c0-5 4-9 9-9s9 4 9 9z"/><path d="M3 16h18"/><path d="M9 10l2 3M13 9l2 3"/></svg>Sourdough</span>
+    <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>Bagels</span>
+    <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M8 6.5l.8.8M16 7l-.6.9M18 13l-1 .2M7 16l.9-.5"/></svg>Sourdough bagels</span>
+    <span class="chip"><svg viewBox="0 0 24 24"><path d="M3 14c0-3.5 4-6 9-6s9 2.5 9 6-4 4-9 4-9-.5-9-4z"/><circle cx="8" cy="12" r=".6"/><circle cx="12" cy="11" r=".6"/><circle cx="16" cy="12" r=".6"/><circle cx="10" cy="14.5" r=".6"/><circle cx="14" cy="14.5" r=".6"/></svg>Rye</span>
+    <span class="chip"><svg viewBox="0 0 24 24"><path d="M5 20V11a3 3 0 0 1-1-2.2C4 6.7 7.6 5 12 5s8 1.7 8 3.8A3 3 0 0 1 19 11v9z"/><path d="M5 20h14"/></svg>Sandwich loaf</span>
+    </div></div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <div class="blk"><p class="section-label">Hydration</p>
+    <div class="card">
+    <div class="hyd">
+    <svg class="jar" viewBox="0 0 84 112"><rect x="10" y="6" width="64" height="10" rx="3" fill="none" stroke="rgb(var(--muted))" stroke-width="2"/><path d="M14 16h56v84a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8z" fill="rgb(var(--surface))" stroke="rgb(var(--muted))" stroke-width="2"/><path d="M15 52c8-8 46-8 54 0v48a7 7 0 0 1-7 7H22a7 7 0 0 1-7-7z" fill="rgb(var(--dough))"/><path d="M15 52c8-8 46-8 54 0" fill="none" stroke="rgb(var(--crust))" stroke-width="2"/><circle cx="30" cy="70" r="3" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/><circle cx="52" cy="80" r="4" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/><circle cx="40" cy="94" r="2.5" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/><circle cx="58" cy="62" r="2" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/></svg>
+    <div><div class="big r">75<small>%</small></div><p class="hint">Water for every 100 g of flour. Higher makes a slacker, more open dough.</p></div>
+    </div>
+    <div class="slide"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><div class="track"><div class="t"></div><div class="f"></div><div class="k"></div></div><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div>
+    <div class="ends"><span>50% stiff</span><span>100% slack</span></div>
+    <p class="typ">Typical for sourdough: 70 to 80%</p>
+    </div></div>
+
+    <div class="blk two">
+    <div><p class="lab">Loaves</p><div class="step"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><span class="v r">2</span><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div></div>
+    <div><p class="lab">Each loaf</p><div class="step"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><span class="v r">900<span>g</span></span><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div></div>
+    </div>
+    <div class="tot"><span>Total dough</span><b>1,800 g</b></div>
+
+    <button class="btn-primary">Calculate</button>
+
+    <div class="blk"><div class="rh"><h2 class="r">Ingredients</h2><span>2 sourdough loaves</span></div>
+    <div class="list">
+    <div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M7 8h10l1 12H6z"/><path d="M8 8c0-2 1.5-4 4-4s4 2 4 4"/><path d="M10 13h4"/></svg><div class="tx"><b>Bread flour</b><i>90% of total flour</i></div><div class="g r">915<span>g</span></div></div>
+    <div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z"/></svg><div class="tx"><b>Water</b><i>Lukewarm, about 27°C</i></div><div class="g r">661<span>g</span></div></div>
+    <div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M7 7h10v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M6 4h12v3H6z"/><circle cx="10" cy="14" r="1"/><circle cx="14" cy="16" r="1"/></svg><div class="tx"><b>Starter</b><i>Active, fed 1:1 flour and water</i></div><div class="g r">203<span>g</span></div></div>
+    <div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M8 20h8l1-11H7z"/><path d="M7 9h10"/><path d="M10 5h4v4h-4z"/></svg><div class="tx"><b>Salt</b><i>2% of total flour</i></div><div class="g r">20<span>g</span></div></div>
+    <div class="list-row sum"><span class="ic"></span><div class="tx"><b>Total dough</b><i>Total flour 1,017 g, water 763 g</i></div><div class="g r">1,799<span>g</span></div></div>
+    </div>
+    <p class="note">The night before, feed 70 g starter with 70 g flour and 70 g water. Use it when it has doubled.</p>
+    </div>
+
+    <div class="blk"><div class="rh"><h2 class="r">Rise</h2><span>at about 24°C</span></div>
+    <div class="list">
+    <div class="list-row"><span class="n">1</span><div class="tx"><b>Bulk rise</b><i>Stretch and fold every 30 min for the first 2 h, until risen by half</i></div><div class="when">4 to 5 h</div></div>
+    <div class="list-row"><span class="n">2</span><div class="tx"><b>Shape</b><i>Pre-shape, rest 20 min, then shape into a banneton</i></div><div class="when">30 min</div></div>
+    <div class="list-row"><span class="n">3</span><div class="tx"><b>Final proof</b><i>Covered, in the fridge</i></div><div class="when">12 to 16 h</div></div>
+    </div></div>
+
+    <div class="blk"><div class="rh"><h2 class="r">Bake</h2><span>in a Dutch oven</span></div>
+    <div class="card">
+    <div class="oven">
+    <div class="temp"><div class="tt r">250°C</div><div class="tf">480°F</div><div class="tl">Lid on, 20 min</div></div>
+    <div class="temp"><div class="tt r">230°C</div><div class="tf">450°F</div><div class="tl">Lid off, 20 to 25 min</div></div>
+    </div>
+    <p class="done">Preheat 45 min. Bake one loaf at a time. Done when deep brown and 96°C inside; cool 1 h before slicing.</p>
+    </div></div>
+    </div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="app">
+      <h1 class="r">Bread Bot</h1>
+      <p class="sub">Grams, rise and bake for your bake</p>
+
+      <div class="blk"><p class="section-label">Bread</p>
+      <div class="chips">
+      <span class="chip"><svg viewBox="0 0 24 24"><path d="M3 16c0-5 4-9 9-9s9 4 9 9z"/><path d="M3 16h18"/><path d="M9 10l2 3M13 9l2 3"/></svg>Sourdough</span>
+      <span class="chip on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>Bagels</span>
+      <span class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M8 6.5l.8.8M16 7l-.6.9M18 13l-1 .2M7 16l.9-.5"/></svg>Sourdough bagels</span>
+      <span class="chip"><svg viewBox="0 0 24 24"><path d="M3 14c0-3.5 4-6 9-6s9 2.5 9 6-4 4-9 4-9-.5-9-4z"/><circle cx="8" cy="12" r=".6"/><circle cx="12" cy="11" r=".6"/><circle cx="16" cy="12" r=".6"/><circle cx="10" cy="14.5" r=".6"/><circle cx="14" cy="14.5" r=".6"/></svg>Rye</span>
+      <span class="chip"><svg viewBox="0 0 24 24"><path d="M5 20V11a3 3 0 0 1-1-2.2C4 6.7 7.6 5 12 5s8 1.7 8 3.8A3 3 0 0 1 19 11v9z"/><path d="M5 20h14"/></svg>Sandwich loaf</span>
+      </div></div>
+
+      <div class="blk"><p class="section-label">Hydration</p>
+      <div class="card">
+      <div class="hyd">
+      <svg class="jar" viewBox="0 0 84 112"><rect x="10" y="6" width="64" height="10" rx="3" fill="none" stroke="rgb(var(--muted))" stroke-width="2"/><path d="M14 16h56v84a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8z" fill="rgb(var(--surface))" stroke="rgb(var(--muted))" stroke-width="2"/><path d="M15 70c8-7 46-7 54 0v30a7 7 0 0 1-7 7H22a7 7 0 0 1-7-7z" fill="rgb(var(--dough))"/><path d="M15 70c8-7 46-7 54 0" fill="none" stroke="rgb(var(--crust))" stroke-width="2"/><circle cx="30" cy="84" r="3" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/><circle cx="52" cy="80" r="4" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/><circle cx="40" cy="94" r="2.5" fill="none" stroke="rgb(var(--crust))" stroke-width="1.5"/></svg>
+      <div><div class="big r">58<small>%</small></div><p class="hint">Water for every 100 g of flour. Lower makes the stiff, chewy dough bagels need.</p></div>
+      </div>
+      <div class="slide"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><div class="track"><div class="t"></div><div class="f"></div><div class="k"></div></div><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div>
+      <div class="ends"><span>50% stiff</span><span>100% slack</span></div>
+      <p class="typ">Typical for bagels: 55 to 60%</p>
+      </div></div>
+
+      <div class="blk two">
+      <div><p class="lab">Bagels</p><div class="step"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><span class="v r">8</span><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div></div>
+      <div><p class="lab">Each bagel</p><div class="step"><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></span><span class="v r">115<span>g</span></span><span class="sb"><svg viewBox="0 0 24 24"><path d="M6 12h12M12 6v12"/></svg></span></div></div>
+      </div>
+      <div class="tot"><span>Total dough</span><b>920 g</b></div>
+
+      <button class="btn-primary">Calculate</button>
+
+      <div class="blk"><div class="rh"><h2 class="r">Ingredients</h2><span>8 bagels</span></div><div class="list"><div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M7 8h10l1 12H6z"/><path d="M8 8c0-2 1.5-4 4-4s4 2 4 4"/><path d="M10 13h4"/></svg><div class="tx"><b>Bread flour</b><i>High protein, 100% of flour</i></div><div class="g r">558<span>g</span></div></div><div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z"/></svg><div class="tx"><b>Water</b><i>Lukewarm, about 27°C</i></div><div class="g r">323<span>g</span></div></div><div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M8 8h8v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z"/><path d="M9 4h6v4H9z"/><path d="M8 13h8"/></svg><div class="tx"><b>Barley malt syrup</b><i>Or honey, 4% of flour</i></div><div class="g r">22<span>g</span></div></div><div class="list-row"><svg class="ic" viewBox="0 0 24 24"><path d="M8 20h8l1-11H7z"/><path d="M7 9h10"/><path d="M10 5h4v4h-4z"/></svg><div class="tx"><b>Salt</b><i>2% of flour</i></div><div class="g r">11<span>g</span></div></div><div class="list-row"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="10" r="3"/><circle cx="15.5" cy="9" r="2"/><circle cx="14" cy="15.5" r="3.5"/></svg><div class="tx"><b>Instant yeast</b><i>1% of flour</i></div><div class="g r">5.6<span>g</span></div></div><div class="list-row sum"><span class="ic"></span><div class="tx"><b>Total dough</b><i>Total flour 558 g, water 323 g</i></div><div class="g r">920<span>g</span></div></div></div></div><div class="blk"><div class="rh"><h2 class="r">Rise</h2><span>at about 24°C</span></div><div class="list"><div class="list-row"><span class="n">1</span><div class="tx"><b>Knead and rest</b><i>Knead 10 min until smooth, then cover</i></div><div class="when">1 h</div></div><div class="list-row"><span class="n">2</span><div class="tx"><b>Shape</b><i>Roll ropes and join into rings</i></div><div class="when">20 min</div></div><div class="list-row"><span class="n">3</span><div class="tx"><b>Cold proof</b><i>Covered, in the fridge, until a ring floats in water</i></div><div class="when">8 to 12 h</div></div><div class="list-row"><span class="n">4</span><div class="tx"><b>Boil</b><i>In water with 1 tbsp malt syrup, each side</i></div><div class="when">1 min</div></div></div></div><div class="blk"><div class="rh"><h2 class="r">Bake</h2><span>on a lined tray</span></div><div class="card"><div class="oven"><div class="temp"><div class="tt r">220°C</div><div class="tf">425°F</div><div class="tl">18 to 22 min</div></div></div><p class="done">Preheat 30 min. Top with seeds straight after boiling. Done when glossy and deep golden.</p></div></div></div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
