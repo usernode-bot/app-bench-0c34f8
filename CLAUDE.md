@@ -95,22 +95,31 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A decision board for a club: anyone posts a decision the club needs to
+make, every member votes For / Against / Abstain with one tap (change
+or retract by tapping again), and members discuss under the decision
+in comments. The board splits open decisions into "Waiting for your
+vote" and "You voted" so nobody has to hunt for what's theirs.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm paper neutrals (light ground `247 243 235`, dark
+  `24 21 17`) with a steady green accent (light `22 101 52`, dark
+  `110 200 140`); the three tally colours are kit tokens — For uses the
+  accent green, Against a brick red (light `176 74 38`, dark
+  `232 132 96`), Abstain a stone grey (light `158 146 128`, dark
+  `120 110 96`). Danger for destructive actions only.
+- **Signature element:** the tally bar — For / Against / Abstain
+  segments that grow with their counts, thin gaps between segments, a
+  dashed empty track with "No votes yet" at zero, and a dot-and-count
+  key line under it (`public/tally-bar.js`, tokens in
+  `styles/tailwind-input.css`). Every screen shows where a decision
+  stands through it.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +147,27 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `reports` table is `staging:private` (see `server.js`): reports
+  are for the people running the club only, so the demo generator
+  fills nothing into it and a staging wipe clears it.
+- Decisions are the kit's items-with-votes-and-comments resource
+  (`kit/server.js`, DO NOT EDIT) mounted as `decisions` with the three
+  fixed options; the POST middleware strips any client-sent `options`.
+  Don't add a fourth vote option without rethinking the tally bar.
+- The kit's staging demo writes its rows into the real `decisions`
+  table the first time `?demo=1` is opened, and they stay. Never
+  declare a `dapp.json` check on `/` expecting the empty state — it
+  only exists before the first demo seeding. Empty states that stay
+  checkable live on demo rows that ship empty, e.g. 900005's comments.
+- The declared checks set `allowConsoleErrors: true` because outside
+  the Homeroom shell (the only way to browse locally) the bridge logs
+  a console error probing the platform for `127.0.0.1`'s app host.
+  Inside the real shell that probe does not fire, so the platform's
+  own no-console-errors baseline still gates staging.
+- Running the declared checks locally needs an authenticated browser:
+  mint a throwaway RSA keypair, restart the app with
+  `USERNODE_JWT_PUBLIC_KEY` + `USERNODE_APP_ID=99`, sign a token with
+  `pur: 'iframe'`, issuer `usernode`, audience `usernode:app:99`, put
+  a tiny token-injecting reverse proxy in front (the runner accepts
+  `--base-url`), and run `usernode-run-checks --base-url <proxy>`.
+  Keys and tokens are local-only; nothing is committed.

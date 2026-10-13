@@ -1,27 +1,43 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A decision board for the club, on Homeroom. Anyone can post a decision
+the club needs to make; every member votes For, Against or Abstain with
+one tap (changeable, retractable); everyone talks it through in the
+comments underneath.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **The board** — one list of open decisions, split into "Waiting for
+  your vote" and "You voted". Each row shows who posted it and when,
+  the tally bar (the app's signature element), the counts and the
+  comment count.
+- **A decision** — the details, where it stands as a large tally bar,
+  three toggle buttons for your vote and the comments. Your vote saves
+  straight away and moves the bar; tap the same option again to
+  retract.
+- **Comments** — short replies under each decision, with report (via
+  the native more-menu) for things the club's people should look at.
+- **Posting** — the "New decision" button opens a form sheet: a title
+  (required, up to 120 characters) and optional details.
 
-## Replacing the template
+## Under the hood
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- Decisions, votes and comments come from the kit's
+  items-with-votes-and-comments resource (`kit/server.js`), mounted as
+  `decisions` with three fixed options; client code is in `public/`,
+  the tally bar in `public/tally-bar.js`.
+- Reports go into the `reports` table, marked `staging:private`.
+- Staging previews accept `?demo=1`, which seeds eight made-up
+  decisions and made-up comment lines (labelled on screen as a demo)
+  so the populated board can be seen without anyone typing first.
+- Styling is Tailwind, precompiled by `npm run build`, in a light and
+  a dark look that follow the viewer's Homeroom theme. The palette and
+  the design rules live in `CLAUDE.md` and `styles/tailwind-input.css`.
 
-Once the real app exists, rewrite this README to describe it.
+## Development
+
+- `npm start` runs the app (`node server.js`).
+- `npm test` runs the unit tests for the tally bar's pure half.
+- `npm run build` recompiles `public/tailwind.css`.
+- The declared `dapp.json` checks need an authenticated browser to
+  pass; see `CLAUDE.md` for how to run them locally.

@@ -50,8 +50,11 @@ module.exports = {
         fg: token('fg'), // text
         muted: token('muted'), // secondary text
         line: token('line'), // borders, dividers, skeletons
-        accent: token('accent'), // the one accent: the primary action
+        accent: token('accent'), // the one accent: the primary action, For
         'on-accent': token('on-accent'), // text on the accent
+        for: token('for'), // tally: For
+        against: token('against'), // tally: Against
+        abstain: token('abstain'), // tally: Abstain
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring

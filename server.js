@@ -145,6 +145,85 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Decisions ──────────────────────────────────────────────────────────────
+// The kit's items-with-votes-and-comments resource (kit/server.js, see
+// public/kit/README.md): GET/POST /api/decisions, GET /api/decisions/:id,
+// POST /api/decisions/:id/vote, POST /api/decisions/:id/comments and
+// DELETE /api/decisions/:id. Every decision votes For/Against/Abstain, so the
+// middleware below strips any `options` a client tries to send and the
+// resource is mounted with the club's three fixed options.
+// Staging demo rows (?demo=1 on staging): eight made-up decisions, newest
+// first, and a pool of made-up comment lines, so the populated screen can be
+// seen without anyone typing first. Fake on purpose — see "Staging mock data"
+// in the platform conventions.
+const DEMO_DECISIONS = [
+  { title: 'Move club nights from Tuesday to Thursday', body: 'The hall now charges extra on Tuesdays, and three of us clash with evening classes. Thursdays are free at the same time, 7 to 9.' },
+  { title: 'Switch the newsletter from print to email', body: 'Printing and posting 120 copies costs 40 a month. An email would reach everyone faster and spend the money on events instead.' },
+  { title: 'Hold the spring picnic at Willow Bend Park', body: 'Willow Bend has shaded tables, a playground and parking. The riverside meadow we used last year floods when it rains.' },
+  { title: 'Buy a second set of folding tables for events', body: 'We keep borrowing tables from the scout hut. A second set of six would let the jigsaw and the cake stalls run at the same time.' },
+  { title: 'Raise the yearly dues by 5 to cover hall rent', body: 'The hall rent went up in April. An extra 5 a year keeps the account in the black without cutting anything.' },
+  { title: 'Start a monthly book swap table', body: 'A table at club nights where people leave a book and take one. Nothing to buy, nothing to track.' },
+  { title: 'Repaint the clubhouse sign in the old colours', body: 'The sign has faded to almost nothing. Repainting it in the original green and cream would keep it looking like ours.' },
+  { title: 'Invite the choir from Elm Street to the summer fair', body: 'They asked if they could sing a set at the fair. It would fill the quiet hour before the raffle.' },
+];
+const DEMO_COMMENTS = [
+  'Could we try it for a month first?',
+  'Thursday works for me.',
+  'The quiz league is on the first Thursday of the month, just saying.',
+  'Can we cover this out of the normal pot?',
+  'I can help set up on the day.',
+  'Willow Bend has covered tables if it rains.',
+  'Print costs keep going up, this makes sense.',
+  'My neighbour swaps books all the time, she would love this.',
+  'The old colours are part of the hall, keep them.',
+  'They sang at the fete last year, everyone loved it.',
+];
+
+app.post('/api/decisions', (req, _res, next) => { if (req.body) delete req.body.options; next(); });
+const decisions = require('./kit/server').resource(app, pool, {
+  name: 'decisions',
+  options: ['For', 'Against', 'Abstain'],
+  demo: { titles: DEMO_DECISIONS, comments: DEMO_COMMENTS },
+});
+
+// ── Reports ───────────────────────────────────────────────────────────────
+// A member flags a decision or a comment; the report goes into a table only
+// this app's maintainers see. The table is marked staging:private (see
+// "Public and private tables" in the platform conventions): the staging demo
+// generator fills nothing into it and a wipe clears it.
+async function migrateReports() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    kind TEXT NOT NULL CHECK (kind IN ('decision', 'comment')),
+    target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (kind, target_id, reporter_id)
+  )`);
+  await pool.query("COMMENT ON TABLE reports IS 'staging:private'");
+}
+
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const kind = req.body && req.body.kind;
+    const id = Number(req.body && req.body.id);
+    if ((kind !== 'decision' && kind !== 'comment') || !Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'Pick something to report.' });
+    }
+    const table = kind === 'decision' ? 'decisions' : 'decisions_comments';
+    const { rows } = await pool.query(`SELECT 1 FROM ${table} WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ error: 'This was removed, or the link is wrong.' });
+    await pool.query(
+      'INSERT INTO reports (kind, target_id, reporter_id, created_at) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
+      [kind, id, req.user.id, req.now]);
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
@@ -192,9 +271,25 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // Boot migrations are idempotent (CREATE TABLE IF NOT EXISTS), so they are
+  // safe to run on every start, including the staging wipe.
+  await decisions.migrate();
+  await migrateReports();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // On SIGTERM/SIGINT: stop taking requests, give open ones ~3 s to finish,
+  // then close the pool and exit.
+  let closing = false;
+  const stop = () => {
+    if (closing) return;
+    closing = true;
+    console.log('Shutting down');
+    server.close(() => process.exit(0));
+    setTimeout(() => pool.end().then(() => process.exit(0)), 3000);
+  };
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

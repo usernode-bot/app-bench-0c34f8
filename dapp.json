@@ -2,5 +2,28 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "decisions.list-demo",
+      "name": "Decision list with demo",
+      "path": "/?demo=1",
+      "expectSelector": ".decision-row .tally",
+      "allowConsoleErrors": true,
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js"]
+    },
+    {
+      "name": "Empty comments state on a demo decision",
+      "path": "/?demo=1#d/900005",
+      "expectText": "No comments yet. Say what you think.",
+      "allowConsoleErrors": true
+    },
+    {
+      "name": "Decision opens",
+      "path": "/?demo=1#d/900001",
+      "expectSelector": ".kit-votes",
+      "allowConsoleErrors": true
+    }
+  ]
 }

@@ -29,30 +29,36 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --ground: 247 243 235;    /* warm paper */
+    --surface: 255 253 248;   /* lists, cards, fields */
+    --raised: 239 233 222;    /* hovers, badges */
+    --fg: 38 33 27;           /* text */
+    --muted: 99 89 77;        /* secondary text */
+    --line: 224 216 202;      /* borders, dividers, skeletons */
+    --accent: 22 101 52;      /* steady green: the primary action, For */
     --on-accent: 255 255 255; /* text on the accent */
+    --for: 22 101 52;         /* tally: For (the accent green) */
+    --against: 176 74 38;     /* tally: Against (brick) */
+    --abstain: 158 146 128;   /* tally: Abstain (stone) */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 22 101 52;       /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 21 17;
+    --surface: 34 30 25;
+    --raised: 46 41 34;
+    --fg: 241 235 224;
+    --muted: 176 166 150;
+    --line: 66 59 49;
+    --accent: 110 200 140;
+    --on-accent: 10 40 20;
+    --for: 110 200 140;
+    --against: 232 132 96;
+    --abstain: 120 110 96;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 110 200 140;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -259,4 +265,28 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* ── The tally bar: Club Votes' signature element ────────────────────────
+     One rounded track, one segment per option with votes (flex-grow by
+     count, thin gaps between), a key line of dot + count under it. No votes
+     at all: an empty dashed track and "No votes yet". public/tally-bar.js
+     draws it; the list rows use the 10 px one, the detail screen .tally-lg.
+     Colours come straight from the for/against/abstain tokens. */
+  .tally { @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-line; }
+  .tally-lg { @apply h-3.5 gap-1; }
+  .tally-none { @apply border border-dashed border-line bg-transparent; }
+  .tally-seg { @apply h-full min-w-0; }
+  .tally-for { @apply bg-for; }
+  .tally-against { @apply bg-against; }
+  .tally-abstain { @apply bg-abstain; }
+  .tally-key { @apply flex flex-wrap items-center gap-x-3 gap-y-1 text-small tabular-nums text-muted; }
+  .tally-dot { @apply h-2 w-2 shrink-0 rounded-full bg-line; }
+  .tally-dot-for { @apply bg-for; }
+  .tally-dot-against { @apply bg-against; }
+  .tally-dot-abstain { @apply bg-abstain; }
+
+  /* A decision list row (drawn as a .list-row .kit-row button): the bar and
+     its key sit under the title, so the row stacks instead of centring. */
+  .decision-row { @apply flex-col items-stretch gap-2; }
+  .vote-chip { @apply mt-1 inline-flex items-center gap-1.5 self-start rounded-full bg-raised px-2.5 py-0.5 text-small font-medium text-fg; }
 }
