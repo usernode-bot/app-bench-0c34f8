@@ -1,0 +1,111 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+main {display:flex;flex-direction:column;gap:24px;padding:20px 16px 32px}
+
+.num {font-variant-numeric:tabular-nums}
+
+.hdr {display:flex;align-items:center;gap:10px}
+
+.hdr svg {width:28px;height:28px;color:rgb(var(--accent))}
+
+.text-title {font-size:28px;line-height:36px;font-weight:700;letter-spacing:-.01em}
+
+.text-heading {font-size:20px;line-height:28px;font-weight:600}
+
+.text-small {font-size:14px;line-height:20px}
+
+.muted {color:rgb(var(--muted))}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:999px;background:rgb(var(--surface));font-size:16px}
+
+.chip svg {width:20px;height:20px;color:rgb(var(--muted))}
+
+.chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.chip.on svg {color:rgb(var(--on-accent))}
+
+.card {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));padding:16px}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.row-main {flex:1}
+
+.slider {position:relative;height:44px;display:flex;align-items:center}
+
+.track {height:6px;width:100%;border-radius:3px;background:rgb(var(--raised))}
+
+.fill {position:absolute;left:0;height:6px;width:62.5%;border-radius:3px;background:rgb(var(--accent))}
+
+.thumb {position:absolute;left:calc(62.5% - 14px);width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;margin-top:-6px}
+
+.stepper {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px}
+
+.stepper button {width:44px;height:44px;border:0;background:none;color:rgb(var(--fg));font-size:20px}
+
+.stepper span {min-width:32px;text-align:center;font-weight:600}
+
+.field {display:flex;align-items:center;gap:6px;min-height:44px;width:120px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:0 12px}
+
+.field b {flex:1;font-weight:400;text-align:right}
+
+.btn-primary {display:flex;align-items:center;justify-content:center;min-height:48px;width:100%;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600}
+
+.sheet-head {display:flex;justify-content:space-between;align-items:baseline;padding-bottom:12px;border-bottom:2px solid rgb(var(--fg))}
+
+table {width:100%;border-collapse:collapse}
+
+th {font-size:14px;font-weight:500;color:rgb(var(--muted));text-align:right;padding:10px 0 6px}
+
+th:first-child,td:first-child {text-align:left}
+
+td {padding:10px 0;border-bottom:1px dashed rgb(var(--line));text-align:right}
+
+td.g {font-weight:600}
+
+td.p {color:rgb(var(--muted));width:72px;font-size:14px}
+
+tr.total td {border-bottom:0;border-top:2px solid rgb(var(--fg));font-weight:600}
+
+.strip {display:flex;gap:3px;height:14px;margin:4px 0 8px}
+
+.strip div {border-radius:3px}
+
+.s-mix {flex:.5;background:rgb(var(--line))}
+
+.s-bulk {flex:4.5;background:rgb(var(--crumb))}
+
+.s-shape {flex:.3;background:rgb(var(--line))}
+
+.s-proof {flex:1.5;background:rgb(var(--wheat))}
+
+.s-bake {flex:.75;background:rgb(var(--accent))}
+
+.dot {width:12px;height:12px;border-radius:3px;flex:none}
+
+.bake {display:flex;gap:24px;align-items:baseline}
+
+.big {font-size:28px;line-height:36px;font-weight:700}
