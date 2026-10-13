@@ -95,22 +95,29 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot turns a bread choice into a recipe. One screen: pick one of five
+breads (sourdough, bagels, sourdough bagels, rye, sandwich loaf), set the
+hydration, the count and each loaf's weight, tap "Calculate recipe", and a
+recipe slip fills in with ingredient grams next to baker's percentages, the
+total dough, numbered rise steps and the oven stages. All client side: the
+maths lives in `public/recipe.js`, nothing is saved, no database.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour-and-crumb neutrals (cream page to toasted-brown text,
+  warming through in the dark look); the action colour is a deep crust
+  brown (light `122 69 30`, dark toasted `222 160 96` with dark text on
+  it); two subject tokens, `--crust` (golden, the gauge fill) and `--dough`
+  (raw-dough beige, the gauge track and step numbers).
+- **Signature element:** the hydration gauge on its dough-coloured track,
+  and the recipe slip — a kitchen recipe card with dashed rules between
+  its parts.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  headings use the system serif (`fontFamily.serif`), settings and numbers
+  the system sans with tabular figures.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +145,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The five breads are pure data in the `BREADS` table in
+  `public/recipe.js`; `app.js` only renders what `computeRecipe` returns.
+  Change a recipe by editing that table, not the rendering code.
+- Units are grams and Celsius only — there is no unit picker in this
+  version.
+- Nothing is stored: no database tables, no saved recipes, no history.
+  The staging demo is `/?demo=1` (staging only, gated by `/env.js`).

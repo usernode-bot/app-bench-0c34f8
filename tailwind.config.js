@@ -56,6 +56,10 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // Headings drawn with .serif use the system serif stack.
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

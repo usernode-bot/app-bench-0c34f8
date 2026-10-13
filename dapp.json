@@ -2,5 +2,20 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "home",
+      "path": "/",
+      "expectSelector": ".kinds .kind",
+      "expectText": ["Calculate recipe"]
+    },
+    {
+      "id": "recipe",
+      "visual": true,
+      "impact": ["public/**", "styles/**"],
+      "path": "/?demo=1",
+      "expectText": ["Sourdough, 2 loaves of 900 g", "914 g"]
+    }
+  ]
 }

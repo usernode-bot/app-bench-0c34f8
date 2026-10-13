@@ -147,6 +147,15 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// One tiny env script for the page: which environment this build runs in,
+// so the staging demo (?demo=1) only turns on on staging. A plain GET
+// outside /api, so the auth middleware leaves it open.
+app.get('/env.js', (_req, res) => {
+  res.type('application/javascript');
+  res.set('Cache-Control', 'no-store');
+  res.send(`window.BREAD_ENV={staging:${IS_STAGING}};\n`);
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -191,10 +200,25 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Graceful stop (SIGTERM from the platform, SIGINT by hand): stop accepting,
+// give in-flight requests about 3 s to drain, then exit.
+function stop() {
+  if (!server) process.exit(0);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+
+for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => {
+  console.log(`${signal}: stopping`);
+  stop();
+});
 
 start().catch(err => { console.error(err); process.exit(1); });

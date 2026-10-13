@@ -106,3 +106,33 @@ h1 {font-size:28px;line-height:36px;font-weight:700}
 .oven {border:1px solid rgb(var(--line));border-radius:8px;padding:12px;background:rgb(var(--ground))}
 
 .temp {font-size:28px;line-height:36px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ── Behaviour: the real controls under the drawn styles ────────────────── */
+
+button.kind {cursor:pointer;font-family:inherit}
+
+.kind:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+.stepper button {cursor:pointer}
+
+.stepper button:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
+
+.stepper button:disabled {opacity:.4;cursor:default}
+
+/* The range input sits invisibly on top of the drawn gauge: same drag
+   target, keyboard access for free. */
+.gauge-input {position:absolute;left:0;top:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;touch-action:none}
+
+.gauge:has(.gauge-input:focus-visible) {outline:2px solid rgb(var(--focus));outline-offset:4px}
+
+.field input {border:0;background:none;padding:0;width:100%;min-width:0;font:inherit;color:inherit;outline:none;appearance:textfield;-moz-appearance:textfield}
+
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button {appearance:none;margin:0}
+
+.field:focus-within {box-shadow:inset 0 0 0 2px rgb(var(--focus))}
+
+.kit-error {padding:0 4px;margin-top:6px}
+
+@media (prefers-reduced-motion: no-preference) { .slip {transition:opacity .2s} }
+
+.slip.stale {opacity:.55}
