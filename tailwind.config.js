@@ -52,9 +52,16 @@ module.exports = {
         line: token('line'), // borders, dividers, skeletons
         accent: token('accent'), // the one accent: the primary action
         'on-accent': token('on-accent'), // text on the accent
+        wheat: token('wheat'), // the gauge fill: fills only, never text
+        band: token('band'), // the typical-range band: fills only, never text
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+      },
+      // Headings and figures use a rounded face; body text stays system.
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

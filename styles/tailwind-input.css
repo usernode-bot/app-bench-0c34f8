@@ -29,30 +29,34 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 246 245 242;    /* the page: warm flour white */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 240 237 232;    /* hovers, badges */
+    --fg: 41 33 26;           /* text: dark crust brown */
+    --muted: 106 94 84;       /* secondary text */
+    --line: 226 220 212;      /* borders, dividers, skeletons */
+    --accent: 156 74 20;      /* the one accent: deep crust brown */
     --on-accent: 255 255 255; /* text on the accent */
+    --wheat: 214 160 78;      /* fills only, never text */
+    --band: 244 228 198;      /* fills only, never text */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 156 74 20;       /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 22 19 16;
+    --surface: 33 29 25;
+    --raised: 46 40 35;
+    --fg: 243 238 231;
+    --muted: 176 165 152;
+    --line: 66 58 51;
+    --accent: 236 170 88;     /* baked crust gold */
+    --on-accent: 43 24 8;
+    --wheat: 196 142 64;      /* fills only, never text */
+    --band: 82 62 36;         /* fills only, never text */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 236 170 88;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -125,6 +129,81 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* ── Bread Bot ────────────────────────────────────────────────────────────
+   * The bakery's own pieces: kind tiles, the hydration gauge, steppers,
+   * schedule step numbers and ingredient grams.
+   */
+
+  /* The five bread kinds, three to a row. aria-pressed marks the chosen one. */
+  .kind-tile {
+    @apply flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-line
+      bg-surface px-1 py-2 text-center text-small text-fg hover:bg-raised focus-visible:outline-none
+      focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .kind-icon { @apply h-7 w-7 shrink-0 text-muted; }
+  .kind-tile[aria-pressed="true"] {
+    @apply border-accent bg-accent/10 font-medium text-accent shadow-[inset_0_0_0_1px_rgb(var(--accent))];
+  }
+  .kind-tile[aria-pressed="true"] .kind-icon { @apply text-accent; }
+
+  /* The hydration gauge: a track with the kind's typical range as a soft
+     band, the dough's hydration as a wheat fill, and a transparent range
+     input on top whose thumb is the handle (44 px tall, easy to drag). */
+  .gauge { @apply relative h-11; }
+  .gauge-track { @apply pointer-events-none absolute inset-x-0 top-3.5 h-4 overflow-hidden rounded-full border border-line bg-raised; }
+  .gauge-band { @apply absolute inset-y-0 bg-band; }
+  .gauge-fill { @apply absolute inset-y-0 left-0 bg-wheat motion-safe:transition-[width] motion-safe:duration-200; }
+  .gauge-zone { @apply absolute inset-y-0 w-px bg-surface; }
+  .gauge-input {
+    @apply absolute inset-0 m-0 w-full cursor-pointer appearance-none border-0 bg-transparent p-0
+      focus-visible:outline-none;
+  }
+  .gauge-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply h-7 w-7 rounded-full border-[3px] border-accent bg-surface;
+  }
+  .gauge-input::-moz-range-thumb {
+    @apply h-7 w-7 rounded-full border-[3px] border-accent bg-surface;
+  }
+  .gauge-input:focus-visible::-webkit-slider-thumb,
+  .gauge-input:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 2px rgb(var(--ground)), 0 0 0 4px rgb(var(--focus));
+  }
+
+  /* Minus/plus steppers: a 44 px button either side of an editable number. */
+  .stepper {
+    @apply flex h-11 items-stretch overflow-hidden rounded-lg border border-line bg-surface;
+  }
+  .stepper button {
+    @apply flex w-11 shrink-0 items-center justify-center bg-raised text-heading text-fg
+      hover:bg-line focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-inset focus-visible:ring-focus disabled:cursor-not-allowed
+      disabled:opacity-40 disabled:hover:bg-raised;
+  }
+  .stepper input {
+    @apply min-w-0 flex-1 border-0 bg-transparent text-center text-body font-semibold tabular-nums text-fg
+      focus:outline-none focus:ring-2 focus:ring-inset focus:ring-focus;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper .stepper-unit { @apply self-center pr-1 text-small font-normal text-muted; }
+
+  /* A numbered step in the rise schedule; rise steps get the wheat ring. */
+  .step-num {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line
+      bg-surface text-small font-semibold tabular-nums text-muted;
+  }
+  .step-num-rise { @apply border-wheat bg-band text-fg; }
+  /* A row's second line when it is an instruction to read, not a label:
+     wraps instead of the kit row's one-line truncate. */
+  .row-note { @apply break-words text-small text-muted; }
+
+  /* The grams figure on an ingredient row. */
+  .grams { @apply shrink-0 text-right text-heading tabular-nums; }
+  .grams .unit { @apply text-small font-normal text-muted; }
 
   /* ── Kit pieces ──────────────────────────────────────────────────────────
    * What public/kit/ draws with (its README.md), on the tokens only.

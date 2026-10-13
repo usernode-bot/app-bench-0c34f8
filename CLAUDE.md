@@ -95,22 +95,33 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A one-screen bread calculator for home bakers. The viewer picks a bread
+kind (sourdough, bagels, sourdough bagels, rye, sandwich loaf), sets
+hydration, piece count and dough weight per piece, and sees ingredient
+grams that sum exactly to the total dough, a numbered rise schedule, and
+bake temperature and times. Everything updates live — there is no
+Calculate button. The maths live in `public/bread.js` (pure, tested by
+`test/bread.test.js`); the screen in `public/app.js` just draws them.
+Each kind remembers its own settings in localStorage under
+`breadbot:v1`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent is a deep crust brown in light and a baked crust
+  gold in dark; `wheat` and `band` are fill-only tokens for the gauge
+  (never text); neutrals are warm flour greys. Values live in the token
+  block of `styles/tailwind-input.css`.
+- **Signature element:** the hydration gauge-as-slider — a track with the
+  kind's typical range as a soft band, the dough's hydration as a wheat
+  fill, and a transparent range input on top whose thumb is the handle.
+  Zone labels Stiff / Soft / Slack sit under it; bread-kind tiles, oven
+  stage icons and the numbered rise steps are drawn from the same subject.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (headings and figures use the `font-display` rounded face; change their
+  sizes in `tailwind.config.js` if you must, not their number).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

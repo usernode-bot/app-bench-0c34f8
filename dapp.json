@@ -2,5 +2,36 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Calculator renders",
+      "path": "/",
+      "expectSelector": ".gauge-input"
+    },
+    {
+      "name": "Recipe renders with ingredients and a total",
+      "path": "/",
+      "expectText": "Total"
+    },
+    {
+      "name": "Staging demo opens with sample settings",
+      "path": "/?demo=1",
+      "expectSelector": ".kit-demo-label"
+    },
+    {
+      "id": "calculator.live-update",
+      "name": "Calculator live-updates the recipe",
+      "path": "/",
+      "expectSelector": ".gauge-input",
+      "visual": true,
+      "impact": [
+        "public/app.js",
+        "public/bread.js",
+        "public/index.html",
+        "styles/tailwind-input.css",
+        "tailwind.config.js"
+      ]
+    }
+  ]
 }

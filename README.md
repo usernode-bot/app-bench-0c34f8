@@ -1,27 +1,42 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A one-screen bread calculator for home bakers. Pick a bread kind
+(sourdough, bagels, sourdough bagels, rye, or a sandwich loaf), set the
+hydration, the number of loaves or bagels and the dough weight per piece,
+and the screen shows:
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Ingredients** in whole grams that sum exactly to the total dough
+  (starter counted as 100% hydration, so its flour and water are part of
+  the percentages).
+- **Rise schedule** as numbered steps with durations, the rise steps
+  marked.
+- **Bake** temperature in °C with the °F beside it, preheat note, oven
+  stages scaled to the dough size, and resting notes.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Everything updates live as the settings change — there is no Calculate
+button. A hydration gauge doubles as the hydration slider: the soft band
+marks the kind's typical range, the wheat fill tracks the dough, and the
+gauge word (Stiff, Soft, Slack) says how the dough will feel.
 
-## Replacing the template
+Each kind remembers its own settings in the browser (`localStorage` key
+`breadbot:v1`). In staging, `?demo=1` opens on sample settings and
+writes nothing.
+
+## Layout
+
+- `server.js` — Express server: platform token auth, `/api/demo`, static
+  files.
+- `public/bread.js` — the bread maths, pure (no DOM), so Node can test it.
+- `public/app.js` — the screen; draws the kind tiles, gauge, steppers and
+  the three result sections from `bread.js`.
+- `public/index.html` — the HTML shell.
+- `styles/tailwind-input.css` — the design kit: colour tokens (light and
+  dark) and the app's components; `npm run build` compiles it to
+  `public/tailwind.css`.
+- `test/bread.test.js` — Node's test runner over `bread.js`
+  (`npm test`).
 
 To change this app, ask Homeroom bot: open the app on Homeroom, tap the
 Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+what you'd like in plain English. You can also run Claude Code against
+this repo directly; start with `CLAUDE.md`.

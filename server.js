@@ -154,6 +154,21 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// Staging demo seed for ?demo=1 ("Staging mock data" in the platform
+// conventions): one sample bake the screen opens on, so the populated
+// calculator can be seen without typing anything. Reads nothing, writes
+// nothing; outside staging, or without the query flag, demo is false and
+// the screen keeps the viewer's own settings.
+app.get('/api/demo', (req, res) => {
+  const demo = IS_STAGING && req.query.demo === '1';
+  res.json({
+    demo,
+    settings: demo
+      ? { kind: 'sourdough', hydration: 75, count: 2, size: 900 }
+      : null,
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
