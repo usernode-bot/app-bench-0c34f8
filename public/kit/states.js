@@ -7,9 +7,9 @@ import { h, clear } from './dom.js';
  * gives { content, run(task), loading(), empty(), error(), ready() }. task(content)
  * renders and returns false for empty; a throw shows the error, whose Try again reruns it.
  */
-export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
+export function createStates(el, { rows = 4, skeleton, empty = {}, error = {} } = {}) {
   let last = null;
-  const skeleton = h('div', { 'aria-busy': 'true' },
+  const skeletonEl = skeleton ? skeleton() : h('div', { 'aria-busy': 'true' },
     h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
     h('ul', { class: 'un-group kit-group', 'aria-hidden': 'true' },
       Array.from({ length: rows }, (_, i) => h('li', { class: 'un-group-row kit-skeleton-row' },
@@ -25,8 +25,8 @@ export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
     h('p', { class: 'text-body text-muted' }, error.text || 'Something went wrong on our side. Nothing you saved is lost.'),
     h('button', { type: 'button', class: 'btn-secondary mt-2', on: { click: () => (last ? run(last) : null) } }, 'Try again'));
   const content = h('div', { class: 'kit-content' });
-  const parts = { loading: skeleton, empty: emptyEl, error: errorEl, ready: content };
-  clear(el).append(skeleton, emptyEl, errorEl, content);
+  const parts = { loading: skeletonEl, empty: emptyEl, error: errorEl, ready: content };
+  clear(el).append(skeletonEl, emptyEl, errorEl, content);
 
   function show(which) {
     for (const [name, node] of Object.entries(parts)) node.hidden = name !== which;

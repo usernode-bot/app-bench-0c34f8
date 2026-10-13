@@ -9,6 +9,7 @@ import { toast } from '/kit/native.js';
 
 const appEl = document.querySelector('.app');
 const countEl = document.getElementById('count');
+const footEl = document.querySelector('.foot');
 const failuresEl = document.getElementById('feed-failures');
 const addBtn = document.getElementById('add-feed');
 
@@ -21,10 +22,11 @@ document.querySelector('template[data-spec-screen="2"]').remove();
 
 const view = createStates(document.getElementById('list-area'), {
   rows: 5,
+  skeleton: skeletonList,
   empty: {
     title: 'Add your first feed',
     text: 'Add an RSS or Atom feed and its unread posts will show up here.',
-    action: { label: 'Add feed', onClick: openAddSheet, primary: true },
+    action: { label: 'Add feed', onClick: openAddSheet },
   },
   error: {
     title: 'Posts did not load',
@@ -33,6 +35,24 @@ const view = createStates(document.getElementById('list-area'), {
 });
 
 let feedCount = 0;
+
+// Loading rows shaped like the real ones: a dot, a tag bar with the time,
+// a title bar and two summary bars, in a .list so the dividers are full
+// width as in the populated list.
+function skeletonList() {
+  return h('div', { 'aria-busy': 'true' },
+    h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+    h('ul', { class: 'list', 'aria-hidden': 'true' },
+      Array.from({ length: 5 }, () => h('li', { class: 'list-row' },
+        h('span', { class: 'skeleton shrink-0', style: 'width:8px;height:8px;border-radius:50%;margin-top:7px' }),
+        h('div', { class: 'post' },
+          h('div', { class: 'masthead' },
+            h('span', { class: 'skeleton h-4 w-32' }),
+            h('span', { class: 'when skeleton h-3 w-10' })),
+          h('span', { class: 'skeleton h-5 w-3/4' }),
+          h('span', { class: 'skeleton h-4 w-full' }),
+          h('span', { class: 'skeleton h-4 w-2/3' }))))));
+}
 
 // The drawn "when" values are the short kind: "12 min", "1 hr", "Yesterday".
 function whenLabel(post) {
@@ -55,6 +75,9 @@ function updateCount() {
   countEl.textContent = rows || feedCount
     ? `${plural(rows, 'post')} from ${plural(feedCount, 'feed')}`
     : '';
+  // The footer line is a claim about a loaded list: it shows only while a
+  // populated list is on the screen.
+  footEl.hidden = !rows;
 }
 
 function rowFor(post) {
@@ -146,8 +169,8 @@ function openAddSheet() {
       label: 'Feed address',
       required: true,
       max: 500,
-      placeholder: 'e.g. example.com/feed.xml',
-      hint: 'The address of the RSS or Atom feed.',
+      placeholder: 'https://example.com/feed.xml',
+      hint: "Paste the feed's own address, not the site's home page.",
     }],
     submitLabel: 'Add feed',
     savedMessage: 'Feed added',
@@ -159,6 +182,9 @@ function openAddSheet() {
 }
 
 async function load() {
+  // The footer claim does not belong to the loading, empty or error states;
+  // updateCount shows it again only once a populated list is on the screen.
+  footEl.hidden = true;
   return view.run(async (box) => {
     const data = await api('GET', '/api/posts');
     feedCount = data.feedCount || 0;
