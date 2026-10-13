@@ -55,6 +55,9 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        'tally-2': token('tally-2'), // tally strip, second rank
+        'tally-3': token('tally-3'), // tally strip, third rank
+        'tally-4': token('tally-4'), // tally strip, fourth rank and below
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
@@ -62,6 +65,11 @@ module.exports = {
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      // The rounded face the spec's titles ask for (screens.css's .text-title
+      // uses the same stack).
+      fontFamily: {
+        display: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
     },
   },

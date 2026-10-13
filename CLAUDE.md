@@ -95,22 +95,26 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Any member posts a question
+with 2–6 options ("Ask the club"), everyone votes — one option, changeable
+or take-back-able until voting closes — and discusses it in comments. When
+the asker closes voting, the question moves to "Decided", which shows what
+the group picked. Guests can read everything but cannot vote, comment,
+post or report.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** chalk-green neutrals with a ballot-box green accent
+  (`--accent`); the tally strip gets three quieter greens (`--tally-2`,
+  `--tally-3`, `--tally-4`) that rank the non-leading options.
+- **Signature element:** the ballot slip — each open question is a card with
+  a tally strip and a perforated 72 px stub ("Voted"/"Vote", the box ticked
+  once the viewer has voted). Decided questions show a circled tick instead.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  titles use the rounded face (`ui-rounded`, `font-display`).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +142,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `questions` resource itself is the kit's (`kit/server.js`); this app's
+  additions live in `server.js` around it: `closed_at`/`hidden_at` columns,
+  the `question_reports` table (marked `staging:private` — reports never
+  leave the server), and an enrich middleware on `/api/questions` so hidden
+  or reported content never reaches any client, not even its author once
+  hidden. Never serve hidden content anywhere.
+- Voting closes with `POST /api/questions/:id/close` (asker only); closed
+  questions carry `closedAt` in API answers and the client renders them
+  read-only with the final result.
+- Staging demo (`?demo=1`): question ids 900001+, the two oldest are the
+  decided ones, and each viewer gets one ownable question ("Colour for the
+  new club t-shirts") once, tracked in `club_demo_viewers`.
+- `public/kit/*` and `kit/server.js` are platform-provided; do not edit them.
+  The tally strip lives in `styles/tailwind-input.css`
+  (`.tally-strip`, `.tally-1`…`.tally-4`) and is drawn by `public/app.js`.

@@ -119,17 +119,17 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <div data-spec-screen="1" id="list-screen">
     <div>
-    <div class="s"><main class="wrap">
+    <div class="s" id="page"><main class="wrap">
     <header class="top">
       <div><h1 class="text-title">Club Votes</h1><p class="text-small muted">What the club is deciding</p></div>
-      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ask the club</button>
+      <button class="btn-primary" id="ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ask the club</button>
     </header>
 
     <section>
-    <h2 class="section-label">Open questions, 5</h2>
-    <div class="feed">
+    <h2 class="section-label" id="open-label">Open questions, 5</h2>
+    <div id="feed"><div class="feed">
 
     <button class="card ballot"><div class="b-main">
       <h3 class="b-title">Where should the spring picnic be?</h3>
@@ -166,12 +166,12 @@
       <p class="meta"><span>Hana, 4 days ago</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>1</span></p>
     </div><div class="stub"><svg viewBox="0 0 24 24" fill="none" stroke="rgb(78 92 83)" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/></svg><b>Vote</b></div></button>
 
-    </div>
+    </div></div>
     </section>
 
-    <section>
+    <section id="decided-sec">
     <h2 class="section-label">Decided</h2>
-    <ul class="list">
+    <ul class="list" id="decided">
       <li class="list-row"><svg class="d-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5.5-6"/></svg><div class="d-text"><span class="d-title">Day for the summer quiz night</span><span class="text-small muted">Picked Friday, 9 of 11 votes</span></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></li>
       <li class="list-row"><svg class="d-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5.5-6"/></svg><div class="d-text"><span class="d-title">Name for the club newsletter</span><span class="text-small muted">Picked The Weekly Bulletin, 6 of 10 votes</span></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></li>
     </ul>
@@ -179,52 +179,12 @@
     </main></div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="s"><main class="wrap">
-      <article class="kit-detail">
-      <header class="kit-detail-head">
-        <div class="bar">
-          <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Questions</button>
-          <button class="kit-icon-button" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-        </div>
-        <h2 class="text-title">Where should the spring picnic be?</h2>
-        <p class="text-small muted">Asked by Ana, 2 hours ago</p>
-        <p class="kit-detail-body">We need somewhere with shade and space for the games table. Bring ideas below if your favourite spot is missing.</p>
-      </header>
-
-      <section class="kit-section">
-        <h3 class="section-label">Your vote</h3>
-        <div class="strip"><i class="t1" style="width:58%"></i><i class="t2" style="width:25%"></i><i class="t3" style="width:17%"></i></div>
-        <div class="kit-votes">
-          <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:58%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="kit-vote-label">Riverside park</span><span class="kit-vote-count">7</span></button>
-          <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:25%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="kit-vote-label">Library lawn</span><span class="kit-vote-count">3</span></button>
-          <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:17%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="kit-vote-label">Community garden</span><span class="kit-vote-count">2</span></button>
-        </div>
-        <p class="kit-vote-summary">12 votes, Riverside park leads. Tap your choice again to take your vote back.</p>
-      </section>
-
-      <section class="kit-section">
-        <h3 class="section-label">Comments, 4</h3>
-        <ul class="kit-group">
-          <li class="list-row kit-comment"><div class="c-text"><p class="kit-comment-meta"><span class="kit-comment-author">Ben</span><time>1 hour ago</time></p><p class="kit-comment-body">Riverside has the big oak, so shade is sorted.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
-          <li class="list-row kit-comment"><div class="c-text"><p class="kit-comment-meta"><span class="kit-comment-author">Chioma</span><time>58 minutes ago</time></p><p class="kit-comment-body">The library lawn is closer to the bus stop though.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
-          <li class="list-row kit-comment"><div class="c-text"><p class="kit-comment-meta"><span class="kit-comment-author">Gus</span><time>40 minutes ago</time></p><p class="kit-comment-body">Could we book the garden shed in case it rains?</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
-          <li class="list-row kit-comment"><div class="c-text"><p class="kit-comment-meta"><span class="kit-comment-author">Lucia</span><time>12 minutes ago</time></p><p class="kit-comment-body">Riverside gets my vote. Plenty of room for the frisbee.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
-        </ul>
-        <form class="kit-composer">
-          <label class="kit-label">Add a comment</label>
-          <div class="field">e.g. I can bring the folding chairs</div>
-          <div class="kit-composer-actions"><button class="btn-secondary" disabled>Post comment</button></div>
-        </form>
-      </section>
-      </article>
-      </main></div>
-      </div>
-    </div>
-  </template>
+  <!-- Screen 2, live: app.js draws the question into #detail when the hash
+       points at one. data-spec-screen="2" keeps the carried-over styles. -->
+  <div id="detail-screen" data-spec-screen="2" hidden>
+    <main class="wrap" id="detail"></main>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

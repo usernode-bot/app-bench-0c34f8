@@ -145,6 +145,286 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Club Votes API ─────────────────────────────────────────────────────────
+// The questions themselves (with votes and comments) are the kit's resource,
+// mounted further down. The routes here sit BESIDE it, before it, so they
+// run first: hiding and reporting, closing voting, and the staging demo's
+// extras. Made-up staging-demo rows (public/kit/demo.js) start at id 900001.
+
+const GONE = 'This question was removed, or the link is wrong.';
+const CLOSED = 'Voting on this question has closed.';
+const HIDE_AT = 3; // distinct reporters needed before content hides for everyone
+const viewerId = (req) => (req.user ? Number(req.user.id) : null);
+
+// The staging demo, passed to the kit's resource below. Each entry's options
+// win over the kit's Yes/No default. Newest first: the last two are the
+// oldest questions, which the demo closes (see finalizeDemo).
+const DEMO = {
+  bodies: [
+    'Shout in the comments if your favourite is missing.',
+    'We need to settle this soon so the booking can go in.',
+    'One vote each while it is open — change it any time.',
+    'Raise it at the next meeting if nothing gets picked.',
+  ],
+  comments: [
+    'Happy to help set up.',
+    'Can we decide before Friday?',
+    'Either works for me.',
+    'I can bring the folding chairs.',
+    'Last time ran late, so earlier would be better.',
+    'Count me in.',
+    'Does the hall have parking?',
+    'The library room is free on Thursdays.',
+    'Good idea, it has come up a few times now.',
+    'Ask at the desk — they were helpful last time.',
+    'I will ask around and report back.',
+    'Fine by me as long as we keep it short.',
+  ],
+  titles: [
+    { title: 'Where should the spring picnic be?', options: ['Riverside park', 'Library lawn', 'Community garden'] },
+    { title: 'Move meetings to Thursday evenings?' },
+    { title: 'Next book for the reading night', options: ['The Lighthouse Diaries', 'The Orchard Letters', 'Northwind', 'The Long Field'] },
+    { title: 'Should we start a monthly litter pick?' },
+    { title: 'Date for the Christmas party', options: ['Early December', 'Mid December', 'January'] },
+    { title: 'Slogan for the club banner', options: ['Stitch it together', 'All threads welcome'] },
+    { title: 'Trip to the coastal nature reserve', options: ['Saturday morning', 'Sunday morning', 'A weekday evening'] },
+    { title: 'Bake sale or quiz night for the fundraiser?', options: ['Bake sale', 'Quiz night'] },
+    { title: 'Where to meet through the winter', options: ['The scout hut', 'The library room', 'The café back room'] },
+    { title: 'Day for the summer quiz night', options: ['Friday', 'Saturday'] },
+    { title: 'Name for the club newsletter', options: ['The Weekly Bulletin', 'Club Notes', 'The Noticeboard'] },
+  ],
+};
+
+// Wraps res.json on the questions API so every answer leaves through one
+// place: hidden or reported-by-the-viewer content never shows, closed
+// questions carry closedAt, and comment counts stay honest.
+app.use('/api/questions', (req, res, next) => {
+  const json = res.json.bind(res);
+  res.json = async (data) => {
+    try {
+      if (data && data.demo) await finalizeDemo();
+      if (data && Array.isArray(data.items)) return json(await enrichList(data, req));
+      if (data && data.item && Array.isArray(data.comments)) return json(await enrichOne(data, req, res));
+      return json(data);
+    } catch (err) {
+      console.error('enrich failed:', err);
+      return json(data);
+    }
+  };
+  next();
+});
+
+async function questionInfo(ids) {
+  const { rows } = await pool.query(
+    'SELECT id, closed_at, hidden_at FROM questions WHERE id = ANY($1)', [ids]);
+  return new Map(rows.map((r) => [r.id, r]));
+}
+
+// What THIS viewer has reported: that content hides for them straight away.
+async function reportedBy(kind, ids, req) {
+  const uid = viewerId(req);
+  if (!uid || !ids.length) return new Set();
+  const { rows } = await pool.query(
+    'SELECT target_id FROM question_reports WHERE kind = $1 AND user_id = $2 AND target_id = ANY($3)',
+    [kind, uid, ids]);
+  return new Set(rows.map((r) => r.target_id));
+}
+
+async function enrichList(data, req) {
+  const ids = data.items.map((i) => i.id);
+  if (!ids.length) return data;
+  const info = await questionInfo(ids);
+  const reported = await reportedBy('question', ids, req);
+  // Comments hidden from everyone, or reported by this viewer, come off the count too.
+  const uid = viewerId(req);
+  const { rows } = await pool.query(
+    `SELECT c.item_id, COUNT(*)::int AS n FROM questions_comments c
+     WHERE c.item_id = ANY($1) AND (c.hidden_at IS NOT NULL OR EXISTS (
+       SELECT 1 FROM question_reports r WHERE r.kind = 'comment' AND r.target_id = c.id AND r.user_id = $2))
+     GROUP BY c.item_id`, [ids, uid]);
+  const gone = new Map(rows.map((r) => [r.item_id, r.n]));
+  data.items = data.items.filter((item) => {
+    const q = info.get(item.id);
+    if (!q || q.hidden_at || reported.has(item.id)) return false;
+    item.closedAt = q.closed_at ? q.closed_at.toISOString() : null;
+    item.commentCount = Math.max(0, item.commentCount - (gone.get(item.id) || 0));
+    return true;
+  });
+  if (data.demo) await refreshDemoCounts(data.items);
+  return data;
+}
+
+async function enrichOne(data, req, res) {
+  const info = await questionInfo([data.item.id]);
+  const q = info.get(data.item.id);
+  const reported = await reportedBy('question', [data.item.id], req);
+  if (!q || q.hidden_at || reported.has(data.item.id)) {
+    res.status(404);
+    return { error: GONE };
+  }
+  data.item.closedAt = q.closed_at ? q.closed_at.toISOString() : null;
+  const ids = data.comments.map((c) => c.id);
+  const hiddenSet = new Set((await pool.query(
+    'SELECT id FROM questions_comments WHERE id = ANY($1) AND hidden_at IS NOT NULL', [ids])).rows.map((r) => r.id));
+  const reportedSet = await reportedBy('comment', ids, req);
+  data.comments = data.comments.filter((c) => !hiddenSet.has(c.id) && !reportedSet.has(c.id));
+  data.item.commentCount = data.comments.length;
+  return data;
+}
+
+// Staging demo only, once the kit has written its rows: the two oldest demo
+// questions are already decided. Closing them here means the first demo load
+// already shows them under "Decided": enrichList re-reads closed_at and
+// refreshDemoCounts re-reads the tallies.
+async function finalizeDemo() {
+  // Once per database: claiming the marker row settles concurrent demo
+  // requests, so the two decided questions stay exactly two.
+  const claimed = await pool.query(
+    `INSERT INTO club_demo_state (key) VALUES ('decided') ON CONFLICT DO NOTHING RETURNING key`);
+  if (!claimed.rows.length) return;
+  const { rows } = await pool.query(
+    `SELECT id FROM questions WHERE id BETWEEN 900001 AND 900099 AND closed_at IS NULL
+     ORDER BY created_at ASC, id ASC LIMIT 2`);
+  for (const q of rows) {
+    await pool.query(
+      `UPDATE questions SET closed_at = created_at + interval '2 days' WHERE id = $1 AND closed_at IS NULL`, [q.id]);
+    // A decisive result: seven votes for the first option, two for the second,
+    // from made-up staging ids no real account holds. Idempotent via the PK.
+    const users = [];
+    const choices = [];
+    for (let k = 0; k < 7; k += 1) { users.push(-(q.id * 20 + k)); choices.push(0); }
+    for (let k = 0; k < 2; k += 1) { users.push(-(q.id * 20 + 10 + k)); choices.push(1); }
+    await pool.query(
+      `INSERT INTO questions_votes (item_id, user_id, choice, created_at)
+       SELECT $1, u, c, (SELECT created_at + interval '1 hour' FROM questions WHERE id = $1)
+       FROM unnest($2::int[], $3::int[]) AS t(u, c)
+       ON CONFLICT DO NOTHING`, [q.id, users, choices]);
+  }
+}
+
+// A demo response's tallies were counted before finalizeDemo's votes went in,
+// so on staging demo reads, re-read the counts from the table.
+async function refreshDemoCounts(items) {
+  const ids = items.map((i) => i.id);
+  if (!ids.length) return;
+  const { rows } = await pool.query(
+    'SELECT item_id, choice, COUNT(*)::int AS n FROM questions_votes WHERE item_id = ANY($1) GROUP BY item_id, choice', [ids]);
+  const counts = new Map();
+  for (const r of rows) {
+    let m = counts.get(r.item_id);
+    if (!m) counts.set(r.item_id, (m = new Map()));
+    m.set(r.choice, r.n);
+  }
+  for (const item of items) {
+    const m = counts.get(item.id);
+    if (m) for (const o of item.votes.options) o.count = m.get(o.id) || 0;
+  }
+}
+
+// Staging demo, signed-in viewers, once each: their own question to look
+// after, three days old, with three votes already on it.
+app.get(['/api/questions', '/api/questions/:id'], async (req, res, next) => {
+  try {
+    if (IS_STAGING && req.query.demo === '1' && req.user) {
+      const first = await pool.query(
+        'INSERT INTO club_demo_viewers (user_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING user_id',
+        [viewerId(req)]);
+      if (first.rows.length) {
+        const at = new Date(req.now.getTime() - 3 * 24 * 60 * 60 * 1000);
+        const { rows } = await pool.query(
+          `INSERT INTO questions (title, body, options, author_id, author_name, created_at)
+           VALUES ($1, $2, $3::jsonb, $4, $5, $6) RETURNING id`,
+          ['Colour for the new club t-shirts',
+            'Pick the colour for the sample batch. One vote each, and you can change it until voting closes.',
+            JSON.stringify(['Forest green', 'Navy', 'Sunny yellow']),
+            viewerId(req), String(req.user.username || 'You'), at]);
+        await pool.query(
+          `INSERT INTO questions_votes (item_id, user_id, choice, created_at)
+           SELECT $1, u, c, $2 FROM unnest($3::int[], $4::int[]) AS t(u, c)
+           ON CONFLICT DO NOTHING`, [rows[0].id, at, [-3, -7, -9], [0, 0, 1]]);
+      }
+    }
+    next();
+  } catch (err) { next(err); }
+});
+
+// No vote on a removed question, and none after voting closed.
+app.post('/api/questions/:id/vote', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const { rows } = Number.isInteger(id) && id > 0
+      ? await pool.query('SELECT closed_at, hidden_at FROM questions WHERE id = $1', [id])
+      : { rows: [] };
+    if (!rows.length || rows[0].hidden_at) return res.status(404).json({ error: GONE });
+    if (rows[0].closed_at) return res.status(409).json({ error: CLOSED });
+    return next();
+  } catch (err) { next(err); }
+});
+
+// No comment on a removed question either.
+app.post('/api/questions/:id/comments', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const { rows } = Number.isInteger(id) && id > 0
+      ? await pool.query('SELECT hidden_at FROM questions WHERE id = $1', [id])
+      : { rows: [] };
+    if (!rows.length || rows[0].hidden_at) return res.status(404).json({ error: GONE });
+    return next();
+  } catch (err) { next(err); }
+});
+
+// The person who asked can close voting; everyone then sees the result.
+app.post('/api/questions/:id/close', async (req, res) => {
+  const id = Number(req.params.id);
+  const { rows } = Number.isInteger(id) && id > 0
+    ? await pool.query('SELECT id, author_id, closed_at, hidden_at FROM questions WHERE id = $1', [id])
+    : { rows: [] };
+  const q = rows[0];
+  if (!q || q.hidden_at) return res.status(404).json({ error: GONE });
+  if (q.author_id !== viewerId(req)) {
+    return res.status(403).json({ error: 'Only the person who asked can close voting.' });
+  }
+  if (!q.closed_at) await pool.query('UPDATE questions SET closed_at = $1 WHERE id = $2', [req.now, id]);
+  return res.json({ ok: true });
+});
+
+// Report a question or a comment. It disappears for the reporter at once,
+// and for everyone once HIDE_AT distinct people have reported it.
+app.post('/api/reports', async (req, res) => {
+  const body = req.body || {};
+  const kind = body.kind;
+  const targetId = Number(body.targetId != null ? body.targetId : body.target_id);
+  if (!['question', 'comment'].includes(kind) || !Number.isInteger(targetId) || targetId <= 0) {
+    return res.status(400).json({ error: 'Say what you are reporting.' });
+  }
+  const table = kind === 'question' ? 'questions' : 'questions_comments';
+  const { rows } = await pool.query(
+    `SELECT id, author_id, hidden_at FROM ${table} WHERE id = $1`, [targetId]);
+  const target = rows[0];
+  if (!target || target.hidden_at) return res.status(404).json({ error: GONE });
+  if (target.author_id === viewerId(req)) {
+    return res.status(400).json({ error: 'You cannot report your own post.' });
+  }
+  await pool.query(
+    'INSERT INTO question_reports (kind, target_id, user_id, created_at) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
+    [kind, targetId, viewerId(req), req.now]);
+  const { rows: counted } = await pool.query(
+    'SELECT COUNT(*)::int AS n FROM question_reports WHERE kind = $1 AND target_id = $2', [kind, targetId]);
+  if (counted[0].n >= HIDE_AT) {
+    await pool.query(`UPDATE ${table} SET hidden_at = $1 WHERE id = $2 AND hidden_at IS NULL`, [req.now, targetId]);
+  }
+  return res.status(201).json({ ok: true });
+});
+
+// The kit's resource: the questions, their votes and their comments, with
+// routes /api/questions and the staging demo rows. Mounted AFTER the routes
+// above, so the guards and the demo extras run first.
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  options: ['Yes', 'No'],
+  demo: DEMO,
+});
+
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
@@ -191,10 +471,44 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Forward-only, idempotent schema: the kit's tables first, then this app's
+// columns and tables.
+async function migrate() {
+  await questions.migrate();
+  await pool.query('ALTER TABLE questions ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ');
+  await pool.query('ALTER TABLE questions ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ');
+  await pool.query('ALTER TABLE questions_comments ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ');
+  await pool.query(`CREATE TABLE IF NOT EXISTS question_reports (
+    kind TEXT NOT NULL,
+    target_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (kind, target_id, user_id))`);
+  await pool.query("COMMENT ON TABLE question_reports IS 'staging:private'");
+  await pool.query('CREATE TABLE IF NOT EXISTS club_demo_viewers (user_id INTEGER PRIMARY KEY)');
+  // Marks the staging demo's two decided questions as closed, once per
+  // database (finalizeDemo).
+  await pool.query('CREATE TABLE IF NOT EXISTS club_demo_state (key TEXT PRIMARY KEY)');
+}
+
 async function start() {
+  await migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  let shuttingDown = false;
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    const timer = setTimeout(() => process.exit(0), 3000);
+    timer.unref();
+    server.close(() => {
+      clearTimeout(timer);
+      pool.end().finally(() => process.exit(0));
+    });
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

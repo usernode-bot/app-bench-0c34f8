@@ -39,23 +39,26 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 34 130 84;      /* the keyboard focus ring */
     --tally-2: 118 158 131; /* from the spec's screens */
     --tally-3: 172 198 179; /* from the spec's screens */
     --tally-4: 209 222 211; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 14 20 16;
+    --surface: 24 32 27;
+    --raised: 34 44 38;
+    --fg: 236 241 236;
+    --muted: 158 172 162;
+    --line: 52 64 56;
+    --accent: 110 200 150;
+    --on-accent: 8 40 24;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 134 214 166;
+    --tally-2: 76 128 98;
+    --tally-3: 58 92 72;
+    --tally-4: 46 70 56;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -197,8 +200,10 @@
   .kit-vote-summary { @apply mt-2 px-1 text-small text-muted; }
   .kit-error { @apply text-small text-danger; }
 
-  /* A comment thread, then the composer. */
-  .kit-comment { @apply flex-col items-start gap-1; }
+  /* A comment thread, then the composer. (No flex-col: the comment row is a
+     list row, author and time beside the text, and screens.css's .list-row
+     lays the row out.) */
+  .kit-comment { @apply items-start gap-1; }
   .kit-comment-meta { @apply flex flex-wrap items-baseline gap-x-2 text-small text-muted; }
   .kit-comment-author { @apply font-medium text-fg; }
   .kit-comment-body { @apply whitespace-pre-line break-words text-body text-fg; }
@@ -262,4 +267,24 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* ── The ballot slip's tally strip ─────────────────────────────────────
+   * 10 px in the feed, 12 px on the detail screen. Segments are ranked by
+   * count: the leader takes tally-1 (the accent), then tally-2, tally-3,
+   * and from the fourth rank on everything shares tally-4. app.js sets each
+   * segment's width to its share of the vote. */
+  .tally-strip {
+    @apply flex gap-0.5 overflow-hidden rounded-[3px] bg-raised;
+    height: 10px;
+  }
+  .tally-strip-lg {
+    @apply mb-3 flex gap-0.5 overflow-hidden rounded-[3px] bg-raised;
+    height: 12px;
+  }
+  .tally-strip i,
+  .tally-strip-lg i { @apply block h-full; }
+  .tally-1 { @apply bg-accent; }
+  .tally-2 { @apply bg-tally-2; }
+  .tally-3 { @apply bg-tally-3; }
+  .tally-4 { @apply bg-tally-4; }
 }

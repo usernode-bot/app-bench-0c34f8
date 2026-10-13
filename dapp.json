@@ -2,5 +2,31 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "feed.demo",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js"],
+      "name": "Question feed (demo)",
+      "path": "/?demo=1",
+      "expectSelector": ".ballot .tally-strip"
+    },
+    {
+      "id": "detail.demo",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js"],
+      "name": "Question opens (demo)",
+      "path": "/?demo=1#q-900001",
+      "expectSelector": ".kit-votes, .kit-report"
+    },
+    {
+      "id": "loads",
+      "visual": false,
+      "impact": ["public/**", "server.js"],
+      "name": "App loads without demo",
+      "path": "/",
+      "expectText": "Club Votes"
+    }
+  ]
 }

@@ -85,9 +85,11 @@
 
 .chev {width:20px;height:20px;color:rgb(var(--muted));flex-shrink:0}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. The rules that would
+   restyle screen 1 too (.s, .wrap, .strip, .list-row) are scoped to
+   [data-spec-screen="2"], so the feed keeps its own sizes. */
 
-.s {
+[data-spec-screen="2"] .s {
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
@@ -95,7 +97,7 @@
   box-sizing: border-box;
 }
 
-.wrap {max-width:42rem;margin:0 auto;padding:16px 16px 32px}
+[data-spec-screen="2"] .wrap {max-width:42rem;margin:0 auto;padding:16px 16px 32px}
 
 .kit-detail {display:flex;flex-direction:column;gap:24px}
 
@@ -113,7 +115,7 @@
 
 .kit-section {display:flex;flex-direction:column}
 
-.strip {display:flex;gap:2px;height:12px;border-radius:3px;overflow:hidden;background:rgb(var(--raised));margin-bottom:12px}
+[data-spec-screen="2"] .strip {display:flex;gap:2px;height:12px;border-radius:3px;overflow:hidden;background:rgb(var(--raised));margin-bottom:12px}
 
 .kit-votes {display:flex;flex-direction:column;gap:8px}
 
@@ -141,7 +143,7 @@
 
 .kit-group {list-style:none;padding:0;overflow:hidden;border-radius:14px;border:1px solid rgb(var(--line));background:rgb(var(--surface))}
 
-.list-row {display:flex;gap:12px;padding:12px 8px 12px 16px;min-height:44px}
+[data-spec-screen="2"] .list-row {display:flex;gap:12px;padding:12px 8px 12px 16px;min-height:44px}
 
 .kit-comment {align-items:flex-start}
 
