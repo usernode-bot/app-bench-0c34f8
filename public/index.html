@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,78 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main class="app">
+      <header class="head">
+        <div class="head-text">
+          <h1 class="text-title">Unread</h1>
+          <p class="text-small muted">23 posts from 4 feeds</p>
+        </div>
+        <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+      </header>
+      <ul class="list">
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">Pretend Garden Weekly</span><span class="when">12 min</span></div>
+          <h2 class="title">Ten tomatoes that only grow in sample data</h2>
+          <p class="summary">This is made-up demo text. Our imaginary allotment tried every variety we could invent this summer.</p>
+        </div></li>
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">The Example Kitchen</span><span class="when">1 hr</span></div>
+          <h2 class="title">A soup recipe nobody has cooked, step by step</h2>
+          <p class="summary">Placeholder steps for a placeholder soup: chop the pretend leeks, simmer for a fictional twenty minutes.</p>
+        </div></li>
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">Sample Cycling Club</span><span class="when">3 hr</span></div>
+          <h2 class="title">Route of the week: the loop around Lorem Lake</h2>
+          <p class="summary">Forty invented kilometres, two fake hills and a café that exists only in this demo.</p>
+        </div></li>
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">Mock Space Notes</span><span class="when">Yesterday</span></div>
+          <h2 class="title">What the made-up telescope saw on Tuesday night</h2>
+          <p class="summary">A demo post about a demo comet. Nothing here was observed by anyone.</p>
+        </div></li>
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">Pretend Garden Weekly</span><span class="when">Yesterday</span></div>
+          <h2 class="title">How to water a garden that is only in a test database</h2>
+          <p class="summary">Less often than you think. This post is staging sample content.</p>
+        </div></li>
+        <li class="list-row"><span class="dot"></span><div class="post">
+          <div class="masthead"><span class="feed-tag">The Example Kitchen</span><span class="when">2 days</span></div>
+          <h2 class="title">Five breakfasts from an imaginary pantry</h2>
+          <p class="summary">Toast, more toast, and three ideas we invented for this preview.</p>
+        </div></li>
+      </ul>
+      <p class="foot text-small muted">That's every unread post. Read ones leave the list.</p>
+    </main>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="behind"><h1 class="text-title">Unread</h1><p class="text-small muted">23 posts from 4 feeds</p></div>
+      <div class="scrim"></div>
+      <section class="sheet">
+        <div class="grab"></div>
+        <div class="sheet-bar">
+          <span class="feed-tag">Pretend Garden Weekly</span>
+          <button class="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div>
+          <h2 class="title">Ten tomatoes that only grow in sample data</h2>
+          <p class="text-small muted">Today at 9:48, by Demo Gardener</p>
+        </div>
+        <p class="body">This is made-up demo text. Our imaginary allotment tried every variety we could invent this summer, from the Placeholder Plum to the Lorem Cherry.</p>
+        <p class="body">The short version: water the pretend ones in the morning, and never trust a tomato that only exists in a staging database. The full article walks through all ten.</p>
+        <a class="btn-primary" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
+      </section>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
