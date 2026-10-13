@@ -13,8 +13,10 @@ export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
     h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
     h('ul', { class: 'un-group kit-group', 'aria-hidden': 'true' },
       Array.from({ length: rows }, (_, i) => h('li', { class: 'un-group-row kit-skeleton-row' },
-        h('span', { class: i % 2 ? 'skeleton h-4 w-1/2' : 'skeleton h-4 w-3/4' }),
-        h('span', { class: 'skeleton h-3 w-1/3' })))));
+        h('span', { class: 'skeleton h-9 w-9 shrink-0 rounded-lg' }),
+        h('span', { class: 'flex min-w-0 flex-1 flex-col gap-2' },
+          h('span', { class: 'skeleton h-3 w-1/3' }),
+          h('span', { class: i % 2 ? 'skeleton h-4 w-1/2' : 'skeleton h-4 w-3/4' }))))));
   const action = empty.action;
   const emptyEl = h('div', { class: 'state-empty' },
     h('h2', { class: 'text-heading' }, empty.title || 'Nothing here yet'),

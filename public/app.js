@@ -19,6 +19,7 @@ const els = {
   addLabel: document.getElementById('add-label'),
   addError: document.getElementById('add-error'),
   pills: document.getElementById('pills'),
+  metaRow: document.getElementById('meta-row'),
   markRead: document.getElementById('mark-read'),
   failed: document.getElementById('failed-line'),
   end: document.getElementById('end-line'),
@@ -61,6 +62,13 @@ function shortAgo(when) {
 const makeRow = rowsFrom(document.getElementById('post-list'));
 const view = createStates(els.states, {
   rows: 5,
+  // The kit's empty element: title and one sentence, so both exist for
+  // setEmpty to rewrite (the no-feeds words are also what the declared
+  // check looks for).
+  empty: {
+    title: 'No feeds yet',
+    text: "Paste a feed's address above to start your list. Most blogs and news sites have one, often ending in /feed or .xml.",
+  },
   error: {
     title: "Your posts didn't load",
     text: 'Your feeds are saved. Check your connection and try again.',
@@ -168,6 +176,10 @@ function unreadInView() {
 // Renders everything; returns true when the list shows, false when the
 // screen's empty state should.
 function renderAll() {
+  // The "Newest first" row belongs to the list: it hides while anything
+  // else (loading, empty, caught up, error) shows, and only a rendered
+  // list brings it back.
+  els.metaRow.hidden = true;
   renderHeader();
   renderPills();
   renderFailed();
@@ -209,6 +221,7 @@ function renderAll() {
   }
   view.content.replaceChildren(list);
   els.end.hidden = false;
+  els.metaRow.hidden = false;
   return true;
 }
 
@@ -448,8 +461,16 @@ async function loadInitial() {
   return renderAll(); // false → the kit shows the empty state
 }
 
+// The header line names the fresh-copy state ("No feeds yet") from the
+// first paint, before the list has loaded; a failed load takes the claim
+// back rather than leaving it over the error block.
+renderHeader();
 view.run(loadInitial).then(() => {
+  if (els.states.dataset.state === 'error') {
+    els.unreadLine.textContent = '';
+    return;
+  }
   // The first load shows saved posts at once; then quietly check the feeds
   // that have not been checked in a while.
-  if (els.states.dataset.state !== 'error') refresh(false);
+  refresh(false);
 });

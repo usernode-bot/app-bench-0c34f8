@@ -261,8 +261,10 @@
     bottom: calc(1rem + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
-  /* Loading rows, the content holder, the one demo line. */
-  .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
+  /* Loading rows, the content holder, the one demo line. A loading row has
+     the shape of a real one: chip square on the left, feed-and-time line
+     over the headline. */
+  .kit-skeleton-row { @apply flex items-start gap-3 px-4 py-4; }
   .kit-content { @apply flex flex-col gap-6; }
   .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
 
@@ -317,9 +319,10 @@
   /* The meta line above the headline: feed name, time, unread dot. */
   .post-meta { @apply flex items-center gap-2 text-small text-muted; }
 
-  /* Filter pills. The chosen one is filled dark; its chip keeps its colour. */
+  /* Filter pills. The chosen one is filled dark; its chip keeps its colour.
+     44px tall, so the tap target meets the platform's minimum. */
   .feed-pill {
-    @apply inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3
+    @apply inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3
       text-small text-fg hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
   }
   .feed-pill b { @apply font-semibold tabular-nums text-muted; }

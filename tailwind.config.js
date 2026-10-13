@@ -22,13 +22,13 @@ module.exports = {
     './public/**/*.js',
   ],
 
-  // Classes this app builds dynamically (if it ever does) go here, since the
-  // extractor cannot see them. Prefer whole literals in the markup instead.
-  // app.js does pick a chip's colour class from the feed's colour number
-  // ("feed-" + color), but .feed-1 through .feed-6 are hand-written
-  // components in styles/tailwind-input.css, not utilities, so they need
-  // no safelist entry.
-  safelist: [],
+  // Classes this app builds dynamically go here, since the extractor
+  // cannot see them. Prefer whole literals in the markup instead. app.js
+  // picks a chip's colour class from the feed's colour number
+  // ("feed-" + color), and Tailwind prunes unused @layer components rules,
+  // so the six hand-written .feed-N rules in styles/tailwind-input.css
+  // need their names here to survive the build.
+  safelist: ['feed-1', 'feed-2', 'feed-3', 'feed-4', 'feed-5', 'feed-6'],
 
   // dark: variants key off a "dark" class on <html>, which public/index.html
   // sets from the viewer's Homeroom theme (the platform bridge reports it),
@@ -61,7 +61,7 @@ module.exports = {
         focus: token('focus'), // the keyboard focus ring
         // The six feed-chip colours and their text. A chip's class is picked
         // from the feed's colour number in app.js ("feed-" + color), so the
-        // six names are on the safelist below.
+        // six names are on the safelist above.
         'feed-1': token('feed-1'),
         'feed-2': token('feed-2'),
         'feed-3': token('feed-3'),

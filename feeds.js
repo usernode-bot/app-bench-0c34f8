@@ -116,24 +116,27 @@ function postOut(row) {
   };
 }
 
-/** The whole list payload the page renders from. */
-async function listPayload(pool, userId) {
+/** The whole list payload the page renders from. Demo rows belong to the
+ * ?demo=1 screen (request-time demo seeding): a plain load stays empty even
+ * once the demo has been seeded for the viewer, so the demo screen and the
+ * real one can be open at the same time (two checks do exactly that). */
+async function listPayload(pool, userId, withDemo) {
   const feeds = (await pool.query(
     `SELECT f.id, f.title, f.url, f.site_url, f.color, f.is_demo, f.last_error,
        (SELECT count(*) FROM rss_posts p WHERE p.feed_id = f.id AND p.read_at IS NULL) AS unread
      FROM rss_feeds f
-     WHERE f.user_id = $1
+     WHERE f.user_id = $1 AND ($2 OR NOT f.is_demo)
      ORDER BY f.created_at, f.id`,
-    [userId],
+    [userId, Boolean(withDemo)],
   )).rows;
   const posts = (await pool.query(
     `SELECT p.id, p.feed_id, p.title, p.snippet, p.link, p.published_at
      FROM rss_posts p
      JOIN rss_feeds f ON f.id = p.feed_id
-     WHERE f.user_id = $1 AND p.read_at IS NULL
+     WHERE f.user_id = $1 AND ($2 OR NOT f.is_demo) AND p.read_at IS NULL
      ORDER BY p.published_at DESC
      LIMIT 300`,
-    [userId],
+    [userId, Boolean(withDemo)],
   )).rows;
   return {
     feeds: feeds.map(feedOut),
@@ -371,10 +374,13 @@ function mountFeeds(app, pool) {
         return;
       }
       const userId = String(req.user.id);
-      if (IS_STAGING && req.query.demo === '1') {
+      // Demo rows belong to the ?demo=1 screen only: seed there, and keep
+      // them out of every other load of the same viewer's list.
+      const withDemo = IS_STAGING && req.query.demo === '1';
+      if (withDemo) {
         await seedDemoFor(pool, userId, req.now);
       }
-      res.json(await listPayload(pool, userId));
+      res.json(await listPayload(pool, userId, withDemo));
     } catch (err) {
       next(err);
     }
@@ -412,7 +418,12 @@ function mountFeeds(app, pool) {
         }));
       }
       await pruneReadPosts(pool, userId);
-      res.json({ ...(await listPayload(pool, userId)), failed: [...new Set(failed)] });
+      // The demo screen refreshes in place: pass the demo flag through so
+      // its feeds stay in the list (the page's api() adds demo=1 there).
+      res.json({
+        ...(await listPayload(pool, userId, IS_STAGING && req.query.demo === '1')),
+        failed: [...new Set(failed)],
+      });
     } catch (err) {
       next(err);
     }
