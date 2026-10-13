@@ -1,0 +1,116 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.r {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1440px;
+}
+
+.r * {box-sizing:border-box;margin:0}
+
+.serif {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif}
+
+main {padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
+
+.top {display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+
+.text-title {font-size:28px;line-height:36px;font-weight:700}
+
+.text-small {font-size:14px;line-height:20px}
+
+.muted {color:rgb(var(--muted))}
+
+.acts {display:flex;gap:8px}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:16px;font-weight:500}
+
+.icon-only {padding:0}
+
+.btn-secondary svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.btn-secondary .plus {stroke:rgb(var(--accent))}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.list {list-style:none;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.chip {flex:none;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font-family:ui-serif,Charter,Georgia,serif;font-weight:700;font-size:18px;margin-top:2px}
+
+.f1 {background:rgb(var(--feed-1))}
+
+.f2 {background:rgb(var(--feed-2))}
+
+.f3 {background:rgb(var(--feed-3))}
+
+.f4 {background:rgb(var(--feed-4))}
+
+.f5 {background:rgb(var(--feed-5))}
+
+.f6 {background:rgb(var(--feed-6))}
+
+.body {flex:1;min-width:0}
+
+.meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px}
+
+.src {font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.dot {width:8px;height:8px;border-radius:50%;background:rgb(var(--accent));flex:none}
+
+.ttl {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:17px;line-height:23px;font-weight:600;margin-top:2px}
+
+.sum {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.done {text-align:center;padding:8px 0 0;display:flex;flex-direction:column;align-items:center;gap:10px}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.r {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  height: 844px;
+  position: relative;
+  overflow: hidden;
+}
+
+main {padding:20px 16px;display:flex;flex-direction:column;gap:20px}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
+
+.chip {flex:none;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font-family:ui-serif,Charter,Georgia,serif;font-weight:700;font-size:18px}
+
+.ttl {font-family:ui-serif,Charter,Georgia,serif;font-size:17px;line-height:23px;font-weight:600}
+
+.scrim {position:absolute;inset:0;background:rgb(0 0 0/.32)}
+
+.sheet {position:absolute;left:0;right:0;bottom:0;top:72px;background:rgb(var(--surface));border-radius:14px 14px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column}
+
+.grab {width:36px;height:5px;border-radius:3px;background:rgb(var(--line));margin:0 auto 8px}
+
+.bar {display:flex;align-items:center;gap:12px}
+
+.bar .who {flex:1;min-width:0}
+
+.src {font-size:16px;line-height:22px;font-weight:600}
+
+.close {width:44px;height:44px;border-radius:22px;border:0;background:rgb(var(--raised));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+
+svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+h2.big {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:28px;line-height:34px;font-weight:700;margin-top:20px}
+
+.by {margin-top:8px}
+
+.text {margin-top:20px;font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:17px;line-height:28px;display:flex;flex-direction:column;gap:14px}
+
+.foot {margin-top:auto;padding-top:20px;border-top:1px solid rgb(var(--line));display:flex;flex-direction:column;gap:8px;align-items:center}
+
+.btn-primary {display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600}

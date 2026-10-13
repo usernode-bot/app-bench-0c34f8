@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,75 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="r"><main>
+    <header class="top">
+    <div><h1 class="text-title serif">Unread</h1><p class="text-small muted">11 posts from 5 feeds, checked just now</p></div>
+    <div class="acts">
+    <button class="btn-secondary icon-only" aria-label="Check feeds for new posts"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="btn-secondary"><svg class="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </div>
+    </header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <section><h2 class="section-label">Today</h2>
+    <ul class="list">
+    <li class="list-row"><span class="chip f1">T</span><div class="body"><div class="meta"><span class="src">Tidepool Notes</span><span class="dot"></span><span class="muted">25 min ago</span></div><p class="ttl">The sea stars are back on the north rocks</p><p class="sum">After three quiet winters, a count at low tide found forty-one ochre stars.</p></div></li>
+    <li class="list-row"><span class="chip f2">K</span><div class="body"><div class="meta"><span class="src">Kettle and Crumb</span><span class="dot"></span><span class="muted">1 hr ago</span></div><p class="ttl">A rye loaf that forgives a late start</p><p class="sum">Mix it before work, shape it after dinner, bake it in the morning.</p></div></li>
+    <li class="list-row"><span class="chip f3">O</span><div class="body"><div class="meta"><span class="src">Orbit Weekly</span><span class="dot"></span><span class="muted">3 hr ago</span></div><p class="ttl">How to spot the station passing over tonight</p><p class="sum">It crosses low in the west just after nine. No telescope needed.</p></div></li>
+    <li class="list-row"><span class="chip f4">S</span><div class="body"><div class="meta"><span class="src">The Slow Bike</span><span class="dot"></span><span class="muted">5 hr ago</span></div><p class="ttl">Fixing a squeaky chain in ten minutes</p><p class="sum">A rag, a drop of oil and some patience. Here is the order that works.</p></div></li>
+    <li class="list-row"><span class="chip f5">P</span><div class="body"><div class="meta"><span class="src">Pocket Garden</span><span class="dot"></span><span class="muted">7 hr ago</span></div><p class="ttl">Basil on a windowsill, week four</p><p class="sum">Pinching the tops made it bushier than I expected. Photos inside.</p></div></li>
+    </ul></section>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <section><h2 class="section-label">Yesterday</h2>
+    <ul class="list">
+    <li class="list-row"><span class="chip f1">T</span><div class="body"><div class="meta"><span class="src">Tidepool Notes</span><span class="dot"></span><span class="muted">Yesterday</span></div><p class="ttl">What lives under a single rock</p><p class="sum">We turned one over, counted, and put it back exactly as it was.</p></div></li>
+    <li class="list-row"><span class="chip f3">O</span><div class="body"><div class="meta"><span class="src">Orbit Weekly</span><span class="dot"></span><span class="muted">Yesterday</span></div><p class="ttl">A small moon with a very long tail</p><p class="sum">Why the newest comet looks brighter in photos than to the eye.</p></div></li>
+    <li class="list-row"><span class="chip f2">K</span><div class="body"><div class="meta"><span class="src">Kettle and Crumb</span><span class="dot"></span><span class="muted">Yesterday</span></div><p class="ttl">Five ways to use up a sad banana</p><p class="sum">Bread is the obvious one. The pancakes are better.</p></div></li>
+    </ul></section>
+
+    <section><h2 class="section-label">Earlier</h2>
+    <ul class="list">
+    <li class="list-row"><span class="chip f4">S</span><div class="body"><div class="meta"><span class="src">The Slow Bike</span><span class="dot"></span><span class="muted">Oct 10</span></div><p class="ttl">A flat, quiet loop along the canal</p><p class="sum">Twenty-two kilometres, two cafes, no hills worth the name.</p></div></li>
+    <li class="list-row"><span class="chip f5">P</span><div class="body"><div class="meta"><span class="src">Pocket Garden</span><span class="dot"></span><span class="muted">Oct 9</span></div><p class="ttl">Saving seeds from this year's tomatoes</p><p class="sum">Ferment, rinse, dry on a plate. Label everything twice.</p></div></li>
+    <li class="list-row"><span class="chip f1">T</span><div class="body"><div class="meta"><span class="src">Tidepool Notes</span><span class="dot"></span><span class="muted">Oct 8</span></div><p class="ttl">Reading a tide table without a headache</p><p class="sum">Two numbers matter. The rest is there for sailors.</p></div></li>
+    </ul></section>
+
+    <div class="done"><p class="text-small muted">That is everything unread.</p><button class="btn-secondary">Mark all as read</button></div>
+    </main></div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="r">
+      <main aria-hidden="true">
+      <div><h1 class="text-title serif">Unread</h1><p class="text-small muted">11 posts from 5 feeds, checked just now</p></div>
+      <ul class="list">
+      <li class="list-row"><span class="chip f1">T</span><p class="ttl">The sea stars are back on the north rocks</p></li>
+      <li class="list-row"><span class="chip f2">K</span><p class="ttl">A rye loaf that forgives a late start</p></li>
+      </ul>
+      </main>
+      <div class="scrim"></div>
+      <section class="sheet" role="dialog" aria-label="The sea stars are back on the north rocks">
+      <div class="grab"></div>
+      <div class="bar"><span class="chip f1">T</span><div class="who"><p class="src">Tidepool Notes</p><p class="text-small muted">25 minutes ago</p></div>
+      <button class="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <h2 class="big">The sea stars are back on the north rocks</h2>
+      <p class="text-small muted by">By Mara Finch</p>
+      <div class="text">
+      <p>After three quiet winters, our low-tide count on Saturday found forty-one ochre stars on the north rocks, most of them small enough to sit on a thumbnail.</p>
+      <p>That is the first real sign of young stars settling here since the wasting years. We will count again at the next spring tide and post the numbers side by side.</p>
+      </div>
+      <div class="foot">
+      <button class="btn-primary">Open full article<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+      <p class="text-small muted">Opens tidepoolnotes.example in your browser</p>
+      </div>
+      </section>
+      </div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
