@@ -2,5 +2,22 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "unread-demo-list",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post]",
+      "visual": true,
+      "allowConsoleErrors": true,
+      "impact": ["public/**", "styles/**", "lib/**", "server.js"]
+    },
+    {
+      "id": "empty-no-feeds",
+      "path": "/",
+      "expectText": "No feeds yet",
+      "allowConsoleErrors": true,
+      "impact": ["public/**"]
+    }
+  ]
 }

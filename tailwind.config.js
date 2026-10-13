@@ -55,12 +55,26 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // Feed colours, one per feed in the order feeds were added; they
+        // colour only dots and rings. The values live with the other tokens
+        // in styles/tailwind-input.css, in both looks.
+        'feed-1': token('feed-1'),
+        'feed-2': token('feed-2'),
+        'feed-3': token('feed-3'),
+        'feed-4': token('feed-4'),
+        'feed-5': token('feed-5'),
+        'feed-6': token('feed-6'),
+      },
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        // Titles and previews: the platform's reading serif.
+        serif: ['ui-serif', 'Iowan Old Style', 'Charter', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
     },
