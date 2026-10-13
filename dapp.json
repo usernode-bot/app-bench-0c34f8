@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Calculator",
+      "path": "/",
+      "expectSelector": "#recipe .list-row",
+      "expectText": "Calculate"
+    },
+    {
+      "id": "demo",
+      "name": "Staging demo recipe",
+      "path": "/?demo=1",
+      "expectText": "2 sourdough loaves",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    }
+  ]
 }

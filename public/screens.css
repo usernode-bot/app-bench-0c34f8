@@ -1,13 +1,13 @@
-/* The screens the spec drew, carried over by the platform before the first
-   version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+/* The screen the spec drew, carried over by the platform before the first
+   version was built (public/index.html's main screen, now filled by
+   public/app/main.js). Colours are the design kit's tokens,
+   rgb(var(--accent)), so they follow the light and the dark look. */
 
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
-  min-height: 1960px;
+  min-height: 100vh;
   padding: 20px 16px 40px;
   box-sizing: border-box;
 }
@@ -72,7 +72,9 @@ h1 {font-size:28px;line-height:36px;font-weight:700;margin:0}
 
 .step .sb {border:0;border-radius:0;height:46px}
 
-.step .v {flex:1;text-align:center;font-size:20px;font-weight:600}
+.step .v {flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:20px;font-weight:600}
+
+.step .v .step-in {flex:1;min-width:0}
 
 .step .v span {font-size:14px;font-weight:500;color:rgb(var(--muted));margin-left:2px}
 
@@ -127,18 +129,3 @@ h1 {font-size:28px;line-height:36px;font-weight:700;margin:0}
 .temp .tl {font-size:14px;margin-top:6px}
 
 .done {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:12px 0 0}
-
-/* Screen 2: its rules the first screen has not got. */
-
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
-  min-height: 2040px;
-  padding: 20px 16px 40px;
-  box-sizing: border-box;
-}
-
-.track .f {position:absolute;left:0;width:16%;top:19px;height:6px;border-radius:3px;background:rgb(var(--accent))}
-
-.track .k {position:absolute;left:calc(16% - 13px);top:9px;width:26px;height:26px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}

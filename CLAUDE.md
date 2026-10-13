@@ -56,24 +56,14 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## Starter template (replaced)
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+The Homeroom starter template screen was removed when the first real
+feature landed: the app now ships the spec-drawn calculator screen, and
+`README.md` describes Bread Bot. Keep the platform infrastructure blocks
+in `public/index.html` if you rewrite it: the `usernode-dev-console@1`
+forwarder `<script>`, the bridge `<script>`, and the theme `<script>`
+right after the bridge tag.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
@@ -95,22 +85,36 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator. The baker picks a bread (sourdough, bagels,
+sourdough bagels, rye or sandwich loaf), sets the hydration, the loaf or
+bagel count (1 to 24) and each one's size in grams, and taps Calculate
+to get exact ingredient grams, the rise steps with their times, and the
+oven temperature (°C with °F underneath) plus bake duration. The maths
+is baker's percentages of total flour, with a 100%-hydration starter
+whose flour is part of the total but not in the denominator; it lives in
+`public/app/recipe.js` and its spec worked examples are unit-tested in
+`test/recipe.test.mjs`. The screen always shows a recipe (never an empty
+state), and fades it with a note when settings change until Calculate is
+tapped again. The first screen came from the spec's drawing and is kept
+in `public/index.html`; rows render from data via the kit's
+`rowsFrom`/`fillIn`, never rebuilt.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: crust brown (light `133 77 33`, dark `224 164 104` on
+  a warm dark ground); neutrals: warm greys throughout. Two extra
+  app-only tokens carry the subject: `--dough` (raw dough, light `236 216
+  178` / dark `112 86 56`) and `--crust` (baked crust, light `176 112 54` /
+  dark `214 150 90`), used for the jar's dough and the small line icons.
+- **Signature element:** the proofing jar in the hydration card — a drawn
+  jar whose dough level follows the hydration slider (75% is where the
+  spec drew it, one percent ≈ one pixel), bubbles shifting with the
+  surface. No other screen element carries the subject; keep it.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

@@ -147,6 +147,16 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Staging demo: `?demo=1` on a staging preview swaps the calculator's
+// starting settings for a sample bake, so the populated screen can be seen.
+// Production always answers demo:false. Guests may read it (it is a GET).
+app.get('/api/demo', (_req, res) => {
+  if (IS_STAGING) {
+    return res.json({ demo: true, settings: { type: 'sourdough', hydration: 75, count: 2, size: 900 } });
+  }
+  res.json({ demo: false });
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to

@@ -39,22 +39,24 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 160 95 40;      /* the keyboard focus ring */
     --dough: 236 216 178; /* from the spec's screens */
     --crust: 176 112 54; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;
+    --surface: 34 29 25;
+    --raised: 46 40 35;
+    --fg: 244 239 232;
+    --muted: 181 170 158;
+    --line: 70 62 55;
+    --accent: 224 164 104;
+    --on-accent: 43 24 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 240 190 130;
+    --dough: 112 86 56;
+    --crust: 214 150 90;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -247,6 +249,33 @@
     @apply fixed left-1/2 z-50 max-w-[85vw] -translate-x-1/2 rounded-2xl bg-fg px-4 py-2 text-small text-ground shadow-lg;
     bottom: calc(1rem + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
   }
+
+  /* The report total, then Bread Bot's own pieces. */
+
+  /* The hydration slider: the native <input type="range"> sits over the
+     drawn track and is transparent, so the visuals stay the screen's own. */
+  .range {
+    @apply absolute inset-0 h-full w-full cursor-pointer opacity-0;
+  }
+
+  /* After a setting changes but before Calculate, the lists fade and the
+     note carries the news (the note itself stays full strength). */
+  .recipe-stale :is(.list, .oven) { @apply opacity-45; }
+
+  /* The dough level inside the jar moves with hydration. */
+  @media (prefers-reduced-motion: no-preference) {
+    .jar .dough { transition: d 0.2s ease; }
+  }
+
+  /* A number typed straight into a stepper (not stepped). */
+  .step-in {
+    @apply w-full border-0 bg-transparent p-0 text-center text-[20px] font-semibold text-fg tabular-nums
+      outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  /* The stepper's own ± buttons step it, so the browser's spin buttons go. */
+  .step-in::-webkit-outer-spin-button,
+  .step-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .step-in { -moz-appearance: textfield; appearance: textfield; }
 
   /* Loading rows, the content holder, the one demo line. */
   .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }

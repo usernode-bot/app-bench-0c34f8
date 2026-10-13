@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        dough: token('dough'), // the jar's dough, from the spec's screens
+        crust: token('crust'), // icon strokes and the proof rings
+      },
+      fontFamily: {
+        rounded: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
