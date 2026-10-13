@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the timeline's proof stage
+        crumb: token('crumb'), // the timeline's rise stage
+      },
+      // The screen's type is the system sans-serif.
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

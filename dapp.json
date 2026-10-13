@@ -2,5 +2,9 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "checks": [
+    { "name": "Calculator loads", "path": "/", "expectSelector": "#bread-types", "expectText": "Type a baked weight" },
+    { "id": "demo-recipe", "name": "Demo recipe", "path": "/?demo=1", "expectText": "Bread flour", "visual": true, "impact": ["public/**", "styles/**"] }
+  ]
 }

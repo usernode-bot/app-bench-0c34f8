@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
@@ -96,6 +97,14 @@ function requestNow(req) {
   return typeof raw === 'string' && PREVIEW_NOW.test(raw) ? new Date(raw) : new Date();
 }
 
+// The HTML shell, read once at boot. On a staging preview <html> is marked
+// data-staging="1", which is what lets the page honour ?demo=1 (sample
+// settings, clearly labelled); production ignores ?demo=1 entirely.
+const INDEX_HTML = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+const SHELL_HTML = IS_STAGING
+  ? INDEX_HTML.replace('<html lang="en">', '<html lang="en" data-staging="1">')
+  : INDEX_HTML;
+
 // Verify platform-issued JWT if one was passed, then enforce auth on
 // anything not explicitly marked public. The iframe adds `?token=…`
 // on load; the frontend script forwards the token via `x-usernode-token`
@@ -154,6 +163,11 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// "/" serves the boot-time shell (staging-marked in staging), not the raw
+// file from disk: static would otherwise answer "/" first with
+// public/index.html, which never carries the marker.
+app.get('/', (_req, res) => res.type('html').send(SHELL_HTML));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -188,13 +202,33 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(SHELL_HTML);
 });
 
 async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  return server;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Retire cleanly on the platform's stop signal: stop taking new requests,
+// give the ones in flight about 3 s, then close the database pool and exit.
+function shutdown(server) {
+  console.log('Shutting down');
+  let done = false;
+  const exit = () => {
+    if (done) return;
+    done = true;
+    pool.end().finally(() => process.exit(0));
+  };
+  if (server) server.close(exit);
+  setTimeout(exit, 3000);
+}
+
+start()
+  .then((server) => {
+    process.on('SIGTERM', () => shutdown(server));
+    process.on('SIGINT', () => shutdown(server));
+  })
+  .catch(err => { console.error(err); process.exit(1); });

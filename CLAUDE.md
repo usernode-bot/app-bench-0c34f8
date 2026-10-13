@@ -58,31 +58,17 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
+Replaced by the first real version: the spec's bread calculator screen
+(the one drawn under `usernode-spec-screens@1`). The starter guidance
+below still holds where it is about platform infrastructure.
 
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
+Keep the `usernode-dev-console@1` forwarder `<script>` in
+`public/index.html` — platform infrastructure, not template content. So is
+the bridge `<script>` and the theme `<script>` that sets a `dark` class on
+`<html>` from the viewer's Homeroom setting. Give everything both looks
+(the design kit's colour tokens carry both). Unless a request asks for
+one, add no theme picker: the viewer's Homeroom setting is the control.
+"The platform's light/dark theme inside the app frame" in the platform
 conventions has the details.
 
 If a rule below this line conflicts with the hosted conventions, the
@@ -95,22 +81,31 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot turns a few settings into a bread recipe you can bake from: pick
+a bread (sourdough, bagels, sourdough bagels, rye, sandwich loaf), set the
+hydration, the loaf count and the baked weight per loaf, and it works out
+the grams and baker's percentages of every ingredient, the rise-and-bake
+timeline, and the oven setting scaled to loaf size. Everything is computed
+in the browser; nothing is saved. The spec's drawn screens live in
+`public/index.html` / `public/screens.css` — keep their markup and styles,
+wire behaviour only.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm flour-pale neutrals; one accent, crust brown
+  (light `140 74 30`, dark `232 160 92`); plus `--wheat` and `--crumb`,
+  two colours that exist for the timeline (rise in crumb, proof in wheat,
+  bake in the accent). The drawn screen's colours live in the tokens.
+- **Signature element:** the recipe sheet laid out like a baker's formula —
+  grams beside baker's percentages under the bread's name — with the
+  rise-and-bake timeline strip under it (segment widths follow the real
+  stage durations) and a drawn line icon per bread.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  system-ui sans; even-width figures (`.num`) so table columns line up.
+- No fixed look: everything follows the viewer's Homeroom theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +133,12 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The recipe maths is in `public/app.js` and runs entirely client-side;
+  there is no recipe storage and no `/api` route. Grams round to whole
+  numbers (yeast to the half gram); bake time scales with loaf size by the
+  cube root of the weight against each bread's reference loaf, to the
+  nearest 5 minutes.
+- Valid baked weight is 50–3,000 g; loaves 1–24. Weight values are typed
+  grams, never stored floats — nothing is stored at all.
+- The staging demo (`?demo=1`, only when `data-staging="1"` on `<html>`)
+  prefills Sourdough, 75%, 2 loaves, 900 g. Production ignores `?demo=1`.

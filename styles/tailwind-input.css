@@ -35,26 +35,28 @@
     --fg: 33 27 22;           /* text */
     --muted: 102 92 82;        /* secondary text */
     --line: 226 221 213;      /* borders, dividers, skeletons */
-    --accent: 140 74 30;     /* the one accent */
+    --accent: 140 74 30;     /* the one accent: crust brown */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --wheat: 214 160 62; /* from the spec's screens */
-    --crumb: 240 224 190; /* from the spec's screens */
+    --focus: 140 74 30;      /* the keyboard focus ring, the accent family */
+    --wheat: 214 160 62;     /* the timeline's proof stage */
+    --crumb: 240 224 190;    /* the timeline's rise stage */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 22 19 17;
+    --surface: 33 29 26;
+    --raised: 46 41 37;
+    --fg: 242 236 228;
+    --muted: 176 165 152;
+    --line: 64 57 51;
+    --accent: 232 160 92;
+    --on-accent: 43 22 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 232 160 92;
+    --wheat: 196 146 58;
+    --crumb: 92 74 48;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -252,6 +254,56 @@
   .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
   .kit-content { @apply flex flex-col gap-6; }
   .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
+
+  /* ── The bread screen ─────────────────────────────────────────────────────
+   * The drawn screen's own styles are public/screens.css, which loads after
+   * the build and outranks these layers; these carry the same names on the
+   * kit's tokens so the pieces still hang together without it.
+   */
+  .chip {
+    @apply inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-3.5 text-body text-fg;
+    font-family: inherit;
+  }
+  .chip.on { @apply border-accent bg-accent text-on-accent; }
+  .stepper { @apply flex items-center overflow-hidden rounded-lg border border-line; }
+  .stepper button { @apply flex h-11 w-11 items-center justify-center border-0 bg-transparent text-body text-fg; font-family: inherit; }
+  .recipe-sheet { @apply rounded-xl border border-line bg-surface p-4; }
+  .timeline-strip { display: flex; gap: 3px; height: 14px; margin: 4px 0 8px; }
+  .timeline-strip > div { border-radius: 3px; }
+
+  /* The hydration slider: a real range input drawn like the kit's slider —
+     a 44 px hit area, an accent fill and a 28 px thumb. The hard-stop
+     gradient below is the fill itself, not decoration; --range-pct (set from
+     JS) is how far along it is. */
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, rgb(var(--accent)) var(--range-pct, 62.5%), rgb(var(--raised)) var(--range-pct, 62.5%));
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    margin-top: -11px;
+    border-radius: 50%;
+    background: rgb(var(--surface));
+    border: 2px solid rgb(var(--accent));
+  }
+  .range::-moz-range-track { height: 6px; border-radius: 3px; background: rgb(var(--raised)); }
+  .range::-moz-range-progress { height: 6px; border-radius: 3px; background: rgb(var(--accent)); }
+  .range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: rgb(var(--surface)); border: 2px solid rgb(var(--accent)); }
+  .range:focus-visible { outline: none; }
+  .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgb(var(--focus)); }
+  .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px rgb(var(--focus)); }
 
   /* A report: a line per option or category, and its bar. */
   .kit-report { @apply flex flex-col gap-3; }
