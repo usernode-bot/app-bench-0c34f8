@@ -3,18 +3,21 @@
 import { h, clear } from './dom.js';
 
 /**
- * createStates(el, { rows, empty: { title, text, action: { label, onClick, primary } }, error: { title, text } })
+ * createStates(el, { rows, skeleton, empty: { title, text, action: { label, onClick, primary } }, error: { title, text } })
  * gives { content, run(task), loading(), empty(), error(), ready() }. task(content)
  * renders and returns false for empty; a throw shows the error, whose Try again reruns it.
+ * Pass skeleton() to draw a loading shape that fits the screen; the default
+ * is `rows` grouped-list rows.
  */
-export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
+export function createStates(el, { rows = 4, skeleton = null, empty = {}, error = {} } = {}) {
   let last = null;
-  const skeleton = h('div', { 'aria-busy': 'true' },
+  const groupedRows = () => h('div', { 'aria-busy': 'true' },
     h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
     h('ul', { class: 'un-group kit-group', 'aria-hidden': 'true' },
       Array.from({ length: rows }, (_, i) => h('li', { class: 'un-group-row kit-skeleton-row' },
         h('span', { class: i % 2 ? 'skeleton h-4 w-1/2' : 'skeleton h-4 w-3/4' }),
         h('span', { class: 'skeleton h-3 w-1/3' })))));
+  const loadingEl = skeleton ? skeleton() : groupedRows();
   const action = empty.action;
   const emptyEl = h('div', { class: 'state-empty' },
     h('h2', { class: 'text-heading' }, empty.title || 'Nothing here yet'),
@@ -25,8 +28,8 @@ export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
     h('p', { class: 'text-body text-muted' }, error.text || 'Something went wrong on our side. Nothing you saved is lost.'),
     h('button', { type: 'button', class: 'btn-secondary mt-2', on: { click: () => (last ? run(last) : null) } }, 'Try again'));
   const content = h('div', { class: 'kit-content' });
-  const parts = { loading: skeleton, empty: emptyEl, error: errorEl, ready: content };
-  clear(el).append(skeleton, emptyEl, errorEl, content);
+  const parts = { loading: loadingEl, empty: emptyEl, error: errorEl, ready: content };
+  clear(el).append(loadingEl, emptyEl, errorEl, content);
 
   function show(which) {
     for (const [name, node] of Object.entries(parts)) node.hidden = name !== which;

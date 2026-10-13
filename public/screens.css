@@ -34,11 +34,15 @@
 
 .tally {display:flex;gap:2px;height:12px;margin-bottom:8px}
 
-.tally i {flex:1;border-radius:2px;background:rgb(var(--ballot)/.55)}
+/* One slip per vote, a fixed small width, so the bar only grows with the
+   count; the groups sit 6px apart (the 2px gap element inside the 2px
+   flex gaps). Above 24 votes tallySlips swaps to one block per option,
+   whose inline flex makes it as wide as its share. */
+.tally i {flex:0 0 10px;border-radius:2px;background:rgb(var(--ballot)/.55)}
 
 .tally i.lead {background:rgb(var(--accent))}
 
-.tally i.gap {flex:0 0 6px;background:none}
+.tally i.gap {flex:0 0 2px;background:none}
 
 .standing {font-size:14px;line-height:20px;margin:0 0 10px}
 
@@ -160,3 +164,18 @@
 .meta .ic {font-variant-numeric:tabular-nums}
 .card {cursor:pointer}
 .list-row[role="button"] {cursor:pointer}
+
+/* The board (screen 1): the demo line clears the header, the section labels
+   sit 8px over their rows as drawn (kit-content's own flex gap is off here —
+   loadBoard rebuilds the drawn label + stack structure), and the empty board
+   sits lower so it does not crowd the header. */
+[data-spec-screen="1"] .kit-demo-label {margin-bottom:16px}
+[data-spec-screen="1"] .kit-content {gap:0}
+[data-spec-screen="1"] .state-empty {padding-top:80px}
+
+/* Loading on the board: card placeholders shaped like the loaded cards,
+   10px apart, each a title line, a tally-bar line and a meta line. */
+[data-spec-screen="1"] .board-skeleton {display:flex;flex-direction:column;gap:10px}
+[data-spec-screen="1"] .board-skeleton .bar-title {display:block;height:17px;width:75%}
+[data-spec-screen="1"] .board-skeleton .bar-tally {display:block;height:100%;width:60%}
+[data-spec-screen="1"] .board-skeleton .bar-meta {display:inline-block;height:14px;width:38%}

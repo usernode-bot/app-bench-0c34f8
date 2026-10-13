@@ -32,8 +32,18 @@ stack.remove();
 decidedList.remove();
 const board = h('div');
 listApp.append(board);
+
+// Loading shows card placeholders shaped like the loaded cards, so the
+// screen does not jump when the data arrives.
+const boardSkeleton = () => h('div', { class: 'board-skeleton', 'aria-busy': 'true' },
+  h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+  Array.from({ length: 4 }, () => h('div', { class: 'card', 'aria-hidden': 'true' },
+    h('p', { class: 'q-title' }, h('span', { class: 'skeleton bar-title' })),
+    h('div', { class: 'tally' }, h('span', { class: 'skeleton bar-tally' })),
+    h('p', { class: 'meta' }, h('span', { class: 'skeleton bar-meta' })))));
+
 const listStates = createStates(board, {
-  rows: 4,
+  skeleton: boardSkeleton,
   empty: {
     title: 'No questions yet',
     text: 'Post the first thing for the club to decide.',
@@ -42,7 +52,10 @@ const listStates = createStates(board, {
   error: { title: 'Questions did not load', text: 'Nothing is lost. Try again in a moment.' },
 });
 
-listApp.querySelector('.head .btn-primary').addEventListener('click', () => openPost());
+// The one filled button on the main screen. While the board is empty the
+// empty state's own button leads, so the header's steps aside.
+const postBtn = listApp.querySelector('.head .btn-primary');
+postBtn.addEventListener('click', () => openPost());
 
 const iconSvg = (d, width) => {
   const ns = 'http://www.w3.org/2000/svg';
@@ -140,18 +153,24 @@ function decidedEntry(item) {
 }
 
 async function loadBoard() {
+  postBtn.hidden = false;
   const data = await api('GET', '/api/questions');
   if (isDemo() && data.demo) showDemoLabel(listApp, DEMO_LINE);
   const items = data.items || [];
   const open = items.filter((i) => !i.decided);
   const decided = items.filter((i) => i.decided)
     .sort((a, b) => new Date(b.decided.at) - new Date(a.decided.at));
-  if (!open.length && !decided.length) return false;
+  if (!open.length && !decided.length) {
+    postBtn.hidden = true; // the empty state's own button leads
+    return false;
+  }
   const box = listStates.content;
   box.replaceChildren();
   if (open.length) {
     box.append(sectionLabel(openLabelTpl, 'Open', open.length));
-    for (const item of open) box.append(questionCard(item));
+    const stackEl = h('div', { class: 'stack' });
+    for (const item of open) stackEl.append(questionCard(item));
+    box.append(stackEl);
   }
   if (decided.length) {
     box.append(sectionLabel(decidedLabelTpl, 'Decided', decided.length));
