@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,73 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="app">
+    <header class="head"><div><h1 class="text-title">Club Votes</h1><p class="sub">What the club is deciding</p></div>
+    <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Post a question</button></header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <h2 class="section-label"><span>Open</span><span>4</span></h2>
+    <div class="stack">
+    <button class="card"><p class="q-title">Where should we meet in November?</p>
+    <div class="tally"><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="gap"></i><i></i><i></i><i></i><i class="gap"></i><i></i></div>
+    <p class="standing"><b>Riverside hall</b> leads <span>with 5 of 9 votes</span></p>
+    <p class="meta"><span class="by">Ana, 2 days ago</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>6</span><span class="ic mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Voted</span></p></button>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <button class="card"><p class="q-title">Move meetings to Thursday evenings?</p>
+    <div class="tally"><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="gap"></i><i></i><i></i><i></i><i></i></div>
+    <p class="standing"><b>Agree</b> leads <span>with 7 of 11 votes</span></p>
+    <p class="meta"><span class="by">Ben, 5 hours ago</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>3</span><span class="ic mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Voted</span></p></button>
+
+    <button class="card"><p class="q-title">What should we do for the end of year?</p>
+    <div class="tally"><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="gap"></i><i></i><i></i><i></i><i class="gap"></i><i></i></div>
+    <p class="standing"><b>Board game night</b> and <b>Potluck picnic</b> are tied <span>with 3 each</span></p>
+    <p class="meta"><span class="by">You, yesterday</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>9</span><span class="ic mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Voted</span></p></button>
+
+    <button class="card"><p class="q-title">Start a shared reading list for the club?</p>
+    <div class="tally"><i class="lead"></i><i class="lead"></i><i class="gap"></i><i></i></div>
+    <p class="standing"><b>Agree</b> leads <span>with 2 of 3 votes</span></p>
+    <p class="meta"><span class="by">Dev, 20 minutes ago</span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>1</span></p></button>
+    </div>
+
+    <h2 class="section-label"><span>Decided</span><span>2</span></h2>
+    <ul class="list">
+    <li class="list-row"><svg class="seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V5h8v6"/><path d="M10 8.5l1.5 1.5 3-3"/></svg><div class="rt"><p class="t">Pick a colour for the club banner</p><p class="s">Decided: Forest green, 12 votes</p></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></li>
+    <li class="list-row"><svg class="seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V5h8v6"/><path d="M10 8.5l1.5 1.5 3-3"/></svg><div class="rt"><p class="t">Date for the spring cleanup</p><p class="s">Decided: Saturday 12 April, 8 votes</p></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></li>
+    </ul>
+    </div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="app">
+      <div class="bar"><button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Questions</button>
+      <button class="kit-icon-button" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div>
+      <h2 class="kit-detail-title">Where should we meet in November?</h2>
+      <p class="meta">Asked by Mina, 2 days ago</p>
+      <p class="kit-detail-body">The library room is booked on two of our dates. Pick the place that works best for you.</p>
+      <div class="tally"><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="lead"></i><i class="gap"></i><i></i><i></i><i></i><i class="gap"></i><i></i></div>
+      <p class="standing"><b>Riverside hall</b> leads <span>with 5 of 9 votes</span></p>
+
+      <h3 class="section-label">Your vote</h3>
+      <div class="kit-votes">
+      <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:56%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span class="kit-vote-label">Riverside hall</span><span class="kit-vote-count">5</span></button>
+      <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:33%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Café Lindo, back room</span><span class="kit-vote-count">3</span></button>
+      <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:11%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Library room</span><span class="kit-vote-count">1</span></button>
+      </div>
+
+      <h3 class="section-label">Comments, 3</h3>
+      <ul class="list">
+      <li class="list-row"><div class="c"><p class="kit-comment-meta"><span class="kit-comment-author">Theo</span>2 days ago</p><p class="kit-comment-body">Riverside has the long tables, which helps for the map night.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
+      <li class="list-row"><div class="c"><p class="kit-comment-meta"><span class="kit-comment-author">Rafa</span>yesterday</p><p class="kit-comment-body">Café Lindo is closer for those of us coming by bus.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
+      <li class="list-row"><div class="c"><p class="kit-comment-meta"><span class="kit-comment-author">You</span>3 hours ago</p><p class="kit-comment-body">Riverside for me. I can bring the key on the first week.</p></div><button class="kit-icon-button" aria-label="More for this comment"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></li>
+      </ul>
+      <form class="kit-composer"><label class="kit-label">Add a comment</label><textarea class="field">e.g. Thursday works better for me</textarea><div class="kit-composer-actions"><button class="btn-secondary" disabled>Post comment</button></div></form>
+      </div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

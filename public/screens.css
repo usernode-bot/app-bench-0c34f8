@@ -1,0 +1,152 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;
+  min-height: 1120px;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+
+.app * {box-sizing:border-box}
+
+.head {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:24px}
+
+.text-title {font-size:28px;line-height:36px;font-weight:700;margin:0;letter-spacing:-.01em}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0}
+
+.btn-primary {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:inherit;font-size:15px;font-weight:600;white-space:nowrap}
+
+.btn-primary svg {width:18px;height:18px}
+
+.section-label {display:flex;justify-content:space-between;margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--muted))}
+
+.stack {display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+
+.card {display:block;width:100%;text-align:left;font:inherit;color:inherit;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:14px;padding:14px 16px 12px}
+
+.q-title {font-size:17px;line-height:23px;font-weight:600;margin:0 0 12px}
+
+.tally {display:flex;gap:2px;height:12px;margin-bottom:8px}
+
+.tally i {flex:1;border-radius:2px;background:rgb(var(--ballot)/.55)}
+
+.tally i.lead {background:rgb(var(--accent))}
+
+.tally i.gap {flex:0 0 6px;background:none}
+
+.standing {font-size:14px;line-height:20px;margin:0 0 10px}
+
+.standing b {font-weight:600}
+
+.standing span {color:rgb(var(--muted))}
+
+.meta {display:flex;align-items:center;gap:14px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.meta .by {flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.meta .ic {display:inline-flex;align-items:center;gap:4px}
+
+.meta svg {width:16px;height:16px}
+
+.mine {color:rgb(var(--accent));font-weight:600}
+
+.list {list-style:none;margin:0;padding:0;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:14px;overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.seal {width:28px;height:28px;flex:none;color:rgb(var(--muted))}
+
+.rt {flex:1;min-width:0}
+
+.rt p {margin:0}
+
+.rt .t {font-size:16px;line-height:22px;font-weight:500}
+
+.rt .s {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.chev {width:20px;height:20px;color:rgb(var(--muted));flex:none}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",sans-serif;
+  min-height: 1180px;
+  padding: 16px 16px 32px;
+  box-sizing: border-box;
+}
+
+.bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-size:15px;font-weight:500}
+
+.btn-secondary svg,.kit-icon-button svg {width:20px;height:20px}
+
+.kit-icon-button {display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:10px;background:none;color:rgb(var(--muted))}
+
+.kit-detail-title {font-size:28px;line-height:34px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+
+.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 12px}
+
+.kit-detail-body {font-size:16px;line-height:24px;margin:0 0 20px}
+
+.tally {display:flex;gap:2px;height:14px;margin-bottom:8px}
+
+.standing {font-size:14px;line-height:20px;margin:0 0 24px}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--muted))}
+
+.kit-votes {display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+
+.kit-vote {position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--fg));text-align:left;width:100%}
+
+.kit-vote-fill {position:absolute;top:0;bottom:0;left:0;background:rgb(var(--raised))}
+
+.kit-vote>*:not(.kit-vote-fill) {position:relative}
+
+.kit-vote-mark {width:24px;height:24px;flex:none;border-radius:50%;border:2px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center;color:transparent}
+
+.kit-vote-mark svg {width:16px;height:16px}
+
+.kit-vote-label {flex:1}
+
+.kit-vote-count {font-size:14px;font-weight:600;color:rgb(var(--muted))}
+
+.kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));font-weight:600}
+
+.kit-vote[aria-pressed="true"] .kit-vote-fill {background:rgb(var(--accent)/.15)}
+
+.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--fg))}
+
+.list-row {display:flex;gap:4px;padding:10px 4px 10px 16px;border-top:1px solid rgb(var(--line))}
+
+.c {flex:1;min-width:0;padding-top:2px}
+
+.c p {margin:0}
+
+.kit-comment-meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.kit-comment-author {font-weight:600;color:rgb(var(--fg));margin-right:6px}
+
+.kit-comment-body {font-size:16px;line-height:23px}
+
+.kit-composer {margin-top:16px;display:flex;flex-direction:column;gap:6px}
+
+.kit-label {font-size:14px;font-weight:600}
+
+.field {display:block;width:100%;min-height:68px;padding:10px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--muted)/.6);resize:none}
+
+.kit-composer-actions {display:flex;justify-content:flex-end}
+
+.btn-secondary[disabled] {opacity:.5}
