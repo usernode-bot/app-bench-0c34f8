@@ -49,8 +49,8 @@ export function renderTallyBar(el, options = [], { size = 'sm' } = {}) {
   const key = h('div', { class: 'tally-key' });
   if (total) {
     all.forEach((o, i) => key.append(
-      h('span', { class: 'inline-flex items-center gap-1.5' },
-        h('i', { class: DOTS[i % DOTS.length], 'aria-hidden': 'true' }),
+      h('span', { class: 'inline-flex items-center gap-1' },
+        h('i', { class: `tally-dot ${DOTS[i % DOTS.length]}`, 'aria-hidden': 'true' }),
         `${Math.max(0, Math.floor(Number(o.count) || 0))} ${String(o.label).toLowerCase()}`)));
   } else {
     key.append('No votes yet');

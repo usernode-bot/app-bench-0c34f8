@@ -147,19 +147,21 @@ function renderBoard() {
 
   const box = board.content;
   clear(box);
-  box.append(h('h2', { class: 'section-label' }, 'Waiting for your vote'));
-  if (waiting.length) {
-    box.append(h('ul', { class: 'un-group kit-group', 'aria-label': 'Decisions waiting for your vote' },
-      waiting.map(rowEl)));
-  } else {
-    box.append(h('p', { class: 'px-1 text-small text-muted' },
-      "You're up to date: you've voted on every open decision."));
-  }
+  const heading = (label, count) => h('h2', { class: 'section-label' },
+    h('span', null, label), h('span', null, String(count)));
+  // Each section is one child of the kit's gap-6 content box, so 24 px falls
+  // between sections; the label's own mb-2 sets the 8 px to its list.
+  const section = (label, count, body) => h('div', null, heading(label, count), body);
+  box.append(section('Waiting for your vote', waiting.length,
+    waiting.length
+      ? h('ul', { class: 'un-group kit-group', 'aria-label': 'Decisions waiting for your vote' },
+          waiting.map(rowEl))
+      : h('p', { class: 'px-1 text-small text-muted' },
+          "You're up to date: you've voted on every open decision.")));
   if (voted.length) {
-    box.append(
-      h('h2', { class: 'section-label mt-2' }, 'You voted'),
+    box.append(section('You voted', voted.length,
       h('ul', { class: 'un-group kit-group', 'aria-label': 'Decisions you voted on' },
-        voted.map(rowEl)));
+        voted.map(rowEl))));
   }
 }
 
@@ -188,7 +190,7 @@ function chip(item) {
   const mine = item.votes.mine;
   if (mine == null) return null;
   return h('span', { class: 'vote-chip' },
-    h('i', { class: CHIP_DOTS[mine] || 'tally-dot', 'aria-hidden': 'true' }),
+    h('i', { class: `tally-dot ${CHIP_DOTS[mine] || ''}`, 'aria-hidden': 'true' }),
     CHIP_TEXT[mine] || 'You voted');
 }
 

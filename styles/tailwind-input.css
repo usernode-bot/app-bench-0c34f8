@@ -112,9 +112,10 @@
     @apply rounded-xl border border-line bg-surface p-4;
   }
 
-  /* The label above a section: sentence case, never uppercase or tracked. */
+  /* The label above a section: sentence case, never uppercase or tracked.
+     A flex row so a section can put its count at the other end. */
   .section-label {
-    @apply mb-2 px-1 text-small font-medium text-muted;
+    @apply mb-2 flex items-baseline justify-between gap-3 text-small font-medium text-muted;
   }
 
   /* The states of anything that loads data. Show exactly one at a time:
