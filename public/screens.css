@@ -81,60 +81,24 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;strok
 
 .end {display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 0;text-align:center}
 
-/* Screen 2: its rules the first screen has not got. */
-
-.stage {
-  position: relative;
-  height: 844px;
-  overflow: hidden;
-}
-
-.app {padding:20px 16px;display:flex;flex-direction:column;gap:20px}
-
-.text-title {font-size:1.75rem;line-height:2.25rem;font-weight:700}
-
-.section-label {margin-bottom:8px;padding:0 4px;font-size:.875rem;font-weight:500;color:rgb(var(--muted))}
-
-.list-row {display:flex;gap:12px;padding:14px 16px;align-items:flex-start}
-
-.src {width:28px;height:28px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-src));font-size:.8125rem;font-weight:700}
-
-.post-meta {display:flex;justify-content:space-between;font-size:.875rem;color:rgb(var(--muted))}
-
-.post-source {font-weight:600;color:rgb(var(--fg))}
+/* The post preview sheet, built in app.js from the spec's second screen. The
+   sheet chrome itself (grabber, backdrop, scroll body) is the design kit's
+   and the native UI kit's; these are the parts the drawn screen added. */
 
 .serif {font-family:Charter,"Bitstream Charter","Sitka Text",Cambria,ui-serif,Georgia,serif}
-
-.post-title {font-size:1rem;line-height:1.5rem;font-weight:700}
-
-.backdrop {position:absolute;inset:0;background:rgb(var(--fg)/.32)}
-
-.sheet {position:absolute;left:0;right:0;bottom:0;top:118px;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column}
-
-.grab {width:36px;height:5px;border-radius:3px;background:rgb(var(--line));margin:0 auto 10px}
-
-.kit-sheet-head {display:flex;align-items:center;gap:10px;margin-right:-8px;padding-bottom:12px}
 
 .kit-sheet-head .who {flex:1;min-width:0;display:flex;flex-direction:column}
 
 .who b {font-size:.875rem;line-height:1.25rem;font-weight:600}
 
-.kit-icon-button {display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:8px;color:rgb(var(--muted))}
-
-.kit-sheet-body {flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:14px}
+.byline {font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
 
 .text-heading {font-size:1.25rem;line-height:1.75rem;font-weight:700}
-
-.byline {font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
 
 .summary {font-size:1rem;line-height:1.65rem;color:rgb(var(--fg));display:flex;flex-direction:column;gap:12px}
 
 .actions {display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid rgb(var(--line))}
 
-.btn-primary,.btn-secondary {display:flex;min-height:44px;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:0 16px;font-size:1rem;font-weight:500;width:100%}
-
-.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent))}
-
-.btn-secondary {border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
+.actions .btn-primary,.actions .btn-secondary {width:100%}
 
 .host {text-align:center;font-size:.875rem;color:rgb(var(--muted))}

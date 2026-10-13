@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        'src-1': token('src-1'), // feed tile colours, from the spec's screens
+        'src-2': token('src-2'),
+        'src-3': token('src-3'),
+        'src-4': token('src-4'),
+        'src-5': token('src-5'),
+        'src-6': token('src-6'),
+        'on-src': token('on-src'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
@@ -62,6 +69,11 @@ module.exports = {
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      // Serif is the reading voice: headlines in the list, the preview's
+      // headline and summary.
+      fontFamily: {
+        serif: ['Charter', '"Bitstream Charter"', '"Sitka Text"', 'Cambria', 'ui-serif', 'Georgia', 'serif'],
       },
     },
   },

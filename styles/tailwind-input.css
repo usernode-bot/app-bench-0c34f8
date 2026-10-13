@@ -39,7 +39,7 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 234 88 12;      /* the keyboard focus ring */
     --src-1: 29 78 216; /* from the spec's screens */
     --src-2: 21 128 61; /* from the spec's screens */
     --src-3: 162 28 175; /* from the spec's screens */
@@ -49,17 +49,24 @@
     --on-src: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 15 17 21;
+    --surface: 24 27 33;
+    --raised: 34 38 46;
+    --fg: 236 238 241;
+    --muted: 155 163 175;
+    --line: 52 58 68;
+    --accent: 251 146 60;
+    --on-accent: 31 14 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 253 186 116;
+    --src-1: 96 165 250;
+    --src-2: 74 222 128;
+    --src-3: 232 121 249;
+    --src-4: 251 191 36;
+    --src-5: 34 211 238;
+    --src-6: 251 113 133;
+    --on-src: 15 17 21;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -266,4 +273,14 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* The refresh icon while a check is running, and a post row leaving the
+     list after it was read. */
+  .spin { @apply motion-safe:animate-spin; }
+  .post-leaving {
+    @apply overflow-hidden opacity-0 motion-safe:transition-all motion-safe:duration-300;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }

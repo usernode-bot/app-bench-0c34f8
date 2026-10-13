@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c2410c'/><circle cx='30' cy='70' r='9' fill='white'/><path d='M30 45a25 25 0 0 1 25 25M30 27a43 43 0 0 1 43 43' stroke='white' stroke-width='9' fill='none' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -125,12 +125,14 @@
       <header class="top">
         <div class="top-text">
           <h1 class="text-title">Unread</h1>
-          <p class="text-small muted">12 posts from 5 feeds, checked 2 minutes ago</p>
+          <p class="text-small muted" id="status"></p>
+          <button type="button" class="text-small text-left text-danger hover:underline" id="failed" hidden></button>
         </div>
-        <button class="kit-icon-button" aria-label="Refresh feeds"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
-        <button class="btn-secondary"><svg viewBox="0 0 24 24"><circle cx="5.5" cy="18.5" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button>
+        <button type="button" class="kit-icon-button" aria-label="Refresh feeds" id="refresh"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
+        <button type="button" class="btn-secondary" id="feeds"><svg viewBox="0 0 24 24"><circle cx="5.5" cy="18.5" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button>
       </header>
 
+      <div id="posts">
       <section class="day">
         <h2 class="section-label">Today</h2>
         <ul class="list">
@@ -160,51 +162,16 @@
           <li><button class="list-row"><span class="src src-3">S</span><span class="post-text"><span class="post-meta"><span class="post-source">The Slow Kitchen</span><span class="post-time">Oct 9</span></span><span class="post-title">Why your bread dough needs less flour than the recipe says</span><span class="post-excerpt">Wet dough is harder to handle and makes a better loaf. How to work with it using only a scraper and a little patience.</span></span></button></li>
         </ul>
       </section>
+      </div>
 
-      <p class="end text-small muted">That is everything unread. Refresh to check for new posts.</p>
+      <p class="end text-small muted" id="end" hidden>That is everything unread. Refresh to check for new posts.</p>
     </main>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="stage">
-        <main class="app" aria-hidden="true">
-          <div><h1 class="text-title">Unread</h1><p class="text-small muted">11 posts from 5 feeds, checked 2 minutes ago</p></div>
-          <section>
-            <h2 class="section-label">Today</h2>
-            <ul class="list">
-              <li class="list-row"><span class="src src-2">T</span><span class="post-text"><span class="post-meta"><span class="post-source">Trailhead Notes</span><span>1 h</span></span><span class="post-title serif">Packing light for a three-day ridge walk</span></span></li>
-              <li class="list-row"><span class="src src-3">S</span><span class="post-text"><span class="post-meta"><span class="post-source">The Slow Kitchen</span><span>3 h</span></span><span class="post-title serif">Roasted squash soup that tastes better</span></span></li>
-            </ul>
-          </section>
-        </main>
-        <div class="backdrop"></div>
-        <div class="sheet" role="dialog" aria-label="Post preview">
-          <div class="grab"></div>
-          <div class="kit-sheet-head">
-            <span class="src src-1">B</span>
-            <span class="who"><b>Byte Garden</b><span class="byline">Mira Okafor, 18 minutes ago</span></span>
-            <span class="kit-icon-button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
-          </div>
-          <div class="kit-sheet-body">
-            <h2 class="text-heading serif">A small, boring database is still the right first choice</h2>
-            <div class="summary serif">
-              <p>Most new projects never outgrow one well-indexed table. We kept everything in a single Postgres database for three years, through two redesigns and a tenfold jump in readers.</p>
-              <p>When we finally split it, the reason was not speed. It was that two teams kept stepping on each other's migrations. Here is the checklist we used to decide, and what we would do differently.</p>
-            </div>
-          </div>
-          <div class="actions">
-            <a class="btn-primary">Open full article<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-            <p class="host">Opens bytegarden.example in your browser</p>
-            <button class="btn-secondary">Keep unread</button>
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
-  </template>
+  <script type="module" src="/app.js"></script>
+  <!-- The post preview sheet (the spec's second screen) is built in app.js
+       from the same drawn parts: the .kit-sheet-head with the feed tile and
+       byline, the serif headline and summary, and the actions. -->
   <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

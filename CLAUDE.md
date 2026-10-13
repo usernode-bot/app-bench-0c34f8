@@ -95,22 +95,33 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style reader: the person adds the address of a feed or a site,
+and the app shows every unread post from all their feeds in one
+scrolling list, newest first, grouped under Today / Yesterday / Earlier.
+Tapping a post opens an in-app preview and marks it read; a link opens
+the full article in the browser. Feeds and read state are private to
+each account. The server fetches and parses the feeds itself; the
+client never talks to a feed server.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every change follows it, and updates it when a request
+changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent is RSS orange (warm, loud enough to be the one
+  brand colour); neutrals are cool greys on a near-white ground (light)
+  and near-black ground (dark). Feed tiles add six source colours
+  (`src-1`..`src-6`: blue, green, purple, amber, cyan, rose) used to
+  tell feeds apart.
+- **Signature element:** the feed letter tile — a small rounded square
+  in the feed's source colour with the first letter of the feed's name
+  (skipping a leading "The"). It appears on every post row, in the
+  preview sheet head and on each row of the Feeds sheet.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Headlines and the preview body are serif (Charter stack, the `.serif`
+  class); everything else is the kit's sans.
+- Reading a post fades its row out of the list; that motion is part of
+  the look, keep it when touching the list.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +149,20 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are marked `staging:private` (see their
+  `COMMENT ON TABLE` in `server.js`). Every query on them is scoped by
+  `user_id` — a person's feeds and read state are never visible to or
+  writable by another account.
+- The server fetches web content only through `feeds.js`'s `safeFetch`
+  (public addresses only, manual re-checked redirects, 10 s timeout,
+  3 MB cap). Never `fetch` a feed URL directly elsewhere in the server.
+- Feed failures are `FeedError`s whose messages are written to be shown
+  verbatim to the person who added the feed — keep them plain words.
+- Feed colours (`feeds.color` 1..6) are assigned at insert time and
+  never change; rows and tiles read them as `src-1`..`src-6`.
+- Posts are deduped per feed by `guid`; unread only live in the main
+  list, and read posts older than 30 days are deleted on refresh.
+- Demo data (`?demo=1`) is seeded once per viewing account, but rows
+  with `is_demo` are visible only to requests that carry `?demo=1` —
+  the plain screen shows only the account's real feeds, so demo
+  seeding never changes what an account sees without the flag.
