@@ -56,88 +56,44 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
-
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
-
----
-
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+One scrolling list of every unread post from the feeds a person added,
+newest first. Add a feed by pasting the link to a site's RSS feed; tap a
+post to preview it in-app, which marks it read (Feedly-style); a button
+opens the full article in the browser. Each person keeps their own feeds
+(feeds and posts are per-user). Staging carries a made-up demo list at
+`/?demo=1` so the populated screen can be seen.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+- **Palette:** warm grey neutrals with one RSS orange accent
+  (`--accent` 194 65 12 light / 251 146 60 dark); feed badge colours
+  `--feed-1`..`--feed-5` (blue, green, purple, rose, teal).
+- **Signature element:** the round feed badge — a tile in the feed's
+  colour with the feed's initial in serif, an orange unread dot on its
+  corner; read posts keep the badge, dimmed, with the dot gone.
+- **Type scale:** `text-title`, `text-heading`, `text-body`,
+  `text-small`. Post titles and the preview use the serif stack
+  (`ui-serif, Charter, Iowan Old Style, Georgia`); everything else is
+  the sans `system-ui` stack.
+- Two looks only, no fixed scene: everything follows the viewer's
+  Homeroom theme via the token values in `styles/tailwind-input.css`
+  (`:root` light, `.dark` dark). No theme picker.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
-
-The kit is in `styles/tailwind-input.css`: colour tokens with a light and
-a dark value (named in `tailwind.config.js`), and a few components
-(`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
-Re-theme by changing the token values there, keeping every text pair at
-4.5:1 or more in both looks.
-
-- Colour comes only from the tokens (`bg-ground`, `bg-surface`,
-  `text-fg`, `text-muted`, `border-line`, `bg-accent` with
-  `text-on-accent`, ...): never a raw hex value or a stock palette class.
-- Tap targets are at least 44 px; the buttons and fields already are.
-- A field's label says what it is; its placeholder, if any, is an example
-  that says so ("e.g. 5.0"), never a bare value that could pass for one
-  already entered.
-- Every screen that loads data has honest loading, empty and error states.
-  Never show the empty state while loading or after a failure; an error says
-  what failed, what still works, and offers Retry.
-- Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
-- No cards in cards, no uppercase eyebrows, no emoji as icons.
-- A header that shows the app's own mark shows the project's icon there
-  (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
-  empty tile, and never `brand/icon.png`, which the app does not serve.
+The kit is in `styles/tailwind-input.css`. Re-theme by changing the
+token values there, keeping every text pair at 4.5:1 or more in both
+looks.
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are both marked **staging:private**;
+  every query is scoped to the requesting user's id.
+- All outbound fetching goes through `fetchFeed()` in `feeds.js` — the
+  one guarded call (default ports only, no credentials, DNS checked and
+  the connection pinned to the checked address, redirects re-checked,
+  8 s / 2 MB caps). Nothing else in the app may open a network
+  connection to an outside host.
+- Post summaries are stored as plain text (HTML stripped, 4000 chars)
+  and rendered as text, never HTML.
+- Demo feeds (`demo = true`, `*.example` URLs) are never fetched.

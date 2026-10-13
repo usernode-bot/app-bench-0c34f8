@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23c2410c'/><g stroke='white' stroke-width='9' stroke-linecap='round' fill='none'><path d='M30 34a36 36 0 0 1 36 36'/><path d='M30 16a54 54 0 0 1 54 54'/></g><circle cx='31' cy='69' r='9' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -129,8 +129,10 @@
       </header>
       <div class="head">
         <h1 class="text-title">Unread</h1>
-        <p class="text-small text-muted">18 new posts from 5 feeds</p>
+        <p class="text-small text-muted" id="count-line">18 new posts from 5 feeds</p>
       </div>
+      <div id="feed-errors" hidden></div>
+      <div id="states">
       <ul class="list">
         <li class="list-row">
           <span class="badge f1">T<span class="dot"></span></span>
@@ -174,34 +176,33 @@
         </li>
       </ul>
       <p class="foot text-small text-muted">Pull down to check your feeds again</p>
+      </div>
     </main>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <main>
-        <header class="top">
-          <button class="back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Unread</button>
-        </header>
-        <div class="source">
-          <span class="badge">T</span>
-          <div class="source-text"><span class="feed">Teapot Weekly (sample)</span><span class="text-small text-muted">12 minutes ago</span></div>
-        </div>
-        <h1 class="text-title">Ten pretend teapots ranked by how well they pour</h1>
-        <div class="summary">
-          <p>We filled every made-up teapot in the office and timed the pour. The squat blue one won by a mile, finishing a full cup in under four seconds without a single drip.</p>
-          <p>The tall copper one looked lovely and dribbled down its own spout every time. The glass one was fine until somebody remembered it was imaginary.</p>
-          <p>Our full table of pour times, lid wobble and handle comfort is in the article.</p>
-        </div>
-        <hr>
-        <button class="btn-primary" type="button">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
-        <p class="host text-small text-muted">Opens teapotweekly.example in your browser</p>
-      </main>
+  <!-- Screen 2, the post preview, moved where that view belongs: hidden until
+       a post is tapped, filled and shown over the list. -->
+  <div data-spec-screen="2" id="post-preview" hidden>
+    <main>
+      <header class="top">
+        <button class="back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Unread</button>
+      </header>
+      <div class="source">
+        <span class="badge">T</span>
+        <div class="source-text"><span class="feed">Teapot Weekly (sample)</span><span class="text-small text-muted">12 minutes ago</span></div>
       </div>
-    </div>
-  </template>
+      <h1 class="text-title">Ten pretend teapots ranked by how well they pour</h1>
+      <div class="summary">
+        <p>We filled every made-up teapot in the office and timed the pour. The squat blue one won by a mile, finishing a full cup in under four seconds without a single drip.</p>
+        <p>The tall copper one looked lovely and dribbled down its own spout every time. The glass one was fine until somebody remembered it was imaginary.</p>
+        <p>Our full table of pour times, lid wobble and handle comfort is in the article.</p>
+      </div>
+      <hr>
+      <button class="btn-primary" type="button">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+      <p class="host text-small text-muted">Opens teapotweekly.example in your browser</p>
+    </main>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

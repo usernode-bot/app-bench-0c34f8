@@ -2,5 +2,20 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "unread-demo",
+      "name": "Unread list (demo)",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post-row]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "No feeds yet",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

@@ -1,7 +1,10 @@
 /* The screens the spec drew, carried over by the platform before the first
    version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+   its post preview, is the hidden <div data-spec-screen="2"> in
+   public/index.html). Colours are the design kit's tokens,
+   rgb(var(--accent)), so they follow the light and the dark look.
+   Screen 2's own rules are scoped to [data-spec-screen="2"] so they never
+   touch the unread list. */
 
 * {
   box-sizing: border-box;
@@ -34,11 +37,17 @@ main {max-width:42rem;margin:0 auto;padding:12px 16px 24px;display:flex;flex-dir
 
 .head {display:flex;flex-direction:column;gap:2px;padding:0 4px}
 
+.feed-note {font-size:.8125rem;line-height:1.125rem;color:rgb(var(--muted));padding:0 4px}
+
 .list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:14px;overflow:hidden;padding:0;list-style:none}
 
 .list-row {display:flex;gap:12px;padding:14px 16px;min-height:44px;align-items:flex-start}
 
 .list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.list-row[data-post-row] {cursor:pointer}
+
+.list-row[data-post-row]:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
 
 .badge {position:relative;width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font:700 .9375rem/1 ui-serif,Georgia,serif;margin-top:2px}
 
@@ -72,30 +81,29 @@ main {max-width:42rem;margin:0 auto;padding:12px 16px 24px;display:flex;flex-dir
 
 .foot {text-align:center;padding:4px 0}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2, the post preview: its rules the first screen has not got,
+   scoped so they never touch the list. */
 
-main {max-width:42rem;margin:0 auto;padding:12px 16px 32px;display:flex;flex-direction:column;gap:20px}
+[data-spec-screen="2"] main {max-width:42rem;margin:0 auto;padding:12px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
-.top {display:flex;align-items:center;justify-content:space-between;min-height:52px;margin-left:-8px}
+[data-spec-screen="2"] .top {display:flex;align-items:center;justify-content:space-between;min-height:52px;margin-left:-8px}
 
-.btn-secondary,.back {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;border-radius:10px;font:500 1rem/1 system-ui,sans-serif}
+[data-spec-screen="2"] .back {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;border-radius:10px;border:0;background:none;color:rgb(var(--fg));padding:0 8px;font:500 1rem/1 system-ui,sans-serif;cursor:pointer}
 
-.back {border:0;background:none;color:rgb(var(--fg));padding:0 8px}
+[data-spec-screen="2"] .back svg {width:22px;height:22px}
 
-.back svg {width:22px;height:22px}
+[data-spec-screen="2"] .btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;width:100%;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 1rem/1 system-ui,sans-serif;cursor:pointer}
 
-.btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;width:100%;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 1rem/1 system-ui,sans-serif}
+[data-spec-screen="2"] .badge {width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font:700 .9375rem/1 ui-serif,Georgia,serif;margin-top:0}
 
-.source {display:flex;align-items:center;gap:10px}
+[data-spec-screen="2"] .source {display:flex;align-items:center;gap:10px}
 
-.badge {width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font:700 .9375rem/1 ui-serif,Georgia,serif;background:rgb(var(--feed-1))}
+[data-spec-screen="2"] .source-text {display:flex;flex-direction:column}
 
-.source-text {display:flex;flex-direction:column}
+[data-spec-screen="2"] .source-text .feed {font-weight:600;font-size:.9375rem;line-height:1.25rem}
 
-.feed {font-weight:600;font-size:.9375rem;line-height:1.25rem}
+[data-spec-screen="2"] .summary {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:1.125rem;line-height:1.75rem;display:flex;flex-direction:column;gap:14px}
 
-.summary {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:1.125rem;line-height:1.75rem;display:flex;flex-direction:column;gap:14px}
+[data-spec-screen="2"] .host {text-align:center}
 
-.host {text-align:center}
-
-hr {border:0;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] hr {border:0;border-top:1px solid rgb(var(--line))}

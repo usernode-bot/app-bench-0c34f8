@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const feedsRoutes = require('./feeds');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -147,6 +148,10 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// The RSS Reader's own routes (feeds.js): the unread list, add/remove feed,
+// mark read. Mounted before the static middleware.
+app.use(feedsRoutes(pool));
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -191,10 +196,26 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await feedsRoutes.migrate(pool);
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop listening, let in-flight requests finish briefly, close the pool, exit.
+async function shutdown() {
+  if (!server) process.exit(0);
+  server.close();
+  const drain = new Promise((resolve) => setTimeout(resolve, 3000));
+  await Promise.race([drain, new Promise((resolve) => server.close(() => resolve()))]);
+  try { await pool.end(); } catch {}
+  process.exit(0);
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });
