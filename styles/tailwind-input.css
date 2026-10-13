@@ -42,14 +42,14 @@
     --focus: 13 148 136;      /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 14 14 20;
+    --surface: 26 26 36;
+    --raised: 38 38 50;
+    --fg: 240 240 245;
+    --muted: 165 165 180;
+    --line: 58 58 74;
+    --accent: 165 160 250;
+    --on-accent: 20 18 60;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
@@ -259,4 +259,21 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* ── The drawn screens (public/screens.css carries these too) ──────────
+   * The tally (the app's signature: votes as hand-counted ballot marks),
+   * the voter names under a choice, and the Report link.
+   */
+  .tally { @apply flex items-center gap-2 text-accent; }
+  .tally-marks { @apply flex gap-1.5; }
+  .tally-count { @apply text-small font-semibold tabular-nums; }
+  .tally-none { @apply text-small text-muted; }
+  .voters { @apply pb-1 pl-12 pt-0.5 text-small text-muted; }
+  .report {
+    @apply ml-auto inline-flex min-h-11 items-center gap-1 px-1 text-small text-muted
+      hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+    margin-block: -13px;
+  }
+  .report svg { width: 18px; height: 18px; }
+  .tally svg { width: 22px; height: 16px; }
 }

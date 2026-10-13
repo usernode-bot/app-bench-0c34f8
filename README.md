@@ -1,27 +1,37 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A place for your club to decide things together. Anyone can post a
+question the club needs to settle — with two to six choices, or a plain
+Yes or No — and everyone votes with one tap. Votes are changeable, and
+each choice shows who picked it. A question's discussion lives under it
+as comments, and anything that should not be here can be reported with
+one tap.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **The board** — the club's open questions, newest first, each with the
+  choice that is leading, a hand-counted tally of votes, who asked it
+  and how many comments it has.
+- **A question** — vote by tapping a choice, tap again to take your vote
+  back, and say what you think in the comments. The names under each
+  choice are the people who voted for it.
+- **Reports** — a question or comment can be flagged with an optional
+  reason. A report is recorded only: nothing is hidden or removed by
+  one, and there is no way to read reports back yet.
 
-## Replacing the template
+Questions stay open for now — closing them comes later.
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+## Under the hood
 
-Once the real app exists, rewrite this README to describe it.
+- Sign-in, the private Postgres database, the precompiled Tailwind
+  build and the light/dark looks are platform plumbing, described in
+  `CLAUDE.md`.
+- The question, vote and comment storage and routes come from the
+  platform kit (`kit/server.js`); the tally marks, voter names and
+  reports are this app's own code in `server.js` and `public/app.js`.
+- On staging, `/?demo=1` seeds a board of made-up questions so the
+  populated screen can be seen. Nothing you post there is real.
+
+To change the app, ask Homeroom bot: open the app on Homeroom, tap the
+Homeroom icon in the header, then **Suggest an improvement**. Or run
+Claude Code against this repo directly; start with `CLAUDE.md`.

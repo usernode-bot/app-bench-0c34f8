@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { pathToFileURL } = require('url');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -154,6 +155,148 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Club Votes data ────────────────────────────────────────────────────────
+// The questions themselves (rows, votes, comments) come from the platform
+// kit: kit/server.js creates the questions, questions_votes and
+// questions_comments tables and the routes under /api/questions. Public
+// tables, public usernames.
+//
+// Registered BEFORE that mount, so it runs ahead of the kit's vote route:
+// every account vote leaves the person's username beside their id in
+// voter_names, which is what the voters route joins on to show names. The
+// votes table stores only the id — there is no users table to join.
+app.post('/api/questions/:id/vote', (req, res, next) => {
+  if (!req.user) return next();
+  pool.query(
+    `INSERT INTO voter_names (user_id, username, updated_at) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username, updated_at = EXCLUDED.updated_at`,
+    [req.user.id, String(req.user.username || 'Someone'), req.now],
+  ).then(() => next(), (err) => { console.error('voter_names upsert failed:', err.message); next(); });
+});
+
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  // The form asks for up to 140 characters of title; the kit's own default
+  // is 120, so let the kit keep what the form promised.
+  max: { title: 140 },
+  // A question posted with no choices becomes a plain Yes or No vote.
+  options: ['Yes', 'No'],
+  demo: {
+    titles: [
+      { title: 'Where should we meet in November?', options: ['Library back room', 'Cafe on Elm Street', 'Online call'],
+        body: 'The community hall is booked for repairs all month. Which of these works for most of us?' },
+      { title: 'Pick our spring outing', options: ['Botanic garden walk', 'Kite day', 'Coastal train trip'],
+        body: 'The spring fund covers one big day out. Vote for the one you would actually come to.' },
+      { title: 'Should we move meetings to Thursday evenings?',
+        body: 'Some of us cannot make Tuesdays any more. Would Thursdays suit you better?' },
+      { title: 'What snack should we bring to the open day?', options: ['Lemon drizzle cake', 'Oat cookies', 'Fruit platter', 'Sausage rolls'],
+        body: 'The open day table needs something homemade. Pick what you would like to see on it.' },
+      { title: 'Which colour for the club T-shirt?', options: ['Deep indigo', 'Forest green', 'Marigold yellow'],
+        body: 'The printer needs a decision by the end of the month. One colour per shirt.' },
+      { title: 'Should we enter the city fair again this year?',
+        body: 'Last year we won second place for the plot display. The entry fee comes out of the same fund as the picnic.' },
+      { title: 'What time should weekday meetings start?', options: ['6 pm', '7 pm', '8 pm'],
+        body: 'The room is ours from 5 pm, and the caretaker locks up at 9.' },
+      { title: 'Where should we keep the shared equipment?', options: ['The scout hut', "A member's garage", 'The school store'],
+        body: 'The old shed is coming down. We need somewhere dry that two people can get into on a Sunday.' },
+      { title: 'Should we run a beginner workshop in spring?',
+        body: 'The waiting list has fifteen names on it. It would be two evenings, run by whoever volunteers.' },
+      { title: 'Pick a date for the annual picnic', options: ['First Saturday of June', 'Second Saturday of June', 'Last Sunday of May'],
+        body: 'Same field as always. The earlier we pick, the better the chance of the sunny slot.' },
+      { title: 'What should we spend the raffle money on?', options: ['A new notice board', 'Seeds for the plot', 'A summer outing'],
+        body: 'Forty-one pounds in the tin. It should be one thing we can all see or share.' },
+      { title: 'Should the newsletter go out weekly or monthly?', options: ['Weekly', 'Monthly'],
+        body: 'Whoever writes it has asked for a rhythm, not a third option.' },
+      { title: 'What film should the winter social show?', options: ['The Great Race', 'Sing Along Tonight', 'Storm on the Marsh'],
+        body: 'Projector is booked, the hall is free, and we vote on the film itself.' },
+    ],
+    bodies: ['Bring your thoughts; the club decides together.', 'We vote at the next meeting, but say what you think now.'],
+    comments: [
+      'Works for me, the earlier the better.',
+      'Can we check the cost before we decide?',
+      'I can help set up either way.',
+      'Happy to go with whatever most people want.',
+      'Could we do both, just on different days?',
+    ],
+  },
+});
+
+// Who voted for what: votes joined to voter_names, so every choice can show
+// its names. The kit's demo rows are voted by made-up people with negative
+// ids, whose names live in public/kit/demo.js.
+let demoPeople = null;
+async function demoPeopleNames() {
+  if (!demoPeople) {
+    const mod = await import(pathToFileURL(path.join(__dirname, 'public', 'kit', 'demo.js')).href);
+    demoPeople = mod.DEMO_PEOPLE;
+  }
+  return demoPeople;
+}
+
+app.get('/api/questions/:id/voters', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(404).json({ error: 'This was removed, or the link is wrong.' });
+  }
+  try {
+    const found = await pool.query('SELECT 1 FROM questions WHERE id = $1', [id]);
+    if (!found.rows.length) return res.status(404).json({ error: 'This was removed, or the link is wrong.' });
+    const { rows } = await pool.query(
+      'SELECT user_id, choice FROM questions_votes WHERE item_id = $1 ORDER BY created_at, user_id', [id],
+    );
+    const real = [...new Set(rows.map((r) => Number(r.user_id)).filter((n) => n > 0))];
+    const names = new Map();
+    if (real.length) {
+      const { rows: un } = await pool.query(
+        'SELECT user_id, username FROM voter_names WHERE user_id = ANY($1::int[])', [real],
+      );
+      for (const u of un) names.set(Number(u.user_id), u.username);
+    }
+    const byDemoId = new Map((await demoPeopleNames()).map((p) => [p.id, p.name]));
+    const viewer = req.user ? Number(req.user.id) : null;
+    const voters = rows.map((r) => ({
+      optionId: r.choice,
+      name: Number(r.user_id) > 0
+        ? (names.get(Number(r.user_id)) || 'Someone')
+        : (byDemoId.get(Number(r.user_id)) || 'Someone'),
+      isMe: viewer !== null && Number(r.user_id) === viewer,
+    }));
+    return res.json({ voters });
+  } catch (err) {
+    console.error('voters route failed:', err.message);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Reports: a question or comment flagged for the app's keepers. Recorded
+// only — nothing is hidden or removed by one. The table is private: who
+// reported what is nobody else's business, and there are no routes to read
+// it back yet.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  const kind = req.body && req.body.kind;
+  const targetId = Number(req.body && req.body.targetId);
+  if (!['question', 'comment'].includes(kind) || !Number.isInteger(targetId) || targetId <= 0) {
+    return res.status(400).json({ error: 'Pick what you are reporting.' });
+  }
+  try {
+    const table = kind === 'question' ? 'questions' : 'questions_comments';
+    const found = await pool.query(`SELECT 1 FROM ${table} WHERE id = $1`, [targetId]);
+    if (!found.rows.length) return res.status(404).json({ error: 'This was removed, or the link is wrong.' });
+    const reason = typeof (req.body && req.body.reason) === 'string'
+      ? req.body.reason.replace(/\s+/g, ' ').trim().slice(0, 500) : '';
+    await pool.query(
+      `INSERT INTO reports (kind, target_id, reporter_id, reporter_name, reason, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [kind, targetId, req.user.id, String(req.user.username || 'Someone'), reason, req.now],
+    );
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error('reports route failed:', err.message);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,8 +334,46 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+async function migrate() {
+  await questions.migrate();
+  // Who to show beside each vote (see the voters route above).
+  await pool.query(`CREATE TABLE IF NOT EXISTS voter_names (
+    user_id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+  )`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    kind TEXT NOT NULL CHECK (kind IN ('question', 'comment')),
+    target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL,
+    reporter_name TEXT NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL
+  )`);
+  // Only the keepers may see who reported what.
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
+}
+
+// A stop from the platform stops taking new connections, lets the running
+// ones finish (about 3 s), closes the database pool, then exits.
+let server = null;
+let stopping = false;
+function stop() {
+  if (stopping) return;
+  stopping = true;
+  console.log('Shutting down: finishing what is in flight');
+  if (server) server.close(() => console.log('Connections drained'));
+  setTimeout(() => {
+    pool.end().then(() => process.exit(0), () => process.exit(0));
+  }, 3000);
+}
+process.on('SIGTERM', stop);
+process.on('SIGINT', stop);
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }

@@ -95,22 +95,35 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a question
+with 2–6 choices (none given means a plain Yes and No), everyone votes
+with one tap, and a vote is changeable — tap your choice again to take
+it back. Each choice shows the names of the people who picked it.
+Comments under a question carry the discussion, and a question or
+comment can be reported with an optional reason. Reports are recorded
+only: nothing is hidden by one, and the `reports` table is private —
+no route reads it back. Questions stay open for now; closing,
+editing and live refresh are deliberately not in this version.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every change follows it, and updates it when a request
+changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** "paper and ballot ink" — paper neutrals (warm white
+  ground, white surface, warm grey lines) with deep indigo as the accent
+  in light; near-black blue ground with soft indigo ink in dark. Values
+  live in `styles/tailwind-input.css`; the dark set came from the spec.
+- **Signature element:** the tally — votes drawn as hand-counted ballot
+  marks, groups of five as one SVG (four strokes crossed by a fifth),
+  remaining votes as single strokes, the count always shown beside them,
+  at most six groups drawn. Every question row has one, in the ballot
+  ink. "No votes yet" until the first mark.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unmodified in `tailwind.config.js`; `public/screens.css` carries the
+  drawn sizes).
+- No fixed look: the app follows the viewer's Homeroom theme, light and
+  dark.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

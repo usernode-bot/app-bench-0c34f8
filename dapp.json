@@ -2,5 +2,10 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    { "name": "Board loads", "path": "/", "expectText": "Club Votes" },
+    { "id": "demo-board", "visual": true, "impact": ["public/**", "styles/**"], "name": "Populated demo", "path": "/?demo=1", "expectText": "Staging demo" },
+    { "name": "Demo rows show tallies", "path": "/?demo=1", "expectSelector": ".tally" }
+  ]
 }
