@@ -18,15 +18,22 @@ main {padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
 .top {display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 
+/* The title block takes the remaining width, so the status line wraps under
+   it without squeezing the buttons; the button group never shrinks. */
+.top > div:first-child {flex:1;min-width:0}
+
+/* Without a status line the title centres against the 44 px button row. */
+.top:has(#status:empty) {align-items:center}
+
 .text-title {font-size:28px;line-height:36px;font-weight:700}
 
 .text-small {font-size:14px;line-height:20px}
 
 .muted {color:rgb(var(--muted))}
 
-.acts {display:flex;gap:8px}
+.acts {display:flex;gap:8px;flex:none}
 
-.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:16px;font-weight:500}
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:16px;font-weight:500;white-space:nowrap}
 
 .icon-only {padding:0}
 
@@ -34,7 +41,13 @@ main {padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
 .btn-secondary .plus {stroke:rgb(var(--accent))}
 
-.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+.section-label {margin:0 0 8px;padding:0;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+/* In the post list the label sits close to its own list (8 px) and a
+   section's width away from the one above (20 px), left edge with the list. */
+#posts .kit-content {gap:0}
+#posts .kit-content .section-label {margin:20px 0 8px}
+#posts .kit-content .section-label:first-child {margin-top:0}
 
 .list {list-style:none;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
 
@@ -113,6 +126,15 @@ h2.big {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:2
 .foot {margin-top:auto;padding-top:20px;border-top:1px solid rgb(var(--line));display:flex;flex-direction:column;gap:8px;align-items:center}
 
 .btn-primary {display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600}
+
+/* The empty and error states: air under the header, and room above the
+   action button (the kit's mt-2 is reset by the .r margin reset above). */
+.state-empty,
+.state-error {padding-top:3.5rem}
+
+.state-empty > .btn-primary,
+.state-empty > .btn-secondary,
+.state-error > .btn-secondary {margin-top:.5rem}
 
 /* Behaviour the script adds to the first screen's rows. */
 
