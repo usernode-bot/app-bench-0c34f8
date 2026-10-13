@@ -53,13 +53,19 @@
 
 .step b {min-width:64px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 
-.step i {width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.step button {width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;font:inherit;cursor:pointer}
+
+.step button:disabled {opacity:.35;cursor:default}
+
+.chip:focus-visible,.step button:focus-visible,.btn-primary:focus-visible,.field:focus-within {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .step svg {width:18px;height:18px;stroke:rgb(var(--fg))}
 
 .field {display:flex;align-items:center;justify-content:flex-end;gap:6px;width:112px;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;padding:0 12px;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 
 .field span {font-weight:400;color:rgb(var(--muted))}
+
+.field input {width:100%;min-width:0;border:0;background:transparent;padding:0;font:inherit;font-weight:600;font-variant-numeric:tabular-nums;color:inherit;text-align:right;outline:none}
 
 .btn-primary {display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;border:0;width:100%}
 

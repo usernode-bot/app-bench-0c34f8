@@ -56,61 +56,40 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## The screen
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
-
----
+The main screen (`div[data-spec-screen="1"]` in `public/index.html`,
+styled by `public/screens.css`) was drawn from the spec before the first
+version was built. Keep its markup: wire behaviour with `data-*` hooks
+and render its rows from data (`rowsFrom` in the kit keeps the drawn row
+as the template). Do not redraw it; change it only where behaviour needs
+it.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator. The user picks one of five breads (sourdough,
+bagels, sourdough bagels, rye, sandwich loaf), sets hydration, loaf/bagel
+count and flour per loaf, and taps Calculate: they get the grams of every
+ingredient with baker's percentages, the total dough weight, and the
+steps in order — rises adjusted for hydration, the boil for bagels, and
+the bake in °C and °F. Nothing is saved; there is no history and no
+accounts beyond the platform's sign-in.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+A flour-and-crust kitchen look: warm paper neutrals, a crust-brown
+accent, and a doughy crumb tint behind the chosen chip and the step
+icons. Both looks come from the same tokens (dark ground is a dark
+crust, the accent warms to baked-crust orange).
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: crust brown (light `132 70 28`, dark `224 160 96`);
+  second colour: crumb (the doughy tint, light `236 226 210`, dark
+  `66 48 32`); neutrals: warm paper greys (ground/surface/line).
+- **Signature element:** the recipe card — ingredient lines with dotted
+  leaders, right-aligned tabular-nums grams, a baker's % column, a
+  dashed divider, then the steps with line-drawn clock/dough/oven icons
+  in crumb circles.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +117,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **No data is stored.** No tables, no API writes; the scaffold database
+  is unused. All the recipe maths is pure and lives in
+  `public/recipes.js` — the screen (`public/app.js`) never does maths.
+- Units and maths: hydration, percentages and counts are integers; grams
+  are whole numbers (one decimal only below 10 g); salt is always 2% of
+  flour; rises shift 10% per 5 hydration points from the bread's default;
+  the bake shifts 5 min per 250 g of flour from the starting size.
+- The staging `?demo=1` prefill is gated on the SERVER's environment,
+  which it marks as `data-env="staging"` on `<html>` when serving the
+  shell — never on the URL alone.

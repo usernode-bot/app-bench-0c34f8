@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        crumb: token('crumb'), // the doughy tint behind chips and step icons
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

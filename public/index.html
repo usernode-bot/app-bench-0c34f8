@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,8 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <!-- The sourdough line icon, in the accent crust brown. -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2384461c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M3 17a9 8 0 0 1 18 0z'/><path d='M8 12c2 1.5 5 1.5 8-1'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -119,46 +120,55 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
+  <main id="app" class="mx-auto w-full max-w-xl">
   <div data-spec-screen="1">
     <div><div class="s">
     <header><h1 class="text-title">Bread Bot</h1><p class="text-body muted" style="margin:4px 0 0">Pick a bread, set the dough, get the recipe.</p></header>
 
     <section><h2 class="section-label">Bread</h2>
     <div class="chips">
-    <div class="chip on"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 8 0 0 1 18 0z"/><path d="M8 12c2 1.5 5 1.5 8-1"/></svg>Sourdough</div>
-    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Bagels</div>
-    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M6.5 8.5l1 .8M16.5 7.5l-.8 1M17 15.5l-1-.6"/></svg>Sourdough bagels</div>
-    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V5"/><path d="M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zM12 8c3 0 4-2 4-4-3 0-4 2-4 4zM12 13c-3 0-4-2-4-4 3 0 4 2 4 4zM12 13c3 0 4-2 4-4-3 0-4 2-4 4z"/></svg>Rye</div>
-    <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linejoin="round"><path d="M4 19v-8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8z"/><path d="M4 11h16"/></svg>Sandwich loaf</div>
+    <div class="chip on" data-bread="sourdough" role="button" tabindex="0" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 8 0 0 1 18 0z"/><path d="M8 12c2 1.5 5 1.5 8-1"/></svg>Sourdough</div>
+    <div class="chip" data-bread="bagels" role="button" tabindex="0" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Bagels</div>
+    <div class="chip" data-bread="sourdoughBagels" role="button" tabindex="0" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M6.5 8.5l1 .8M16.5 7.5l-.8 1M17 15.5l-1-.6"/></svg>Sourdough bagels</div>
+    <div class="chip" data-bread="rye" role="button" tabindex="0" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V5"/><path d="M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zM12 8c3 0 4-2 4-4-3 0-4 2-4 4zM12 13c-3 0-4-2-4-4 3 0 4 2 4 4zM12 13c3 0 4-2 4-4-3 0-4 2-4 4z"/></svg>Rye</div>
+    <div class="chip" data-bread="sandwich" role="button" tabindex="0" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linejoin="round"><path d="M4 19v-8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8z"/><path d="M4 11h16"/></svg>Sandwich loaf</div>
     </div></section>
 
     <section><h2 class="section-label">Dough</h2>
     <div class="list">
-    <div class="list-row"><div class="lbl text-body">Hydration<small>Water as % of flour</small></div><div class="step"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></i><b>78 %</b><i><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></i></div></div>
-    <div class="list-row"><div class="lbl text-body">Loaves</div><div class="step"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></i><b>2</b><i><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></i></div></div>
-    <div class="list-row"><div class="lbl text-body">Flour per loaf<small>e.g. 500</small></div><div class="field">500<span>g</span></div></div>
+    <div class="list-row" data-setting="hydration"><div class="lbl text-body"><span data-label>Hydration</span><small>Water as % of flour</small></div><div class="step"><button type="button" data-step="down" aria-label="Lower hydration"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><b data-value>78 %</b><button type="button" data-step="up" aria-label="Raise hydration"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div><p class="err text-small text-danger" data-error hidden></p></div>
+    <div class="list-row" data-setting="count"><div class="lbl text-body"><span data-label>Loaves</span></div><div class="step"><button type="button" data-step="down" aria-label="Fewer loaves"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><b data-value>2</b><button type="button" data-step="up" aria-label="More loaves"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div><p class="err text-small text-danger" data-error hidden></p></div>
+    <div class="list-row" data-setting="flour"><div class="lbl text-body"><span data-label>Flour per loaf</span><small>e.g. 500</small></div><label class="field"><input data-input type="text" inputmode="numeric" autocomplete="off" value="500" aria-label="Flour per loaf, grams"><span>g</span></label><p class="err text-small text-danger" data-error hidden></p></div>
     </div></section>
 
-    <button class="btn-primary">Calculate</button>
+    <button class="btn-primary" type="button" data-calculate>Calculate</button>
 
-    <section class="card" aria-label="Recipe">
-    <div class="rc-head"><h2 class="text-heading">Sourdough, 2 loaves</h2><span class="tot">2,000 g dough</span></div>
+    <div data-card-slot>
+    <div class="state-empty" data-empty>
+    <p class="text-heading">Your recipe shows here</p>
+    <p class="text-small text-muted">Pick a bread, set the dough and tap Calculate.</p>
+    </div>
+    <div class="state-error" data-error-state hidden>
+    <p class="text-heading">No recipe to show</p>
+    <p class="text-small text-muted" data-error-text></p>
+    </div>
+    <section class="card" data-recipe hidden aria-label="Recipe">
+    <div class="rc-head"><h2 class="text-heading" data-title></h2><span class="tot" data-total></span></div>
+    <p class="text-small text-muted" data-stale hidden>Settings changed: tap Calculate to update</p>
     <ul class="formula">
     <li class="hd"><span style="flex:1">Ingredient</span><span>Grams</span><span style="min-width:44px;text-align:right">Baker's %</span></li>
     <li><span>Bread flour</span><span class="lead"></span><span class="g">1,000 g</span><span class="pc">100</span></li>
-    <li><span>Water</span><span class="lead"></span><span class="g">780 g</span><span class="pc">78</span></li>
-    <li><span>Starter</span><span class="lead"></span><span class="g">200 g</span><span class="pc">20</span></li>
-    <li><span>Salt</span><span class="lead"></span><span class="g">20 g</span><span class="pc">2</span></li>
     </ul>
     <hr class="cut">
     <ol class="steps">
     <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><div><p class="text-small muted">Bulk rise, at about 24 °C</p><p class="big">4 to 4½ hours</p><p class="note">Stretch and fold every 30 minutes for the first 2 hours.</p></div></li>
-    <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a9 8 0 0 1 18 0z"/><path d="M12 9V5M9 6l3-2 3 2"/></svg></span><div><p class="text-small muted">Shape, then proof</p><p class="big">1 to 2 hours</p><p class="note">Or overnight in the fridge for a tangier loaf.</p></div></li>
-    <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><rect x="7" y="12" width="10" height="5" rx="1"/></svg></span><div><p class="text-small muted">Bake</p><p class="big">250 °C, 20 min covered</p><p class="big">230 °C, 25 min uncovered</p><p class="note">250 °C is 480 °F, 230 °C is 445 °F. Bake one loaf at a time.</p></div></li>
     </ol>
     </section>
+    </div>
     </div></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  </main>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

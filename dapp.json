@@ -2,5 +2,22 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "screen.calculator",
+      "name": "Calculator renders",
+      "path": "/",
+      "expectSelector": "[data-bread]",
+      "expectText": "Calculate",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Recipe card renders on the staging demo",
+      "path": "/?demo=1",
+      "expectSelector": "[data-recipe]:not([hidden]) .formula .g",
+      "expectText": "Baker's %"
+    }
+  ]
 }

@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -154,7 +155,17 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// The HTML shell, read once at boot and never re-read per request. On
+// staging it carries `data-env="staging"` on <html>, which is how the page
+// knows the ?demo=1 prefill may show — the environment is the server's to
+// state, not the URL's.
+const SHELL_FILE = path.join(__dirname, 'public', 'index.html');
+let SHELL = fs.readFileSync(SHELL_FILE, 'utf8');
+if (process.env.USERNODE_ENV === 'staging') {
+  SHELL = SHELL.replace('<html lang="en">', '<html lang="en" data-env="staging">');
+}
+
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -188,13 +199,28 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(SHELL);
 });
 
 async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop cleanly on the platform's shutdown signal: stop taking requests,
+  // close the pool, and leave — with a force-exit timer 3s out, unref'd so
+  // it alone never keeps the process up if a close hangs.
+  let closing = false;
+  const shutdown = (signal) => {
+    if (closing) return;
+    closing = true;
+    console.log(`${signal}: closing`);
+    const finish = () => process.exit(0);
+    server.close(() => pool.end().then(finish, finish));
+    setTimeout(finish, 3000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
