@@ -95,22 +95,41 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a question the
+club needs to decide; everyone votes once (changeable or take-back by
+tapping again); the result is a hand-counted tally of marks with the
+voters' names, like a show of hands. Comments sit under each question.
+Nothing ever closes a question. Questions are kit-resource data
+(`questions` / `questions_votes` / `questions_comments`, answers limited
+to 6, Agree/Disagree when none given). Two app tables in `server.js`:
+`voter_names` is PUBLIC (each voter's username, for the names under each
+tally — usernames are public on the platform); `reports` is PRIVATE
+(`staging:private` comment, one row per reporter per target, no link from
+any public table). Not in the first version: closing/deciding questions,
+membership restrictions, editing or deleting own posts, anonymous voting,
+live refresh, share links, report review.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm neutrals with a deep indigo accent — accent `#3730a3`
+  (light) / soft indigo `#a7a0ff` (dark); neutrals: warm paper greys
+  (ground `#f7f6f3` / `#181614`, surface white / `#2220`, ink `#1f1c1a` /
+  `#f2efea`). Focus ring is the accent. The tally-mark strokes are ink
+  (`--tally`) in both looks.
+- **Signature element:** hand-counted tally marks — groups of five (four
+  upright strokes and a diagonal fifth), drawn by `public/ballot.js` —
+  with the voters' names under each answer, like a show of hands. The
+  ballot-box line drawing is the app mark and favicon, in indigo. Icons
+  are hand-drawn-style line icons (ballot box, speech bubble, check, flag).
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (26/32 in the rounded system face for titles; the rest system sans).
+  Defined in `public/screens.css` and mirrored in `tailwind.config.js`.
+- Phone-first density: full-width indigo primary action, 16 px side
+  margins, 44 px tap targets, header + button + 3–4 questions before
+  scrolling.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

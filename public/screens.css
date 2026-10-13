@@ -64,16 +64,15 @@ body {
 
 .foot {padding:0 4px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Scoped to the detail
+   view so they do not override the first screen's own .app and .head. */
 
-.app {
+[data-spec-screen="2"] .app {
   display: flex;
   flex-direction: column;
   gap: 24px;
   padding: 12px 16px 32px;
 }
-
-.text-title {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:26px;line-height:32px;font-weight:700}
 
 .bar {display:flex;justify-content:space-between;align-items:center}
 
@@ -81,7 +80,7 @@ body {
 
 .back {color:rgb(var(--accent));font-size:16px;padding-left:0}
 
-.head {display:flex;flex-direction:column;gap:8px}
+[data-spec-screen="2"] .head {display:flex;flex-direction:column;gap:8px}
 
 .votes {display:flex;flex-direction:column;gap:8px}
 
@@ -121,6 +120,6 @@ body {
 
 .composer {display:flex;flex-direction:column;gap:8px;margin-top:12px}
 
-.field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--muted))}
+.field {display:block;width:100%;min-height:88px;padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));font:inherit;font-size:16px;color:rgb(var(--fg))}
 
 .btn-secondary {align-self:flex-end;min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:inherit;font-weight:500}

@@ -55,13 +55,17 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        tally: token('tally'), // the tally-mark strokes
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
+        title: ['1.625rem', { lineHeight: '2rem', fontWeight: '700' }],
+      },
+      fontFamily: {
+        rounded: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
     },
   },

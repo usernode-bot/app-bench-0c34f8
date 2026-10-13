@@ -39,21 +39,22 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --tally: 31 28 26; /* from the spec's screens */
+    --focus: 55 48 163;       /* the keyboard focus ring: the same as the accent */
+    --tally: 31 28 26;        /* the tally-mark strokes: ink in both looks */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 22 20;
+    --surface: 34 31 28;
+    --raised: 46 42 38;
+    --fg: 242 239 234;
+    --muted: 170 163 153;
+    --line: 64 59 54;
+    --accent: 167 160 255;
+    --on-accent: 26 22 74;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 167 160 255;
+    --tally: 242 239 234;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -176,14 +177,16 @@
   .kit-detail-body { @apply whitespace-pre-line break-words text-body text-fg; }
   .kit-section { @apply flex flex-col; }
 
-  /* Votes: aria-pressed="true" is the viewer's choice. */
+  /* Votes: aria-pressed="true" is the viewer's choice. This app's detail
+     screen shows tally marks and voter names under each option instead of
+     the fill bar (public/screens.css), so the fill is hidden. */
   .kit-votes { @apply flex flex-col gap-2; }
   .kit-votes-row { @apply grid auto-cols-fr grid-flow-col; }
   .kit-vote {
-    @apply relative isolate flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-lg border border-line
-      bg-surface px-3 py-2 text-left text-body text-fg hover:border-muted;
+    @apply relative isolate flex min-h-11 w-full flex-col items-stretch gap-1.5 overflow-hidden rounded-lg border border-line
+      bg-surface px-3 py-2.5 text-left text-body text-fg hover:border-muted;
   }
-  .kit-vote-fill { @apply absolute inset-y-0 left-0 -z-10 bg-raised motion-safe:transition-[width] motion-safe:duration-300; }
+  .kit-vote-fill { @apply hidden; }
   .kit-vote-mark { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-transparent; }
   .kit-vote-label { @apply min-w-0 flex-1 break-words; }
   .kit-vote-count { @apply shrink-0 text-small font-medium tabular-nums text-muted; }

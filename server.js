@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { pathToFileURL } = require('url');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -154,6 +155,152 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── This app's own data ───────────────────────────────────────────────────
+//
+// The kit resource owns questions / questions_votes / questions_comments.
+// Two app tables sit beside it:
+//
+// voter_names — the username each voter had when they last voted here, so
+// the detail screen can show the names under each tally (a show of hands).
+// Public on purpose: usernames are public on the platform, and votes are
+// shown by name. Nothing else about a user is stored.
+//
+// reports — private (see the COMMENT below): what members flagged. The
+// public tables carry no trace of a report, so nothing on screen reveals
+// one; there is deliberately no foreign key from a public table to it.
+
+async function migrateApp() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS voter_names (
+    user_id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    kind TEXT NOT NULL CHECK (kind IN ('question', 'comment')),
+    target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (kind, target_id, reporter_id))`);
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
+}
+
+// Before the kit's vote route: remember the voter's current username, so
+// /voters can show names for votes cast now and before. A failure here must
+// never block the vote itself.
+app.post('/api/questions/:id/vote', (req, res, next) => {
+  if (!req.user) return next();
+  pool.query(
+    `INSERT INTO voter_names (user_id, username, updated_at) VALUES ($1, $2, $3)
+     ON CONFLICT (user_id) DO UPDATE SET username = EXCLUDED.username, updated_at = EXCLUDED.updated_at`,
+    [req.user.id, String(req.user.username || 'Someone'), req.now],
+  )
+    .catch((err) => console.warn('voter_names upsert failed: ' + err.message))
+    .then(() => next());
+});
+
+// The questions resource: list, post, vote, comment. Agree/Disagree is the
+// default shape when a question is posted with no answers of its own.
+const questions = require('./kit/server').resource(app, pool, {
+  name: 'questions',
+  options: ['Agree', 'Disagree'],
+  demo: {
+    titles: [
+      { title: 'Where should we meet in November?', body: 'The café is closing for renovation. Pick the place that works for most of us and we will book it this week.', options: ['Library room', 'Community hall', "Someone's garden"] },
+      'Should we start a monthly book swap?',
+      { title: 'What should the spring outing be?', body: 'One day out, travel by train, back before dark.', options: ['Botanic garden', 'Coastal walk', 'Museum day', 'Picnic in the park'] },
+      'Move meetings to Thursday evenings?',
+      { title: 'Which day suits for the December quiz night?', options: ['Friday 5th', 'Saturday 6th', 'Friday 12th'] },
+      'Should the club buy its own projector?',
+      { title: 'What should we call the club newsletter?', options: ['The Notice Board', 'Club Notes', 'The Monthly Minute'] },
+      'Do we need a snacks rota for meetings?',
+      { title: 'Which good cause should the winter raffle support?', options: ['Food bank', 'Animal shelter', 'Youth club'] },
+      'Should we try an online meeting once a month?',
+      { title: 'New club badge: which sketch do you like?', body: 'Three sketches from the design evening. The badge goes on the noticeboard and the newsletter.', options: ['Roundel with a ballot box', 'Plain wordmark', 'Leaf and quill'] },
+      'Keep the current meeting time of 7 pm?',
+      { title: 'Where should the summer barbecue be?', options: ['The quay', 'Riverside meadow', 'The hall garden'] },
+      'Should we add a small annual membership fee?',
+    ],
+    bodies: [
+      'Thoughts welcome before the next meeting.',
+      'Say why if you can, it helps the rest of us.',
+      'We will go with whatever most people pick.',
+    ],
+    comments: [
+      'Happy with whatever most people pick.',
+      'Can we make sure the room has step-free access?',
+      'I can help set up if we need a hand.',
+      'Works for me, though the later slot is easier by bus.',
+      'Last time the room was a bit cold, worth asking about.',
+    ],
+  },
+});
+
+// Who voted, by name: { voters: { [optionId]: [name, …] } }, the viewer
+// first as "You". Demo voters (negative ids) come from the kit's demo
+// people; anyone whose username was not captured shows as "A member".
+app.get('/api/questions/:id/voters', async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Bad question id.' });
+    const { rows } = await pool.query(
+      'SELECT user_id, choice FROM questions_votes WHERE item_id = $1 ORDER BY created_at, user_id',
+      [id],
+    );
+    const ids = [...new Set(rows.map((r) => r.user_id))];
+    const known = new Map();
+    const real = ids.filter((x) => x >= 0);
+    if (real.length) {
+      const { rows: people } = await pool.query(
+        'SELECT user_id, username FROM voter_names WHERE user_id = ANY($1::int[])',
+        [real],
+      );
+      for (const p of people) known.set(p.user_id, p.username);
+    }
+    if (ids.some((x) => x < 0)) {
+      const { DEMO_PEOPLE } = await import(pathToFileURL(path.join(__dirname, 'public', 'kit', 'demo.js')).href);
+      for (const p of DEMO_PEOPLE) known.set(p.id, p.name);
+    }
+    const viewer = req.user ? Number(req.user.id) : null;
+    const voters = {};
+    for (const r of rows) {
+      const key = String(r.choice);
+      voters[key] = voters[key] || [];
+      if (r.user_id === viewer) voters[key].unshift('You');
+      else voters[key].push(known.get(r.user_id) || 'A member');
+    }
+    return res.json({ voters });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side.' });
+  }
+});
+
+// Report a question or a comment. One row per (kind, target, reporter); a
+// repeat report changes nothing and still answers 201, so the screen can
+// always thank the member.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const kind = (req.body || {}).kind;
+    const id = Number((req.body || {}).id);
+    if (!['question', 'comment'].includes(kind) || !Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'Say what is being reported.' });
+    }
+    const table = kind === 'question' ? 'questions' : 'questions_comments';
+    const { rows } = await pool.query(`SELECT 1 FROM ${table} WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ error: 'That was removed, or the link is wrong.' });
+    await pool.query(
+      `INSERT INTO reports (kind, target_id, reporter_id, created_at) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (kind, target_id, reporter_id) DO NOTHING`,
+      [kind, id, req.user.id, req.now],
+    );
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +338,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrateApp();
+  await questions.migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Shut down cleanly when the platform stops the container: stop accepting
+// new connections, give requests already in flight about three seconds,
+// then close the database pool and exit.
+let stopping = false;
+function stop(signal) {
+  if (stopping || !server) return;
+  stopping = true;
+  console.log(`${signal}: finishing open requests`);
+  server.close(() => console.log('Stopped accepting connections'));
+  setTimeout(async () => {
+    try { await pool.end(); } catch (_) {}
+    process.exit(0);
+  }, 3000).unref();
+}
+process.on('SIGTERM', () => stop('SIGTERM'));
+process.on('SIGINT', () => stop('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });
