@@ -1,0 +1,112 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+
+button {font:inherit;color:inherit}
+
+.app {
+  max-width: 390px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+.head {display:flex;align-items:center;gap:8px;padding:20px 0 2px}
+
+.head h1 {font-size:1.75rem;line-height:2.25rem;font-weight:700;letter-spacing:-0.01em;flex:1}
+
+.count {font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted));padding-bottom:6px;display:flex;align-items:center;gap:4px}
+
+.btn-icon {min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
+
+.btn-add {min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--accent));font-size:1.0625rem;font-weight:600}
+
+.btn-icon svg,.btn-add svg {width:20px;height:20px}
+
+.link-btn {color:rgb(var(--accent));font-weight:500;font-size:0.875rem;background:none;border:0;min-height:44px;padding:0 6px}
+
+.section-label {margin:14px 0 8px;padding:0 4px;font-size:0.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted))}
+
+.list {list-style:none;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list>li+li {border-top:1px solid rgb(var(--line))}
+
+.post {display:flex;gap:10px;padding:12px 14px 13px 10px;width:100%;text-align:left;background:none;border:0}
+
+.mark {width:20px;flex-shrink:0;padding-top:1px;color:rgb(var(--accent))}
+
+.mark svg {width:18px;height:18px}
+
+.post-text {min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
+
+.post-meta {display:flex;gap:8px;font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.post-feed {font-weight:600;color:rgb(var(--fg));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+
+.post-time {flex-shrink:0;font-variant-numeric:tabular-nums}
+
+.post-title {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:1.0625rem;line-height:1.5rem;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.post-sum {font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.is-read .mark {visibility:hidden}
+
+.is-read .post-title,.is-read .post-feed {color:rgb(var(--muted));font-weight:500}
+
+.foot {display:flex;justify-content:center;padding-top:16px}
+
+.btn-secondary {min-height:44px;padding:0 16px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:1.0625rem;font-weight:500}
+
+/* Screen 2: its rules the first screen has not got. */
+
+button,a {font:inherit}
+
+.app {
+  max-width: 390px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+.bar {display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;margin-left:-8px}
+
+.back {min-height:44px;display:inline-flex;align-items:center;gap:2px;padding:0 8px;background:none;border:0;color:rgb(var(--accent));font-size:1rem;font-weight:500}
+
+.back svg {width:22px;height:22px}
+
+.quiet {min-height:44px;padding:0 4px;background:none;border:0;color:rgb(var(--muted));font-size:0.875rem;font-weight:500}
+
+.kit-detail {display:flex;flex-direction:column;gap:20px}
+
+.kit-detail-head {display:flex;flex-direction:column;gap:8px;padding-top:6px}
+
+.feed {display:flex;align-items:center;gap:6px;font-size:0.875rem;line-height:1.25rem;font-weight:600;color:rgb(var(--fg))}
+
+.feed svg {width:16px;height:16px;color:rgb(var(--accent))}
+
+.kit-detail-title {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:1.75rem;line-height:2.25rem;font-weight:700;letter-spacing:-0.005em}
+
+.meta {font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.rule {border:0;border-top:1px solid rgb(var(--line))}
+
+.kit-detail-body {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:1.0625rem;line-height:1.75rem;color:rgb(var(--fg));display:flex;flex-direction:column;gap:14px;max-width:34em}
+
+.note {font-size:0.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.btn-primary {min-height:48px;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:1rem;font-weight:600;text-decoration:none}
+
+.btn-primary svg {width:18px;height:18px}
+
+.open {display:flex;flex-direction:column;gap:8px;align-items:center}
