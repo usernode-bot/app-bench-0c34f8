@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,7 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+          if (typeof val === 'function') return '[Function ' + (val.name || '') + ']';
           if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='8' width='84' height='84' rx='20' fill='%23c2410c'/><path d='M30 68a6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6 6 6 0 0 1-6-6zm-4-20a24 24 0 0 1 24 24h-8a16 16 0 0 0-16-16zm0-16a40 40 0 0 1 40 40h-8a32 32 0 0 0-32-32z' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -108,28 +108,77 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main id="app" class="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pb-10 pt-6">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- The screen's one primary button is "Add"; everything else is a
+         secondary button or a plain row, per the design kit. -->
+    <header class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h1 class="text-title">Unread</h1>
+        <p id="unread-line" class="text-small text-muted" aria-live="polite"></p>
+      </div>
+      <div class="flex shrink-0 gap-2">
+        <button type="button" id="check-btn" class="btn-secondary px-3" aria-label="Check again" title="Check again">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 20v-4h-4"/></svg>
+        </button>
+        <button type="button" id="feeds-btn" class="btn-secondary px-3" aria-label="Your feeds" title="Your feeds">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>
+        </button>
+      </div>
+    </header>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <!-- Add a feed: the address field plus the screen's primary button.
+         #add-error speaks inline, in plain words, under the field. -->
+    <form id="add-form" class="flex flex-col gap-1.5" novalidate>
+      <label for="add-feed" class="section-label mb-0">Add a feed</label>
+      <div class="flex gap-2">
+        <input id="add-feed" name="url" type="url" class="field" placeholder="e.g. example.com/feed.xml"
+               inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false" enterkeyhint="go">
+        <button type="submit" id="add-btn" class="btn-primary shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          <span id="add-label">Add</span>
+        </button>
+      </div>
+      <p id="add-error" class="text-small text-danger" role="status" aria-live="polite" hidden></p>
+    </form>
+
+    <!-- Filter pills: "All" plus one per feed, filled in by app.js. -->
+    <div id="pills"></div>
+
+    <div class="flex items-center justify-between px-1">
+      <span class="section-label mb-0">Newest first</span>
+      <button type="button" id="mark-read" class="text-small font-medium text-accent" hidden>Mark all read</button>
+    </div>
+
+    <!-- Above the list: which feeds failed the last check. -->
+    <p id="failed-line" class="text-small text-muted" hidden></p>
+
+    <!-- The states holder: app.js takes the sample row out of the list
+         FIRST (fill.js's rowsFrom), then hands #states to the kit's
+         createStates, which swaps loading / empty / error / content here. -->
+    <div id="states">
+      <ul class="list" id="post-list">
+        <li>
+          <button type="button" class="post-row">
+            <span class="feed-chip feed-1" aria-hidden="true">P</span>
+            <span class="min-w-0 flex-1">
+              <span class="post-meta">
+                <span class="post-feed">Pocket Gardens Weekly</span>
+                <span class="post-time">12 min</span>
+                <span class="unread-dot" aria-hidden="true"></span>
+              </span>
+              <span class="post-title">Growing basil on a windowsill that only gets morning sun</span>
+              <span class="post-snip">Three pots, one east window and a lot of patience.</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Below the list: the end. -->
+    <p id="end-line" class="text-small text-muted" hidden>That's everything new. Check again later.</p>
+
+    <script type="module" src="/app.js"></script>
   </main>
 </body>
 </html>

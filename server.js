@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { migrate, mountFeeds } = require('./feeds');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -154,6 +155,11 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// The app's own API and tables (feeds.js): feed management, the unread list,
+// mark-read. Mounted before the static handler and the catch-all so /api/*
+// is never answered by index.html.
+mountFeeds(app, pool);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -192,9 +198,29 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // Create the app's tables before the first request lands.
+  await migrate(pool);
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop cleanly: stop taking requests, give in-flight ones a few seconds,
+  // then close the database pool so the platform's restart isn't left with
+  // half-served connections.
+  let stopping = false;
+  const shutdown = (signal) => {
+    if (stopping) return;
+    stopping = true;
+    console.log(`${signal}: closing`);
+    const timer = setTimeout(() => process.exit(0), 3000);
+    timer.unref();
+    server.close(() => {
+      clearTimeout(timer);
+      pool.end().finally(() => process.exit(0));
+    });
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

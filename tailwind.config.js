@@ -24,6 +24,10 @@ module.exports = {
 
   // Classes this app builds dynamically (if it ever does) go here, since the
   // extractor cannot see them. Prefer whole literals in the markup instead.
+  // app.js does pick a chip's colour class from the feed's colour number
+  // ("feed-" + color), but .feed-1 through .feed-6 are hand-written
+  // components in styles/tailwind-input.css, not utilities, so they need
+  // no safelist entry.
   safelist: [],
 
   // dark: variants key off a "dark" class on <html>, which public/index.html
@@ -55,12 +59,28 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The six feed-chip colours and their text. A chip's class is picked
+        // from the feed's colour number in app.js ("feed-" + color), so the
+        // six names are on the safelist below.
+        'feed-1': token('feed-1'),
+        'feed-2': token('feed-2'),
+        'feed-3': token('feed-3'),
+        'feed-4': token('feed-4'),
+        'feed-5': token('feed-5'),
+        'feed-6': token('feed-6'),
+        'on-feed': token('on-feed'),
       },
-      // The type scale: four sizes, and nothing in between.
+      // The type scale: four sizes, and nothing in between. Headlines and
+      // preview text are serif (Design in CLAUDE.md); the rest is the
+      // system sans.
+      fontFamily: {
+        serif: ['ui-serif', 'Charter', '"Iowan Old Style"', 'Georgia', 'serif'],
+        sans: ['system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'sans-serif'],
+      },
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
     },

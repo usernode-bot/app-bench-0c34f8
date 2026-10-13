@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Unread list, no feeds yet",
+      "path": "/",
+      "expectSelector": "#add-feed",
+      "expectText": "No feeds yet"
+    },
+    {
+      "name": "Staging demo list",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "expectSelector": ".feed-chip",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "feeds.js", "lib/**"]
+    }
+  ]
 }

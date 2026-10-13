@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-like feed reader. The user adds RSS/Atom feeds (private, per
+user), sees every unread post in one scrolling list, newest first, and
+taps a post for an in-app preview of what the feed shares, with an
+"Open full post" link to the site. Feeds are fetched and parsed
+server-side (`feeds.js`, `lib/rss.js`); the frontend (`public/app.js`)
+is one screen plus two sheets.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent burnt orange (`194 65 12` light / `251 146 60`
+  dark); neutrals cool greys (`text-fg` on white surfaces, GitHub-dark
+  ground). The second colour is the six-colour feed-chip set
+  (`feed-1`…`feed-6`), which is the app's subject showing.
+- **Signature element:** the feed chip — a small rounded square with the
+  feed's initial, in one of six colours, that travels with the feed
+  everywhere (post row, filter pill, preview sheet head, "Your feeds"
+  sheet). Nothing else on screen carries colour except the orange accent.
+- **Type scale:** `text-title` (serif, page title and preview headline),
+  `text-heading` (serif, post headlines and preview article text),
+  `text-body`, `text-small`. Serif is only for headlines and article
+  text; system sans everywhere else.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +146,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All three tables (`rss_feeds`, `rss_posts`, `rss_demo_seeds`) are
+  marked `staging:private` — no other app or user reads them.
+- Read state is per user, stored as `read_at` on `rss_posts`. The list
+  endpoint returns only unread posts; posts read during a session stay
+  greyed in the frontend until the next app open.
+- Feeds are fetched only through `safeFetch` in `lib/rss.js` (public
+  addresses only, re-checked at every redirect hop, 10 s timeout, 3 MB
+  cap). Known gap, accepted: the DNS check happens before the fetch, so
+  a host that changes its answer between check and fetch could still
+  reach a private address (classic rebinding window).
+- Feed HTML is never rendered as HTML: it is flattened to plain text
+  paragraphs by `htmlToParagraphs` server-side.
+- Times come from the feed or the fetch time, never `new Date()` in a
+  displayed position — the server uses `req.now` per the platform rules.
