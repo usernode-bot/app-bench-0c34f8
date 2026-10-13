@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a yes/no
+question, everyone votes, and the discussion happens in comments under the
+question. One page: the open questions with their tally bars, then the
+question itself when you open it. Guests read; members vote and talk.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** cool paper grey neutrals; accent: ink blue (light
+  `35 61 140`, dark `140 165 240`); yes green (light `21 116 79`, dark
+  `94 200 150`) and no red (light `178 62 42`, dark `244 132 112`) for the
+  ballot bar and the Yes/No words only.
+- **Signature element:** the ballot tally bar — one rounded bar per
+  question, Yes filling from the left, No from the right (8 px in list
+  rows, 14 px on the question). A dashed outline stands in while nobody
+  has voted.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+
+The two screens the spec drew live in `public/index.html` (screen 1 in
+place, screen 2 cloned from its `<template data-spec-screen="2">`) with
+their styles in `public/screens.css`. Fill them from data
+(`public/kit/fill.js`); do not redraw them, and do not add styles for what
+they already draw.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +148,15 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Votes are stored as smallints: 0 = Yes, 1 = No. `votes.options` keeps
+  that order in the API, so option id 0 is always Yes.
+- A choice of "no vote" is `null`/`option: null` on the wire, and "no
+  vote" rows are deleted, not zeroed.
+- Every read leaves out moderation-hidden rows (`hidden_at IS NULL`) and
+  rows the viewer has reported (`questions_reports`). `comment_count`
+  counts only comments the viewer can see.
+- `questions_reports` (who reported what) is marked `staging:private`, so
+  staging never shares it as demo data.
+- Words: "question" (never poll), "vote", "comment", "Report". Buttons:
+  "New question", "Post question", "Post comment", "All questions".
+  Toasts: "Question posted" and "Reported. Thanks for flagging it."

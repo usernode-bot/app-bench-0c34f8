@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23233d8c'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -122,17 +122,18 @@
   <div data-spec-screen="1">
     <div>
     <div class="s">
-    <main>
+    <main id="app">
       <header class="head">
         <div class="head-top">
           <h1 class="text-title">Club Votes</h1>
-          <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button>
+          <button id="new-question" class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New question</button>
         </div>
         <p class="text-small muted">What the club is deciding. Open a question to vote and talk it through.</p>
       </header>
 
       <section>
-        <h2 class="section-label"><span>Open questions</span><span class="n">8</span></h2>
+        <h2 class="section-label"><span>Open questions</span><span class="n" id="q-count">8</span></h2>
+        <section id="questions">
         <ul class="list">
           <li><button class="list-row">
             <span class="kit-row-text">
@@ -204,6 +205,8 @@
     </div>
     </div>
   </div>
+  <!-- The question view, filled from the screen-2 template by app.js on open. -->
+  <section id="question" hidden></section>
   <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
   <template data-spec-screen="2">
     <div data-spec-screen="2">
@@ -252,5 +255,6 @@
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

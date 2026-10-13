@@ -145,6 +145,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// The app's own API: questions, votes, comments, reports. Mounted after the
+// sign-in middleware (its routes rely on req.user / req.guest / req.now),
+// before express.static.
+const questions = require('./questions').mount(app, pool);
+
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
@@ -192,9 +197,25 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await questions.migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  return server;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Stop cleanly when the platform asks: stop taking requests, let the ones
+// in flight finish (3s at most), close the Postgres pool, then exit.
+const serverPromise = start().catch(err => { console.error(err); process.exit(1); });
+
+let stopping = false;
+async function shutdown() {
+  if (stopping) return;
+  stopping = true;
+  const server = await serverPromise.catch(() => null);
+  if (!server) process.exit(0);
+  setTimeout(() => process.exit(0), 3000).unref();
+  server.close(() => pool.end().then(() => process.exit(0)));
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

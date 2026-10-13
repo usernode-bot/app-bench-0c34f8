@@ -44,17 +44,19 @@
     --no: 178 62 42; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 16 18 24;
+    --surface: 26 29 37;
+    --raised: 36 40 50;
+    --fg: 236 238 243;
+    --muted: 160 166 180;
+    --line: 54 59 72;
+    --accent: 140 165 240;
+    --on-accent: 12 20 48;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 140 165 240;
+    --yes: 94 200 150;
+    --no: 244 132 112;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -195,6 +197,14 @@
   .kit-vote:focus-visible { @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-ground; }
   .kit-vote-summary { @apply mt-2 px-1 text-small text-muted; }
   .kit-error { @apply text-small text-danger; }
+
+  /* The drawn ballot (public/screens.css): the tally bar above the buttons
+     already carries the split, so the buttons' own fill is not drawn. */
+  .ballot .kit-vote-fill { display: none; }
+
+  /* Typed text in the drawn composer keeps full strength; the faint colour
+     is for the placeholder only. */
+  .kit-composer .field { color: rgb(var(--fg)); }
 
   /* A comment thread, then the composer. */
   .kit-comment { @apply flex-col items-start gap-1; }

@@ -2,5 +2,28 @@
   "icon": {
     "emoji": "🗳️"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "Questions list loads",
+      "path": "/",
+      "expectSelector": "#questions",
+      "expectText": "Club Votes"
+    },
+    {
+      "id": "demo-questions",
+      "name": "Demo questions with tally bars",
+      "path": "/?demo=1",
+      "visual": true,
+      "impact": ["public/**", "questions.js", "server.js", "styles/**"],
+      "expectSelector": ".tally",
+      "expectText": "Staging demo"
+    },
+    {
+      "name": "Open a demo question",
+      "path": "/?demo=1#q/900002",
+      "expectSelector": ".kit-vote",
+      "expectText": "Comments"
+    }
+  ]
 }
