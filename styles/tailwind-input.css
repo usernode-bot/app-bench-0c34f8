@@ -29,30 +29,46 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
+    --ground: 247 244 238;    /* the page: warm flour cream */
+    --surface: 255 253 249;   /* lists, cards, fields */
+    --raised: 239 233 223;    /* hovers, badges */
+    --fg: 43 31 22;           /* text: dark crust */
+    --muted: 105 89 75;       /* secondary text */
+    --line: 226 217 204;      /* borders, dividers, skeletons */
+    --accent: 138 74 26;      /* the one accent: baked crust brown */
+    --on-accent: 255 250 242; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 138 74 26;       /* the keyboard focus ring: matches the accent */
+    /* The subject's own materials, used only in the percentage strip and
+       the ingredient-row swatches. */
+    --ing-flour: 226 204 156;
+    --ing-rye: 134 96 62;
+    --ing-water: 111 152 184;
+    --ing-leaven: 189 140 80;
+    --ing-salt: 156 151 144;
+    --ing-sweet: 122 72 40;
+    --ing-fat: 232 190 84;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 28 22 18;
+    --surface: 38 31 26;
+    --raised: 52 43 36;
+    --fg: 245 237 226;
+    --muted: 190 175 158;
+    --line: 70 59 50;
+    --accent: 222 164 92;     /* gold crust in the dark look */
+    --on-accent: 40 24 10;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 222 164 92;
+    --ing-flour: 214 190 140;
+    --ing-rye: 150 112 78;
+    --ing-water: 104 150 186;
+    --ing-leaven: 200 150 90;
+    --ing-salt: 150 146 140;
+    --ing-sweet: 168 110 70;
+    --ing-fat: 214 176 80;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -259,4 +275,112 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* ── Bread Bot ─────────────────────────────────────────────────────────
+   * The calculator's own pieces, on the tokens. Signature element: the
+   * baker's percentage strip (.strip), flour at 100% with the rest scaled
+   * against it; each segment's colour is the ingredient's material token.
+   */
+
+  /* A bread choice: a rounded chip with a line drawing of the bread. */
+  .chip {
+    @apply inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface
+      py-2 pl-2.5 pr-3.5 text-body font-medium text-fg hover:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .chip svg { @apply h-6 w-6 shrink-0 text-muted; }
+  .chip[aria-pressed="true"] { @apply border-accent bg-accent text-on-accent hover:bg-accent; }
+  .chip[aria-pressed="true"] svg { @apply text-on-accent; }
+
+  /* The minus/plus stepper for the loaf count. */
+  .stepper { @apply flex items-stretch overflow-hidden rounded-lg border border-line; }
+  .stepper button {
+    @apply flex h-11 w-11 items-center justify-center text-heading text-accent
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .stepper > span {
+    @apply flex h-11 min-w-10 items-center justify-center border-x border-line
+      text-heading font-semibold tabular-nums;
+  }
+
+  /* The hydration slider: a styled input[type=range], 44 px tall, accent
+     track and thumb. The filled part is --fill, set from JS. */
+  .range {
+    @apply h-11 w-full cursor-pointer appearance-none bg-transparent;
+    --fill: 62.5%;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, rgb(var(--accent)) var(--fill), rgb(var(--line)) var(--fill));
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    margin-top: -11px;
+    border-radius: 999px;
+    background: rgb(var(--surface));
+    border: 2px solid rgb(var(--accent));
+  }
+  .range::-moz-range-track { height: 6px; border-radius: 999px; background: rgb(var(--line)); }
+  .range::-moz-range-progress { height: 6px; border-radius: 999px; background: rgb(var(--accent)); }
+  .range::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgb(var(--surface));
+    border: 2px solid rgb(var(--accent));
+  }
+  .range:focus-visible { outline: none; }
+  .range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px rgb(var(--ground)), 0 0 0 4px rgb(var(--focus));
+  }
+  .range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 2px rgb(var(--ground)), 0 0 0 4px rgb(var(--focus));
+  }
+
+  /* The baker's percentage strip: one <i> per ingredient, flex-grow set
+     from JS to its percentage against flour. */
+  .strip { @apply flex h-10 gap-0.5 overflow-hidden rounded-lg; }
+  .strip i { @apply block h-full; }
+  @media (prefers-reduced-motion: no-preference) {
+    .strip i { transition: flex-grow 200ms ease; }
+  }
+
+  /* The rise-and-bake timeline: steps joined by a thin line, each with a
+     drawn icon. The bake step's icon is filled, to mark the step people
+     come back to with flour on their hands. */
+  .step { @apply relative flex gap-3.5 pb-5 last:pb-0; }
+  .step::before {
+    content: '';
+    position: absolute;
+    left: 21px;
+    top: 44px;
+    bottom: 0;
+    width: 2px;
+    background: rgb(var(--line));
+  }
+  .step:last-child::before { content: none; }
+  .step-ico {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full
+      border border-line bg-surface text-fg;
+  }
+  .step-ico svg { @apply h-6 w-6; }
+  .step-bake .step-ico { @apply border-accent bg-accent text-on-accent; }
+  .step-title { @apply pt-0.5 text-body font-semibold; }
+  .step-meta { @apply mt-0.5 text-body; }
+  .step-sub { @apply mt-0.5 text-small text-muted; }
+
+  /* The bake step's panel: one line per oven phase, then how to tell it is
+     done. */
+  .bake-panel { @apply mt-2 flex flex-col gap-2.5 rounded-xl border border-line bg-surface p-3; }
+  .bake-line { @apply flex items-baseline justify-between gap-2; }
+  .bake-line strong { @apply text-heading font-semibold tabular-nums; }
+  .bake-line small { @apply ml-1.5 text-small font-normal text-muted; }
+
+  /* An ingredient row's colour swatch, matching its part of the strip. */
+  .swatch { @apply h-3 w-3 shrink-0 rounded; }
 }

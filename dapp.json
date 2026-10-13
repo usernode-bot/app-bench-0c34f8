@@ -2,5 +2,25 @@
   "icon": {
     "emoji": "🍞"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "name": "calculator renders the recipe strip",
+      "path": "/",
+      "expectSelector": ".strip"
+    },
+    {
+      "name": "staging demo fills in example settings",
+      "path": "/?demo=1",
+      "expectSelector": ".strip",
+      "expectText": "Staging demo"
+    },
+    {
+      "id": "bread-bot-main",
+      "visual": true,
+      "impact": ["core"],
+      "name": "main flow: pick a bread, set the dough, read the recipe",
+      "path": "/"
+    }
+  ]
 }

@@ -35,7 +35,7 @@ const GUEST_PUBLIC_KEY = (process.env.USERNODE_GUEST_JWT_PUBLIC_KEY || '')
 // Paths that stay open without authentication. Add a path here (and add it
 // with `app.get`/`app.post` below) if you deliberately want it public.
 // Everything else requires a valid platform-issued JWT.
-const PUBLIC_API_PATHS = new Set(['/health']);
+const PUBLIC_API_PATHS = new Set(['/health', '/api/demo']);
 
 app.use(express.json());
 
@@ -146,6 +146,18 @@ app.use((req, res, next) => {
 });
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Staging demo (see "Staging mock data" in the platform conventions): with
+// ?demo=1 on a staging container, the page asks here for example settings
+// and fills them in, so the populated screen can be seen straight away.
+// Public and inert elsewhere: no staging, no demo — always { demo: null }.
+app.get('/api/demo', (req, res) => {
+  res.json({
+    demo: IS_STAGING && req.query.demo === '1'
+      ? { type: 'sourdough', hydration: 75, count: 2, size: 900 }
+      : null,
+  });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes

@@ -95,22 +95,28 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator, built from issue #1. The user picks one of five
+breads (Sourdough, Bagels, Sourdough bagels, Rye, Sandwich loaf), sets
+hydration (50–90%), loaf count (1–24) and loaf weight (50–3,000 g), and the
+screen live-updates — no Calculate button, nothing saved — to show the
+ingredient grams, a baker's-percentage strip, the rise steps, and the bake
+temperature and time scaled to the loaf size. There is no database; every
+number is computed on the fly from `public/breads.js`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm flour-cream neutrals with a baked crust-brown accent
+  (gold crust in the dark look); seven ingredient material tokens (flour,
+  rye, water, leaven, salt, sweet, fat) used only in the percentage strip
+  and the ingredient-row swatches
+- **Signature element:** the baker's-percentage strip — flour at 100% with
+  every other ingredient drawn to scale against it, each segment in its
+  material's colour, animating as the settings change
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  _(change their sizes in `tailwind.config.js` if you must, not their number)_;
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +144,11 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **All recipe maths lives in `public/breads.js` and is pure** (no DOM, no
+  fetch): `computeRecipe`, `bakeMinutes`, `toF`, `formatGrams`,
+  `isValidSize`. `public/app.js` only reads settings and renders. Keep new
+  maths there too.
+- Ingredient rows must sum to the dough weight exactly — the largest flour
+  row absorbs the rounding difference. Never show a zero recipe: an invalid
+  weight gets the empty state, not zeros.
+- No database, no new dependencies unless a request truly needs one.

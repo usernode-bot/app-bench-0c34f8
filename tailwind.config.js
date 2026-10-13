@@ -43,6 +43,9 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields
@@ -55,6 +58,15 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The bread's own materials (the strip and the row swatches only):
+        // flour, rye flour, water, starter/yeast, salt, sugar/malt, butter.
+        'ing-flour': token('ing-flour'),
+        'ing-rye': token('ing-rye'),
+        'ing-water': token('ing-water'),
+        'ing-leaven': token('ing-leaven'),
+        'ing-salt': token('ing-salt'),
+        'ing-sweet': token('ing-sweet'),
+        'ing-fat': token('ing-fat'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
