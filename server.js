@@ -147,6 +147,9 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// The reader: feeds, posts, demo seeds and their routes (feeds.js).
+const feeds = require('./feeds').mount(app, pool, { IS_STAGING });
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +195,23 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await feeds.migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Retire cleanly: stop taking requests, give in-flight ones 3 s, then
+  // close the Postgres pool and exit. No pid-file housekeeping required.
+  let draining = false;
+  const shutdown = (signal) => {
+    if (draining) return;
+    draining = true;
+    console.log(`${signal}: closing`);
+    server.close(() => pool.end().then(() => process.exit(0)).catch(() => process.exit(0)));
+    setTimeout(() => process.exit(0), 3_000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

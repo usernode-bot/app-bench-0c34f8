@@ -2,5 +2,21 @@
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.unread-demo",
+      "name": "Unread posts (demo)",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post-row]",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**", "server.js", "feeds.js", "styles/**", "tailwind.config.js"]
+    },
+    {
+      "name": "First run shows add feed",
+      "path": "/",
+      "expectText": "Add your first feed"
+    }
+  ]
 }

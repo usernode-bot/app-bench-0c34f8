@@ -95,22 +95,28 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A feed reader like Feedly: paste a feed address to follow a blog or news
+site, and all followed feeds mix into one list of unread posts newest
+first, grouped Today / Yesterday / Earlier. Tapping a post marks it read
+and opens a preview with a link to the full article. Feeds and read state
+are private per user. Refresh happens on open and on the refresh button.
+In staging, `?demo=1` shows five invented feeds (never fetched) so the
+screen can be seen empty-handed.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** RSS orange accent (tomato `196 72 12` light, `251 146 60`
+  dark), cool grey neutrals, one coloured chip per feed (`--feed-1`…`--feed-6`).
+- **Signature element:** the 36 px serif-letter chip in the feed's colour,
+  on every post row, feed row and preview; post titles set in the serif
+  reading face.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- The screens the spec drew (`public/index.html` + `public/screens.css`)
+  are the layout's source of truth; fill them, do not redraw them.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +144,12 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds`, `posts` and `demo_seeds` tables are marked
+  `staging:private` — one person's feeds and read state must never be
+  visible to another.
+- Feed content (titles, summaries) is stored and rendered as plain text
+  only: never `innerHTML` it, never serve it back as HTML.
+- Outbound fetches go through `feeds.js`'s `safeFetch` only — public
+  http(s) hosts, DNS-resolved and IP-blocked against private ranges, 2 MB
+  and 10 s caps. Demo feeds are never fetched at all.
+- A post counts as read the moment it is tapped to open its preview.

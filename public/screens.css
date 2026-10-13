@@ -70,9 +70,12 @@ main {padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
 .done {text-align:center;padding:8px 0 0;display:flex;flex-direction:column;align-items:center;gap:10px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. The rules below that
+   would also restyle the first screen are scoped to [data-spec-screen="2"],
+   which holds only the template copy; the preview sheet the app renders is
+   not inside one, so the sheet chrome it reuses stays unscoped. */
 
-.r {
+[data-spec-screen="2"] .r {
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
@@ -81,27 +84,23 @@ main {padding:20px 16px 32px;display:flex;flex-direction:column;gap:20px}
   overflow: hidden;
 }
 
-main {padding:20px 16px;display:flex;flex-direction:column;gap:20px}
+[data-spec-screen="2"] main {padding:20px 16px;display:flex;flex-direction:column;gap:20px}
 
-.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
 
-.chip {flex:none;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font-family:ui-serif,Charter,Georgia,serif;font-weight:700;font-size:18px}
+[data-spec-screen="2"] .chip {flex:none;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgb(var(--on-feed));font-family:ui-serif,Charter,Georgia,serif;font-weight:700;font-size:18px}
 
-.ttl {font-family:ui-serif,Charter,Georgia,serif;font-size:17px;line-height:23px;font-weight:600}
+[data-spec-screen="2"] .ttl {font-family:ui-serif,Charter,Georgia,serif;font-size:17px;line-height:23px;font-weight:600}
 
-.scrim {position:absolute;inset:0;background:rgb(0 0 0/.32)}
+[data-spec-screen="2"] .scrim {position:absolute;inset:0;background:rgb(0 0 0/.32)}
 
-.sheet {position:absolute;left:0;right:0;bottom:0;top:72px;background:rgb(var(--surface));border-radius:14px 14px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column}
+[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;bottom:0;top:72px;background:rgb(var(--surface));border-radius:14px 14px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column}
 
 .grab {width:36px;height:5px;border-radius:3px;background:rgb(var(--line));margin:0 auto 8px}
 
 .bar {display:flex;align-items:center;gap:12px}
 
 .bar .who {flex:1;min-width:0}
-
-.src {font-size:16px;line-height:22px;font-weight:600}
-
-.close {width:44px;height:44px;border-radius:22px;border:0;background:rgb(var(--raised));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -114,3 +113,23 @@ h2.big {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:2
 .foot {margin-top:auto;padding-top:20px;border-top:1px solid rgb(var(--line));display:flex;flex-direction:column;gap:8px;align-items:center}
 
 .btn-primary {display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600}
+
+/* Behaviour the script adds to the first screen's rows. */
+
+.is-read .dot {display:none}
+
+.is-read .ttl {color:rgb(var(--muted))}
+
+.is-read .sum {color:rgb(var(--muted)/.75)}
+
+.post-row {cursor:pointer}
+
+.post-row:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
+
+.spin {animation:spin 1s linear infinite}
+
+@keyframes spin {to {transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {animation:none}
+}

@@ -122,12 +122,14 @@
   <div data-spec-screen="1">
     <div><div class="r"><main>
     <header class="top">
-    <div><h1 class="text-title serif">Unread</h1><p class="text-small muted">11 posts from 5 feeds, checked just now</p></div>
+    <div><h1 class="text-title serif">Unread</h1><p id="status" class="text-small muted"></p></div>
     <div class="acts">
-    <button class="btn-secondary icon-only" aria-label="Check feeds for new posts"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
-    <button class="btn-secondary"><svg class="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    <button id="refresh" class="btn-secondary icon-only" aria-label="Check feeds for new posts"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button id="add-feed" class="btn-secondary"><svg class="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </div>
     </header>
+
+    <div id="posts">
 
     <section><h2 class="section-label">Today</h2>
     <ul class="list">
@@ -151,40 +153,12 @@
     <li class="list-row"><span class="chip f5">P</span><div class="body"><div class="meta"><span class="src">Pocket Garden</span><span class="dot"></span><span class="muted">Oct 9</span></div><p class="ttl">Saving seeds from this year's tomatoes</p><p class="sum">Ferment, rinse, dry on a plate. Label everything twice.</p></div></li>
     <li class="list-row"><span class="chip f1">T</span><div class="body"><div class="meta"><span class="src">Tidepool Notes</span><span class="dot"></span><span class="muted">Oct 8</span></div><p class="ttl">Reading a tide table without a headache</p><p class="sum">Two numbers matter. The rest is there for sailors.</p></div></li>
     </ul></section>
+    </div>
 
-    <div class="done"><p class="text-small muted">That is everything unread.</p><button class="btn-secondary">Mark all as read</button></div>
+    <div class="done" hidden><p class="text-small muted">That is everything unread.</p><button id="mark-read" class="btn-secondary">Mark all as read</button></div>
     </main></div></div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div><div class="r">
-      <main aria-hidden="true">
-      <div><h1 class="text-title serif">Unread</h1><p class="text-small muted">11 posts from 5 feeds, checked just now</p></div>
-      <ul class="list">
-      <li class="list-row"><span class="chip f1">T</span><p class="ttl">The sea stars are back on the north rocks</p></li>
-      <li class="list-row"><span class="chip f2">K</span><p class="ttl">A rye loaf that forgives a late start</p></li>
-      </ul>
-      </main>
-      <div class="scrim"></div>
-      <section class="sheet" role="dialog" aria-label="The sea stars are back on the north rocks">
-      <div class="grab"></div>
-      <div class="bar"><span class="chip f1">T</span><div class="who"><p class="src">Tidepool Notes</p><p class="text-small muted">25 minutes ago</p></div>
-      <button class="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <h2 class="big">The sea stars are back on the north rocks</h2>
-      <p class="text-small muted by">By Mara Finch</p>
-      <div class="text">
-      <p>After three quiet winters, our low-tide count on Saturday found forty-one ochre stars on the north rocks, most of them small enough to sit on a thumbnail.</p>
-      <p>That is the first real sign of young stars settling here since the wasting years. We will count again at the next spring tide and post the numbers side by side.</p>
-      </div>
-      <div class="foot">
-      <button class="btn-primary">Open full article<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
-      <p class="text-small muted">Opens tidepoolnotes.example in your browser</p>
-      </div>
-      </section>
-      </div></div>
-    </div>
-  </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
