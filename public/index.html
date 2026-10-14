@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,76 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="s">
+    <header class="bar">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg>
+    <h1 class="name">RSS Reader</h1>
+    <button class="icon-btn" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+    <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </header>
+    <main class="wrap">
+    <div class="sum"><p class="count">14 unread</p><a class="feeds">3 feeds</a></div>
+    <ul class="list">
+    <li class="list-row"><span class="dot"></span><div class="txt">
+    <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Pretend Garden Weekly</span><span class="time">12 min</span></p>
+    <h2 class="title">Ten imaginary tomatoes we grew on a balcony that does not exist</h2>
+    <p class="ex">A made-up season of watering, staking and waiting, with notes on which of the invented varieties did best in the pretend shade.</p>
+    </div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt">
+    <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Sample Tech Digest</span><span class="time">1 h</span></p>
+    <h2 class="title">Example Corp ships version 0.0.1 of its sample widget</h2>
+    <p class="ex">The release notes for a product nobody makes: faster pretend loading, a fictional dark mode and fixes for bugs that never happened.</p>
+    </div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt">
+    <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Make-believe Bike Blog</span><span class="time">3 h</span></p>
+    <h2 class="title">Riding the placeholder coast road in one long afternoon</h2>
+    <p class="ex">Forty fictional kilometres, two invented cafes and a headwind we made up for the story.</p>
+    </div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt">
+    <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Pretend Garden Weekly</span><span class="time">Yesterday</span></p>
+    <h2 class="title">How to compost leaves from a sample tree</h2>
+    <p class="ex">Layering, turning and patience, explained with a pile of entirely fictional leaves.</p>
+    </div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt">
+    <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Sample Tech Digest</span><span class="time">2 days</span></p>
+    <h2 class="title">A beginner's tour of an example keyboard</h2>
+    <p class="ex">Every key on a keyboard drawn for this demo, and the one we could not find a use for.</p>
+    </div></li>
+    </ul>
+    </main>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="s">
+      <section class="sheet" role="dialog" aria-label="Post preview">
+      <div class="grab"></div>
+      <div class="top"><button class="icon-btn" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Pretend Garden Weekly</span></p>
+      <h2>Ten imaginary tomatoes we grew on a balcony that does not exist</h2>
+      <p class="date">14 October 2026, 9:42</p>
+      <div class="body">
+      <p>A made-up season of watering, staking and waiting, with notes on which of the invented varieties did best in the pretend shade.</p>
+      <p>We started all ten from sample seeds in March, moved them to the fictional balcony in May and kept a diary that only exists in this demo. The cherry types won, again.</p>
+      </div>
+      <p class="more">This is the summary the feed sends. The full story is on the site.</p>
+      <div class="actions">
+      <a class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</a>
+      <p class="host">garden.example.com</p>
+      </div>
+      </section>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
