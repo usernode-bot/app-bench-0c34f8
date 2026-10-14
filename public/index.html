@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -18,7 +18,7 @@
         if (typeof v === 'string') return v;
         if (typeof v === 'number' || typeof v === 'boolean') return String(v);
         if (typeof v === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
-        if (v instanceof Error) return (v.stack || (v.name + ': ' + v.message));
+        if (v instanceof Error) return (v.stack || (v.name || 'Error') + ': ' + v.message);
         if (depth > 3) return '[…]';
         var seen = new WeakSet();
         return JSON.stringify(v, function (k, val) {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.name + ': ' + val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2392620c'/><circle cx='50' cy='32' r='9' fill='%23f5eee4'/><circle cx='38' cy='48' r='9' fill='%23f5eee4'/><circle cx='62' cy='48' r='9' fill='%23f5eee4'/><circle cx='50' cy='64' r='9' fill='%23f5eee4'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -118,52 +118,361 @@
        components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+       Change them only where behaviour needs it: ids and hooks below, states
+       rendered from data, the drawn demo rows moved into a template. -->
   <div data-spec-screen="1">
     <div class="app">
     <div class="top"><div><h1 class="title">Bread Bot</h1><div class="small muted">Formula for your next bake</div></div>
-    <button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</button></div>
+    <button class="btn-secondary" id="savedJump" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</button></div>
 
     <div class="section-label">Bread</div>
-    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
+    <div class="chips" id="breadChips"><button class="chip on" type="button" data-bread="sourdough">Sourdough</button><button class="chip" type="button" data-bread="bagels">Bagels</button><button class="chip" type="button" data-bread="sourdoughBagels">Sourdough bagels</button><button class="chip" type="button" data-bread="rye">Rye</button><button class="chip" type="button" data-bread="sandwich">Sandwich loaf</button></div>
 
     <div class="section-label">Dough</div>
     <div class="card">
-    <div class="row"><span>Hydration</span><span class="val">72%</span></div>
-    <div class="track"><div class="fill"></div><div class="knob"></div></div>
+    <div class="row"><span>Hydration</span><span class="val" id="hydrationVal">72%</span></div>
+    <div class="track" id="hydrationTrack"><div class="fill" id="hydrationFill"></div><div class="knob" id="hydrationKnob"></div><input type="range" class="track-input" id="hydrationRange" min="50" max="85" step="1" value="72" aria-label="Hydration"></div>
     <div class="row small muted"><span>50%</span><span>85%</span></div>
     <div style="height:1px;background:rgb(var(--line));margin:16px 0"></div>
     <div class="grid">
-    <div><div class="small muted" style="margin-bottom:6px">Loaves</div><div class="step"><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div><div class="sv">2</div><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></div></div></div>
-    <div><div class="small muted" style="margin-bottom:6px">Flour per loaf</div><div class="step"><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div><div class="sv">500 g</div><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></div></div></div>
+    <div><div class="small muted" style="margin-bottom:6px" id="countLabel">Loaves</div><div class="step"><button class="sb" type="button" data-target="count" data-dir="-1" id="countMinus" aria-label="Fewer loaves"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><div class="sv" id="countVal">2</div><button class="sb" type="button" data-target="count" data-dir="1" id="countPlus" aria-label="More loaves"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
+    <div><div class="small muted" style="margin-bottom:6px" id="flourLabel">Flour per loaf</div><div class="step"><button class="sb" type="button" data-target="flour" data-dir="-1" id="flourMinus" aria-label="Less flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><div class="sv" id="flourVal">500 g</div><button class="sb" type="button" data-target="flour" data-dir="1" id="flourPlus" aria-label="More flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
     </div>
     </div>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Calculate recipe</button>
+    <button class="btn-primary" id="calcBtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Calculate recipe</button>
 
     <div class="section-label">Formula</div>
-    <div class="sheet">
-    <div class="sh"><div class="h">Sourdough, 2 loaves</div><div class="small muted">1,000 g flour, 1,940 g dough</div></div>
+    <div class="state-empty" id="formulaEmpty">Your formula appears here. Pick a bread and tap Calculate recipe.</div>
+    <div class="stale-note" id="formulaStale" hidden>Settings changed, tap Calculate recipe</div>
+    <div class="sheet" id="formulaSheet" hidden>
+    <div class="sh"><div class="h" id="sheetTitle"></div><div class="small muted" id="sheetSub"></div></div>
     <div class="cols"><span>Ingredient</span><span>Grams</span><span>Baker's %</span></div>
-    <div class="ing flour"><span>Bread flour</span><span class="n">1,000 g</span><span class="p">100%</span></div>
-    <div class="ing"><span>Water</span><span class="n">720 g</span><span class="p">72%</span></div>
-    <div class="ing"><span>Starter</span><span class="n">200 g</span><span class="p">20%</span></div>
-    <div class="ing" style="border:0"><span>Salt</span><span class="n">20 g</span><span class="p">2%</span></div>
+    <div id="sheetRows"></div>
     <div class="stats">
-    <div class="stat"><div class="small muted">Rise</div><div class="big">5 h</div><div class="small muted">at 24°C</div></div>
-    <div class="stat"><div class="small muted">Bake</div><div class="big">240°C</div><div class="small muted">then 220°C</div></div>
-    <div class="stat"><div class="small muted">Time</div><div class="big">45 min</div><div class="small muted">lidded 25</div></div>
+    <div class="stat"><div class="small muted">Rise</div><div class="big" id="riseBig"></div><div class="small muted" id="riseNote"></div></div>
+    <div class="stat"><div class="small muted">Bake</div><div class="big" id="bakeBig"></div><div class="small muted" id="bakeNote"></div></div>
+    <div class="stat"><div class="small muted">Time</div><div class="big" id="timeBig"></div><div class="small muted" id="timeNote"></div></div>
     </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px"><div class="field">e.g. Weekend rye</div><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><input class="field" id="recipeName" placeholder="e.g. Weekend rye" maxlength="60" aria-label="Recipe name"><button class="btn-secondary" id="saveBtn" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
+    <div class="save-msg small" id="saveMsg" hidden></div>
 
-    <div class="section-label">Your saved recipes</div>
-    <div class="list">
-    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><path d="M4 15c0-5 4-9 8-9s8 4 8 9v3H4z"/><path d="M9 10l1 2M14 10l1 2"/></svg></div><div style="flex:1"><div style="font-weight:600">Weekend rye</div><div class="small muted">Rye, 3 loaves, 78% hydration</div></div><span class="small muted">Sat</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
-    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div><div style="flex:1"><div style="font-weight:600">Sunday bagels</div><div class="small muted">Sourdough bagels, 12 bagels, 58%</div></div><span class="small muted">Oct 4</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
-    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M4 11c0-4 4-5 8-5s8 1 8 5"/></svg></div><div style="flex:1"><div style="font-weight:600">School lunch loaf</div><div class="small muted">Sandwich loaf, 2 loaves, 65%</div></div><span class="small muted">Sep 27</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
+    <div class="section-label" id="savedHeading">Your saved recipes</div>
+    <div class="list" id="savedSkeleton" hidden>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:45%"></div><div class="skeleton" style="height:13px;width:72%;margin-top:6px"></div></div></div>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:38%"></div><div class="skeleton" style="height:13px;width:64%;margin-top:6px"></div></div></div>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:52%"></div><div class="skeleton" style="height:13px;width:58%;margin-top:6px"></div></div></div>
     </div>
+    <div class="list" id="savedList" hidden></div>
+    <div class="state-empty" id="savedEmpty" hidden><div class="small" style="font-weight:600">No saved recipes yet</div><div class="small muted">Calculate one and tap Save recipe.</div></div>
+    <div class="state-error" id="savedError" hidden><div class="small">Couldn't load your saved recipes. The calculator still works.</div><button class="btn-secondary" id="retryBtn" type="button">Retry</button></div>
+    <div class="save-msg small" id="listMsg" hidden></div>
     </div>
   </div>
-  <!-- /usernode-spec-screens@1 -->
+  <!-- The one drawn saved-recipe row, kept as the template its live rows are
+       rendered from (same markup, values filled from the API). -->
+  <template id="savedRowTpl">
+    <div class="list-row" data-action="open" role="button" tabindex="0" aria-label="Open recipe">
+      <div class="dot"></div>
+      <div style="flex:1"><div style="font-weight:600"></div><div class="small muted"></div></div>
+      <span class="small muted"></span>
+      <button class="del" type="button" data-action="delete" aria-label="Delete recipe"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>
+    </div>
+  </template>
+  <script src="/formulas.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var F = window.BreadFormulas;
+    var DEMO = new URLSearchParams(location.search).get('demo') === '1';
+    var motionOK = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // The drawn demo rows' kinds of bread: a domed loaf for sourdough and
+    // rye, a ring for bagels, a tin loaf for sandwich loaf.
+    var ICONS = {
+      loaf: '<path d="M4 15c0-5 4-9 8-9s8 4 8 9v3H4z"/><path d="M9 10l1 2M14 10l1 2"/>',
+      ring: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+      tin: '<rect x="4" y="8" width="16" height="11" rx="2"/><path d="M4 11c0-4 4-5 8-5s8 1 8 5"/>',
+    };
+    var BREAD_ICON = { sourdough: 'loaf', bagels: 'ring', sourdoughBagels: 'ring', rye: 'loaf', sandwich: 'tin' };
+
+    var state = { bread: 'sourdough', hydration: 72, count: 2, flourPer: 500, calculated: null };
+
+    function $(id) { return document.getElementById(id); }
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+    function show(node, on) { node.hidden = !on; }
+    // The iframe loads the app with ?token=…; the same token travels on
+    // every same-origin API call as x-usernode-token (the server verifies
+    // it there). Guests, who get no token, simply send none.
+    var TOKEN = new URLSearchParams(location.search).get('token') || '';
+    function api(path, options) {
+      options = options || {};
+      var headers = Object.assign({}, options.headers);
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      return fetch(path, Object.assign({}, options, { headers: headers }));
+    }
+
+    // ── Controls ────────────────────────────────────────────────────────
+    var chips = Array.prototype.slice.call(document.querySelectorAll('#breadChips .chip'));
+    var hydrationRange = $('hydrationRange');
+
+    function breadDef() { return F.BREADS[state.bread]; }
+
+    function isBagel() { return state.bread === 'bagels' || state.bread === 'sourdoughBagels'; }
+
+    function syncUnits() {
+      var countWord = isBagel() ? 'Bagels' : 'Loaves';
+      var one = isBagel() ? 'bagel' : 'loaf';
+      $('countLabel').textContent = countWord;
+      $('flourLabel').textContent = isBagel() ? 'Flour per bagel' : 'Flour per loaf';
+      $('countMinus').setAttribute('aria-label', 'Fewer ' + countWord.toLowerCase());
+      $('countPlus').setAttribute('aria-label', 'More ' + countWord.toLowerCase());
+      $('flourMinus').setAttribute('aria-label', 'Less flour per ' + one);
+      $('flourPlus').setAttribute('aria-label', 'More flour per ' + one);
+      $('countVal').textContent = state.count;
+      $('flourVal').textContent = state.flourPer + ' g';
+    }
+
+    function syncSlider() {
+      hydrationRange.value = state.hydration;
+      var pctPos = (state.hydration - 50) / 35 * 100;
+      $('hydrationFill').style.width = pctPos + '%';
+      $('hydrationKnob').style.left = pctPos + '%';
+      $('hydrationVal').textContent = state.hydration + '%';
+    }
+
+    function syncChips() {
+      chips.forEach(function (c) {
+        c.classList.toggle('on', c.getAttribute('data-bread') === state.bread);
+      });
+    }
+
+    // Any setting change after a calculation stales the sheet, so nobody
+    // bakes from an old formula.
+    function changed() {
+      syncSlider();
+      syncUnits();
+      if (state.calculated) {
+        show($('formulaStale'), true);
+        $('formulaSheet').classList.add('dim');
+      }
+    }
+
+    function setBread(key) {
+      state.bread = key;
+      var b = breadDef();
+      state.hydration = b.defaultHydration;
+      state.flourPer = b.defaultFlour;
+      syncChips();
+      changed();
+    }
+
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () { setBread(c.getAttribute('data-bread')); });
+    });
+
+    hydrationRange.addEventListener('input', function () {
+      state.hydration = parseInt(hydrationRange.value, 10);
+      changed();
+    });
+
+    document.querySelectorAll('.sb').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var dir = parseInt(btn.getAttribute('data-dir'), 10);
+        if (btn.getAttribute('data-target') === 'count') {
+          state.count = Math.min(24, Math.max(1, state.count + dir));
+        } else {
+          var b = breadDef();
+          state.flourPer = Math.min(b.flourMax, Math.max(b.flourMin, state.flourPer + dir * b.flourStep));
+        }
+        changed();
+      });
+    });
+
+    $('savedJump').addEventListener('click', function () {
+      $('savedHeading').scrollIntoView({ behavior: motionOK ? 'smooth' : 'auto', block: 'start' });
+    });
+
+    // ── The formula sheet ───────────────────────────────────────────────
+    function renderFormula(r) {
+      $('sheetTitle').textContent = r.heading;
+      $('sheetSub').textContent = r.sub;
+      var box = $('sheetRows');
+      box.textContent = '';
+      r.rows.forEach(function (row, i) {
+        var line = el('div', 'ing' + (row.isFlour ? ' flour' : ''));
+        if (i === r.rows.length - 1) line.style.border = '0';
+        line.appendChild(el('span', null, row.name));
+        line.appendChild(el('span', 'n', F.fmtGrams(row.grams) + ' g'));
+        line.appendChild(el('span', 'p', F.fmtPct(row.pct)));
+        box.appendChild(line);
+      });
+      $('riseBig').textContent = r.rise.big;
+      $('riseNote').textContent = r.rise.note;
+      $('bakeBig').textContent = r.bake.big;
+      $('bakeNote').textContent = r.bake.note;
+      $('timeBig').textContent = r.time.big;
+      $('timeNote').textContent = r.time.note;
+    }
+
+    function calculate() {
+      var r = F.calculate(state.bread, state.hydration, state.count, state.flourPer);
+      state.calculated = r;
+      renderFormula(r);
+      show($('formulaEmpty'), false);
+      show($('formulaStale'), false);
+      var sheet = $('formulaSheet');
+      sheet.classList.remove('dim');
+      show(sheet, true);
+    }
+
+    $('calcBtn').addEventListener('click', calculate);
+
+    // ── Saved recipes ───────────────────────────────────────────────────
+    var savedRows = [];
+
+    function savedStates(loading, list, empty, error) {
+      show($('savedSkeleton'), loading);
+      show($('savedList'), list && savedRows.length > 0);
+      show($('savedEmpty'), empty);
+      show($('savedError'), error);
+    }
+
+    function fmtDate(iso) {
+      var d = new Date(iso);
+      var days = (Date.now() - d.getTime()) / 86400000;
+      if (days >= 0 && days < 7) return d.toLocaleDateString('en-US', { weekday: 'short' });
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function renderSaved() {
+      var list = $('savedList');
+      list.textContent = '';
+      var tpl = $('savedRowTpl');
+      savedRows.forEach(function (row) {
+        var node = tpl.content.firstElementChild.cloneNode(true);
+        node.querySelector('.dot').innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[BREAD_ICON[row.bread] || 'loaf'] + '</svg>';
+        node.querySelector('div div div').textContent = row.name;
+        node.querySelector('div div .small').textContent =
+          (F.BREADS[row.bread] ? F.BREADS[row.bread].label : row.bread) + ', ' +
+          row.count + ' ' + (F.BREADS[row.bread] ? (row.count === 1 ? F.BREADS[row.bread].unitOne : F.BREADS[row.bread].unit) : '') +
+          ', ' + row.hydration + '% hydration';
+        node.querySelector('span').textContent = fmtDate(row.created_at);
+        node.setAttribute('aria-label', 'Open recipe ' + row.name);
+        node.querySelector('.del').setAttribute('aria-label', 'Delete ' + row.name);
+        node._row = row;
+        list.appendChild(node);
+      });
+    }
+
+    function flash(msgBox, text) {
+      msgBox.textContent = text;
+      show(msgBox, true);
+      clearTimeout(msgBox._t);
+      msgBox._t = setTimeout(function () { show(msgBox, false); }, 6000);
+    }
+
+    function loadRecipes() {
+      savedStates(true, false, false, false);
+      show($('listMsg'), false);
+      api('/api/recipes' + (DEMO ? '?demo=1' : ''))
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (rows) {
+          savedRows = rows;
+          renderSaved();
+          savedStates(false, true, rows.length === 0, false);
+        })
+        .catch(function () {
+          savedStates(false, false, false, true);
+        });
+    }
+
+    $('retryBtn').addEventListener('click', loadRecipes);
+
+    function openSaved(row) {
+      state.bread = row.bread;
+      state.hydration = row.hydration;
+      state.count = row.count;
+      state.flourPer = row.flour_per_piece;
+      syncChips();
+      syncSlider();
+      syncUnits();
+      calculate();
+      $('formulaSheet').scrollIntoView({ behavior: motionOK ? 'smooth' : 'auto', block: 'start' });
+    }
+
+    $('savedList').addEventListener('click', function (e) {
+      var rowNode = e.target.closest('.list-row');
+      if (!rowNode || !rowNode._row) return;
+      if (e.target.closest('.del')) {
+        var row = rowNode._row;
+        api('/api/recipes/' + row.id, { method: 'DELETE' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            loadRecipes();
+          })
+          .catch(function () {
+            flash($('listMsg'), "Couldn't delete " + row.name + ". It's still saved.");
+          });
+        return;
+      }
+      openSaved(rowNode._row);
+    });
+    $('savedList').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var rowNode = e.target.closest('.list-row');
+      if (rowNode && rowNode._row && !e.target.closest('.del')) {
+        e.preventDefault();
+        openSaved(rowNode._row);
+      }
+    });
+
+    $('saveBtn').addEventListener('click', function () {
+      var body = {
+        bread: state.bread,
+        hydration: state.hydration,
+        count: state.count,
+        flour_per_piece: state.flourPer,
+        name: $('recipeName').value,
+      };
+      api('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+        .then(function (res) {
+          if (res.status === 401) return; // the bridge asks for an account
+          if (!res.ok) return res.json().then(function (j) { throw new Error(j.error || 'HTTP ' + res.status); });
+          $('recipeName').value = '';
+          loadRecipes();
+        })
+        .catch(function (err) {
+          flash($('saveMsg'), err && err.message && err.message.indexOf('HTTP 4') !== 0 && err.message !== 'HTTP 401'
+            ? "Couldn't save the recipe. Nothing was lost."
+            : "Couldn't save the recipe. Nothing was lost.");
+        });
+    });
+
+    // ── Start ───────────────────────────────────────────────────────────
+    syncChips();
+    syncSlider();
+    syncUnits();
+    if (DEMO) {
+      // The staging demo opens with its formula already calculated, and its
+      // list is labelled once, in the heading.
+      $('savedHeading').textContent = 'Your saved recipes, Staging demo';
+      calculate();
+    }
+    loadRecipes();
+  })();
+  </script>
 </body>
 </html>

@@ -3,5 +3,24 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Bread choices render",
+      "path": "/",
+      "expectText": "Sourdough bagels"
+    },
+    {
+      "name": "Saved recipes empty state",
+      "path": "/",
+      "expectText": "No saved recipes yet"
+    },
+    {
+      "name": "Staging demo",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "id": "main",
+      "visual": true,
+      "impact": ["public/**"]
+    }
+  ]
 }

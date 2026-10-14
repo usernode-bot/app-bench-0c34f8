@@ -56,34 +56,12 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## Starter template → replaced
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter-template screen was replaced by the app's real screen in the
+first version (issue #1). The `usernode-dev-console@1` forwarder script,
+the bridge `<script>` and the theme `<script>` in `public/index.html` are
+platform infrastructure — keep them through any future rewrite.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +73,28 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+One screen: the user picks a bread (Sourdough, Bagels, Sourdough bagels,
+Rye, Sandwich loaf), sets hydration, how many loaves/bagels, and flour
+per piece, and taps "Calculate recipe" to get a baker's formula sheet —
+grams and baker's % per ingredient (flour at 100% on top), rise
+time/temperature, oven temperature and bake time. Recipes can be saved
+(named or auto-named "Sourdough, 2 loaves"), reopened and deleted. The
+maths is all client-side (`public/formulas.js`); the server only stores
+the four settings + name and returns saved recipes.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: deep wheat gold (light `146 98 12`, dark
+  `222 170 72`); second: crust brown (`crust` token, light `122 72 38`,
+  dark `196 132 86`) for the selected bread chip and the formula sheet's
+  outline; neutrals: flour white ground, white surfaces, pale oat raised,
+  warm brown text.
+- **Signature element:** the baker's formula sheet — the ingredient table
+  with the flour row shaded at 100%, closed by the three-part Rise / Bake
+  / Time footer.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +124,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- `public/formulas.js` is the single source of truth for the five breads
+  (baker's percentages, defaults, flour ranges, rise/bake values) and the
+  auto-name ("Sourdough, 2 loaves"). The server's `BREAD_LABELS`/`UNITS`
+  maps in `server.js` are kept in sync by hand — change both together.
+- Hydration counts **added water only**, not the water inside the starter.
+- Rye's 100% is a 60/40 mix: rye flour, bread flour.
+- Flour per piece: loaves 200–1500 step 50 g; bagels 50–200 step 10 g.
+  Hydration 50–85 step 1; count 1–24. Picking a bread resets hydration
+  and flour to that bread's defaults, keeps the count.
+- `saved_recipes` is marked `staging:private`. The formula is never
+  stored — only the four settings + name; the sheet recomputes.
+- Demo rows (`is_demo = true`, six fixed `demo_key`s) are inserted only
+  behind `IS_STAGING && ?demo=1` and are excluded from responses without
+  `?demo=1`, so plain loads still see the honest empty state.
+- No new dependencies.

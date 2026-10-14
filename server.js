@@ -147,6 +147,153 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── Saved recipes ─────────────────────────────────────────────────────────
+// A saved recipe is just the four settings plus a name; the formula itself
+// is never stored, it is recomputed from them every time it is shown. The
+// table carries the five breads by key (public/formulas.js is the source of
+// truth for the labels and ranges; the map below is kept in sync by hand).
+const BREAD_KEYS = new Set(['sourdough', 'bagels', 'sourdoughBagels', 'rye', 'sandwich']);
+const BREAD_LABELS = {
+  sourdough: 'Sourdough',
+  bagels: 'Bagels',
+  sourdoughBagels: 'Sourdough bagels',
+  rye: 'Rye',
+  sandwich: 'Sandwich loaf',
+};
+const UNITS = {
+  sourdough: ['loaf', 'loaves'],
+  bagels: ['bagel', 'bagels'],
+  sourdoughBagels: ['bagel', 'bagels'],
+  rye: ['loaf', 'loaves'],
+  sandwich: ['loaf', 'loaves'],
+};
+// Flour per piece: loaves 200–1500 by 50, bagels 50–200 by 10.
+function flourOk(bread, v) {
+  if (!Number.isInteger(v)) return false;
+  if (bread === 'bagels' || bread === 'sourdoughBagels') {
+    return v >= 50 && v <= 200 && (v - 50) % 10 === 0;
+  }
+  return v >= 200 && v <= 1500 && (v - 200) % 50 === 0;
+}
+
+// Recipes are staging:private: real user data in production, and nothing
+// leaves staging. In staging the demo flag fills the list with six
+// viewer-owned example rows so the populated screen can be seen.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS saved_recipes (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      name text NOT NULL,
+      bread text NOT NULL,
+      hydration integer NOT NULL,
+      count integer NOT NULL,
+      flour_per_piece integer NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      demo_key text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`);
+  await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS saved_recipes_user_demo_key ON saved_recipes (user_id, demo_key)');
+  await pool.query('CREATE INDEX IF NOT EXISTS saved_recipes_user_created ON saved_recipes (user_id, created_at)');
+  await pool.query("COMMENT ON TABLE saved_recipes IS 'staging:private'");
+}
+
+// Six example rows, idempotent per viewer, newest last so the offsets below
+// land them in a stable order.
+const DEMO_RECIPES = [
+  { demo_key: 'demo-big-batch-sourdough', name: 'Big batch sourdough', bread: 'sourdough', hydration: 72, count: 4, flour_per_piece: 500, daysAgo: 1 },
+  { demo_key: 'demo-sunday-bagels', name: 'Sunday bagels', bread: 'bagels', hydration: 58, count: 8, flour_per_piece: 100, daysAgo: 2 },
+  { demo_key: 'demo-weekend-rye', name: 'Weekend rye', bread: 'rye', hydration: 78, count: 2, flour_per_piece: 500, daysAgo: 3 },
+  { demo_key: 'demo-overnight-bagels', name: 'Overnight sourdough bagels', bread: 'sourdoughBagels', hydration: 58, count: 6, flour_per_piece: 75, daysAgo: 5 },
+  { demo_key: 'demo-school-lunch-loaf', name: 'School lunch loaf', bread: 'sandwich', hydration: 65, count: 2, flour_per_piece: 500, daysAgo: 7 },
+  { demo_key: 'demo-rye-freezer', name: 'Rye for the freezer', bread: 'rye', hydration: 78, count: 3, flour_per_piece: 500, daysAgo: 12 },
+];
+
+async function ensureDemoRecipes(req) {
+  for (const d of DEMO_RECIPES) {
+    await pool.query(
+      `INSERT INTO saved_recipes (user_id, name, bread, hydration, count, flour_per_piece, is_demo, demo_key, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8)
+       ON CONFLICT (user_id, demo_key) DO NOTHING`,
+      [req.user.id, d.name, d.bread, d.hydration, d.count, d.flour_per_piece, d.demo_key,
+        new Date(req.now.getTime() - d.daysAgo * 86400000)]
+    );
+  }
+}
+
+const LIST_COLUMNS = 'id, name, bread, hydration, count, flour_per_piece, is_demo, created_at';
+
+// Guests may look at the calculator but have nothing saved (nothing can be,
+// writes need an account): an empty list, not an error.
+app.get('/api/recipes', async (req, res) => {
+  if (!req.user) return res.json([]);
+  try {
+    const withDemo = IS_STAGING && req.query.demo === '1';
+    if (withDemo) await ensureDemoRecipes(req);
+    const rows = await pool.query(
+      `SELECT ${LIST_COLUMNS} FROM saved_recipes
+       WHERE user_id = $1 AND ($2::boolean OR NOT is_demo)
+       ORDER BY created_at DESC, id DESC`,
+      [req.user.id, withDemo]
+    );
+    res.json(rows.rows);
+  } catch (err) {
+    console.error('GET /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not load saved recipes' });
+  }
+});
+
+app.post('/api/recipes', async (req, res) => {
+  const b = req.body || {};
+  const bread = b.bread;
+  const hydration = b.hydration;
+  const count = b.count;
+  const flour = b.flour_per_piece;
+  if (typeof bread !== 'string' || !BREAD_KEYS.has(bread)) {
+    return res.status(400).json({ error: 'Unknown bread' });
+  }
+  if (!Number.isInteger(hydration) || hydration < 50 || hydration > 85) {
+    return res.status(400).json({ error: 'Hydration must be between 50 and 85' });
+  }
+  if (!Number.isInteger(count) || count < 1 || count > 24) {
+    return res.status(400).json({ error: 'Count must be between 1 and 24' });
+  }
+  if (!flourOk(bread, flour)) {
+    return res.status(400).json({ error: 'Flour per piece is out of range' });
+  }
+  let name = typeof b.name === 'string' ? b.name.trim() : '';
+  if (!name) {
+    // "Sourdough, 2 loaves" — the same auto-name the page would show.
+    const unit = UNITS[bread];
+    name = BREAD_LABELS[bread] + ', ' + count + ' ' + (count === 1 ? unit[0] : unit[1]);
+  }
+  name = name.slice(0, 60);
+  try {
+    const row = await pool.query(
+      `INSERT INTO saved_recipes (user_id, name, bread, hydration, count, flour_per_piece, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${LIST_COLUMNS}`,
+      [req.user.id, name, bread, hydration, count, flour, req.now]
+    );
+    res.status(201).json(row.rows[0]);
+  } catch (err) {
+    console.error('POST /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not save the recipe' });
+  }
+});
+
+app.delete('/api/recipes/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'Not found' });
+  try {
+    const out = await pool.query('DELETE FROM saved_recipes WHERE id = $1 AND user_id = $2', [id, req.user.id]);
+    if (out.rowCount === 0) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not delete the recipe' });
+  }
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +339,21 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Finish in-flight requests and release the pool before the container
+  // goes, instead of leaving the platform to kill the process mid-request.
+  let closing = false;
+  const shutdown = () => {
+    if (closing) return;
+    closing = true;
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

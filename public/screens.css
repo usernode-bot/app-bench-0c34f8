@@ -111,3 +111,31 @@
 .del {width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgb(var(--muted));flex:none}
 
 svg {width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Behaviour wiring (first version). No new looks here: these only turn
+   the drawn elements into real controls and carry the data states. ── */
+button.chip {font-family:inherit;cursor:pointer}
+button.sb {font-family:inherit;cursor:pointer;padding:0}
+button.del {background:none;border:0;cursor:pointer;padding:0;font-family:inherit}
+
+/* The drawn field is a div; as a real input it needs its own text colour,
+   and the placeholder stays a faint hint. */
+input.field {color:rgb(var(--fg))}
+input.field::placeholder {color:rgb(var(--muted)/0.6)}
+
+/* The invisible native range that drives the drawn hydration track. */
+.track-input {position:absolute;left:0;right:0;top:-11px;height:28px;margin:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none;background:none}
+.track:focus-within {outline:2px solid rgb(var(--focus));outline-offset:4px;border-radius:4px}
+
+/* The sheet dims while its settings have changed and a note asks for a
+   recalculation, so nobody bakes from a stale formula. */
+.stale-note {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--accent))}
+.sheet.dim {opacity:.45}
+
+/* One-line failure notes under the save row and the saved list. */
+.save-msg {margin-top:8px;padding:0 4px;color:rgb(var(--danger))}
+
+/* Saved rows are tappable to reopen the recipe. */
+.list-row[data-action] {cursor:pointer}
+.list-row[data-action]:hover {background:rgb(var(--raised))}
+.list-row:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}

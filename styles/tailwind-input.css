@@ -44,17 +44,19 @@
     --on-crust: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 19 15;       /* dark crust of the page */
+    --surface: 36 29 23;
+    --raised: 48 39 31;
+    --fg: 245 238 228;
+    --muted: 184 170 154;
+    --line: 72 60 49;
+    --accent: 222 170 72;     /* wheat gold */
+    --on-accent: 41 26 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 222 170 72;
+    --crust: 196 132 86;      /* baked crust */
+    --on-crust: 30 17 8;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

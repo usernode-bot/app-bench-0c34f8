@@ -55,6 +55,8 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        crust: token('crust'), // bread crust: the selected chip and the sheet outline
+        'on-crust': token('on-crust'), // text on the crust colour
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
