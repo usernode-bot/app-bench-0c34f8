@@ -36,6 +36,12 @@
   align-items: center;
 }
 
+/* The title block gives up width before the button does, so the label and
+   its plus icon stay on one line and the sub line wraps under the title. */
+.top > div {min-width: 0}
+
+.top .btn-primary {white-space: nowrap; flex-shrink: 0}
+
 .title {font-size:28px;line-height:36px;font-weight:700}
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}

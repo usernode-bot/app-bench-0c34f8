@@ -211,7 +211,7 @@
         for (var i = start; i < Math.min(start + 5, total); i++) {
           var cls = [];
           if (i >= voted) cls.push('e');
-          if (i % 5 === 4) cls.push('x');
+          else if (i % 5 === 4) cls.push('x'); // struck only when all five are filled
           g += '<i' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '></i>';
         }
         out += '<span class="g">' + g + '</span>';
@@ -304,7 +304,7 @@
       var head = '<div class="top"><div><div class="title">Club Votes</div>' +
         (DEMO ? '<div class="sub" data-usernode-demo-note>Staging demo: made-up club decisions</div>' : '') +
         sub + '</div>' +
-        (empty ? '' : '<button type="button" class="btn-primary" data-nav="#/new">' + PLUS + 'New decision</button>') +
+        ((empty || failed) ? '' : '<button type="button" class="btn-primary" data-nav="#/new">' + PLUS + 'New decision</button>') +
         '</div>';
 
       var body;
@@ -410,9 +410,8 @@
     function renderNew() {
       var f = state.form;
       app.innerHTML =
-        '<div class="bar"><button type="button" class="icon-btn" data-nav="#">Cancel</button>' +
-        '<div class="title" style="font-size:20px;line-height:28px">New decision</div>' +
-        '<button type="button" class="btn-primary" data-post>Post decision</button></div>' +
+        '<div class="bar"><button type="button" class="icon-btn" data-nav="#" style="margin-left:-4px">Cancel</button>' +
+        '<div class="title" style="font-size:20px;line-height:28px;flex:1;text-align:center;margin-right:44px">New decision</div></div>' +
         '<label class="lbl" for="fq">Question</label>' +
         '<input class="input" id="fq" placeholder="e.g. Where do we meet on Saturday?" value="' + esc(f.question) + '">' +
         '<label class="lbl">Choices</label>' +
@@ -421,7 +420,8 @@
             '<button type="button" class="icon-btn" data-rm="' + i + '" aria-label="Remove choice"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
         }).join('') +
         '<button type="button" class="btn-secondary" data-add style="margin-top:4px">' + PLUS + 'Add a choice</button>' +
-        '<p id="fErr" class="text-small" style="color:rgb(var(--danger));margin-top:8px" hidden></p>';
+        '<p id="fErr" class="text-small" style="color:rgb(var(--danger));margin-top:8px" hidden></p>' +
+        '<button type="button" class="btn-primary" data-post style="width:100%;margin-top:8px">Post decision</button>';
       var fq = document.getElementById('fq');
       if (fq && !f.question) fq.focus();
     }
