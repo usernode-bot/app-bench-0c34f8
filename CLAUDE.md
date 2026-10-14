@@ -58,32 +58,18 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter's placeholder screen was replaced by the app's first version
+(the recipe calculator): `public/index.html` no longer carries the
+`usernode-starter-notice@1` block, and `README.md` describes the real app.
+The `usernode-dev-console@1` forwarder `<script>`, the bridge `<script>`
+and the theme `<script>` right after it are platform infrastructure, not
+app content: keep them through any rewrite. The screen still has a light
+and a dark look and follows the viewer's Homeroom theme; give everything
+you build both looks (the design kit's colour tokens carry both), unless
+one fixed look is the point of this app, then say so under "## Design"
+below. Unless a request asks for one, add no theme picker: the viewer's
+Homeroom setting is the control. "The platform's light/dark theme inside
+the app frame" in the platform conventions has the details.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +81,32 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator: pick a bread (sourdough, bagels,
+sourdough bagels, rye, sandwich loaf), set the hydration, how many loaves
+and how big, and it works out the grams of every ingredient, the rise time
+and the oven temperature and time. It is a pure client-side calculator —
+no database, no API routes, nothing saved between visits.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by its first version. Every later change follows it,
+and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour and parchment neutrals (warm cream ground, white
+  surface, warm grey-brown text) with a crust brown as the one action
+  colour: light `140 82 40`, dark `217 154 98`. Named only as the kit's
+  tokens in `styles/tailwind-input.css`.
+- **Signature element:** the baker's percentage dial — a ring that fills to
+  the hydration with the number in its centre, beside a plain-words line
+  ("720 g water for every 1,000 g flour"). The recipe repeats the baker's
+  formula: each ingredient row shows its grams large and its percentage of
+  the flour small and muted.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  on `ui-rounded` (the system's rounded face, friendly like a kitchen
+  notebook), set in `tailwind.config.js`.
+- **The filled-control rule:** Bake It is the only filled control on the
+  screen. The selected bread chip is outlined in crust brown with a check,
+  never filled; the rise and bake cards' icons take the accent.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -130,7 +126,9 @@ Re-theme by changing the token values there, keeping every text pair at
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry. Loading has the content's
-  own shape (its rows, with `skeleton` bars for their text).
+  own shape (its rows, with `skeleton` bars for their text). Bread Bot loads
+  nothing, so it has no loading or error state: before the first Bake It it
+  shows the empty state alone.
 - Seed obviously fake staging demo data so the populated screen can be seen
   ("Staging mock data" in the platform conventions).
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
@@ -140,6 +138,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Grams are whole, or one decimal under 10 g ("5.4 g" of yeast); the
+  rounding remainder goes on the largest flour row so the rows always add
+  up to the total dough weight exactly.
+- Recipes come from the `BREADS` table in `public/app.js`: simple standard
+  ratios per bread as baker's percentages of the flour. Sourdough breads
+  use a starter, the yeast breads use instant yeast, and the starter is
+  listed as its own ingredient rather than counted in the flour and water.
+- Picking a bread resets hydration and size to that bread's usual values
+  but keeps the loaf count.
+- Rise times are estimates for a room at about 24°C; bake times assume a
+  home oven.
+- The staging demo is the `?demo=1` UI state in `public/app.js` (Sourdough,
+  72%, 2 × 750 g, recipe shown): it stores nothing, so nothing is gated on
+  `USERNODE_ENV`.

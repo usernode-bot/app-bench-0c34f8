@@ -43,6 +43,10 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      fontFamily: {
+        // Rounded like a kitchen notebook, per the Design section of CLAUDE.md.
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

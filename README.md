@@ -1,27 +1,33 @@
-# Bread Bot
+# Bread Bot 🍞
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Your personal bread recipe calculator. Pick a bread, set your numbers, get
+the recipe.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Pick a bread** from five: Sourdough, Bagels, Sourdough bagels, Rye and
+  Sandwich loaf. Picking one sets the hydration and loaf size to that
+  bread's usual values.
+- **Set hydration** with the slider or the minus and plus buttons, from 50%
+  to 100%. The baker's percentage dial fills to match.
+- **Set how many and how big**: loaves (bagels for the two bagel breads)
+  and the size of each in grams.
+- **Tap Bake It** and get every ingredient in grams with its baker's
+  percentage, the total dough weight, how long the dough rises and at what
+  room temperature, and the oven temperature and bake time. Change anything
+  afterwards and the recipe updates as you go.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Nothing is saved between visits; each visit starts fresh on Sourdough with
+an empty recipe until you tap Bake It.
 
-## Replacing the template
+## How it works
+
+A pure client-side calculator: no database, no API routes. Recipes come
+from a table of standard baker's percentages per bread in
+`public/app.js`, scaled to your total dough weight.
+
+## Developing
 
 To change this app, ask Homeroom bot: open the app on Homeroom, tap the
 Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+the change in plain English. You can also run Claude Code against this
+repo directly; start with `CLAUDE.md`, which carries the app's design
+notes and points at the platform rules.
