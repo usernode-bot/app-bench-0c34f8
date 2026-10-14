@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23b4410a'/><circle cx='30' cy='70' r='9' fill='white'/><path d='M30 46a24 24 0 0 1 24 24' stroke='white' stroke-width='10' fill='none' stroke-linecap='round'/><path d='M30 24a46 46 0 0 1 46 46' stroke='white' stroke-width='10' fill='none' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -119,37 +119,38 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <div data-spec-screen="1" id="screen-list">
     <div><div class="wrap">
     <header class="top">
     <h1>Unread</h1>
-    <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="19" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button>
+    <button class="btn-secondary" id="feeds-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="19" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button>
     </header>
-    <form class="add"><label>Add a feed</label><div class="row"><div class="field">e.g. example.com/feed.xml</div><button class="btn-primary">Add</button></div></form>
-    <p class="section-label">14 unread from 4 feeds</p>
+    <form class="add" id="add-form"><label for="add-url">Add a feed</label><div class="row"><input class="field" id="add-url" name="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. example.com/feed.xml"><button class="btn-primary" type="submit">Add</button></div><p class="kit-error" id="add-error" hidden></p></form>
+    <div id="main-states">
+    <p class="section-label" id="count"></p>
+    <p class="section-label" id="failed" hidden></p>
     <ul class="list">
-    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-1))"></span><div class="txt"><div class="src"><b>Harbor Lane Garden Notes</b><span>· 25 min ago</span></div><p class="title">Five tomatoes that shrug off a cold spring</p><p class="snip">We grew twelve varieties on the windy plot this year. These five set fruit weeks before the rest.</p></div><div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div></li>
-    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-2))"></span><div class="txt"><div class="src"><b>Night Sky Weekly</b><span>· 2 h ago</span></div><p class="title">The best week this autumn to spot the Andromeda galaxy</p><p class="snip">A dark moon and clear forecasts line up on Thursday. Here is where to look and what to bring.</p></div></li>
-    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-3))"></span><div class="txt"><div class="src"><b>The Pocket Kitchen</b><span>· 5 h ago</span></div><p class="title">One-pan lentils for a Tuesday night</p><p class="snip">Twenty minutes, one pan and a lemon. The trick is to toast the spices before the lentils go in.</p></div><div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div></li>
-    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-4))"></span><div class="txt"><div class="src"><b>Tidewater Cycling Club</b><span>· Yesterday</span></div><p class="title">Route notes: the coast loop is open again</p><p class="snip">The bridge repairs finished early. Expect fresh gravel on the north side for another week.</p></div></li>
-    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-2))"></span><div class="txt"><div class="src"><b>Night Sky Weekly</b><span>· 2 days ago</span></div><p class="title">How to read a star chart in five minutes</p><p class="snip">Hold it overhead, find north, and start from the brightest thing you can see.</p></div></li>
+    <li class="list-row" data-post-row><span class="dot"></span><div class="txt"><div class="src"><b></b><span></span></div><p class="title"></p><p class="snip"></p></div><div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div></li>
     </ul>
+    </div>
     </div></div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
+  <!-- Screen 2 as the spec drew it: the preview a tapped row opens. The app
+       moves nothing; it fills this in place and swaps the two screens. -->
+  <div id="screen-preview" hidden>
     <div data-spec-screen="2">
       <div><div class="wrap">
-      <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>Unread</button>
-      <div class="src"><span class="dot"></span>Harbor Lane Garden Notes · 14 Oct, 09:40</div>
-      <h1>Five tomatoes that shrug off a cold spring</h1>
-      <div class="img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div>
-      <div class="body"><p>We grew twelve varieties on the windy plot this year. These five set fruit weeks before the rest, and none of them needed a cloche after mid-May.</p><p>First up is a small yellow cherry that ripened in early July, even after two nights near freezing...</p></div>
-      <a class="btn-primary">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-      <p class="note">Opens harborlane.example in your browser.</p>
+      <button class="back" id="back-button" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>Unread</button>
+      <div class="src"><span class="dot" id="preview-dot"></span><span id="preview-src"></span></div>
+      <h1 id="preview-title"></h1>
+      <div class="img" id="preview-img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div>
+      <div class="body" id="preview-body"><p></p></div>
+      <a class="btn-primary" id="open-article" target="_blank" rel="noopener">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+      <p class="note" id="preview-note"></p>
       </div></div>
     </div>
-  </template>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

@@ -40,25 +40,32 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
-    --feed-1: 180 65 10; /* from the spec's screens */
-    --feed-2: 21 101 160; /* from the spec's screens */
-    --feed-3: 46 125 50; /* from the spec's screens */
-    --feed-4: 126 58 158; /* from the spec's screens */
-    --feed-5: 161 98 7; /* from the spec's screens */
-    --feed-6: 190 24 93; /* from the spec's screens */
+    /* the six feed colours, in each feed's own colour the unread dot is drawn */
+    --feed-1: 180 65 10;
+    --feed-2: 21 101 160;
+    --feed-3: 46 125 50;
+    --feed-4: 126 58 158;
+    --feed-5: 161 98 7;
+    --feed-6: 190 24 93;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 20 18 16;
+    --surface: 30 27 24;
+    --raised: 42 38 34;
+    --fg: 245 242 237;
+    --muted: 171 164 156;
+    --line: 58 53 48;
+    --accent: 251 146 60;
+    --on-accent: 41 18 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --feed-1: 251 146 60;
+    --feed-2: 96 165 250;
+    --feed-3: 74 222 128;
+    --feed-4: 192 132 252;
+    --feed-5: 250 204 21;
+    --feed-6: 244 114 182;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

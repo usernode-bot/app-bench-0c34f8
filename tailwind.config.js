@@ -55,6 +55,14 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The six feed colours, one per feed: the unread dot is drawn in its
+        // feed's own colour (bg-feed-1 … bg-feed-6, written as literals).
+        'feed-1': token('feed-1'),
+        'feed-2': token('feed-2'),
+        'feed-3': token('feed-3'),
+        'feed-4': token('feed-4'),
+        'feed-5': token('feed-5'),
+        'feed-6': token('feed-6'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

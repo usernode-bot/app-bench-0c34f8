@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" role="img" aria-label="A row of tomatoes on the vine">
+  <rect width="160" height="100" fill="#f4f1eb"/>
+  <circle cx="126" cy="26" r="10" fill="none" stroke="#b4410a" stroke-width="2.5"/>
+  <path d="M0 78 Q40 66 80 76 T160 74 V100 H0 Z" fill="#e5ddcf"/>
+  <path d="M46 78 V52 M46 60 Q34 56 32 44 M46 68 Q58 64 60 52" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="46" cy="49" r="7" fill="#b4410a"/>
+  <circle cx="30" cy="42" r="5.5" fill="#b4410a"/>
+  <circle cx="62" cy="50" r="5.5" fill="#b4410a"/>
+  <path d="M104 78 V56 M104 64 Q92 60 92 48 M104 70 Q116 66 118 54" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="104" cy="53" r="6" fill="#b4410a"/>
+  <circle cx="90" cy="46" r="4.5" fill="#b4410a"/>
+</svg>

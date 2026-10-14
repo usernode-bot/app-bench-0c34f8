@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" role="img" aria-label="A pan on a stove with steam rising">
+  <rect width="160" height="100" fill="#f4f1eb"/>
+  <path d="M58 34 Q56 26 62 22 M74 34 Q72 26 78 22" fill="none" stroke="#b4410a" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M46 52 H114" stroke="#1c1917" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="80" cy="66" r="17" fill="none" stroke="#1c1917" stroke-width="3"/>
+  <path d="M97 66 H126" stroke="#1c1917" stroke-width="3" stroke-linecap="round"/>
+  <path d="M40 90 H120" stroke="#e5ddcf" stroke-width="4" stroke-linecap="round"/>
+</svg>

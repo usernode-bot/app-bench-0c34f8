@@ -95,22 +95,28 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style RSS reader: the reader pastes a site's RSS feed address,
+the app fetches and parses it server side, and every unread post from all
+their feeds shows up in one scrolling list. Tapping a post opens a preview
+inside the app (and marks the post read); a link on the preview opens the
+full article in the browser. Each person's feeds and posts are private to
+them. The spec drew two screens, kept as `data-spec-screen` blocks in
+`public/index.html`; behaviour fills them in rather than redrawing them.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** RSS orange accent (burnt `#b4410a` in the light look,
+  brighter `#fb923c` in the dark) on warm paper neutrals.
+- **Signature element:** the unread dot, drawn in each feed's own colour
+  (`--feed-1` … `--feed-6`, assigned round-robin when a feed is added and
+  reused after removals). The same dot colours the source line in the
+  preview.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  post titles and the preview body are serif (Georgia stack) against the
+  system-ui rest.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +144,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are marked `staging:private` (per-user
+  data). Everything else follows the platform defaults.
+- Snippets and titles are rendered as text only, never as HTML — feed
+  content is untrusted.
+- Outbound fetching goes through `lib/fetchFeed.js`, which guards SSRF
+  (http/https only, no loopback/private/metadata addresses, 2 MB cap,
+  8 s timeout, redirects re-checked). Reuse it for any new fetching.
+- No new runtime dependencies without need; the only ones so far are
+  express, pg, jsonwebtoken and rss-parser.
+- Content rules apply to demo/staging seed data: nothing mature, violent
+  or gambling-related.
