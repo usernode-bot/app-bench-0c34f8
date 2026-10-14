@@ -1,0 +1,67 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  font: 16px/1.5 system-ui,sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1300px;
+}
+
+.s * {box-sizing:border-box;margin:0}
+
+.hd {display:flex;align-items:center;gap:10px;padding:16px 16px 12px}
+
+.mk {width:28px;height:28px;color:rgb(var(--accent))}
+
+.hd h1 {font-size:1.25rem;font-weight:600;flex:1}
+
+.btn-primary {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 .875rem system-ui}
+
+.btn-primary svg {width:18px;height:18px}
+
+.wrap {padding:4px 16px 24px;display:flex;flex-direction:column;gap:12px}
+
+.section-label {font-size:.875rem;font-weight:500;color:rgb(var(--muted));padding:8px 4px 0}
+
+.card {display:block;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px}
+
+.meta {display:flex;align-items:center;gap:8px;font-size:.875rem;color:rgb(var(--muted))}
+
+.st {font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:rgb(var(--accent)/.1);color:rgb(var(--accent))}
+
+.st.done {background:rgb(var(--raised));color:rgb(var(--muted))}
+
+.q {font-size:1.125rem;font-weight:600;line-height:1.4;margin:6px 0 12px}
+
+.opt {margin-top:10px}
+
+.ol {display:flex;justify-content:space-between;gap:8px;font-size:.875rem}
+
+.ol b {font-weight:500}
+
+.ol span {color:rgb(var(--muted));font-variant-numeric:tabular-nums}
+
+.mine b {color:rgb(var(--accent))}
+
+.ck {width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+
+.bar {margin-top:4px;height:10px;border-radius:3px;background:rgb(var(--raised));display:flex;gap:2px;overflow:hidden}
+
+.bar i {width:10%;background:rgb(var(--tally))}
+
+.mine .bar i {background:rgb(var(--accent))}
+
+.who {font-size:.8125rem;color:rgb(var(--muted));margin-top:2px}
+
+.ft {display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid rgb(var(--line));font-size:.875rem;color:rgb(var(--muted))}
+
+.ft span {display:flex;align-items:center;gap:6px}
+
+.ft svg {width:16px;height:16px}
+
+.res {margin-top:4px;font-size:.875rem}
+
+.res b {font-weight:600}

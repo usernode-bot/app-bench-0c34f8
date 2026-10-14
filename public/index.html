@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,34 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="s">
+    <header class="hd"><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V11"/><path d="M10 7.5l1.5 1.5 3-3"/><path d="M8 15h8"/></svg><h1>Club Votes</h1><button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button></header>
+    <div class="wrap">
+    <p class="section-label">Open decisions</p>
+    <a class="card"><div class="meta"><span class="st">Open</span>Mira Testwell · 2h ago</div><h2 class="q">Where should we meet next month?</h2>
+    <div class="opt mine"><div class="ol"><b><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg>Library back room</b><span>5</span></div><div class="bar"><i></i><i></i><i></i><i></i><i></i></div><p class="who">You, Mira, Theo, Juno, Sam</p></div>
+    <div class="opt"><div class="ol"><b>Corner café upstairs</b><span>3</span></div><div class="bar"><i></i><i></i><i></i></div><p class="who">Priya, Lee, Ana</p></div>
+    <div class="opt"><div class="ol"><b>Community hall</b><span>1</span></div><div class="bar"><i></i></div><p class="who">Omar</p></div>
+    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>9 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>4 comments</span></div></a>
+    <a class="card"><div class="meta"><span class="st">Open</span>You · yesterday</div><h2 class="q">What should our spring project be?</h2>
+    <div class="opt"><div class="ol"><b>Park clean-up day</b><span>4</span></div><div class="bar"><i></i><i></i><i></i><i></i></div><p class="who">Theo, Ana, Lee, Sam</p></div>
+    <div class="opt"><div class="ol"><b>Book swap stall</b><span>4</span></div><div class="bar"><i></i><i></i><i></i><i></i></div><p class="who">Mira, Juno, Priya, Omar</p></div>
+    <div class="opt"><div class="ol"><b>Board game night series</b><span>0</span></div><div class="bar"></div><p class="who">No votes yet</p></div>
+    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>8 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>7 comments</span></div></a>
+    <a class="card"><div class="meta"><span class="st">Open</span>Theo Sample · 3d ago</div><h2 class="q">Which evening works best for meetings?</h2>
+    <div class="opt"><div class="ol"><b>Tuesday</b><span>2</span></div><div class="bar"><i></i><i></i></div><p class="who">Theo, Juno</p></div>
+    <div class="opt mine"><div class="ol"><b><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg>Thursday</b><span>6</span></div><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i></div><p class="who">You, Mira, Priya, Lee, Sam, Ana</p></div>
+    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>8 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>2 comments</span></div></a>
+    <p class="section-label">Decided</p>
+    <a class="card"><div class="meta"><span class="st done">Decided</span>Juno Example · 2 weeks ago</div><h2 class="q">Snack for the autumn picnic?</h2>
+    <p class="res">Chosen: <b>Fruit and cheese plates</b>, 7 of 10 votes</p>
+    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>10 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>5 comments</span></div></a>
+    </div></div></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
