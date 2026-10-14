@@ -10,7 +10,13 @@
   font-size: 16px;
   line-height: 24px;
   min-height: 1360px;
-  padding: 20px 16px 32px;
+  padding: 20px 16px 72px;
+  /* One centred column on desktop too: the chips, dough list, ingredients,
+     rise strip and bake cards share a readable width instead of stretching
+     edge to edge. */
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -75,7 +81,9 @@ input[type=range] {width:100%;accent-color:rgb(var(--accent));height:28px;margin
 
 .strip {display:flex;gap:3px;height:56px;border-radius:10px;overflow:hidden}
 
-.seg2 {display:flex;flex-direction:column;justify-content:center;padding:0 8px;background:rgb(var(--wheat)/.22);border-top:4px solid rgb(var(--wheat));font-size:13px;line-height:17px;min-width:64px}
+/* min-width keeps the short steps (Mix, Bake) and a one-line "First rise"
+   readable even when a long proof dominates the strip. */
+.seg2 {display:flex;flex-direction:column;justify-content:center;padding:0 8px;background:rgb(var(--wheat)/.22);border-top:4px solid rgb(var(--wheat));font-size:13px;line-height:17px;min-width:76px}
 
 .seg2 b {font-variant-numeric:tabular-nums;font-size:14px}
 
