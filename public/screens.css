@@ -10,6 +10,11 @@
   min-height: 1060px;
   font-size: 16px;
   line-height: 24px;
+  /* A reading column: wide desktop windows get a centred ~720 px column,
+     not edge-to-edge lines. */
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .s * {box-sizing:border-box;margin:0}
@@ -32,7 +37,11 @@
 
 .field {flex:1;min-height:44px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:8px;padding:10px 12px;font-size:16px;color:rgb(var(--muted) / .6)}
 
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));padding:16px 20px 8px}
+.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));padding:16px 16px 8px}
+
+/* The add-feed form's error line: inset 4 px like the label above, a step of
+   space so it never sits flush against the field. */
+.form-error {margin:6px 4px 0;font-size:14px;line-height:20px;color:rgb(var(--accent))}
 
 .list {margin:0 16px 24px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;padding:0;list-style:none}
 
@@ -87,7 +96,10 @@
 
 .src b {font-weight:500;color:rgb(var(--fg));display:block}
 
-.badge {width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:rgb(var(--badge-1))}
+/* No background here: the tint comes from .b1–.b4 above, by feed id — a
+   default here would sit later in the cascade and flatten every tint to
+   badge-1. */
+.badge {width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
 
 h2 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:34px;font-weight:700;margin-top:16px;letter-spacing:-.01em}
 

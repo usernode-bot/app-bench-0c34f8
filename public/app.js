@@ -5,7 +5,6 @@ import { rowsFrom, fillIn, screen } from '/kit/fill.js';
 import { createStates } from '/kit/states.js';
 import { openSheet } from '/kit/sheet.js';
 import { toast } from '/kit/native.js';
-import { showDemoLabel } from '/kit/demo.js';
 
 const readerView = document.getElementById('reader-view');
 const viewHost = readerView.parentElement;
@@ -66,12 +65,32 @@ function hostOf(link) {
 
 // ── The unread list ─────────────────────────────────────────────────────
 
+// The feed icon (a dot and two arcs), the app's own mark, for the empty
+// state. Drawn here because h() makes HTML elements, not SVG.
+function feedIcon() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  for (const [k, v] of Object.entries({
+    width: '40', height: '40', viewBox: '0 0 24 24', fill: 'none',
+    stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'aria-hidden': 'true',
+  })) svg.setAttribute(k, v);
+  const dot = document.createElementNS(ns, 'circle');
+  dot.setAttribute('cx', '6'); dot.setAttribute('cy', '18'); dot.setAttribute('r', '1.5');
+  for (const d of ['M4 11a9 9 0 0 1 9 9', 'M4 4a16 16 0 0 1 16 16']) {
+    const arc = document.createElementNS(ns, 'path');
+    arc.setAttribute('d', d);
+    svg.append(arc);
+  }
+  svg.append(dot);
+  return h('span', { class: 'text-muted' }, svg);
+}
+
 const states = createStates(statesEl, {
   rows: 5,
   empty: {
+    icon: feedIcon(),
     title: 'No feeds yet',
     text: 'Add an RSS feed and its unread posts will show up here.',
-    action: { label: 'Add feed', primary: true, onClick: () => addInput.focus() },
   },
   error: {
     title: 'Your posts did not load',
@@ -83,7 +102,10 @@ function renderPosts() {
   const { feeds, posts, demo } = state;
   metaEl.hidden = !(posts.length && feeds.length);
   if (posts.length && feeds.length) {
-    metaEl.textContent = `${plural(posts.length, 'unread')} from ${plural(feeds.length, 'feed')}`;
+    // One line above the list, as the spec drew it: "Staging demo, 18 unread
+    // from 5 feeds" under ?demo=1, "18 unread from 5 feeds" otherwise.
+    const count = `${plural(posts.length, 'unread', 'unread')} from ${plural(feeds.length, 'feed')}`;
+    metaEl.textContent = demo ? `Staging demo, ${count}` : count;
   }
   if (!feeds.length) return false;
   const byFeed = new Map(feeds.map((f) => [f.id, f]));
@@ -118,7 +140,6 @@ function renderPosts() {
 async function loadPosts() {
   const data = await api('GET', '/api/posts');
   state = data;
-  if (data.demo) showDemoLabel(statesEl);
   return renderPosts();
 }
 states.run(loadPosts);

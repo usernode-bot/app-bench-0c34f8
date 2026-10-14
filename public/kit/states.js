@@ -3,7 +3,7 @@
 import { h, clear } from './dom.js';
 
 /**
- * createStates(el, { rows, empty: { title, text, action: { label, onClick, primary } }, error: { title, text } })
+ * createStates(el, { rows, empty: { title, text, icon, action: { label, onClick, primary } }, error: { title, text } })
  * gives { content, run(task), loading(), empty(), error(), ready() }. task(content)
  * renders and returns false for empty; a throw shows the error, whose Try again reruns it.
  */
@@ -17,6 +17,7 @@ export function createStates(el, { rows = 4, empty = {}, error = {} } = {}) {
         h('span', { class: 'skeleton h-3 w-1/3' })))));
   const action = empty.action;
   const emptyEl = h('div', { class: 'state-empty' },
+    empty.icon || null,
     h('h2', { class: 'text-heading' }, empty.title || 'Nothing here yet'),
     empty.text ? h('p', { class: 'text-body text-muted' }, empty.text) : null,
     action ? h('button', { type: 'button', class: action.primary ? 'btn-primary mt-2' : 'btn-secondary mt-2', on: { click: action.onClick } }, action.label) : null);
