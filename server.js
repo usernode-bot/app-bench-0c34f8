@@ -191,10 +191,32 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
-  // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
-  server.keepAliveTimeout = 75_000;
+function start() {
+  return new Promise((resolve) => {
+    const server = app.listen(port, () => {
+      console.log(`Listening on :${port}`);
+      resolve(server);
+    });
+    // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
+    server.keepAliveTimeout = 75_000;
+  });
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+start().then((server) => {
+  // The platform stops containers with SIGTERM: stop accepting connections,
+  // let the ones in flight finish (about 3 s), close the database pool and
+  // exit.
+  let shuttingDown = false;
+  function shutdown() {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log('Shutting down');
+    server.close();
+    setTimeout(() => {
+      server.closeAllConnections?.();
+      pool.end().catch(() => {}).finally(() => process.exit(0));
+    }, 3000).unref();
+  }
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}).catch(err => { console.error(err); process.exit(1); });

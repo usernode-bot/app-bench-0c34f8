@@ -3,5 +3,24 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator loads",
+      "path": "/",
+      "expectText": "Calculate"
+    },
+    {
+      "name": "Empty before calculating",
+      "path": "/",
+      "expectText": "Your recipe shows here"
+    },
+    {
+      "id": "demo-recipe",
+      "name": "Demo recipe",
+      "path": "/?demo=1",
+      "expectSelector": ".notebook",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    }
+  ]
 }

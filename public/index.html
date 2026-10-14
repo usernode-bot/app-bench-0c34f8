@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23844e26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5.5 8.5a4.5 4.5 0 0 0-1.8 8.1V20h16.6v-3.4a4.5 4.5 0 0 0-1.8-8.1c-2.3 0-3.2 1-6.5 1s-4.2-1-6.5-1Z'/><path d='M9 13v3M12 12v4M15 13v3'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -121,44 +121,44 @@
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="head"><h1>Bread Bot</h1><p class="sub">Grams, rise and bake for any loaf</p></div>
+    <div class="head"><h1>Bread Bot</h1><p class="sub">Grams, rise and bake for any loaf</p><p class="sub" id="demo-line" hidden>Staging demo: an example recipe, already calculated</p></div>
 
     <div class="section-label" style="margin-top:0">Bread</div>
-    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
+    <div class="chips" id="chips" role="group" aria-label="Bread">
+    <button type="button" class="chip on" data-bread="sourdough" aria-pressed="true">Sourdough</button><button type="button" class="chip" data-bread="bagels" aria-pressed="false">Bagels</button><button type="button" class="chip" data-bread="sourdough-bagels" aria-pressed="false">Sourdough bagels</button><button type="button" class="chip" data-bread="rye" aria-pressed="false">Rye</button><button type="button" class="chip" data-bread="sandwich" aria-pressed="false">Sandwich loaf</button></div>
 
     <div class="section-label">Dough</div>
     <ul class="list">
-    <li class="list-row"><span class="grow">Hydration</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">75%</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
-    <li class="list-row"><span class="grow">Loaves</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">2</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
-    <li class="list-row"><span class="grow">Size of each loaf</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">800 g</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
+    <li class="list-row"><span class="grow">Hydration</span><div class="step"><button type="button" class="sb" id="hydration-minus" aria-label="Lower hydration"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="num" id="hydration-val">75%</span><button type="button" class="sb" id="hydration-plus" aria-label="Raise hydration"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></li>
+    <li class="list-row"><span class="grow" id="count-label">Loaves</span><div class="step"><button type="button" class="sb" id="count-minus" aria-label="Fewer loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="num" id="count-val">2</span><button type="button" class="sb" id="count-plus" aria-label="More loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></li>
+    <li class="list-row"><span class="grow" id="size-label">Size of each loaf</span><div class="step"><button type="button" class="sb" id="size-minus" aria-label="Smaller loaf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="num" id="size-val">800 g</span><button type="button" class="sb" id="size-plus" aria-label="Bigger loaf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></li>
     </ul>
-    <button class="btn-primary">Calculate</button>
+    <button type="button" class="btn-primary" id="calculate">Calculate</button>
 
-    <div class="section-label" style="margin-top:28px">Ingredients for 2 sourdough loaves, 1,600 g of dough</div>
-    <ul class="list">
-    <li class="list-row"><span class="grow">Bread flour</span><span class="val">833 g</span></li>
-    <li class="list-row"><span class="grow">Water</span><span class="val">625 g</span></li>
-    <li class="list-row"><span class="grow">Sourdough starter</span><span class="val">125 g</span></li>
-    <li class="list-row"><span class="grow">Salt</span><span class="val">17 g</span></li>
-    </ul>
+    <p class="sub" id="stale" hidden style="margin-top:12px">Settings changed. Tap Calculate to update.</p>
+
+    <div id="results-empty" class="state-empty" style="margin-top:20px">
+      <p class="sub" style="margin:0">Your recipe shows here: pick a bread, set the dough, then tap Calculate.</p>
+    </div>
+    <div id="results-error" class="state-error" hidden style="margin-top:20px">
+      <p class="sub" style="margin:0">Couldn't work out this recipe. Your settings are kept.</p>
+      <button type="button" class="btn-secondary" id="retry">Retry</button>
+    </div>
+
+    <div id="results" hidden>
+    <div class="section-label" style="margin-top:28px" id="ingredients-label">Ingredients</div>
+    <ul class="list" id="ingredients"></ul>
 
     <div class="section-label">Baker's percentages <span class="tag">flour = 100%</span></div>
-    <div class="notebook">
-    <div class="nrow"><b>Flour</b><div class="bar"><i style="width:100%"></i></div><span class="pct">100%</span></div>
-    <div class="nrow"><b>Water</b><div class="bar"><i style="width:75%"></i></div><span class="pct">75%</span></div>
-    <div class="nrow"><b>Starter</b><div class="bar"><i style="width:15%"></i></div><span class="pct">15%</span></div>
-    <div class="nrow"><b>Salt</b><div class="bar"><i style="width:2%"></i></div><span class="pct">2%</span></div>
-    </div>
+    <div class="notebook" id="notebook"></div>
 
     <div class="section-label">Rise and bake</div>
-    <div class="tiles">
-    <div class="tile"><small>Bulk rise</small><strong>5 h</strong></div>
-    <div class="tile"><small>Bake at</small><strong>240 °C</strong></div>
-    <div class="tile"><small>Bake for</small><strong>45 min</strong></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card" style="margin-top:8px"><div style="font-weight:600">Timing</div><p class="sub" style="margin-top:4px" id="timing-note"></p></div>
     </div>
-    <div class="card" style="margin-top:8px"><div style="font-weight:600">Timing</div><p class="sub" style="margin-top:4px">Bulk rise at 24 °C with folds every 45 minutes. Shape, then proof 12 hours in the fridge. Bake covered for 25 minutes, then uncovered for 20.</p></div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>

@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: pick a bread (sourdough, bagels, sourdough
+bagels, rye, sandwich loaf), set the hydration, the number of loaves and
+each loaf's size, and it works out the grams of every ingredient, the
+baker's percentages, and the rise times, oven temperature and bake time.
+One screen, nothing saved — each visit calculates fresh, as the creator
+chose.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version set it; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** a baker's warm neutrals — flour-paper ground, warm surface
+  and raised tones, warm brown text — with crust brown as the action colour
+  (the selected bread chip and the Calculate button) and a soft wheat tone
+  for the percentage bars and the "flour = 100%" tag. Dark look, same
+  tokens: ground 26 20 16, surface 38 30 24, raised 50 40 32, text 246 239
+  230, muted 190 176 160, line 76 63 52, a toasted crust brown 222 166 112
+  with dark text 43 25 10 on it, and wheat 201 163 92 with wheat ink 43 29 6.
+- **Signature element:** the baker's percentage notebook — a ruled card on
+  the raised tone with a wheat border, one line per ingredient showing its
+  name, a wheat bar and its percent of the flour, like a notebook page.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Headings and the notebook's figures are a serif (`font-serif`:
+  `ui-serif`/Georgia, like a handwritten recipe book); the rest is the
+  rounded system face.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +150,11 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The recipes live in `RECIPES` in `public/app.js`: ingredient percentages,
+  hydration ranges, defaults, rise and bake rules, one entry per bread.
+  The calculation (`calculate()`) is a pure function; everything runs in
+  the page.
+- Nothing is stored: no tables, no server routes beyond the template's, no
+  local storage. Each visit calculates fresh.
+- Grams and degrees Celsius only — no Fahrenheit, ounces or cups.
+- Grams are whole numbers, with one decimal under 10 g.
