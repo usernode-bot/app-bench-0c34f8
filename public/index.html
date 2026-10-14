@@ -125,6 +125,8 @@
     <button class="btn-secondary" id="feeds-btn" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
     <button class="btn-primary" id="add-btn" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
     <div class="sub sans" id="sub" hidden></div>
+    <!-- Loading keeps the subtitle's slot: a grey bar where the "updated" line goes. -->
+    <div class="sub sans" id="sub-skeleton" hidden><span class="skeleton h-5 w-56 inline-block"></span></div>
     <!-- Loading: the list's own shape, skeleton bars where the text goes. -->
     <div id="loading-state">
       <div class="section-label sans">Today</div>
@@ -202,7 +204,7 @@
 
     var el = function (id) { return document.getElementById(id); };
     var els = {
-      addBtn: el('add-btn'), feedsBtn: el('feeds-btn'), sub: el('sub'),
+      addBtn: el('add-btn'), feedsBtn: el('feeds-btn'), sub: el('sub'), subSkeleton: el('sub-skeleton'),
       loading: el('loading-state'), groups: el('groups'),
       emptyFeeds: el('empty-feeds'), emptyAdd: el('empty-add'),
       emptyCaughtup: el('empty-caughtup'), caughtupText: el('caughtup-text'),
@@ -229,7 +231,8 @@
 
     // ── Times ────────────────────────────────────────────────────────────
     function clock(d) {
-      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+      // A non-breaking space keeps "6:04 pm" from wrapping the pm onto its own line.
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', ' ');
     }
     function dayKey(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
     function rowTime(d) {
@@ -355,6 +358,7 @@
 
     function hideStates() {
       els.sub.hidden = true;
+      els.subSkeleton.hidden = true;
       els.loading.hidden = true;
       els.emptyFeeds.hidden = true;
       els.emptyCaughtup.hidden = true;
@@ -364,6 +368,7 @@
 
     function showLoading() {
       hideStates();
+      els.subSkeleton.hidden = false;
       els.loading.hidden = false;
     }
 

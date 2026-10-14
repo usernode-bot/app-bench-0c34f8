@@ -26,6 +26,12 @@
 
 .app * {box-sizing:border-box;margin:0;padding:0}
 
+/* The blank states: the reset above zeroes the design kit's margins and
+   paddings on them, so the kit's own spacing is repeated here, where it is
+   beaten: a centred block, 48px under the header, 20px side padding. */
+.app .state-empty,
+.app .state-error {margin:0 auto;padding:48px 20px 32px}
+
 .sans {
   font-family: ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -51,11 +57,11 @@
 
 .list {list-style:none;margin:0 16px 20px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
 
-.list-row {display:flex;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
+.list-row {display:flex;align-items:flex-start;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
 
 .list-row:first-child {border-top:0}
 
-.dot {flex:none;width:10px;height:10px;border-radius:50%;background:rgb(var(--accent));margin-top:7px}
+.dot {flex:none;width:10px;height:10px;border-radius:50%;background:rgb(var(--accent));margin-top:5px}
 
 .dot.read {background:transparent;border:1.5px solid rgb(var(--line))}
 
@@ -69,7 +75,7 @@
 
 .time {color:rgb(var(--muted))}
 
-.h {font-size:16px;line-height:22px;font-weight:700}
+.h {font-family:ui-serif,Georgia,"Iowan Old Style",serif;font-size:16px;line-height:22px;font-weight:600}
 
 .ex {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
