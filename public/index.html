@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,69 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main class="bb">
+    <header><h1>Bread Bot</h1><p class="small" style="margin:4px 0 0">Set your dough, get the grams and the timings.</p></header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
+    <section><p class="section-label">Bread</p>
+    <div class="chips">
+    <button class="chip" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M3 15c0-5 4-8 9-8s9 3 9 8c0 2-2 3-9 3s-9-1-9-3z"/><path d="M8 11l3 2M12 10l3 2"/></svg>Sourdough</button>
+    <button class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>Bagels</button>
+    <button class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M6 8l2 1M16 15l2 1"/></svg>Sourdough bagels</button>
+    <button class="chip"><svg viewBox="0 0 24 24"><path d="M3 14c0-3 4-6 9-6s9 3 9 6-4 4-9 4-9-1-9-4z"/><path d="M8 12h.01M12 11h.01M16 12h.01M10 15h.01M14 15h.01"/></svg>Rye</button>
+    <button class="chip"><svg viewBox="0 0 24 24"><path d="M5 10c0-3 3-4 7-4s7 1 7 4v9H5z"/><path d="M5 12h14"/></svg>Sandwich loaf</button>
+    </div></section>
+
+    <section><p class="section-label">Dough</p>
+    <div class="list">
+    <div class="list-row stack"><div style="display:flex;justify-content:space-between"><span>Hydration</span><span class="val">75%</span></div>
+    <input type="range" min="50" max="90" value="75" aria-label="Hydration"><div class="ticks"><span>50% stiff</span><span>90% slack</span></div></div>
+    <div class="list-row"><span class="grow">Loaves</span><div class="stepper"><button aria-label="One fewer">−</button><span>2</span><button aria-label="One more">+</button></div></div>
+    <div class="list-row stack"><div style="margin-bottom:8px">Loaf size</div>
+    <div class="seg"><button>450 g</button><button>680 g</button><button aria-pressed="true">900 g</button><button>1 kg</button><button>Custom</button></div></div>
+    </div></section>
+
+    <section>
+    <div class="total"><h2>Ingredients</h2><span class="small">1,800 g of dough</span></div>
+    <div class="list ing">
+    <div class="list-row"><span class="grow">Bread flour</span><span class="pct">81%</span><span class="g val">824 g</span></div>
+    <div class="list-row"><span class="grow">Whole wheat flour</span><span class="pct">9%</span><span class="g val">92 g</span></div>
+    <div class="list-row"><span class="grow">Water</span><span class="pct">65%</span><span class="g val">661 g</span></div>
+    <div class="list-row"><span class="grow">Sourdough starter <span class="small">fed, 100% hydration</span></span><span class="pct">20%</span><span class="g val">203 g</span></div>
+    <div class="list-row"><span class="grow">Salt</span><span class="pct">2%</span><span class="g val">20 g</span></div>
+    </div>
+    <p class="small" style="margin:8px 4px 0">Percentages are of the total flour, the starter's flour and water counted in.</p>
     </section>
-    <!-- /usernode-starter-notice@1 -->
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <section>
+    <div class="total"><h2>Rise schedule</h2><span class="small">About 17 h 35 min</span></div>
+    <div class="strip" role="img" aria-label="Mix 20 minutes, first rise 4 hours 30 minutes, proof 12 hours in the fridge, bake 45 minutes">
+    <div class="seg2" style="flex:1"><b>20 min</b>Mix</div>
+    <div class="seg2" style="flex:3"><b>4 h 30</b>First rise</div>
+    <div class="seg2 cold" style="flex:5"><b>12 h</b>Proof, fridge</div>
+    <div class="seg2 bake" style="flex:1.2"><b>45 min</b>Bake</div>
+    </div>
+    <div class="list steps" style="margin-top:12px">
+    <div class="list-row"><svg viewBox="0 0 24 24"><path d="M4 10h16l-2 9H6z"/><path d="M8 10c0-3 2-5 4-5s4 2 4 5"/></svg><div class="grow">First rise<div class="small">Covered at about 24 °C, 4 sets of folds in the first 2 h, until risen by half</div></div><span class="val">4 h 30</span></div>
+    <div class="list-row"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M9 6v2M9 13v3"/></svg><div class="grow">Proof<div class="small">Shaped, in a floured basket, in the fridge</div></div><span class="val">12 h</span></div>
+    </div>
+    </section>
+
+    <section>
+    <h2 style="margin-bottom:8px;padding:0 4px">Bake</h2>
+    <div class="oven">
+    <div class="card"><div class="small">Oven</div><div class="big">240 °C</div><div class="small">464 °F, preheat a Dutch oven</div></div>
+    <div class="card"><div class="small">Time</div><div class="big">45 min</div><div class="small">20 lid on, 25 lid off</div></div>
+    </div>
+    </section>
+
+    <button class="btn-primary"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Copy recipe</button>
+    </main></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
