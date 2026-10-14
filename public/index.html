@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,84 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="cv">
+    <div class="top"><h1>Club Votes</h1><p>3 open, 2 waiting on your vote</p></div>
+    <div class="tabs"><span class="tab on">Open</span><span class="tab">Closed</span><span class="tab">Posted by you</span></div>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <div class="card">
+    <div class="meta"><span>Mina, 2 days ago</span><span>9 of 12 voted</span></div>
+    <div class="q">Move Thursday meetings to the library?</div>
+    <div class="bar"><i class="y" style="width:58%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
+    <div class="leg"><span><i class="dot y"></i><b>7</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
+    <div class="act"><span class="btn-secondary sel">Yes</span><span class="btn-secondary">No</span></div>
+    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>7 comments, latest from Dev</div>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <div class="card">
+    <div class="meta"><span>You, yesterday</span><span>5 of 12 voted</span></div>
+    <div class="q">Run a spring tree planting in April?</div>
+    <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
+    <div class="leg"><span><i class="dot y"></i><b>5</b> yes</span><span><i class="dot n"></i><b>0</b> no</span></div>
+    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
+    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>3 comments</div>
+    </div>
+
+    <div class="card">
+    <div class="meta"><span>Tomas, 4 hours ago</span><span>3 of 12 voted</span></div>
+    <div class="q">Raise dues to $5 a month for supplies?</div>
+    <div class="bar"><i class="y" style="width:8%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
+    <div class="leg"><span><i class="dot y"></i><b>1</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
+    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary seln">No</span></div>
+    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>1 comment</div>
+    </div>
+
+    <div class="section-label">Recently closed</div>
+    <div class="list">
+    <div class="list-row"><div>Order pizza for the end-of-term party?<small>Closed by Priya, 11 votes</small></div><span class="res">Yes 9</span></div>
+    <div class="list-row"><div>Buy a second folding table?<small>Closed by you, 10 votes</small></div><span class="res no">No 6</span></div>
+    </div>
+
+    <div class="fab"><span class="btn-primary"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</span></div>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="cv">
+      <div class="nav"><span class="lnk"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Decisions</span></div>
+      <div class="meta">Posted by you, yesterday</div>
+      <h1>Run a spring tree planting in April?</h1>
+      <p class="det">The parks office has 40 saplings for groups. We would need about 8 people on a Saturday morning.</p>
+
+      <div class="card">
+      <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
+      <div class="leg"><span><i class="dot y"></i><b>5</b> yes &nbsp; <i class="dot n"></i><b>0</b> no</span><span>5 of 12 voted</span></div>
+      <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
+      <p class="hint">You have not voted. You can change your vote until it closes.</p>
+      <div class="own"><span class="btn-secondary"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Close decision</span><span class="btn-secondary danger">Delete</span></div>
+      </div>
+
+      <div class="section-label">3 comments</div>
+      <div class="list">
+      <div class="list-row"><div class="who"><span><b>Mina</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>I can bring gloves and two spades.</p></div>
+      <div class="list-row"><div class="who"><span><b>Dev</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>Saturday the 12th works for me, the 19th does not.</p></div>
+      <div class="list-row"><div class="who"><span><b>Ana</b>3 hours ago</span><span class="lnk m">Report</span></div><p>Is there parking near the site?</p></div>
+      </div>
+
+      <label class="lbl">Your comment</label>
+      <div class="field">e.g. I can help on the 12th</div>
+      <div class="post"><span class="btn-primary">Post comment</span></div>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
