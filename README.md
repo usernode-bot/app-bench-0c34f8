@@ -1,27 +1,36 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+All your favourite sites' new posts, in one list. Add an RSS or Atom feed by
+address and every unread post from your feeds gathers in one scrolling list,
+newest first. Tap a post to mark it read and preview the article (the feed's
+own text and images), then open the full story on its site in your browser.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Add feed** saves a feed to your account; its posts show up straight away.
+- **Refresh** fetches new posts on demand. New posts are also fetched when
+  you open the app — never on a background timer.
+- **Your feeds** lists what you follow, and a Remove button (which asks
+  first) takes a feed and its posts away.
+- A feed that fails to update is named above the list, with a Retry; posts
+  from your other feeds still show.
+- Your feeds and what you have read are yours alone.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+One screen: **Unread**. Read posts stay dimmed for a few minutes so you can
+find your way back, then leave the list.
 
-## Replacing the template
+## Stack
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+Node and Express, Postgres, a precompiled Tailwind stylesheet from the
+Homeroom design kit. No RSS packages: feeds are fetched through the
+SSRF-guarded fetcher in `lib/feeds.js` and parsed by the hand-written XML
+reader there. Article HTML is sanitised in the browser from an allowlist.
 
-Once the real app exists, rewrite this README to describe it.
+## Run
+
+```sh
+npm ci --include=dev
+npm run build
+node server.js
+```
+
+`DATABASE_URL`, `USERNODE_JWT_PUBLIC_KEY`, `USERNODE_APP_ID` and `PORT` are
+injected by the Homeroom platform; there are no other settings.

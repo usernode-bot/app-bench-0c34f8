@@ -95,27 +95,39 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader that works like Feedly: you add feeds by address and
+read all their unread posts in one scrolling list. Tapping a post marks it
+read and shows a preview of the article (the feed's own text and images),
+with a button that opens the full story on its site. Feeds refresh when you
+open the app or tap Refresh, never on a background timer. Every person's
+feeds and read marks are private to them.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
-
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm paper neutrals with one amber accent for actions. Light:
+  ground 250 249 247, surface white, raised 244 242 238, fg 31 27 22, muted
+  94 87 78, line 229 225 218, accent 180 83 9 (amber, on-accent white).
+  Dark: ground 20 18 16, surface 30 27 24, raised 42 38 34, fg 240 236 230,
+  muted 170 162 152, line 64 59 53, accent 245 165 60 (on-accent 38 22 4).
+  Six feed tones given to feeds in turn (`--feed-1` to `--feed-6`: light
+  amber, sea, plum, fern, rose, slate with white initials; dark lighter
+  tints with `--on-feed` 28 25 23).
+- **Signature element:** every post row starts with a round badge holding
+  its feed's initial in that feed's tone, so sources are told apart at a
+  glance. A read post's badge fades to 40% and its title turns muted.
+- **Type scale:** `text-title`, `text-heading` (1.125rem, the row-title
+  size: a reader's list, not a dashboard), `text-body`, `text-small`.
+  Post titles, the preview's headline and the article use the serif reading
+  face (`font-reading`: ui-serif, Charter, Iowan Old Style, Georgia); names,
+  times and buttons use the system sans. Icons are thin line icons.
+- **One fixed look:** none. The app follows the viewer's Homeroom theme and
+  ships both looks.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
 (`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`,
-`card`, `section-label`, `skeleton`, `state-empty`, `state-error`).
+`card`, `section-label`, `skeleton`, `state-empty`, `state-error`, plus
+this app's `kit-article` and `kit-row-*`).
 Re-theme by changing the token values there, keeping every text pair at
 4.5:1 or more in both looks.
 
@@ -138,6 +150,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Both tables (`feeds`, `posts`) are private (`staging:private`): a
+  person's feeds and what they read are theirs alone.
+- No new npm packages: feeds are fetched with Node's built-in `fetch` and
+  parsed by the hand-written reader in `lib/feeds.js`.
+- Outbound feed fetches go through `safeFetch` in `lib/feeds.js` only
+  (SSRF-guarded: no loopback, private, link-local, CGNAT or metadata
+  addresses; at most 3 redirects; 8 s timeout; 2 MB body limit).
+- Article HTML from feeds is stored raw in `posts.content_html` and is
+  sanitised on the client (a DOMParser allowlist in `public/app.js`):
+  never rendered as-is, never trusted server-side.
+- Demo rows are feeds with `is_demo = true`. Refresh skips them and every
+  response without `?demo=1` leaves them out, so the plain route keeps its
+  real empty state. Rows rendered from data carry `data-post-row`.
+- Words: "feed", "post", "Unread", "Add feed", "Your feeds", "Open full
+  story", "Remove", "All caught up".
