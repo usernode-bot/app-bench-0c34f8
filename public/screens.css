@@ -1,0 +1,97 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,sans-serif;
+  min-height: 1380px;
+}
+
+.s * {box-sizing:border-box;margin:0}
+
+.m {max-width:448px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:22px}
+
+.hd {display:flex;align-items:center;gap:12px}
+
+.mk {width:44px;height:44px;border-radius:12px;background:rgb(var(--raised));display:flex;align-items:center;justify-content:center;color:rgb(var(--accent))}
+
+.t {font-size:1.75rem;line-height:2.25rem;font-weight:700}
+
+.sm {font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:.875rem;font-weight:500;color:rgb(var(--muted))}
+
+.bt {display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+.b {min-height:76px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;font-size:.875rem;font-weight:500;text-align:center;line-height:1.1rem;color:rgb(var(--fg))}
+
+.b svg {color:rgb(var(--muted))}
+
+.b.on {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--accent)/.08)}
+
+.b.on svg {color:rgb(var(--accent))}
+
+.card {border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px}
+
+.f {display:flex;flex-direction:column;gap:18px}
+
+.r {display:flex;justify-content:space-between;align-items:baseline}
+
+.lb {font-weight:500}
+
+.v {font-weight:600;font-variant-numeric:tabular-nums}
+
+.sl {position:relative;height:44px;display:flex;align-items:center}
+
+.tr {height:6px;border-radius:3px;background:rgb(var(--line));width:100%}
+
+.tf {position:absolute;left:0;height:6px;border-radius:3px;background:rgb(var(--accent));width:62.5%}
+
+.th {position:absolute;left:calc(62.5% - 14px);width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.st {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px;overflow:hidden}
+
+.st span {min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+
+.st .n {border-left:1px solid rgb(var(--line));border-right:1px solid rgb(var(--line));min-width:52px;font-weight:600}
+
+.fw {position:relative}
+
+.field {display:block;min-height:44px;width:100%;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:8px;padding:8px 12px;font-size:1rem;color:rgb(var(--fg))}
+
+.fw i {position:absolute;right:12px;top:10px;font-style:normal;color:rgb(var(--muted))}
+
+.btn-primary {display:flex;min-height:44px;width:100%;align-items:center;justify-content:center;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500}
+
+.fc {border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;overflow:hidden}
+
+.fh {padding:14px 16px;border-bottom:1px dashed rgb(var(--line))}
+
+.h {font-size:1.25rem;line-height:1.75rem;font-weight:600}
+
+.g {display:grid;grid-template-columns:1fr 92px 64px;align-items:center;gap:0 10px;padding:10px 16px;border-bottom:1px solid rgb(var(--line));font-variant-numeric:tabular-nums}
+
+.g.k {padding:8px 16px;font-size:.875rem;color:rgb(var(--muted))}
+
+.g.k span:last-child,.gr {text-align:right}
+
+.pc {display:flex;align-items:center;gap:6px;font-size:.875rem;color:rgb(var(--muted))}
+
+.bar {height:6px;border-radius:3px;background:rgb(var(--accent)/.55)}
+
+.gr {font-weight:600}
+
+.tot {border-bottom:0;background:rgb(var(--raised));font-weight:600}
+
+.list {border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;overflow:hidden;padding:0;list-style:none}
+
+.list-row {display:flex;gap:12px;padding:12px 16px;align-items:flex-start}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.ic {width:32px;height:32px;border-radius:8px;background:rgb(var(--raised));color:rgb(var(--accent));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.tm {margin-left:auto;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
