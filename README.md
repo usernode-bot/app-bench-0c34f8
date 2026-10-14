@@ -1,27 +1,30 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A place for a club to decide things together. Anyone posts a question the
+club needs to decide; everyone votes Yes, No or Abstain and sees the tally;
+the comments under each decision are where it gets talked through. Whoever
+posted a decision closes the vote when it's decided, with a simple majority
+of votes cast deciding: abstentions count as taking part, not as votes, and
+a tie doesn't pass. Closed votes stay closed, but their comments stay open.
 
-The scaffold is a small working demo that proves the plumbing works:
+## Running it
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- `npm ci --include=dev`, then `npm run build` (compiles
+  `styles/tailwind-input.css` to `public/tailwind.css`).
+- `node server.js` with `DATABASE_URL` set. The schema is created
+  idempotently on boot.
+- The app is built to run on Homeroom: sign-in is the platform's
+  iframe token, there are no accounts of its own, and guests may read.
 
-## Replacing the template
+## Data
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+Tables `decisions`, `votes` and `comments` are public. `reports` is marked
+`staging:private` (it only needs to exist for the club to look at later, and
+no public table points into it). Demo rows, written for a viewer's `?demo=1`
+staging preview on that viewer's first such request, carry `demo_for` =
+that viewer's id and are invisible to every request without `?demo=1`.
 
-Once the real app exists, rewrite this README to describe it.
+## Checks
+
+`dapp.json`'s `tests` run on every proposal: the populated staging demo
+list, the plain route's empty state, and `/health`.

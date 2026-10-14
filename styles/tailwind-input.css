@@ -43,18 +43,22 @@
     --no: 157 52 38; /* from the spec's screens */
     --paper: 250 244 226; /* from the spec's screens */
   }
+  /* Dark values from the spec's Design subsection. Ballot paper stays
+     warmer than the page here, so the cards still read as paper. */
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 22 19 15;
+    --surface: 33 29 24;
+    --raised: 46 41 34;
+    --fg: 242 236 224;
+    --muted: 176 166 150;
+    --line: 70 63 54;
+    --accent: 94 196 180;
+    --on-accent: 6 40 36;
+    --danger: 240 128 108;
+    --on-danger: 6 40 36;
+    --focus: 94 196 180;
+    --no: 240 128 108;
+    --paper: 44 39 30;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

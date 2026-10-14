@@ -95,22 +95,35 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone posts a decision (a
+question, plus optional details); everyone votes Yes, No or Abstain and the
+tally is live for everyone; comments under each decision are the discussion.
+The person who posted a decision closes it when it's decided: simple
+majority of votes cast, abstentions shown but not counted, ties don't pass.
+Closed votes stay closed; their comments stay open. Anyone can report a
+post; reports are recorded and change nothing on screen.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version set it; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** deep teal accent (`accent`, the Yes colour and the primary
+  action), brick red for No (`no`), quiet grey for Abstain (muted), warm
+  neutrals for ground/surface/raised, and a soft ballot-paper cream
+  (`paper`) for the decision cards. The same three vote colours repeat in
+  the tally bar, the dots and the result line.
+- **Signature element:** each decision is a sheet of ballot paper: a cream
+  card with its top-right corner folded down (`.card`'s clip-path and
+  `:after` corner in `public/screens.css`). Questions are set in a serif,
+  like a printed ballot (`font-serif`); everything else in a rounded sans
+  (`font-sans`).
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (change their sizes in `tailwind.config.js` if you must, not their number).
+- Both looks follow the viewer's Homeroom theme; there is no theme picker.
+  Dark values are the `.dark` block in `styles/tailwind-input.css`; ballot
+  paper stays warmer than the page in the dark look, so cards still read as
+  paper.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +153,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `reports` table is `staging:private`: it exists so the club can look
+  at reports later, and no public table carries a foreign key into it.
+- Demo rows (a viewer's `?demo=1` staging preview) carry `demo_for` = that
+  viewer's id. Every query filters `demo_for IS NULL`, or, with
+  `IS_STAGING && demo=1`, `demo_for = viewer`. A new feature must keep that
+  filter on every path.
+- Vote words, one each, everywhere: decision, vote, Yes, No, Abstain,
+  tally, comments, Close vote, Open, Closed, Passed, Not passed, Tied.
+- Result phrasing, from the counts frozen at close: "Passed Y to N",
+  "Not passed N to Y", "Tied Y to Y, not passed".
+- Don't add dependencies; the app needs express, pg and jsonwebtoken only.

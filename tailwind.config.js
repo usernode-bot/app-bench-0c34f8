@@ -55,6 +55,14 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        no: token('no'), // the No vote: brick red
+        paper: token('paper'), // the ballot-paper card fill
+      },
+      // Questions read like a printed ballot: serif. Everything else is a
+      // rounded sans.
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

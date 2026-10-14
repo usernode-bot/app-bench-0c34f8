@@ -3,5 +3,23 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "open decisions list",
+      "path": "/?demo=1",
+      "expectSelector": "[data-decision]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "empty state on the plain route",
+      "path": "/",
+      "expectText": "No open decisions yet"
+    },
+    {
+      "name": "health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
