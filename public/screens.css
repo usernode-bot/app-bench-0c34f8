@@ -35,6 +35,15 @@
 
 .dial svg {width:100%;max-width:300px;display:block;margin:0 auto}
 
+/* The dial's parts, on the tokens so the arc, ticks and needle follow the
+   viewer's light or dark look (app.js redraws their geometry). */
+.dial .tr-arc {fill:none;stroke:rgb(var(--line));stroke-width:14}
+.dial .band {fill:none;stroke:rgb(var(--wheat));stroke-width:14}
+.dial .tk {stroke:rgb(var(--muted));stroke-width:1.5}
+.dial .tk-lb {fill:rgb(var(--muted));font-size:12px;text-anchor:middle}
+.dial .needle {stroke:rgb(var(--accent));stroke-width:3;stroke-linecap:round}
+.dial .hub {fill:rgb(var(--accent))}
+
 .dial .n {font:600 40px/1 ui-serif,Georgia,serif;margin-top:-6px;font-variant-numeric:tabular-nums}
 
 .dial .s {font-size:13px;color:rgb(var(--muted));margin-top:4px}
@@ -46,6 +55,15 @@
 .range .fi {position:absolute;left:0;width:62.5%;top:20px;height:4px;border-radius:2px;background:rgb(var(--accent))}
 
 .range .th {position:absolute;left:calc(62.5% - 14px);top:8px;width:28px;height:28px;border-radius:14px;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+/* The working control over the drawn thumb: an invisible range input that
+   fills .range, so dragging moves .fi and .th and keyboard focus shows on
+   the thumb. */
+.range input {position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+.range:focus-within .th {box-shadow:0 0 0 2px rgb(var(--focus))}
+
+/* Keyboard focus for the real buttons the screen wires up. */
+.chip:focus-visible,.sb:focus-visible,.seg button:focus-visible,.btn-primary:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .list {border:1px solid rgb(var(--line));border-radius:14px;background:rgb(var(--surface));overflow:hidden}
 
@@ -67,7 +85,7 @@
 
 .seg {display:flex;background:rgb(var(--raised));border-radius:10px;padding:3px;margin:0 16px 14px}
 
-.seg span {flex:1;text-align:center;min-height:38px;line-height:38px;border-radius:8px;font-size:15px}
+.seg span,.seg button {flex:1;text-align:center;min-height:38px;line-height:38px;border-radius:8px;font-size:15px}
 
 .seg .on {background:rgb(var(--surface));font-weight:600;box-shadow:0 1px 2px rgb(var(--fg)/.15)}
 
@@ -84,3 +102,7 @@
 .ic svg {stroke:rgb(var(--accent))}
 
 .note {margin:8px 4px 0;font-size:13px;color:rgb(var(--muted))}
+
+/* The recipe area's empty and stale state (app.js fills the text). */
+#recipe-state {margin:28px 4px 0;border:1px dashed rgb(var(--line));border-radius:14px;padding:20px 16px;text-align:center;color:rgb(var(--muted));font-size:15px}
+#recipe-state p {margin:0}

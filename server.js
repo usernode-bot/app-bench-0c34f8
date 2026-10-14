@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -145,7 +146,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting-down' });
+  return res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -154,17 +158,20 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// The HTML shell. On staging the document is marked `data-env="staging"`
+// so the page can show its first-version demo; nothing else reads it. Read
+// per request (a small file) so an edited screen is live without a boot.
+// The shell routes intercept BEFORE express.static: static would otherwise
+// answer `/` (and a direct /index.html) with the raw file, and the marker
+// would be missing exactly where staging demos run.
+const SHELL_FILE = path.join(__dirname, 'public', 'index.html');
+function shellHtml() {
+  const html = fs.readFileSync(SHELL_FILE, 'utf8');
+  if (!IS_STAGING) return html;
+  return html.replace('<html lang="en">', '<html lang="en" data-env="staging">');
+}
 
-// HTML shell: serve the app if authenticated. Unauthenticated top-level
-// visits (share links pasted into a browser — Sec-Fetch-Dest: document)
-// are sent to the platform's chromeless view of this app, where the shell
-// embeds it with a real token so the link just works. Every other
-// tokenless case (iframe loads with an expired token, old browsers
-// without Sec-Fetch-*) gets the "open in Homeroom" landing page instead
-// of a redirect, so the platform shell is never loaded INSIDE its own
-// app iframe and stray visits still don't reveal the app.
-app.get('*', (req, res) => {
+function serveShell(req, res) {
   if (!req.user && !req.guest) {
     // Deep-link pass-through (platform #743): carry the visited
     // path+query into the chromeless view so share links land on the
@@ -188,11 +195,54 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(shellHtml());
+}
+
+app.get('*', (req, res, next) => {
+  if (req.path === '/' || req.path === '/index.html') return serveShell(req, res);
+  next();
 });
 
+app.use(express.static(path.join(__dirname, 'public')));
+
+// HTML shell: serve the app if authenticated. Unauthenticated top-level
+// visits (share links pasted into a browser — Sec-Fetch-Dest: document)
+// are sent to the platform's chromeless view of this app, where the shell
+// embeds it with a real token so the link just works. Every other
+// tokenless case (iframe loads with an expired token, old browsers
+// without Sec-Fetch-*) gets the "open in Homeroom" landing page instead
+// of a redirect, so the platform shell is never loaded INSIDE its own
+// app iframe and stray visits still don't reveal the app. Unknown paths
+// get the shell too: the app is one screen.
+app.get('*', serveShell);
+
+// Graceful shutdown (platform convention): stop accepting connections,
+// drain in-flight requests under a hard 3 s deadline, close the pool, exit.
+const DRAIN_MS = 3000;
+let shuttingDown = false;
+let server;
+
+async function shutdown(signal) {
+  if (shuttingDown) return; // SIGTERM then SIGINT must not double-run
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  server?.close(() => {});
+  server?.closeIdleConnections?.();
+  const t = setTimeout(() => server?.closeAllConnections?.(), DRAIN_MS);
+  t.unref?.();
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed', e.message);
+  }
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }

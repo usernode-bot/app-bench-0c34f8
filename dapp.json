@@ -3,5 +3,19 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Recipe screen loads",
+      "path": "/",
+      "expectText": "Calculate recipe"
+    },
+    {
+      "id": "recipe.populated-demo",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectText": "Bread flour",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    }
+  ]
 }

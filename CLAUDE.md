@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A home-baking recipe calculator: pick a bread (sourdough, bagels,
+sourdough bagels, rye, sandwich loaf), set the hydration, how many and how
+big, and get the recipe in grams — ingredients, rise times, bake
+temperature and time. Client-only: no tables, no API routes, nothing
+stored. The screen's markup was drawn by the spec (the
+`usernode-spec-screens@1` block in `public/index.html`); behaviour is
+wired in place, and the drawn rows are the row templates the code fills.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour and crust. Accent is deep crust brown (light) /
+  golden crust (dark); second colour is the wheat gold of the dial's
+  usual-range band; neutrals are warm cream greys (light) / warm dark
+  browns (dark). Exact values are the tokens in `styles/tailwind-input.css`.
+- **Signature element:** the hydration dial, drawn as a baker's scale —
+  a half-turn arc with the bread's usual hydration range shaded in wheat
+  gold, a needle at the chosen value, and the number under the arc in
+  serif.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Serif (the `.rt`, `.n` sizes) is reserved for bread names on the dial
+  and the recipe title; everything else is the kit's sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +146,11 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The recipe screen is client-only and stays that way unless a request
+  asks for persistence: no tables, no `/api` routes, no fetches after
+  load. All the math lives in `public/recipes.js` as a pure function.
+- Units are grams and °C only, never cups or °F. Whole grams, one
+  decimal under 10 g.
+- Both looks matter equally; no theme picker, the viewer's Homeroom
+  setting is the control.
+- The user-facing copy avoids em dashes.
