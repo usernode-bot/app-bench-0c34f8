@@ -1,0 +1,136 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.cv {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1040px;
+  padding: 0 16px 32px;
+  box-sizing: border-box;
+}
+
+.cv * {box-sizing:border-box}
+
+.hd {display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px}
+
+.hd h1 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:26px;line-height:32px;font-weight:700;margin:0;letter-spacing:-.01em}
+
+.hd p {margin:2px 0 0;font-size:14px;color:rgb(var(--muted))}
+
+.btn-primary {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 15px system-ui,sans-serif}
+
+.btn-primary svg {width:18px;height:18px}
+
+.section-label {margin:20px 4px 8px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.list {list-style:none;margin:0;padding:0;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:14px;overflow:hidden}
+
+.list-row {display:block;padding:14px 16px;border-top:1px solid rgb(var(--line));min-height:44px}
+
+.list-row:first-child {border-top:0}
+
+.t {display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+
+.t h2 {margin:0;font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:17px;line-height:23px;font-weight:600}
+
+.t svg {flex:none;width:20px;height:20px;color:rgb(var(--muted));margin-top:2px}
+
+.by {margin:2px 0 10px;font-size:13px;color:rgb(var(--muted))}
+
+.bar {display:flex;height:10px;border-radius:5px;overflow:hidden;background:rgb(var(--raised));gap:2px}
+
+.bar span {display:block;height:100%;background:rgb(var(--accent))}
+
+.bar .s2 {opacity:.5}
+
+.bar .s3 {opacity:.25}
+
+.bar.done span {background:rgb(var(--decided))}
+
+.lean {display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:rgb(var(--muted))}
+
+.lean b {color:rgb(var(--fg));font-weight:600}
+
+.mine {display:inline-flex;align-items:center;gap:4px;color:rgb(var(--accent));font-weight:500}
+
+.mine svg,.cc svg {width:15px;height:15px}
+
+.cc {display:inline-flex;align-items:center;gap:4px}
+
+.badge {display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgb(var(--decided-soft));color:rgb(var(--decided));font-size:12px;font-weight:600}
+
+.badge svg {width:13px;height:13px}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.cv {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1120px;
+  padding: 0 16px 32px;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.nav {display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+
+.back,.more {display:inline-flex;align-items:center;gap:2px;min-height:44px;min-width:44px;background:none;border:0;color:rgb(var(--accent));font:500 16px system-ui,sans-serif;padding:0}
+
+.more {justify-content:center;color:rgb(var(--muted))}
+
+.back svg,.more svg {width:22px;height:22px}
+
+h1 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:26px;line-height:32px;font-weight:700;margin:4px 0 4px}
+
+.by {margin:0;font-size:14px;color:rgb(var(--muted))}
+
+.body {margin:12px 0 0}
+
+.section-label {margin:24px 4px 8px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.opts {display:flex;flex-direction:column;gap:8px}
+
+.opt {position:relative;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;font:500 16px system-ui,sans-serif;color:rgb(var(--fg));text-align:left}
+
+.opt .fill {position:absolute;left:0;top:0;bottom:0;background:rgb(var(--accent)/.10)}
+
+.opt>span {position:relative;display:inline-flex;align-items:center;gap:8px}
+
+.opt .n {color:rgb(var(--muted));font-weight:400;font-size:14px}
+
+.opt.on {border:2px solid rgb(var(--accent))}
+
+.opt.on .fill {background:rgb(var(--accent)/.18)}
+
+.chk {display:inline-flex;width:22px;height:22px;border-radius:11px;background:rgb(var(--accent));color:rgb(var(--on-accent));align-items:center;justify-content:center}
+
+.chk svg {width:14px;height:14px}
+
+.ring {width:22px;height:22px;border-radius:11px;border:2px solid rgb(var(--line))}
+
+.sum {margin:8px 4px 0;font-size:14px;color:rgb(var(--muted))}
+
+.btn-secondary {display:flex;width:100%;justify-content:center;align-items:center;gap:8px;min-height:44px;margin-top:16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:500 16px system-ui,sans-serif}
+
+.btn-secondary svg {width:18px;height:18px;color:rgb(var(--decided))}
+
+.list-row {display:flex;gap:8px;padding:12px 4px 12px 16px;border-top:1px solid rgb(var(--line))}
+
+.c {flex:1}
+
+.c b {font-size:14px;font-weight:600}
+
+.c small {font-size:13px;color:rgb(var(--muted));margin-left:6px}
+
+.c p {margin:2px 0 0;font-size:15px;line-height:22px}
+
+.compose {display:flex;gap:8px;margin-top:12px;align-items:flex-end}
+
+.field {flex:1;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));padding:10px 12px;font-size:16px;color:rgb(var(--muted)/.6)}
+
+.btn-primary {min-height:44px;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 15px system-ui,sans-serif}
