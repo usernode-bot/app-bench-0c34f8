@@ -158,12 +158,14 @@
       fab.hidden = false;
     } else if (list.error) {
       html += '<div class="state-error"><p class="text-body">The decisions couldn’t load.</p>' +
-        '<p class="small">Your votes are safe. Nothing else in the app is affected.</p>' +
+        '<p class="small">Your votes are safe. Check your connection and try again.</p>' +
         '<button type="button" class="btn-secondary" data-retry>Retry</button></div>';
       fab.hidden = false;
     } else if (!list.data || !list.data.decisions.length) {
       if (list.tab === 'open') {
-        html += '<div class="state-empty"><p class="text-body">No open decisions yet. Post the first thing the club needs to decide.</p>' +
+        // 16 px from the message to its button, and (with the footnote's own
+        // 8 px top padding) 32 px from the button to the footnote.
+        html += '<div class="state-empty" style="gap:16px;padding-bottom:24px"><p class="text-body">No open decisions yet. Post the first thing the club needs to decide.</p>' +
           '<button type="button" class="btn-primary" data-new>Post a decision</button></div>';
         fab.hidden = true; // the empty state's own button is the one filled button
       } else {
@@ -175,7 +177,6 @@
       html += list.data.decisions.map(function (d) { return cardHtml(d, false); }).join('');
       fab.hidden = false;
     }
-    seg.style.visibility = list.loading ? 'hidden' : 'visible';
     area.innerHTML = html;
   }
 

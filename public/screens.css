@@ -9,7 +9,7 @@
    design, such as a map. */
 [data-spec-screen] {
   width: 100%;
-  max-width: 42rem;
+  max-width: 32.5rem; /* 520 px: the centred column the screens share */
   margin-inline: auto;
 }
 
@@ -17,7 +17,7 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1260px;
-  width: 390px;
+  width: 100%;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -73,7 +73,11 @@ clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,0 100%)}
 
 .meta {display:flex;align-items:center;gap:6px;font-size:14px;color:rgb(var(--muted));min-height:44px}
 
-.fab {position:absolute;left:16px;right:16px;bottom:24px;box-shadow:0 4px 14px rgba(33,29,24,.2);min-height:52px}
+/* Held at the bottom of the viewport (fixed, not absolute), inset 16 px at
+   the sides and 24 px at the bottom, and centred to the app's column on a
+   wide window. The list's 104 px bottom padding keeps the last card and the
+   footnote clear of it. */
+.fab {position:fixed;left:16px;right:16px;bottom:24px;margin-inline:auto;max-width:32.5rem;box-shadow:0 4px 14px rgba(33,29,24,.2);min-height:52px}
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
@@ -86,7 +90,7 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;strok
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1180px;
-  width: 390px;
+  width: 100%;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
