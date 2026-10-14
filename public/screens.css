@@ -9,7 +9,7 @@
    design, such as a map. */
 [data-spec-screen] {
   width: 100%;
-  max-width: 42rem;
+  max-width: 40rem;
   margin-inline: auto;
 }
 
@@ -17,7 +17,7 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1100px;
-  width: 390px;
+  width: 100%;
   font-family: ui-serif,Georgia,"Iowan Old Style",serif;
   font-size: 16px;
   line-height: 24px;
@@ -31,8 +31,13 @@
 
 .top {
   padding: 20px 20px 12px;
+}
+
+/* One row for the title and the actions; the count line sits below it,
+   full width, so long text never squeezes the buttons. */
+.top-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
@@ -41,7 +46,9 @@
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0}
 
-.acts {display:flex;gap:8px}
+.acts {display:flex;gap:8px;flex:none}
+
+.acts .btn-primary,.acts .btn-secondary {flex:none;white-space:nowrap}
 
 .btn-primary,.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
 
@@ -153,6 +160,10 @@
 .state-sub {font-family:system-ui,sans-serif;font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;max-width:24em}
 
 .state-note {padding:8px 16px}
+
+/* The states' action buttons: the same shared buttons as the header, in the
+   sans meta face, with a clear gap above them (the states' own gap is 8 px). */
+.state-empty button,.state-error button {margin-top:16px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 
 .btn-small {min-height:44px;padding:0 12px;font-size:14px}
 

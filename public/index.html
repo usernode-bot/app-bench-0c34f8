@@ -115,20 +115,22 @@
   <div data-spec-screen="1" id="view-list">
     <div class="app">
     <div class="top">
-    <div>
+    <!-- The title and the actions share one row; the count and the staging
+         line sit full-width below it, so they never squeeze the buttons. -->
+    <div class="top-row">
       <h1 class="title">Unread</h1>
-      <p class="sub sans" id="count-line"></p>
-      <p class="sub sans demo-line" id="demo-line" hidden>Staging demo: made-up feeds and posts</p>
+      <div class="acts sans">
+      <button class="btn-secondary" id="btn-feeds" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+      <button class="btn-primary" id="btn-add-top"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+      </div>
     </div>
-    <div class="acts sans">
-    <button class="btn-secondary" id="btn-feeds" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary" id="btn-add-top"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    <p class="sub sans" id="count-line"></p>
+    <p class="sub sans demo-line" id="demo-line" hidden>Staging demo: made-up feeds and posts</p>
     </div>
-    </div>
-    <div class="section-label sans">Newest first</div>
+    <div class="section-label sans" id="sort-label">Newest first</div>
     <ul class="list" id="post-list" hidden></ul>
     <div class="state-note" id="list-state" hidden></div>
-    <div class="end">Your feeds refresh each time you open this list.</div>
+    <div class="end" id="refresh-note">Your feeds refresh each time you open this list.</div>
     </div>
   </div>
 
@@ -208,6 +210,7 @@
     var $ = function (id) { return document.getElementById(id); };
     var viewList = $('view-list'), viewPreview = $('view-preview');
     var postList = $('post-list'), listState = $('list-state'), countLine = $('count-line');
+    var sortLabel = $('sort-label'), refreshNote = $('refresh-note');
     var btnAddTop = $('btn-add-top'), btnFeeds = $('btn-feeds');
     var sheetAdd = $('sheet-add'), sheetFeeds = $('sheet-feeds');
     var addUrl = $('add-url'), addError = $('add-error'), btnAddSave = $('btn-add-save');
@@ -284,9 +287,17 @@
       return li;
     }
 
+    // The header's Add feed icon, reused on the empty state's button.
+    var ADD_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+
     function render() {
       var n = state.posts.length;
       countLine.textContent = n + ' new from ' + state.feeds + (state.feeds === 1 ? ' feed' : ' feeds');
+      // With no feeds the count, the sort label and the footer note say
+      // nothing worth reading, so they stay out of the empty screen.
+      countLine.hidden = state.feeds === 0;
+      sortLabel.hidden = state.feeds === 0;
+      refreshNote.hidden = state.feeds === 0;
       // The header's Add feed goes outlined while there are no feeds.
       btnAddTop.className = state.feeds === 0 ? 'btn-secondary' : 'btn-primary';
       state.rows = {};
@@ -297,9 +308,9 @@
         empty.className = 'state-empty';
         empty.innerHTML = '<p class="state-title">Add your first feed</p><p class="state-sub">Add an RSS or Atom feed and its new posts will show up here.</p>';
         var btn = document.createElement('button');
-        btn.className = 'btn-primary';
+        btn.className = 'btn-primary sans';
         btn.id = 'btn-add-empty';
-        btn.textContent = 'Add feed';
+        btn.innerHTML = ADD_ICON + 'Add feed';
         btn.addEventListener('click', openAddSheet);
         empty.appendChild(btn);
         state.emptyAddButton = btn;
@@ -334,9 +345,9 @@
       listState.innerHTML = '';
       var err = document.createElement('div');
       err.className = 'state-error';
-      err.innerHTML = '<p class="state-title">Couldn’t load your posts</p><p class="state-sub">Your feeds are still saved. This error is about loading the list, not about your feeds.</p>';
+      err.innerHTML = '<p class="state-title">Couldn’t load your posts</p><p class="state-sub">Your feeds are still saved.</p>';
       var retry = document.createElement('button');
-      retry.className = 'btn-secondary';
+      retry.className = 'btn-secondary sans';
       retry.textContent = 'Retry';
       retry.addEventListener('click', function () { load(); });
       err.appendChild(retry);
