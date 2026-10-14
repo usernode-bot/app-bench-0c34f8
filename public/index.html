@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,50 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="app">
+    <header class="top"><h1 class="text-title serif">Club Votes</h1>
+    <button class="btn-primary"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <section><h2 class="section-label">Open decisions</h2><div class="stack">
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <article class="card slip"><h3 class="text-heading serif">Where should we meet in November?</h3>
+    <p class="by text-small muted">Lucia asked, 2 hours ago</p>
+    <div class="kit-votes">
+    <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:58%"></span><span class="kit-vote-mark"><svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:3"><path d="M5 12l5 5 9-10"/></svg></span><span class="kit-vote-label">Library back room</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 4v16M20 4v16M2 17L23 7"/></svg><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16"/></svg></span><span class="kit-vote-count">7</span></button>
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:25%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Corner cafe</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 4v16"/></svg></span><span class="kit-vote-count">3</span></button>
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:17%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Community hall</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16"/></svg></span><span class="kit-vote-count">2</span></button>
+    </div><div class="tear"></div>
+    <div class="foot"><span>12 votes, <b>Library back room</b> leads</span><span style="display:flex;align-items:center;gap:4px">4 comments<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div></article>
+
+    <article class="card slip"><h3 class="text-heading serif">Next month's activity</h3>
+    <p class="by text-small muted">You asked, yesterday</p>
+    <div class="kit-votes">
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:40%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Board game night</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 4v16M20 4v16"/></svg></span><span class="kit-vote-count">4</span></button>
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:40%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Riverside walk</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 4v16M20 4v16"/></svg></span><span class="kit-vote-count">4</span></button>
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:20%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Pottery class</span><span class="tally"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16"/></svg></span><span class="kit-vote-count">2</span></button>
+    </div><div class="tear"></div>
+    <div class="foot"><span>10 votes, tied</span><span style="display:flex;align-items:center;gap:4px">2 comments<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div></article>
+
+    <article class="card slip"><h3 class="text-heading serif">Move meetings to Thursdays?</h3>
+    <p class="by text-small muted">Dev asked, 3 days ago</p>
+    <div class="kit-votes">
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:0"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Yes</span><span class="kit-vote-count">0</span></button>
+    <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:0"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">No</span><span class="kit-vote-count">0</span></button>
+    </div><div class="tear"></div>
+    <div class="foot"><span>No votes yet</span><span style="display:flex;align-items:center;gap:4px">Comment<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div></article>
+    </div></section>
+
+    <section><h2 class="section-label">Decided</h2><ul class="list">
+    <li class="list-row"><div class="row-text"><span class="row-title serif">Club snack budget</span><span class="won"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Decided: Take turns bringing</span></div><span class="meta">Oct 9</span></li>
+    <li class="list-row"><div class="row-text"><span class="row-title serif">Spring trip destination</span><span class="won"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Decided: Lakeside park</span></div><span class="meta">Oct 2</span></li>
+    <li class="list-row"><div class="row-text"><span class="row-title serif">Name for the newsletter</span><span class="won"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Decided: The Monthly Tally</span></div><span class="meta">Sep 24</span></li>
+    </ul></section>
+    </div></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
