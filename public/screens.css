@@ -1,0 +1,91 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  font-family: system-ui,-apple-system,sans-serif;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1380px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.s * {box-sizing:border-box;margin:0}
+
+.wrap {padding:16px 16px 32px;display:flex;flex-direction:column;gap:24px}
+
+.hd {display:flex;align-items:center;gap:10px}
+
+.hd svg {width:28px;height:28px;color:rgb(var(--accent))}
+
+.text-heading {font-size:20px;line-height:28px;font-weight:650}
+
+.text-small {font-size:14px;line-height:20px}
+
+.muted {color:rgb(var(--muted))}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:44px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.ic {width:24px;height:24px;flex:none;color:rgb(var(--muted))}
+
+.tx {flex:1;min-width:0;display:flex;flex-direction:column}
+
+.t {font-weight:500}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.on {background:rgb(var(--accent)/.07)}
+
+.on .ic,.on .ck {color:rgb(var(--accent))}
+
+.ck {width:20px;height:20px}
+
+.g {font-variant-numeric:tabular-nums;font-weight:650;text-align:right}
+
+.meter {display:flex;align-items:center;gap:16px;padding:16px}
+
+.meter svg {width:120px;height:72px;flex:none}
+
+.big {font-size:28px;line-height:36px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.range {padding:0 16px 16px}
+
+.track {position:relative;height:6px;border-radius:3px;background:rgb(var(--line))}
+
+.fill {position:absolute;left:0;top:0;bottom:0;width:62.5%;border-radius:3px;background:rgb(var(--accent))}
+
+.knob {position:absolute;left:62.5%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;margin-top:14px}
+
+.step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:10px;overflow:hidden}
+
+.step b {width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:20px;color:rgb(var(--accent))}
+
+.step span {width:40px;text-align:center;font-weight:650;font-variant-numeric:tabular-nums}
+
+.seg {display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:10px;background:rgb(var(--raised));margin:0 16px}
+
+.seg span {min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:14px;line-height:18px}
+
+.seg .sel {background:rgb(var(--surface));box-shadow:0 0 0 1px rgb(var(--line));font-weight:600}
+
+.field {min-height:44px;width:112px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums}
+
+.rh {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:8px;padding:0 4px}
+
+.btn-primary {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:14px;font-weight:500;border:0}
+
+.btn-primary svg {width:18px;height:18px}
+
+.tot {background:rgb(var(--raised))}
+
+.note {display:flex;gap:12px;padding:12px 16px;border-top:1px solid rgb(var(--line));background:rgb(var(--wheat)/.16)}

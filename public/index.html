@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,48 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="s"><div class="wrap">
+    <header class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 15c0-5 4-8 9-8s9 3 9 8c0 1.7-1.3 3-3 3H6c-1.7 0-3-1.3-3-3z"/><path d="M8 10l2 3M12 9l2 3M16 10l1.5 2.5"/></svg><h1 class="text-heading">Bread Bot</h1></header>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <section><h2 class="section-label">Bread</h2><ul class="list">
+    <li class="list-row on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 16c0-5 4-9 9-9s9 4 9 9H3z"/><path d="M9 10c1 1.5 2 2.5 4 3"/></svg><span class="tx"><span class="t">Sourdough</span><span class="sub">Starter, overnight proof</span></span><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg><span class="tx"><span class="t">Bagels</span><span class="sub">Yeast, boiled then baked</span></span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M8 7.5v.1M16.5 9v.1M15 17v.1"/></svg><span class="tx"><span class="t">Sourdough bagels</span><span class="sub">Starter, boiled then baked</span></span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="8" width="18" height="9" rx="4.5"/><path d="M8 11v.1M12 13v.1M16 11v.1"/></svg><span class="tx"><span class="t">Rye</span><span class="sub">Rye and bread flour, yeast</span></span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 11h14v8H5z"/><path d="M5 11c0-3 3-5 7-5s7 2 7 5"/></svg><span class="tx"><span class="t">Sandwich loaf</span><span class="sub">Soft crumb, baked in a tin</span></span></li>
+    </ul></section>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <section><h2 class="section-label">Dough</h2><div class="list">
+    <div class="meter"><svg viewBox="0 0 120 72" fill="none" stroke-linecap="round"><path d="M6 60c0-28 24-48 54-48s54 20 54 48z" fill="rgb(var(--raised))"/><path d="M8.4 48h103.2c1.6 3.8 2.4 7.8 2.4 12H6c0-4.2.8-8.2 2.4-12z" fill="rgb(var(--wheat))"/><path d="M6 60c0-28 24-48 54-48s54 20 54 48z" stroke="rgb(var(--accent))" stroke-width="2.5"/><path d="M38 24c8 6 14 10 26 13M60 18c7 5 12 8 22 10" stroke="rgb(var(--accent))" stroke-width="2"/></svg>
+    <div><p class="sub">Hydration</p><p class="big">75%</p><p class="sub">Open, airy crumb</p></div></div>
+    <div class="range"><div class="track"><div class="fill"></div><div class="knob"></div></div><div class="ends text-small muted"><span>50% stiff</span><span>90% very wet</span></div></div>
+    <div class="list-row" style="border-top:1px solid rgb(var(--line))"><span class="tx"><span class="t">Loaves</span></span><div class="step"><b>&minus;</b><span>2</span><b>+</b></div></div>
+    <div class="list-row" style="border-top:1px solid rgb(var(--line))"><span class="tx"><span class="t">Each loaf weighs</span><span class="sub">Dough weight before baking</span></span><span class="field">900 g</span></div>
+    <div class="seg" style="margin-bottom:16px"><span>Small<br><span class="muted">500 g</span></span><span>Medium<br><span class="muted">750 g</span></span><span>Large<br><span class="muted">1,000 g</span></span></div>
+    </div></section>
+
+    <section><div class="rh"><div><h2 class="text-heading">Recipe</h2><p class="sub">2 loaves, 1,800 g of dough</p></div><button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>Copy recipe</button></div>
+    <ul class="list">
+    <li class="list-row"><span class="tx"><span class="t">Bread flour</span></span><span class="g">915 g</span></li>
+    <li class="list-row"><span class="tx"><span class="t">Water</span><span class="sub">Lukewarm, about 27°C</span></span><span class="g">661 g</span></li>
+    <li class="list-row"><span class="tx"><span class="t">Starter</span><span class="sub">Fed and bubbly, half flour, half water</span></span><span class="g">203 g</span></li>
+    <li class="list-row"><span class="tx"><span class="t">Salt</span></span><span class="g">20 g</span></li>
+    <li class="list-row tot"><span class="tx"><span class="t">Total dough</span><span class="sub">Hydration counts the starter's water</span></span><span class="g">1,799 g</span></li>
+    <li class="note"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--accent))" stroke-width="1.6" stroke-linecap="round"><path d="M7 9h10v9a3 3 0 01-3 3h-4a3 3 0 01-3-3z"/><path d="M7 13h10M10 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2"/></svg><p class="text-small"><strong>Feed your starter first.</strong> 4 to 12 hours before mixing, stir 75 g starter, 75 g flour and 75 g water. Use it once it has doubled; the 22 g left over keeps it going.</p></li>
+    </ul></section>
+
+    <section><h2 class="section-label">Rise and bake</h2><ul class="list">
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20h16M6 20c0-6 2.5-9 6-9s6 3 6 9"/><path d="M12 7V3M9.5 5L12 3l2.5 2"/></svg><span class="tx"><span class="t">Bulk rise</span><span class="sub">Stretch and fold every 30 min for the first 2 h, at about 24°C</span></span><span class="g">4 to 6 h</span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12a8 4 0 0016 0z"/><path d="M8 9c1-2 2.5-3 4-3s3 1 4 3"/></svg><span class="tx"><span class="t">Shape and proof</span><span class="sub">In a floured basket, covered, in the fridge. Or 1 to 2 h at room temperature</span></span><span class="g">8 to 16 h</span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 14h10M8 17h8"/></svg><span class="tx"><span class="t">Bake at 250°C (480°F)</span><span class="sub">In a covered pot, lid on</span></span><span class="g">20 min</span></li>
+    <li class="list-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 14h10"/></svg><span class="tx"><span class="t">Then 230°C (450°F)</span><span class="sub">Lid off, until deep brown and hollow when tapped</span></span><span class="g">20 to 25 min</span></li>
+    </ul><p class="sub" style="padding:8px 4px 0">Cool for at least 1 hour before slicing.</p></section>
+    </div></div></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
