@@ -1,0 +1,92 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.bb {
+  width: 390px;
+  min-height: 1200px;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,system-ui,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+
+.bb * {box-sizing:border-box}
+
+.title {font-size:28px;line-height:36px;font-weight:700;margin:0 4px 16px}
+
+.section-label {margin:20px 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {min-height:44px;padding:0 16px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:inline-flex;align-items:center;gap:6px;font-size:16px;color:rgb(var(--fg))}
+
+.chip.on {background:rgb(var(--raised));border:2px solid rgb(var(--accent));padding:0 15px;font-weight:600}
+
+.chip.on svg {stroke:rgb(var(--accent))}
+
+.card {border-radius:12px;border:1px solid rgb(var(--line));background:rgb(var(--surface));padding:16px}
+
+.dialrow {display:flex;align-items:center;gap:16px}
+
+.dialrow p {margin:0;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.dial-track {stroke:rgb(var(--raised))}
+
+.dial-fill {stroke:rgb(var(--accent))}
+
+.dial-num {fill:rgb(var(--fg))}
+
+.big {font-size:20px;line-height:28px;font-weight:600;margin:0 0 4px!important;color:rgb(var(--fg))!important}
+
+.step {display:flex;align-items:center;gap:8px;margin-top:12px}
+
+.sb {width:44px;height:44px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--raised));display:flex;align-items:center;justify-content:center;font-size:20px;color:rgb(var(--fg))}
+
+.bar {flex:1;height:8px;border-radius:4px;background:rgb(var(--raised));position:relative}
+
+.bar i {position:absolute;left:0;top:0;bottom:0;width:44%;background:rgb(var(--accent));border-radius:4px}
+
+.bar b {position:absolute;left:44%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:12px;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.two {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.two .card {padding:12px 16px}
+
+.val {font-size:20px;line-height:28px;font-weight:600}
+
+.small {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.btn-primary {width:100%;min-height:52px;margin-top:20px;border:0;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:600 20px/28px ui-rounded,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+
+.list {list-style:none;margin:0;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.list-row .n {flex:1}
+
+.list-row b {font-size:20px;line-height:28px;font-weight:600}
+
+.pct {font-size:14px;color:rgb(var(--muted));width:48px;text-align:right}
+
+.h {font-size:20px;line-height:28px;font-weight:600;margin:24px 4px 8px}
+
+.ic {display:flex;align-items:center;gap:6px}
+
+.ic svg {stroke:rgb(var(--accent))}
