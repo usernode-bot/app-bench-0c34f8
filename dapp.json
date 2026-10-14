@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Unread list with demo feeds",
+      "id": "unread.demo",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"],
+      "path": "/?demo=1",
+      "expectSelector": ".post-card"
+    },
+    {
+      "name": "Feeds lists the demo feeds",
+      "path": "/?demo=1#feeds",
+      "expectText": "Pixel Daily"
+    },
+    {
+      "name": "New reader sees the empty state",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

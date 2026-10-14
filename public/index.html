@@ -119,46 +119,77 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <div data-spec-screen="1" id="view-unread">
     <div class="rss">
-    <div class="top"><div><h1>Unread</h1><p class="sub">23 new from 5 feeds</p></div>
-    <div class="acts"><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
-    <p class="section-label">Newest first</p>
-    <ul class="list">
-    <li><a class="card" style="--c:var(--feed-2)"><div class="meta"><b>Pixel Daily</b><span>12 min ago</span></div><p class="t">A calmer way to build design tokens</p><p class="ex">Why one small palette beats forty near-duplicates, and how a team of three cut theirs down in an afternoon.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-1)"><div class="meta"><b>Field Notes</b><span>1 hr ago</span></div><p class="t">Notes from a week of slow cycling in Portugal</p><p class="ex">Seven days, four hundred kilometres, and the small villages where the cafés open at six.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-4)"><div class="meta"><b>Garden Ledger</b><span>2 hr ago</span></div><p class="t">What to sow in March if the ground is still cold</p><p class="ex">Peas, broad beans and spinach all cope with frost. Start them indoors and harden off.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-3)"><div class="meta"><b>Salt</b><span>4 hr ago</span></div><p class="t">The bread that fed a harbour town</p><p class="ex">A baker in Cádiz still uses a starter older than her grandmother.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-5)"><div class="meta"><b>Tidewatch</b><span>Yesterday, 18:40</span></div><p class="t">Spring tides: what the numbers actually mean</p><p class="ex">A plain guide to reading tide tables before your next coastal walk.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-2)"><div class="meta"><b>Pixel Daily</b><span>Yesterday, 09:15</span></div><p class="t">Type scales you can explain in one sentence</p><p class="ex">Four sizes are enough for most apps. Here is how to choose them.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-1)"><div class="meta"><b>Field Notes</b><span>Mon, 16:02</span></div><p class="t">Packing list for a night on the ridge</p><p class="ex">Light, warm and dry: the short list.</p></a></li>
+    <div class="top" id="top-bar"><div><h1>Unread</h1><p class="sub" id="count-line"></p></div>
+    <div class="acts"><button id="btn-feeds" class="btn-secondary" type="button"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button id="btn-add" class="btn-primary" type="button"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
+    <p class="section-label" id="newest-label">Newest first</p>
+    <ul class="list" id="post-list"></ul>
+    <p class="end" id="caught-up" hidden></p>
+    <p class="end" id="refresh-note" hidden></p>
+    <!-- Loading has the list's own shape: post cards with skeleton bars
+         where their text goes. -->
+    <ul class="list" id="state-loading" hidden>
+      <li><div class="card" style="--c:var(--line)"><span class="skeleton mb-2 block h-4 w-32"></span><span class="skeleton mb-2 block h-5 w-3/4"></span><span class="skeleton block h-4 w-full"></span></div></li>
+      <li><div class="card" style="--c:var(--line)"><span class="skeleton mb-2 block h-4 w-24"></span><span class="skeleton mb-2 block h-5 w-2/3"></span><span class="skeleton block h-4 w-5/6"></span></div></li>
+      <li><div class="card" style="--c:var(--line)"><span class="skeleton mb-2 block h-4 w-28"></span><span class="skeleton mb-2 block h-5 w-3/5"></span><span class="skeleton block h-4 w-full"></span></div></li>
+      <li><div class="card" style="--c:var(--line)"><span class="skeleton mb-2 block h-4 w-32"></span><span class="skeleton mb-2 block h-5 w-3/4"></span><span class="skeleton block h-4 w-4/5"></span></div></li>
+      <li><div class="card" style="--c:var(--line)"><span class="skeleton mb-2 block h-4 w-24"></span><span class="skeleton mb-2 block h-5 w-1/2"></span><span class="skeleton block h-4 w-2/3"></span></div></li>
     </ul>
-    <p class="end">That is everything unread</p>
+    <div id="state-empty" class="state-empty" hidden>
+      <h2>No feeds yet</h2>
+      <p class="ex">Add a feed and its unread posts will gather here.</p>
+      <button id="empty-add" class="btn-primary" type="button">Add your first feed</button>
+    </div>
+    <div id="state-error" class="state-error" hidden>
+      <h2>Something went wrong</h2>
+      <p class="ex" id="error-message"></p>
+      <button id="btn-retry" class="btn-primary" type="button">Retry</button>
+    </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="rss">
-      <div class="bar"><button class="ghost"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Unread</button></div>
-      <div class="art" style="--c:67 56 202">
-      <p class="src">Pixel Daily</p>
-      <h2>A calmer way to build design tokens</h2>
-      <p class="when">Today, 09:30 · by Staging demo writer</p>
-      </div>
-      <div class="body">
-      <p>Why one small palette beats forty near-duplicates, and how a team of three cut theirs down in an afternoon.</p>
-      <p>They started by printing every colour in the codebase on one page. Most of them were the same grey, written six different ways. The rest were one blue nobody had chosen on purpose.</p>
-      <p>By lunch they had named eight colours, each with a light and a dark value, and deleted the others.</p>
-      </div>
-      <div class="foot">
-      <p class="note">This is the summary the feed sends. The full article is on pixeldaily.example.</p>
-      <a class="btn-primary"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
-      </div>
-      </div>
+  <!-- Screen 2 as the spec drew it, now the post preview view; its values
+       are filled from the tapped post. -->
+  <section id="view-post" data-spec-screen hidden>
+    <div class="rss">
+    <div class="bar"><button id="post-back" class="ghost" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Unread</button></div>
+    <div class="art" id="post-art" style="--c:var(--feed-2)">
+    <p class="src" id="post-src"></p>
+    <h2 id="post-title"></h2>
+    <p class="when" id="post-when"></p>
     </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    <div class="body" id="post-body"></div>
+    <div class="foot">
+    <p class="note" id="post-note"></p>
+    <a id="post-link" class="btn-primary" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
+    </div>
+    </div>
+  </section>
+  <!-- The Feeds view: see and remove what you added. -->
+  <section id="view-feeds" data-spec-screen hidden>
+    <div class="rss">
+    <div class="bar"><button id="feeds-back" class="ghost" type="button"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Unread</button><button id="feeds-add" class="btn-primary" type="button"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div>
+    <h1 class="px-4">Feeds</h1>
+    <ul class="list" id="feeds-list"></ul>
+    </div>
+  </section>
+  <!-- The one post row as the spec drew it, cloned for each post. -->
+  <template id="post-row-tpl"><li><a class="card post-card"><div class="meta"><b></b><span></span></div><p class="t"></p><p class="ex"></p></a></li></template>
+  <!-- The Add feed sheet: Cancel, the title and Add stay above the
+       keyboard on a phone. -->
+  <div id="sheet-backdrop" hidden class="fixed inset-0 z-40 bg-fg/40">
+    <div role="dialog" aria-modal="true" aria-labelledby="sheet-title" class="absolute inset-x-0 bottom-0 mx-auto w-full max-w-2xl border-t border-line bg-surface p-4 pb-8">
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <button id="sheet-cancel" class="btn-secondary" type="button">Cancel</button>
+        <h2 id="sheet-title" class="text-heading">Add feed</h2>
+        <button id="sheet-add" class="btn-primary" type="button">Add</button>
+      </div>
+      <label class="section-label block" for="feed-url">Feed address</label>
+      <input id="feed-url" class="field" type="url" inputmode="url" autocomplete="off" placeholder="e.g. https://example.com/feed.xml">
+      <p id="sheet-error" class="mt-2 text-small" style="color:rgb(var(--danger))" hidden></p>
+    </div>
+  </div>
+  <script src="/app.js" defer></script>
 </body>
 </html>

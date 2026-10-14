@@ -56,6 +56,12 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // The two voices: serif for titles and reading text, rounded sans for
+      // everything that is a detail (times, counts, buttons).
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
+        rounded: ['ui-rounded', 'system-ui', 'sans-serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

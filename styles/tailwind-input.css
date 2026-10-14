@@ -59,6 +59,12 @@
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --feed-1: 251 191 36;
+    --feed-2: 165 180 252;
+    --feed-3: 249 168 212;
+    --feed-4: 74 222 128;
+    --feed-5: 56 189 248;
+    --f2: 165 180 252;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

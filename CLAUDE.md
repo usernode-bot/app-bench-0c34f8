@@ -95,22 +95,36 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A quiet reader for people who follow a handful of things. Each member adds
+their own RSS feed URLs and gets one scrolling list of unread posts from
+all their feeds, newest first. Tapping a post opens a preview (title, feed,
+date, the summary the feed sends) and marks it read; read posts fade in
+place until they fall off the list. The full article opens on the feed's
+own site. Everything is private per user: `feeds` and `posts` are both
+`staging:private`, scoped to the token's user id on every route. Not in
+this version on purpose: filters or folders, background fetching, feed
+discovery, OPML, mark-all-read, full article text.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm grey neutrals (stone), one teal accent, plus five
+  per-feed colours (`--feed-1`..`--feed-5`: amber, indigo, rose, green,
+  blue) that colour each feed's spine, title and preview edge. Values in
+  `styles/tailwind-input.css`, light and dark.
+- **Signature element:** the feed spine — a 6 px coloured edge down the
+  left of each post card, squared on the spine side and rounded on the
+  outer corners, like a row of magazines on a shelf. The preview screen
+  repeats it down the edge of the article header.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  serif (ui-serif/Georgia) for titles and reading text, rounded sans
+  (ui-rounded/system-ui) for the details — the drawn screens set this
+  directly in `public/screens.css`, and `tailwind.config.js` carries the
+  same two families as `font-serif` / `font-rounded`.
+- No fixed look: the screens follow the viewer's Homeroom theme in both
+  light and dark.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
