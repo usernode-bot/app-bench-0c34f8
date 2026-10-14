@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style personal RSS reader: the viewer adds RSS feeds by address and
+sees all unread posts from every feed in one scrolling list, newest first,
+each row carrying the site's badge. Tapping a post opens an in-app preview
+built only from the article content the feed itself carried (sanitized); a
+link opens the full article in the browser. Tapping a post marks it read.
+Feeds and read marks are private to each viewer (`staging:private` tables).
+The preview is deliberately never a fetched full page.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: RSS orange (`--accent`, deep #c2410c light / brighter
+  #fb923c dark); neutrals: cool newsprint greys for ground, surfaces and
+  lines; four soft pastel badge tints (`--badge-1`…`--badge-4`) for the site
+  badges.
+- **Signature element:** the two-letter site monogram in a rounded pastel
+  badge tile, tinted by feed id (`.b1`–`.b4`, `feed.id % 4 + 1`) — it leads
+  every post row and repeats in the Feeds sheet and the preview.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  serif (ui-serif/Georgia) for post titles and article text, the system sans
+  for everything around them.
+
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

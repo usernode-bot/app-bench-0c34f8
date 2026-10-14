@@ -46,17 +46,21 @@
     --badge-4: 237 233 254; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
+    --ground: 17 20 24;     /* cool newsprint greys, the spec's night look */
+    --surface: 26 30 36;
+    --raised: 36 41 48;
+    --fg: 236 238 241;
+    --muted: 160 168 178;
+    --line: 52 58 66;
+    --accent: 251 146 60;   /* the RSS orange, brighter for the dark look */
+    --on-accent: 41 20 5;
+    --danger: 252 165 165;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 45 212 191;
+    --badge-1: 30 58 95;    /* the spec's badge tints, darkened */
+    --badge-2: 20 64 44;
+    --badge-3: 77 54 14;
+    --badge-4: 52 40 92;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

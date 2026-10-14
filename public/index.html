@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23c2410c'/><circle cx='30' cy='70' r='9' fill='%23fff7ed'/><path d='M22 46a32 32 0 0 1 32 32h12A44 44 0 0 0 22 34z' fill='%23fff7ed'/><path d='M22 20a58 58 0 0 1 58 58h12A70 70 0 0 0 22 8z' fill='%23fff7ed'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -116,36 +116,33 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
-    <div><div class="s">
-    <header class="hd"><h1>Unread</h1><button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button></header>
-    <form class="add"><label>Feed address</label><div class="row"><div class="field">e.g. example.com/feed.xml</div><button class="btn-primary">Add feed</button></div></form>
-    <p class="meta">18 unread from 5 feeds</p>
-    <ul class="list">
-    <li class="list-row"><span class="badge b1">GN</span><div class="bd"><p class="src"><b>Example Garden Notes</b><span>2h</span></p><p class="ttl">Sample post: planting tomatoes in October, a made-up guide</p><p class="snip">Demo text for a pretend gardening blog. The beds were turned over last weekend and the first cover crop is going in now.</p></div></li>
-    <li class="list-row"><span class="badge b2">BW</span><div class="bd"><p class="src"><b>Sample Bike Workshop</b><span>4h</span></p><p class="ttl">Fixing a squeaky chain, step by step (demo)</p><p class="snip">A fictional repair note: clean the links, dry them, then oil one link at a time and wipe off what is left over.</p></div></li>
-    <li class="list-row read"><span class="badge b3">KL</span><div class="bd"><p class="src"><b>Demo Kitchen Log</b><span>6h</span></p><p class="ttl">Five pretend soups for a rainy week</p><p class="snip">Made-up recipes for this preview: leek and potato, a red lentil pot and three more that nobody has cooked.</p></div></li>
-    <li class="list-row"><span class="badge b4">WD</span><div class="bd"><p class="src"><b>Placeholder Weather Desk</b><span>Yesterday</span></p><p class="ttl">Test forecast: fog over the sample valley</p><p class="snip">Not a real forecast. Morning fog lifting by noon over an imaginary town, with light wind from the west.</p></div></li>
-    <li class="list-row"><span class="badge b1">TP</span><div class="bd"><p class="src"><b>Test Pattern Tech</b><span>Oct 12</span></p><p class="ttl">Demo review: a keyboard that does not exist</p><p class="snip">Fake product notes written for the staging preview: quiet keys, a long cable and a battery that lasts a while.</p></div></li>
-    </ul></div></div>
-  </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div><div class="s">
-      <div class="bar"><button class="back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button><button class="btn-primary">Open in browser<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></div>
+  <!-- Built from the screens the spec drew (usernode-spec-screens@1): the
+       same markup, with its sample values emptied — app.js fills the list,
+       the count and the preview from the API. Screen 2's markup lives in
+       the #preview-view template below, cloned for each article opened.
+       Styles are in public/screens.css. -->
+  <div><div class="s" id="reader-view">
+    <header class="hd"><h1>Unread</h1><button type="button" class="btn-secondary" id="feeds-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button></header>
+    <form class="add" id="add-form"><label for="feed-address">Feed address</label><div class="row"><input class="field" id="feed-address" type="url" name="url" placeholder="e.g. example.com/feed.xml" autocomplete="off" inputmode="url"><button type="submit" class="btn-primary" id="add-button">Add feed</button></div><p class="form-error" id="add-error" hidden></p></form>
+    <p class="meta" id="unread-meta" hidden></p>
+    <div id="states"></div>
+    <ul class="list" id="post-list" hidden>
+      <li class="list-row" hidden><span class="badge"></span><div class="bd"><p class="src"><b></b><span></span></p><p class="ttl"></p><p class="snip"></p></div></li>
+    </ul>
+  </div></div>
+  <!-- Screen 2 as the spec drew it: inert here; app.js clones it for each
+       preview and pushes it over the list. -->
+  <template data-spec-screen="2" id="preview-view">
+    <div class="s" data-role="preview">
+      <div class="bar"><button type="button" class="back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button><button type="button" class="btn-primary open-link" hidden>Open in browser<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button></div>
       <article class="art">
-      <div class="src"><span class="badge">GN</span><div><b>Example Garden Notes</b>Oct 14, 2 hours ago</div></div>
-      <h2>Sample post: planting tomatoes in October, a made-up guide</h2>
-      <div class="fig"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/></svg></div>
-      <div class="body"><p>Demo text for a pretend gardening blog. The beds were turned over last weekend and the first cover crop is going in now.</p><p>None of this is real advice: it is sample writing so the preview shows how a longer article reads, with paragraphs, an image and a link at the end.</p><p>Next week the made-up gardener plans to cover the beds and write about it again.</p></div>
-      <p class="foot">This is a preview from the feed. <a>Read the full article on example.com</a></p>
-      </article></div></div>
+        <div class="src"><span class="badge"></span><div><b class="feed-name"></b><span class="when"></span></div></div>
+        <h2 class="art-title"></h2>
+        <div class="body"></div>
+        <p class="foot">This is a preview from the feed. <a class="foot-link" target="_blank" rel="noopener noreferrer"></a></p>
+      </article>
     </div>
   </template>
-  <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

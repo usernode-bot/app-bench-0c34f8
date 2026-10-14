@@ -55,6 +55,16 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        'badge-1': token('badge-1'), // the four badge tints of the spec's screens
+        'badge-2': token('badge-2'),
+        'badge-3': token('badge-3'),
+        'badge-4': token('badge-4'),
+      },
+      // Serif for post titles and article text (the spec's screens), the
+      // system sans for everything around them.
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
+        sans: ['system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

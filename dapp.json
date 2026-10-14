@@ -3,5 +3,8 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Empty reader", "path": "/", "expectText": "No feeds yet" },
+    { "id": "reader", "path": "/?demo=1", "expectText": "Staging demo", "expectSelector": ".badge", "visual": true, "impact": ["public/**", "server.js", "feeds.js", "styles/**"] }
+  ]
 }
