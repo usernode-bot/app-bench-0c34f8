@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,62 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <header class="bar">
+      <div class="bar-text">
+        <h1 class="text-title">Unread</h1>
+        <p class="text-small muted">14 posts from 5 feeds</p>
+      </div>
+      <button class="btn-secondary icon" aria-label="Your feeds"><svg class="i" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg></button>
+      <button class="btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </header>
+    <main>
+      <h2 class="section-label">Today</h2>
+      <ul class="list">
+        <li class="list-row unread"><div class="meta"><span class="dot f2"></span><span class="src">Example Weather Desk</span><span class="when">12 min ago</span></div><p class="post-title">Sample post: a week of mild sunshine for the made-up town of Fernvale</p></li>
+        <li class="list-row read"><div class="meta"><span class="dot f3"></span><span class="src">Sample Garden Notes</span><span class="when">1 hr ago</span></div><p class="post-title">Demo article: planting tomatoes in pots on a sunny balcony</p></li>
+        <li class="list-row unread"><div class="meta"><span class="dot f1"></span><span class="src">The Placeholder Kitchen</span><span class="when">3 hr ago</span></div><p class="post-title">Test recipe: one pan lemon rice for a quiet weeknight</p></li>
+        <li class="list-row unread"><div class="meta"><span class="dot f4"></span><span class="src">Fictional Code Weekly</span><span class="when">5 hr ago</span></div><p class="post-title">Sample news: version 2.0 of an imaginary text editor is out</p></li>
+      </ul>
+      <h2 class="section-label">Yesterday</h2>
+      <ul class="list">
+        <li class="list-row unread"><div class="meta"><span class="dot f5"></span><span class="src">Made Up Museum Blog</span><span class="when">Yesterday</span></div><p class="post-title">Demo post: a new room of invented pottery opens on Saturday</p></li>
+        <li class="list-row unread"><div class="meta"><span class="dot f2"></span><span class="src">Example Weather Desk</span><span class="when">Yesterday</span></div><p class="post-title">Sample post: how the pretend river forecast is put together</p></li>
+        <li class="list-row unread"><div class="meta"><span class="dot f3"></span><span class="src">Sample Garden Notes</span><span class="when">Yesterday</span></div><p class="post-title">Demo article: five easy herbs for a windowsill</p></li>
+      </ul>
+    </main>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="behind"></div>
+      <section class="sheet" role="dialog" aria-label="Post preview">
+        <div class="grab"></div>
+        <div class="sheet-head"><button class="btn-secondary" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="body">
+          <div class="meta"><span class="dot"></span><span class="src">Example Weather Desk</span></div>
+          <h2 class="text-heading">Sample post: a week of mild sunshine for the made-up town of Fernvale</h2>
+          <p class="date">Tuesday 14 October, 9:42</p>
+          <div class="summary">
+            <p>This is pretend weather for a pretend town. Fernvale can expect five dry days in a row, with soft winds from the west and afternoons warm enough for a light jacket.</p>
+            <p>The made-up forecasters say a little cloud may roll in on Sunday, but nothing that should spoil a walk by the imaginary river.</p>
+            <p>Read the full sample forecast for the hour by hour detail.</p>
+          </div>
+        </div>
+        <div class="foot">
+          <a class="btn-primary" href="#">Open full article<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+          <p class="host">Opens example.com in your browser</p>
+        </div>
+      </section>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
