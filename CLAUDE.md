@@ -56,61 +56,49 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
+
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
+The starter template has been replaced: the first real version (the
+decisions feed, voting, comments, close, More menus) is built, so the
+`usernode-starter-notice@1` block this section described no longer exists.
+Keep the `usernode-dev-console@1` forwarder `<script>`, the bridge
+`<script>` and the theme `<script>` when rewriting the HTML — that block is
+platform infrastructure, not template content.
 
 ---
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for our club to decide things together. One feed of decision
+questions. Anyone posts a decision: a Question (required), optional Details,
+and 2 to 6 Options. There is no plain agree/disagree vote: everyone picks one
+of the options the poster listed, one vote per person, changeable or takeable
+back by re-tapping. Names show next to each vote, the viewer's own reads
+"You". A notched tally bar (the app's signature element) shows the standing.
+Comments run under every decision, oldest first; you can delete your own.
+The poster can Close a decision, which stops voting and moves it under
+"Decided" showing "Chosen: X, N of M votes" or "Tied"; comments stay open.
+Every decision and comment carries a More menu: Report, and Delete (own
+only). Voting happens in the opened detail view, not the feed card.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, from the spec it was built from. Every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm grey neutrals with a deep ballot blue accent
+  (accent `30 64 175` light, `147 170 253` dark; neutrals are stone-like
+  warm greys; a separate `--tally` token tints the tally notches that are
+  not the viewer's own).
+- **Signature element:** the notched tally bar. One notch per vote, each
+  1/(max(total, 10)) of the bar wide so small counts still read; over 30
+  votes it becomes a solid fill of the option's share; the viewer's own
+  option's notches are accent, the others' are `--tally`.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (system sans; questions are semibold heading size). Unchanged.
+- The feed is the screen the spec drew (`public/screens.css`); no fixed
+  look, it follows the viewer's Homeroom light/dark theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +126,20 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The shared kit (`kit/server.js`, `public/kit/*`) is mounted, not edited.
+  Club Votes' own rules live in `server.js` as routes registered BEFORE the
+  kit's: the 2 to 6 different options check on posting, the closed-decision
+  guard on voting (409), close being the poster's alone, and comment
+  deletion being the comment's author alone.
+- `reports` is the one private table (`COMMENT ON TABLE reports IS
+  'staging:private'`). No public table carries a foreign key to it.
+- Voting means picking one of the poster's listed options; votes are stored
+  as a choice index per user (kit's `(item_id, user_id)` primary key, so
+  one vote per person by construction).
+- Who voted what, by name, is served by `GET /api/decision-meta/:id?`
+  (`voters`, `states`); voter names are remembered in `voter_names` when a
+  vote is cast.
+- Staging demo (`?demo=1`): made-up people and questions, ids from 900001,
+  everything `ON CONFLICT DO NOTHING`, plus one open decision posted by the
+  viewer (keyed once per viewer in `kit_demo_viewers` as `decisions_own`)
+  so Close and Delete can be tried.

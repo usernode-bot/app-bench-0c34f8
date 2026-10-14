@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e40af' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='11' width='16' height='9' rx='1.5'/><path d='M8 11V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V11'/><path d='M10 7.5l1.5 1.5 3-3'/><path d='M8 15h8'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -120,15 +120,15 @@
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div><div class="s">
+    <div><div class="s" id="app">
     <header class="hd"><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V11"/><path d="M10 7.5l1.5 1.5 3-3"/><path d="M8 15h8"/></svg><h1>Club Votes</h1><button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button></header>
     <div class="wrap">
     <p class="section-label">Open decisions</p>
-    <a class="card"><div class="meta"><span class="st">Open</span>Mira Testwell · 2h ago</div><h2 class="q">Where should we meet next month?</h2>
+    <a class="card"><div class="meta"><span class="st">Open</span><span class="by">Mira Testwell · 2h ago</span></div><h2 class="q">Where should we meet next month?</h2>
     <div class="opt mine"><div class="ol"><b><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12l5 5 9-10"/></svg>Library back room</b><span>5</span></div><div class="bar"><i></i><i></i><i></i><i></i><i></i></div><p class="who">You, Mira, Theo, Juno, Sam</p></div>
     <div class="opt"><div class="ol"><b>Corner café upstairs</b><span>3</span></div><div class="bar"><i></i><i></i><i></i></div><p class="who">Priya, Lee, Ana</p></div>
     <div class="opt"><div class="ol"><b>Community hall</b><span>1</span></div><div class="bar"><i></i></div><p class="who">Omar</p></div>
-    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>9 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>4 comments</span></div></a>
+    <div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><b class="vc">9 votes</b></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg><b class="cc">4 comments</b></span></div></a>
     <a class="card"><div class="meta"><span class="st">Open</span>You · yesterday</div><h2 class="q">What should our spring project be?</h2>
     <div class="opt"><div class="ol"><b>Park clean-up day</b><span>4</span></div><div class="bar"><i></i><i></i><i></i><i></i></div><p class="who">Theo, Ana, Lee, Sam</p></div>
     <div class="opt"><div class="ol"><b>Book swap stall</b><span>4</span></div><div class="bar"><i></i><i></i><i></i><i></i></div><p class="who">Mira, Juno, Priya, Omar</p></div>
@@ -145,5 +145,6 @@
     </div></div></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

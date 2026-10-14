@@ -60,6 +60,8 @@
 
 .ft span {display:flex;align-items:center;gap:6px}
 
+.ft b {font-weight:inherit}
+
 .ft svg {width:16px;height:16px}
 
 .res {margin-top:4px;font-size:.875rem}

@@ -43,17 +43,18 @@
     --tally: 191 204 238; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 18 17 16;      /* from the spec's dark look */
+    --surface: 28 27 25;
+    --raised: 40 38 36;
+    --fg: 245 244 242;
+    --muted: 168 163 157;
+    --line: 58 55 52;
+    --accent: 147 170 253;   /* the accent lightened for dark, text stays 4.5:1 */
+    --on-accent: 15 23 42;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 165 180 252;    /* the keyboard focus ring */
+    --tally: 49 62 105;      /* notches that are not the viewer's own */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

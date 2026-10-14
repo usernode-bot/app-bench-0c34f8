@@ -3,5 +3,29 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "feed.default",
+      "name": "Feed loads",
+      "path": "/",
+      "expectSelector": "#app",
+      "allowConsoleErrors": true,
+      "visual": true,
+      "impact": ["public/**", "server.js"]
+    },
+    {
+      "id": "demo.populated",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "allowConsoleErrors": true,
+      "visual": true,
+      "impact": ["public/**", "server.js"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
