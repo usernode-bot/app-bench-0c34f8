@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,49 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="app"><main>
+    <header>
+    <div class="head-text"><h1>Unread</h1><p class="count">24 posts from 5 feeds</p></div>
+    <button class="btn-secondary icon-btn" aria-label="Refresh"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    <button class="btn-secondary icon-btn" aria-label="Your feeds"><svg class="i" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg></button>
+    <button class="btn-primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </header>
+    <p class="note"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>Night Sky Notes did not update.<button>Retry</button></p>
+    <ul class="list">
+    <li><button class="list-row"><span class="dot f1">F</span><span class="post"><span class="src"><b>Fernleaf Garden Journal</b><time>12 min ago</time></span><span class="title">Five herbs that forgive a forgetful waterer</span><span class="snip">Thyme, rosemary and sage all prefer to dry out between drinks, which makes them ideal for a sunny sill you only remember on weekends.</span></span></button></li>
+    <li><button class="list-row"><span class="dot f2">T</span><span class="post"><span class="src"><b>The Tidepool Times</b><time>1 hour ago</time></span><span class="title">What the hermit crabs did when the new shells arrived</span><span class="snip">A volunteer left a tray of empty shells at low tide. Within an hour a queue had formed, smallest crab at the back.</span></span></button></li>
+    <li><button class="list-row"><span class="dot f3">B</span><span class="post"><span class="src"><b>Byte-Sized Builds</b><time>3 hours ago</time></span><span class="title">A weekend clock made from an old bicycle wheel</span><span class="snip">Spokes for hour marks, a cheap quartz movement and a lot of sanding. Here is the parts list and the one mistake to avoid.</span></span></button></li>
+    <li><button class="list-row"><span class="dot f4">S</span><span class="post"><span class="src"><b>Slow Kettle Recipes</b><time>Yesterday</time></span><span class="title">Oat porridge three ways, all under ten minutes</span><span class="snip">Start with the base, then go savoury with miso and spring onion, or sweet with stewed apple and a pinch of cinnamon.</span></span></button></li>
+    </ul>
+    <p class="foot">You are all caught up past here.</p>
+    </main></div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="app"><div class="scrim"></div>
+      <div class="sheet" role="dialog" aria-label="Five herbs that forgive a forgetful waterer">
+      <div class="grab"></div>
+      <div class="bar"><span class="dot">F</span><b>Fernleaf Garden Journal</b><button class="close" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="body">
+      <h2>Five herbs that forgive a forgetful waterer</h2>
+      <p class="meta">By Ivy Bramblewick, 12 minutes ago</p>
+      <div class="art">
+      <p>Thyme, rosemary and sage all prefer to dry out between drinks, which makes them ideal for a sunny sill you only remember on weekends.</p>
+      <p>Start with a terracotta pot, because it breathes. Use a gritty mix, one part sand to two parts compost, and water only when the top inch feels dry.</p>
+      <h3>1. Thyme</h3>
+      <p>Low, tough and happy in the brightest spot you have. Trim it after flowering and it stays bushy for years.</p>
+      <h3>2. Rosemary</h3>
+      <p>Give it the sunniest window in the house and resist the urge to water when it looks a little grey.</p>
+      </div></div>
+      <div class="foot"><a class="btn-primary">Open full story<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a><p class="host">fernleaf-garden.example</p></div>
+      </div></div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
