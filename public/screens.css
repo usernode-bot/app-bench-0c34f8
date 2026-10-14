@@ -16,7 +16,11 @@ body {
 
 main {max-width:42rem;margin:0 auto;padding:16px 16px 32px;display:flex;flex-direction:column;gap:16px}
 
-.head {display:flex;align-items:center;gap:8px}
+.head {display:flex;align-items:center;gap:12px}
+
+/* The header's buttons keep their label on one line, so the header stays one
+   row tall at phone width (the empty screen too, where Add feed is outlined). */
+.head .btn-primary,.head .btn-secondary {white-space:nowrap}
 
 .head h1 {font:700 1.75rem/2.25rem ui-serif,Charter,Georgia,serif;flex:1}
 

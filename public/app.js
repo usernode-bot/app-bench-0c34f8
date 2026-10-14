@@ -107,6 +107,9 @@ let markedRead = new Set(); // guids whose read mark was sent this visit
 
 async function load() {
   return states.run(async (box) => {
+    // The count line waits for real data: hidden while the list loads (and it
+    // stays hidden if the load fails), shown once the posts have arrived.
+    countEl.hidden = true;
     const data = await api('GET', '/api/posts');
     posts = data.posts || [];
     feeds = data.feeds || [];
@@ -117,6 +120,7 @@ async function load() {
     countEl.textContent = feeds.length
       ? `${plural(posts.length, 'unread post')} from ${plural(ok, 'feed')}`
       : 'No feeds yet';
+    countEl.hidden = false;
     // On the empty screen the header's Add feed is outlined too, so "Add
     // your first feed" is the only filled button.
     const isBlank = !feeds.length || (!posts.length && !failed);
