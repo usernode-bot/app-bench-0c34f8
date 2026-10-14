@@ -1,0 +1,86 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.bb {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.45 system-ui,-apple-system,sans-serif;
+  min-height: 1400px;
+  padding: 0 16px 32px;
+}
+
+.bb * {box-sizing:border-box}
+
+.hd {display:flex;align-items:baseline;justify-content:space-between;padding:18px 4px 14px}
+
+.hd h1 {font:600 26px/1.2 ui-serif,Georgia,serif;margin:0}
+
+.hd p {margin:0;font-size:13px;color:rgb(var(--muted))}
+
+.section-label {margin:18px 0 8px;padding:0 4px;font-size:13px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 10px;border:1px solid rgb(var(--line));border-radius:22px;background:rgb(var(--surface));font-size:15px;color:rgb(var(--fg))}
+
+.chip svg {width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.card {border:1px solid rgb(var(--line));border-radius:14px;background:rgb(var(--surface));padding:16px}
+
+.dial {text-align:center;padding:12px 16px 16px}
+
+.dial svg {width:100%;max-width:300px;display:block;margin:0 auto}
+
+.dial .n {font:600 40px/1 ui-serif,Georgia,serif;margin-top:-6px;font-variant-numeric:tabular-nums}
+
+.dial .s {font-size:13px;color:rgb(var(--muted));margin-top:4px}
+
+.range {position:relative;height:44px;margin-top:6px}
+
+.range .tr {position:absolute;left:0;right:0;top:20px;height:4px;border-radius:2px;background:rgb(var(--line))}
+
+.range .fi {position:absolute;left:0;width:62.5%;top:20px;height:4px;border-radius:2px;background:rgb(var(--accent))}
+
+.range .th {position:absolute;left:calc(62.5% - 14px);top:8px;width:28px;height:28px;border-radius:14px;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.list {border:1px solid rgb(var(--line));border-radius:14px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.list-row .t {flex:1}
+
+.list-row .t small {display:block;font-size:13px;color:rgb(var(--muted))}
+
+.step {display:flex;align-items:center;gap:4px}
+
+.step b {width:40px;text-align:center;font-size:18px;font-variant-numeric:tabular-nums}
+
+.sb {width:44px;height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));display:flex;align-items:center;justify-content:center}
+
+.sb svg,.ic svg {width:20px;height:20px;fill:none;stroke:rgb(var(--fg));stroke-width:1.8;stroke-linecap:round}
+
+.seg {display:flex;background:rgb(var(--raised));border-radius:10px;padding:3px;margin:0 16px 14px}
+
+.seg span {flex:1;text-align:center;min-height:38px;line-height:38px;border-radius:8px;font-size:15px}
+
+.seg .on {background:rgb(var(--surface));font-weight:600;box-shadow:0 1px 2px rgb(var(--fg)/.15)}
+
+.btn-primary {display:flex;width:100%;min-height:50px;margin-top:20px;align-items:center;justify-content:center;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:17px;font-weight:600;border:0}
+
+.rt {margin:28px 4px 2px;font:600 22px/1.25 ui-serif,Georgia,serif}
+
+.rs {margin:0 4px;font-size:13px;color:rgb(var(--muted))}
+
+.g {font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.ic {width:28px;display:flex;justify-content:center}
+
+.ic svg {stroke:rgb(var(--accent))}
+
+.note {margin:8px 4px 0;font-size:13px;color:rgb(var(--muted))}
