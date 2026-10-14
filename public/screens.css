@@ -29,7 +29,7 @@ body {
 
 .btn-primary svg {width:20px;height:20px}
 
-.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+.section-label {margin-bottom:8px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
 
 .stack {display:flex;flex-direction:column;gap:12px}
 
@@ -138,9 +138,19 @@ body {
 .kit-composer-actions {display:flex;justify-content:flex-end}
 
 /* The feed's loading state: the kit's skeleton rows drawn as the grey
-   placeholder cards that stand where the decision cards will be. */
+   placeholder cards that stand where the decision cards will be, shaped
+   like a real card — title line, meta line, a 12 px tally bar, a footer
+   line — so the layout does not jump when the cards load in. */
 .states-cards .kit-group[aria-hidden="true"] {display:contents}
 
-.states-cards .kit-skeleton-row {display:flex;flex-direction:column;gap:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px;margin:0 0 12px}
+.states-cards .kit-skeleton-row {display:flex;flex-direction:column;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px;margin:0 0 12px;min-height:168px}
 
 .states-cards .kit-skeleton-row:last-child {margin-bottom:0}
+
+.states-cards .kit-skeleton-row span.skeleton:first-child {height:28px}
+
+.states-cards .kit-skeleton-row span.skeleton:last-child {height:20px;margin-top:4px}
+
+.states-cards .kit-skeleton-row::before {content:'';order:3;height:12px;border-radius:6px;background:rgb(var(--line));margin:14px 0 8px}
+
+.states-cards .kit-skeleton-row::after {content:'';order:4;height:20px;width:40%;border-radius:4px;background:rgb(var(--line));margin-top:auto}

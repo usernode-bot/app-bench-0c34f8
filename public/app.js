@@ -32,6 +32,7 @@ const BUBBLE_SVG = openRow().querySelector('.foot span:last-child svg').cloneNod
 const STAMP_SVG = doneRow().querySelector('.stamp svg').cloneNode(true);
 
 const closuresByDecision = new Map();
+const DEMO_NOTE = 'Staging demo: made-up people and decisions';
 let feedDirty = false;
 let lastRow = null;
 let detailBox = null;
@@ -57,7 +58,7 @@ const load = () => view.run(async (box) => {
   const feed = await api('GET', '/api/decisions');
   const closedData = await api('GET', '/api/closures');
   for (const c of closedData.closures || []) closuresByDecision.set(c.decisionId, c);
-  if (feed.demo) showDemoLabel(feedStates);
+  if (feed.demo) showDemoLabel(feedStates, DEMO_NOTE);
   const closed = feed.items.filter((d) => closuresByDecision.has(d.id))
     .sort((a, b) => String(closuresByDecision.get(b.id).closedAt)
       .localeCompare(String(closuresByDecision.get(a.id).closedAt)));
@@ -172,7 +173,7 @@ function openDecision(id, rowEl) {
   dview.run(async (box) => {
     const data = await api('GET', `/api/decisions/${id}`);
     const item = data.item;
-    if (data.demo) showDemoLabel(detailBox);
+    if (data.demo) showDemoLabel(detailBox, DEMO_NOTE);
     const closure = closuresByDecision.get(item.id) || null;
     const card = detailTpl.content.firstElementChild.cloneNode(true);
 
@@ -375,7 +376,7 @@ function openNew() {
     fields: [
       { name: 'title', label: 'Question', required: true, max: 120, placeholder: 'e.g. Where should we meet next month?' },
       { name: 'body', label: 'Details', type: 'textarea', max: 2000, placeholder: 'e.g. Add anything people should know before voting' },
-      { name: 'options', label: 'Options', type: 'choices', placeholder: ['e.g. Community hall', 'e.g. The café'] },
+      { name: 'options', label: 'Options', type: 'choices', required: true, placeholder: ['e.g. Community hall', 'e.g. The café'] },
     ],
     onSubmit: async (v) => {
       await api('POST', '/api/decisions', { title: v.title, body: v.body, options: v.options });

@@ -106,9 +106,10 @@
     @apply rounded-xl border border-line bg-surface p-4;
   }
 
-  /* The label above a section: sentence case, never uppercase or tracked. */
+  /* The label above a section: sentence case, never uppercase or tracked.
+     No inset: its left edge lines up with the cards or list below it. */
   .section-label {
-    @apply mb-2 px-1 text-small font-medium text-muted;
+    @apply mb-2 text-small font-medium text-muted;
   }
 
   /* The states of anything that loads data. Show exactly one at a time:
@@ -249,7 +250,8 @@
   /* Loading rows, the content holder, the one demo line. */
   .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
   .kit-content { @apply flex flex-col gap-6; }
-  .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
+  /* Plain muted text, with the section below it a clear step down. */
+  .kit-demo-label { @apply mb-6 text-small text-muted; }
 
   /* A report: a line per option or category, and its bar. */
   .kit-report { @apply flex flex-col gap-3; }
