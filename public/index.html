@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,54 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="top">
+    <div><h1 class="title">Unread</h1><p class="sub sans">23 new from 7 feeds</p></div>
+    <div class="acts sans">
+    <button class="btn-secondary" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    </div>
+    </div>
+    <div class="section-label sans">Newest first</div>
+    <ul class="list">
+    <li class="list-row"><span class="fav m1">A</span><div class="body"><div class="meta"><b>A List Apart</b><span>12 min ago</span><span class="dot"></span></div><p class="ph">Designing for the slow connection</p><p class="ex">Most of the web is built on fast wifi. Here is what changes when the page has to load on a train.</p></div></li>
+    <li class="list-row"><span class="fav m2">S</span><div class="body"><div class="meta"><b>Serious Eats</b><span>1 hr ago</span><span class="dot"></span></div><p class="ph">The best way to cook rice on the stove</p><p class="ex">A tested method with exact water ratios for short, medium and long grain.</p></div></li>
+    <li class="list-row read"><span class="fav m3">K</span><div class="body"><div class="meta"><b>Kottke</b><span>2 hr ago</span></div><p class="ph">A map of every lighthouse still staffed</p><p class="ex">Fewer than thirty remain, and one keeper explains what a night shift looks like.</p></div></li>
+    <li class="list-row"><span class="fav m4">D</span><div class="body"><div class="meta"><b>Daring Fireball</b><span>4 hr ago</span><span class="dot"></span></div><p class="ph">Notes on the new keyboard shortcuts</p><p class="ex">A short list of the changes that actually matter for daily use.</p></div></li>
+    <li class="list-row"><span class="fav m1">A</span><div class="body"><div class="meta"><b>A List Apart</b><span>6 hr ago</span><span class="dot"></span></div><p class="ph">Writing CSS that ages well</p><p class="ex">Small habits that keep a stylesheet readable three years after you wrote it.</p></div></li>
+    <li class="list-row"><span class="fav m5">B</span><div class="body"><div class="meta"><b>Bon Appétit</b><span>Yesterday</span><span class="dot"></span></div><p class="ph">Twelve soups for the first cold week</p><p class="ex">Lentil, miso, white bean and more, all done in under an hour.</p></div></li>
+    <li class="list-row"><span class="fav m2">S</span><div class="body"><div class="meta"><b>Serious Eats</b><span>Yesterday</span><span class="dot"></span></div><p class="ph">Why your bread is dense, and how to fix it</p><p class="ex">Under-proofing is the usual cause. Look for these three signs before baking.</p></div></li>
+    <li class="list-row"><span class="fav m3">K</span><div class="body"><div class="meta"><b>Kottke</b><span>Tue</span><span class="dot"></span></div><p class="ph">The quiet return of the paper map</p><p class="ex">Sales of printed atlases are up for the third year running.</p></div></li>
+    </ul>
+    <div class="end">Your feeds refresh each time you open this list.</div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div class="app">
+      <div class="bar sans">
+      <button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button>
+      </div>
+      <div class="art">
+      <div class="src sans"><span class="fav">P</span><b>Pixel Lantern</b><span>Today, 9:41</span></div>
+      <h1 class="h">Designing for the slow connection</h1>
+      <p class="by sans">By Rae Fictional</p>
+      <div class="txt">
+      <p>Most of the web is built on fast wifi. Here is what changes when the page has to load on a train, in a lift, or at the far end of a field.</p>
+      <p>Start with the first screen a person sees. If it needs four requests before anything appears, they will see nothing for a long time. Send the words first, then the pictures.</p>
+      <p>Next, measure what you actually ship. A single hero image can outweigh every script on the page, and nobody misses it when it is gone.</p>
+      </div>
+      <p class="more sans">This is the preview the feed shares. The full article is on its site.</p>
+      <button class="btn-primary sans"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

@@ -1,0 +1,132 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1100px;
+  width: 390px;
+  font-family: ui-serif,Georgia,"Iowan Old Style",serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding-bottom: 32px;
+}
+
+.app * {box-sizing:border-box}
+
+.sans {font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+
+.top {
+  padding: 20px 20px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {font-size:28px;line-height:36px;font-weight:700;margin:0;letter-spacing:-.01em}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0}
+
+.acts {display:flex;gap:8px}
+
+.btn-primary,.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
+
+.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0}
+
+.btn-secondary {background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line))}
+
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));padding:8px 24px}
+
+.list {margin:0 16px;padding:0;list-style:none;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.fav {flex:none;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:rgb(var(--on-mast));margin-top:2px}
+
+.m1 {background:rgb(var(--mast-1))}
+
+.m2 {background:rgb(var(--mast-2))}
+
+.m3 {background:rgb(var(--mast-3))}
+
+.m4 {background:rgb(var(--mast-4))}
+
+.m5 {background:rgb(var(--mast-5))}
+
+.body {min-width:0;flex:1}
+
+.meta {display:flex;align-items:center;gap:8px;font-family:system-ui,sans-serif;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.meta b {color:rgb(var(--feed));font-weight:600}
+
+.dot {width:8px;height:8px;border-radius:50%;background:rgb(var(--unread));flex:none;margin-left:auto}
+
+.ph {font-size:16px;line-height:22px;font-weight:600;margin:2px 0}
+
+.ex {font-family:system-ui,sans-serif;font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.read .ph {font-weight:400;color:rgb(var(--muted))}
+
+.read .fav {opacity:.55}
+
+.end {text-align:center;font-family:system-ui,sans-serif;font-size:14px;color:rgb(var(--muted));padding:20px}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 844px;
+  width: 390px;
+  font-family: ui-serif,Georgia,"Iowan Old Style",serif;
+  font-size: 16px;
+  line-height: 26px;
+  box-sizing: border-box;
+}
+
+.sans {
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+.btn-secondary,.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
+
+.btn-secondary {background:transparent;color:rgb(var(--fg));border:0}
+
+.art {padding:24px 24px 32px}
+
+.src {display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.src b {color:rgb(var(--feed));font-weight:600}
+
+.fav {flex:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:rgb(var(--on-mast));background:rgb(var(--mast-1));font-family:ui-serif,Georgia,serif}
+
+.h {font-size:28px;line-height:36px;font-weight:700;margin:16px 0 8px;letter-spacing:-.01em}
+
+.by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 20px}
+
+.txt p {margin:0 0 16px;max-width:34em}
+
+.more {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:24px 0 12px}
