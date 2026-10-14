@@ -9,7 +9,7 @@
    design, such as a map. */
 [data-spec-screen] {
   width: 100%;
-  max-width: 42rem;
+  max-width: 600px;
   margin-inline: auto;
 }
 
@@ -17,7 +17,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1180px;
-  width: 390px;
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
   box-sizing: border-box;
   font-family: ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
   font-size: 16px;
@@ -82,7 +84,7 @@
 
 .section-label {font-size:14px;font-weight:500;color:rgb(var(--muted));margin:20px 4px 8px}
 
-.fab {position:absolute;left:16px;right:16px;bottom:24px}
+.fab {position:fixed;left:0;right:0;bottom:16px;max-width:600px;margin-inline:auto;padding:0 16px;box-sizing:border-box;z-index:10}
 
 .fab .btn-primary {width:100%;box-shadow:0 2px 8px rgb(0 0 0/.15)}
 
@@ -108,7 +110,7 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1100px;
-  width: 390px;
+  width: 100%;
   box-sizing: border-box;
   font-family: ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
   font-size: 16px;

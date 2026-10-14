@@ -223,7 +223,6 @@
     <div class="cv" style="min-height:0;padding-bottom:32px">
       <div class="nav">
         <button class="lnk" id="btn-cancel" type="button">Cancel</button>
-        <button class="btn-primary" id="btn-post" type="button">Post</button>
       </div>
       <div id="notice-new" class="mb-2 rounded-lg border border-line bg-surface px-4 py-2 text-small text-fg" hidden></div>
       <h1>New decision</h1>
@@ -366,6 +365,8 @@
     var listSeq = 0;
     function loadList() {
       var seq = ++listSeq;
+      $('hdr-sub').hidden = false;
+      $('hdr-sub').textContent = 'Loading…';
       $('list-loading').hidden = false;
       $('list-error').hidden = true;
       $('list-empty').hidden = true;
@@ -378,6 +379,8 @@
       }).catch(function () {
         if (seq !== listSeq) return;
         $('list-loading').hidden = true;
+        $('hdr-sub').hidden = true;
+        $('hdr-sub').textContent = '';
         $('cards').textContent = '';
         $('closed-wrap').hidden = true;
         $('list-error').hidden = false;
@@ -389,11 +392,17 @@
       $('list-loading').hidden = true;
       $('list-error').hidden = true;
       $('demo-line').hidden = !data.demo;
-      var parts = [data.open_count === 1 ? '1 open' : data.open_count + ' open'];
-      if (data.waiting_count > 0) {
-        parts.push(data.waiting_count === 1 ? '1 waiting on your vote' : data.waiting_count + ' waiting on your vote');
+      if (data.open_count > 0) {
+        var parts = [data.open_count === 1 ? '1 open' : data.open_count + ' open'];
+        if (data.waiting_count > 0) {
+          parts.push(data.waiting_count === 1 ? '1 waiting on your vote' : data.waiting_count + ' waiting on your vote');
+        }
+        $('hdr-sub').hidden = false;
+        $('hdr-sub').textContent = parts.join(', ');
+      } else {
+        $('hdr-sub').hidden = true;
+        $('hdr-sub').textContent = '';
       }
-      $('hdr-sub').textContent = parts.join(', ');
 
       var ds = data.decisions || [];
       if (!ds.length) {
@@ -690,13 +699,11 @@
       var q = $('n-q').value.trim();
       var det = $('n-det').value.trim();
       if (!q) { notice($('notice-new'), 'Write a question first.'); return; }
-      $('btn-post').disabled = true;
       $('btn-post-bottom').disabled = true;
       api('/decisions', { method: 'POST', body: JSON.stringify({ question: q, details: det }) })
         .then(function () {
           $('n-q').value = '';
           $('n-det').value = '';
-          $('btn-post').disabled = false;
           $('btn-post-bottom').disabled = false;
           tab = 'open';
           Array.prototype.forEach.call($('tabs').children, function (t) {
@@ -707,12 +714,10 @@
           loadList();
         })
         .catch(function () {
-          $('btn-post').disabled = false;
           $('btn-post-bottom').disabled = false;
           notice($('notice-new'), 'The decision could not be posted.');
         });
     }
-    $('btn-post').addEventListener('click', postDecision);
     $('btn-post-bottom').addEventListener('click', postDecision);
 
     $('d-vote-yes').addEventListener('click', function () { detailVote('yes'); });
