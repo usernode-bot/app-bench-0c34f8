@@ -1,27 +1,34 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+One list of the club's decisions. Open ones at the top, newest first; the
+ones already decided below them. Anyone in the club can vote by tapping a
+choice, change their vote until the vote is closed, and join the
+discussion under each decision.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Voting** — tap a choice to vote, tap another to change. Votes are
+  shown as counts only; nobody sees who voted what.
+- **Closing** — the person who posted a decision closes the vote. The
+  leading choice is marked as the winner (calm blue-green), or both are
+  when it is a tie.
+- **Discussion** — every decision has its own comment thread, oldest
+  first. You can delete your own comments.
+- **Reports** — a quiet Report button on other people's decisions and
+  comments. Reporting never hides anything.
+- **Deciding things together** — anyone can post a decision: a question
+  and at least two choices, with more rows added as needed.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+The tally strip is the app's mark: one stroke per member, grouped in
+struck fives, filled in brick red as votes come in, pale where they
+haven't, and calm blue-green once the vote is closed.
 
-## Replacing the template
+The app runs on [Homeroom](https://app.onhomeroom.com). Sign-in comes from
+the platform, so there are no accounts to build; visitors without a
+Homeroom account can read but not vote or comment. The app has its own
+private Postgres database, and Tailwind CSS is precompiled by
+`npm run build` during image creation, in a light and a dark look that
+follow the viewer's Homeroom theme.
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
+To change the app, ask Homeroom bot (open the app on Homeroom, tap the
+Homeroom icon in the header, then **Suggest an improvement**), or run
+Claude Code against this repo directly — start with `CLAUDE.md`, which
 carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.

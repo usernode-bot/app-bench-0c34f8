@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='38' width='60' height='46' rx='8' fill='%23b23a1e'/><rect x='38' y='20' width='24' height='10' rx='3' fill='%23b23a1e'/><rect x='44' y='24' width='12' height='26' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,93 +109,510 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
-    <div class="app">
-    <div class="top"><div><div class="title">Club Votes</div><div class="sub">3 open decisions, 14 members</div></div><button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></div>
-
-    <div class="section-label">Open now</div>
-
-    <div class="card">
-    <div class="meta"><span>Posted by Priya, today</span><span>Priya closes it</span></div>
-    <div class="q">Where do we meet on Saturday?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt me"><em style="width:50%"></em><b>Library courtyard</b><span>5, your vote</span></button>
-    <button class="opt"><em style="width:30%"></em><b>Fenwick Park</b><span>3</span></button>
-    <button class="opt"><em style="width:20%"></em><b>Cafe on Mill Street</b><span>2</span></button>
-    <div class="foot"><span>10 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>8 comments</a></div>
-    </div>
-
-    <div class="card">
-    <div class="meta"><span>Posted by you, yesterday</span><span>You close it</span></div>
-    <div class="q">What should we build next term?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt"><em style="width:50%"></em><b>Community garden bench</b><span>3</span></button>
-    <button class="opt"><em style="width:33%"></em><b>Zine and print table</b><span>2</span></button>
-    <button class="opt"><em style="width:17%"></em><b>Bike repair day</b><span>1</span></button>
-    <div class="foot"><span>6 of 14 voted, not you yet</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>3 comments</a></div>
-    <button class="btn-secondary" style="width:100%;margin-top:4px">Close vote</button>
-    </div>
-
-    <div class="card">
-    <div class="meta"><span>Posted by Marcus, 2 days ago</span><span>Marcus closes it</span></div>
-    <div class="q">Move meetings to Thursday evenings?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt"><em style="width:73%"></em><b>Yes</b><span>8</span></button>
-    <button class="opt me"><em style="width:27%"></em><b>No, keep Tuesdays</b><span>3, your vote</span></button>
-    <div class="foot"><span>11 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>12 comments</a></div>
-    </div>
-
-    <div class="section-label">Decided</div>
-
-    <div class="card closed">
-    <div class="meta"><span>Closed by Dana, 9 Mar</span><span class="badge">Decided</span></div>
-    <div class="q">Club t-shirt colour</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i class="e"></i></span></div>
-    <div class="opt win"><b>Forest green</b><span>9 votes</span></div>
-    <div class="opt"><b>Navy</b><span>4</span></div>
-    <div class="foot"><span>13 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>6 comments</a></div>
-    </div>
-    </div>
+  <!-- The screens the spec drew, wired to the app's data. Screen 1 (the
+       decision list) is rendered below from /api/decisions; screen 2 (the
+       decision opened with its comments) renders on the #/d/:id hash route.
+       The drawn rows are the shape the demo and real data render into. -->
+  <div data-spec-screen="1" data-decisions>
+    <div class="app" id="app"></div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="bar"><button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button><button class="icon-btn" aria-label="Report">Report</button></div>
-      <div class="card">
-      <div class="meta"><span>Posted by Priya, today</span><span>Priya closes it</span></div>
-      <div class="q">Where do we meet on Saturday?</div>
-      <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-      <button class="opt me"><em style="width:50%"></em><b>Library courtyard</b><span>5, your vote</span></button>
-      <button class="opt"><em style="width:30%"></em><b>Fenwick Park</b><span>3</span></button>
-      <button class="opt"><em style="width:20%"></em><b>Cafe on Mill Street</b><span>2</span></button>
-      <p class="sub">10 of 14 voted. Tap another choice to change your vote.</p>
-      </div>
+  <script>
+  (function () {
+    'use strict';
+    var params = new URLSearchParams(location.search);
+    var TOKEN = params.get('token') || '';
+    var DEMO = params.get('demo') === '1';
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var app = document.getElementById('app');
+    var state = {
+      viewer: null,        // { id, username } | null (guest)
+      members: null,       // member count, or null when the platform didn't answer
+      list: null,          // GET /decisions payload once loaded
+      listFailed: false,
+      detail: null,        // GET /decisions/:id payload once loaded
+      detailId: null,
+      detailFailed: false,
+      errors: {},          // decisionId -> "your vote didn't save"
+      reported: {},        // "decision:<id>" / "comment:<id>" -> true
+      draft: '',           // comment being typed, kept across re-renders
+      form: { question: '', choices: ['', ''] },
+    };
 
-      <div class="section-label">8 comments</div>
-      <div class="list">
-      <div class="list-row"><div class="who"><span><b>Marcus</b>, 2 h ago</span><button>Report</button></div><p>Courtyard has shade and the benches, works if it rains too since the porch is covered.</p></div>
-      <div class="list-row"><div class="who"><span><b>Dana</b>, 1 h ago</span><button>Report</button></div><p>Fenwick Park is closer for the folks coming by bus.</p></div>
-      <div class="list-row"><div class="who"><span><b>You</b>, 40 min ago</span><button>Delete</button></div><p>I can bring the folding table either way.</p></div>
-      <div class="list-row"><div class="who"><span><b>Sam</b>, 10 min ago</span><button>Report</button></div><p>Cafe is nice but it gets loud after 11.</p></div>
-      </div>
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
 
-      <label class="lbl">Your comment</label>
-      <div class="field">e.g. I can bring snacks</div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn-primary">Post comment</button></div>
-      </div>
-    </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    // Every API call carries the token, demo=1 when the page has it, and
+    // the staging "as of" time when the bridge provides one.
+    function api(path, opts) {
+      opts = opts || {};
+      var headers = { 'x-usernode-token': TOKEN };
+      if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
+      if (window.usernode && typeof window.usernode.now === 'function') {
+        try { headers['x-usernode-now'] = window.usernode.now(); } catch (e) {}
+      }
+      var url = '/api' + path;
+      if (DEMO) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'demo=1';
+      return fetch(url, {
+        method: opts.method || 'GET',
+        headers: headers,
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok) throw { status: res.status, code: data && data.error, data: data };
+          return data;
+        });
+      });
+    }
+
+    function samePerson(a, b) { // ids are TEXT in the db, numbers in tokens
+      return a != null && b != null && String(a) === String(b);
+    }
+
+    function fmtDay(ts) { // meta lines: today, yesterday, 3 days ago, 9 Mar
+      var d = new Date(ts), now = new Date();
+      var diff = Math.round(
+        (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
+         new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+      if (diff <= 0) return 'today';
+      if (diff === 1) return 'yesterday';
+      if (diff < 7) return diff + ' days ago';
+      return d.getDate() + ' ' + MONTHS[d.getMonth()];
+    }
+    function fmtAgo(ts) { // comments: 2 h ago, 40 min ago
+      var s = Math.max(0, (Date.now() - new Date(ts).getTime()) / 1000);
+      if (s < 60) return 'just now';
+      if (s < 3600) return Math.floor(s / 60) + ' min ago';
+      if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+      return fmtDay(ts);
+    }
+    function fmtWhen(ts) { // closed lines: today, yesterday, then a date (9 Mar)
+      var d = new Date(ts), now = new Date();
+      var diff = Math.round(
+        (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
+         new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+      if (diff <= 0) return 'today';
+      if (diff === 1) return 'yesterday';
+      return d.getDate() + ' ' + MONTHS[d.getMonth()];
+    }
+
+    // ── Signature element: the tally strip ────────────────────────────────
+    // One mark per club member, in struck groups of five, like counting
+    // hands at a meeting. Filled marks are the accent (calm once closed,
+    // via the .closed styles); empty marks stay pale. Without a member
+    // count, only the filled marks are drawn.
+    function tallyHTML(voted, members) {
+      var total = members == null ? Math.max(0, voted) : Math.max(0, members);
+      var out = '';
+      for (var start = 0; start < total; start += 5) {
+        var g = '';
+        for (var i = start; i < Math.min(start + 5, total); i++) {
+          var cls = [];
+          if (i >= voted) cls.push('e');
+          if (i % 5 === 4) cls.push('x');
+          g += '<i' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '></i>';
+        }
+        out += '<span class="g">' + g + '</span>';
+      }
+      return '<div class="tally">' + out + '</div>';
+    }
+
+    function votedText(d) {
+      var m = state.members;
+      return m == null ? d.voter_count + ' voted' : d.voter_count + ' of ' + m + ' voted';
+    }
+
+    function optHTML(d, c) {
+      var closed = !!d.closed_at;
+      var mine = !closed && state.viewer && d.my_choice_id === c.id;
+      var win = closed && d.winner_ids && d.winner_ids.indexOf(c.id) >= 0;
+      var pct = d.voter_count ? Math.round(c.count * 100 / d.voter_count) : 0;
+      var label = closed
+        ? (win ? c.count + (c.count === 1 ? ' vote' : ' votes') : String(c.count))
+        : (mine ? c.count + ', your vote' : String(c.count));
+      var cls = 'opt' + (win ? ' win' : '') + (mine ? ' me' : '');
+      return closed
+        ? '<div class="' + cls + '"><em style="width:' + pct + '%"></em><b>' + esc(c.label) + '</b><span>' + label + '</span></div>'
+        : '<button type="button" class="' + cls + '" data-vote="' + d.id + ':' + c.id + '"><em style="width:' + pct + '%"></em><b>' + esc(c.label) + '</b><span>' + label + '</span></button>';
+    }
+
+    var BUBBLE = '<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>';
+    var PLUS = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+
+    function cardHTML(d) {
+      var closed = !!d.closed_at;
+      var minePost = state.viewer && samePerson(d.author_id, state.viewer.id);
+      var meta = closed
+        ? '<span>Closed by ' + (minePost ? 'you' : esc(d.author_name)) + ', ' + fmtWhen(d.closed_at) + '</span><span class="badge">' + (d.winner_ids.length > 1 ? 'Tied' : 'Decided') + '</span>'
+        : '<span>Posted by ' + (minePost ? 'you' : esc(d.author_name)) + ', ' + fmtDay(d.created_at) + '</span><span>' + (minePost ? 'You close it' : esc(d.author_name) + ' closes it') + '</span>';
+      var err = state.errors[d.id]
+        ? '<p class="text-small" style="color:rgb(var(--danger));margin:-4px 0 8px">Your vote didn\'t save. Try again.</p>'
+        : '';
+      var closeBtn = minePost && !closed
+        ? '<button type="button" class="btn-secondary" style="width:100%;margin-top:4px" data-close="' + d.id + '">Close vote</button>'
+        : '';
+      return '<div class="card' + (closed ? ' closed' : '') + '">' +
+        '<div class="meta">' + meta + '</div>' +
+        '<div class="q">' + esc(d.question) + '</div>' +
+        tallyHTML(d.voter_count, state.members) +
+        d.choices.map(function (c) { return optHTML(d, c); }).join('') +
+        err +
+        footHTML(d) +
+        closeBtn +
+        '</div>';
+    }
+
+    function footHTML(d) {
+      var m = state.members;
+      var txt = m == null ? d.voter_count + ' voted' : d.voter_count + ' of ' + m + ' voted';
+      if (!d.closed_at && state.viewer && !d.my_choice_id) txt += ', not you yet';
+      return '<div class="foot"><span>' + txt + '</span>' +
+        '<a href="#/d/' + d.id + '">' + BUBBLE + d.comment_count + (d.comment_count === 1 ? ' comment' : ' comments') + '</a></div>';
+    }
+
+    function skeletonCard() {
+      return '<div class="card">' +
+        '<div class="skeleton" style="height:14px;width:45%"></div>' +
+        '<div class="skeleton" style="height:24px;width:78%;margin:8px 0 12px"></div>' +
+        '<div class="skeleton" style="height:22px;width:55%;margin-bottom:12px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:14px;width:50%"></div>' +
+        '</div>';
+    }
+    function loadingHTML(n) {
+      var out = '';
+      for (var i = 0; i < n; i++) out += skeletonCard();
+      return out;
+    }
+
+    function renderList() {
+      var failed = state.listFailed;
+      var d = state.list;
+      var empty = d && d.decisions && d.decisions.length === 0;
+      var sub = '';
+      if (d && !empty) {
+        var openN = d.decisions.filter(function (x) { return !x.closed_at; }).length;
+        var bits = [openN + ' open decision' + (openN === 1 ? '' : 's')];
+        if (state.members != null) bits.push(state.members + ' members');
+        sub = '<div class="sub">' + esc(bits.join(', ')) + '</div>';
+      }
+      var head = '<div class="top"><div><div class="title">Club Votes</div>' +
+        (DEMO ? '<div class="sub" data-usernode-demo-note>Staging demo: made-up club decisions</div>' : '') +
+        sub + '</div>' +
+        (empty ? '' : '<button type="button" class="btn-primary" data-nav="#/new">' + PLUS + 'New decision</button>') +
+        '</div>';
+
+      var body;
+      if (failed) {
+        body = '<div class="state-error"><p class="text-body">Couldn\'t load the club\'s decisions.</p>' +
+          '<button type="button" class="btn-secondary" data-retry>Retry</button></div>';
+      } else if (empty) {
+        body = '<div class="state-empty">' +
+          '<p class="text-body" style="font-weight:600">No decisions yet.</p>' +
+          '<p class="text-small" style="color:rgb(var(--muted))">Post the first thing the club needs to decide.</p>' +
+          '<button type="button" class="btn-primary" data-nav="#/new" style="margin-top:8px">Post the first decision</button>' +
+          '</div>';
+      } else if (!d) {
+        body = loadingHTML(3);
+      } else {
+        var open = d.decisions.filter(function (x) { return !x.closed_at; });
+        var decided = d.decisions.filter(function (x) { return x.closed_at; });
+        body =
+          (open.length ? '<div class="section-label">Open now</div>' + open.map(cardHTML).join('') : '') +
+          (decided.length ? '<div class="section-label">Decided</div>' + decided.map(cardHTML).join('') : '');
+      }
+      app.innerHTML = head + body;
+    }
+
+    function detailSkeleton() {
+      return '<div class="card">' +
+        '<div class="skeleton" style="height:14px;width:45%"></div>' +
+        '<div class="skeleton" style="height:24px;width:78%;margin:8px 0 12px"></div>' +
+        '<div class="skeleton" style="height:22px;width:55%;margin-bottom:12px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;margin-bottom:8px"></div>' +
+        '</div>' +
+        '<div class="skeleton" style="height:20px;width:30%;margin:16px 0 8px"></div>' +
+        '<div class="skeleton" style="height:64px"></div>';
+    }
+
+    function renderDetail() {
+      var data = state.detail;
+      var d = data && data.decision;
+      var bar = '<div class="bar"><button type="button" class="icon-btn" data-nav="#"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button>' +
+        (d && !(state.viewer && samePerson(d.author_id, state.viewer.id))
+          ? (state.reported['decision:' + d.id]
+              ? '<button type="button" class="icon-btn" disabled>Reported, thanks</button>'
+              : '<button type="button" class="icon-btn" data-report="decision:' + d.id + '">Report</button>')
+          : '') +
+        '</div>';
+      if (state.detailFailed) {
+        app.innerHTML = bar + '<div class="state-error"><p class="text-body">Couldn\'t load that decision.</p>' +
+          '<button type="button" class="btn-secondary" data-retry-detail>Retry</button></div>';
+        return;
+      }
+      if (!d) {
+        app.innerHTML = bar + detailSkeleton();
+        return;
+      }
+
+      var minePost = state.viewer && samePerson(d.author_id, state.viewer.id);
+      var closed = !!d.closed_at;
+      var votedTxt = votedText(d);
+      var subTxt = closed
+        ? 'Voting closed. ' + votedTxt + '.'
+        : votedTxt + '. ' + (state.viewer
+            ? (d.my_choice_id ? 'Tap another choice to change your vote.' : 'Tap a choice to vote.')
+            : '');
+      var authorBtns =
+        (minePost && !closed ? '<button type="button" class="btn-secondary" style="width:100%;margin-top:4px" data-close="' + d.id + '">Close vote</button>' : '') +
+        (minePost ? '<button type="button" class="btn-secondary" style="width:100%;margin-top:8px" data-del="' + d.id + '">Delete decision</button>' : '');
+
+      var rows = data.comments.map(function (c) {
+        var own = state.viewer && samePerson(c.author_id, state.viewer.id);
+        var btn;
+        if (own) btn = '<button type="button" data-delc="' + c.id + '">Delete</button>';
+        else if (state.reported['comment:' + c.id]) btn = '<button type="button" disabled>Reported, thanks</button>';
+        else btn = '<button type="button" data-report="comment:' + c.id + '">Report</button>';
+        return '<div class="list-row"><div class="who"><span><b>' + (own ? 'You' : esc(c.author_name)) + '</b>, ' + fmtAgo(c.created_at) + '</span>' + btn + '</div><p>' + esc(c.body) + '</p></div>';
+      }).join('');
+
+      var form = state.viewer
+        ? '<label class="lbl" for="cbox">Your comment</label>' +
+          '<textarea class="field" id="cbox" placeholder="e.g. I can bring snacks">' + esc(state.draft) + '</textarea>' +
+          '<p id="cErr" class="text-small" style="color:rgb(var(--danger));margin-top:4px" hidden>Your comment didn\'t save. Try again.</p>' +
+          '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button type="button" class="btn-primary" data-comment>Post comment</button></div>'
+        : '<p class="sub" style="margin:16px 0 0">Make an account to vote and comment.</p>';
+
+      app.innerHTML = bar +
+        '<div class="card' + (d.closed_at ? ' closed' : '') + '">' +
+        '<div class="meta">' + (d.closed_at
+          ? '<span>Closed by ' + (minePost ? 'you' : esc(d.author_name)) + ', ' + fmtWhen(d.closed_at) + '</span><span class="badge">' + (d.winner_ids.length > 1 ? 'Tied' : 'Decided') + '</span>'
+          : '<span>Posted by ' + (minePost ? 'you' : esc(d.author_name)) + ', ' + fmtDay(d.created_at) + '</span><span>' + (minePost ? 'You close it' : esc(d.author_name) + ' closes it') + '</span>') + '</div>' +
+        '<div class="q">' + esc(d.question) + '</div>' +
+        tallyHTML(d.voter_count, state.members) +
+        d.choices.map(function (c) { return optHTML(d, c); }).join('') +
+        (state.errors[d.id] ? '<p class="text-small" style="color:rgb(var(--danger));margin:-4px 0 8px">Your vote didn\'t save. Try again.</p>' : '') +
+        '<p class="sub" style="margin-top:4px">' + esc(subTxt) + '</p>' +
+        '</div>' +
+        authorBtns +
+        '<div class="section-label">' + d.comment_count + (d.comment_count === 1 ? ' comment' : ' comments') + '</div>' +
+        (data.comments.length ? '<div class="list">' + rows + '</div>' : '<p class="sub">No comments yet.</p>') +
+        form;
+    }
+
+    function renderNew() {
+      var f = state.form;
+      app.innerHTML =
+        '<div class="bar"><button type="button" class="icon-btn" data-nav="#">Cancel</button>' +
+        '<div class="title" style="font-size:20px;line-height:28px">New decision</div>' +
+        '<button type="button" class="btn-primary" data-post>Post decision</button></div>' +
+        '<label class="lbl" for="fq">Question</label>' +
+        '<input class="input" id="fq" placeholder="e.g. Where do we meet on Saturday?" value="' + esc(f.question) + '">' +
+        '<label class="lbl">Choices</label>' +
+        f.choices.map(function (c, i) {
+          return '<div class="choice-row"><input class="input" data-choice="' + i + '" placeholder="e.g. Library courtyard" value="' + esc(c) + '">' +
+            '<button type="button" class="icon-btn" data-rm="' + i + '" aria-label="Remove choice"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+        }).join('') +
+        '<button type="button" class="btn-secondary" data-add style="margin-top:4px">' + PLUS + 'Add a choice</button>' +
+        '<p id="fErr" class="text-small" style="color:rgb(var(--danger));margin-top:8px" hidden></p>';
+      var fq = document.getElementById('fq');
+      if (fq && !f.question) fq.focus();
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────
+    function withScroll(p) {
+      var y = window.scrollY;
+      return Promise.resolve(p).then(function () {
+        window.scrollTo(0, y);
+      });
+    }
+
+    // After a vote, close or similar: refetch what the viewer is looking at
+    // (the one open decision, or the whole list) and re-render, keeping the
+    // scroll position.
+    function afterAction(promise, id) {
+      return withScroll(promise.then(function () {
+        if (state.detail && state.detail.decision && state.detail.decision.id === id) {
+          return api('/decisions/' + id).then(function (data) {
+            state.viewer = data.viewer;
+            state.members = data.member_count;
+            state.detail = data;
+            renderDetail();
+          });
+        }
+        return loadList();
+      })).catch(function (err) { handleActionError(err, id); });
+    }
+
+    function handleActionError(err, decisionId) {
+      if (err && err.code === 'account_required') return; // the bridge asks for an account
+      if (decisionId != null) {
+        state.errors[decisionId] = true;
+        if (state.list) renderList();
+        if (state.detail) renderDetail();
+      } else {
+        console.warn('action failed', err);
+      }
+    }
+
+    function loadList() {
+      state.list = null;
+      state.listFailed = false;
+      renderList();
+      return api('/decisions').then(function (data) {
+        state.viewer = data.viewer;
+        state.members = data.member_count;
+        state.list = data;
+        state.listFailed = false;
+        renderList();
+      }).catch(function () {
+        state.listFailed = true;
+        renderList();
+      });
+    }
+
+    function loadDetail(id) {
+      state.detail = null;
+      state.detailId = id;
+      state.detailFailed = false;
+      renderDetail();
+      return api('/decisions/' + id).then(function (data) {
+        state.viewer = data.viewer;
+        state.members = data.member_count;
+        state.detail = data;
+        state.detailFailed = false;
+        renderDetail();
+      }).catch(function () {
+        if (state.detailId !== id) return;
+        state.detailFailed = true;
+        renderDetail();
+      });
+    }
+
+    // ── Events ────────────────────────────────────────────────────────────
+    app.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-nav],[data-vote],[data-close],[data-del],[data-delc],[data-report],[data-retry],[data-retry-detail],[data-add],[data-rm],[data-post],[data-comment]');
+      if (!el) return;
+      var act;
+
+      if ((act = el.getAttribute('data-nav')) !== null) { location.hash = act; return; }
+      if (el.hasAttribute('data-retry')) { loadList(); return; }
+      if (el.hasAttribute('data-retry-detail')) { loadDetail(state.detailId); return; }
+      if (el.hasAttribute('data-add')) { readForm(); state.form.choices.push(''); renderNew(); return; }
+      if ((act = el.getAttribute('data-rm')) !== null) {
+        readForm(); state.form.choices.splice(Number(act), 1);
+        if (state.form.choices.length < 2) state.form.choices.push('');
+        renderNew(); return;
+      }
+      if (el.hasAttribute('data-post')) { postDecision(); return; }
+
+      if ((act = el.getAttribute('data-vote')) !== null) {
+        var p = act.split(':');
+        state.errors[p[0]] = false;
+        afterAction(api('/decisions/' + p[0] + '/vote', { method: 'POST', body: { choice_id: Number(p[1]) } }), Number(p[0]))
+          .catch(function () {});
+        return;
+      }
+      if ((act = el.getAttribute('data-close')) !== null) {
+        afterAction(api('/decisions/' + act + '/close', { method: 'POST', body: {} }), Number(act)).catch(function () {});
+        return;
+      }
+      if ((act = el.getAttribute('data-del')) !== null) {
+        if (!confirm('Delete this decision, its votes and its comments?')) return;
+        api('/decisions/' + act, { method: 'DELETE' }).then(function () {
+          state.detail = null;
+          location.hash = '#';
+        }).catch(function (err) { console.warn('delete failed', err); });
+        return;
+      }
+      if ((act = el.getAttribute('data-delc')) !== null) {
+        api('/comments/' + act, { method: 'DELETE' }).then(function () {
+          state.draft = readDraft();
+          loadDetail(state.detailId);
+        }).catch(function (err) { console.warn('delete failed', err); });
+        return;
+      }
+      if ((act = el.getAttribute('data-report')) !== null) {
+        var rp = act.split(':');
+        api('/reports', { method: 'POST', body: { kind: rp[0], id: Number(rp[1]) } }).then(function () {
+          state.reported[act] = true;
+          if (state.detail) withScroll(Promise.resolve(renderDetail()));
+        }).catch(function (err) { console.warn('report failed', err); });
+        return;
+      }
+      if (el.hasAttribute('data-comment')) { postComment(); return; }
+    });
+
+    app.addEventListener('input', function (e) {
+      if (e.target.id === 'fq') state.form.question = e.target.value;
+      if (e.target.hasAttribute('data-choice')) state.form.choices[Number(e.target.getAttribute('data-choice'))] = e.target.value;
+      if (e.target.id === 'cbox') state.draft = e.target.value;
+    });
+
+    function readForm() {
+      var fq = document.getElementById('fq');
+      if (fq) state.form.question = fq.value;
+      app.querySelectorAll('input[data-choice]').forEach(function (inp) {
+        state.form.choices[Number(inp.getAttribute('data-choice'))] = inp.value;
+      });
+    }
+    function readDraft() {
+      var box = document.getElementById('cbox');
+      return box ? box.value : state.draft;
+    }
+
+    function postDecision() {
+      readForm();
+      var f = state.form;
+      var choices = f.choices.map(function (c) { return c.trim(); }).filter(Boolean);
+      var btnErr = document.getElementById('fErr');
+      var fail = function (msg) {
+        if (btnErr) { btnErr.hidden = false; btnErr.textContent = msg || 'Your decision didn\'t save. Try again.'; }
+      };
+      if (!f.question.trim() || choices.length < 2) {
+        fail('A question and at least two different choices are needed.');
+        return;
+      }
+      api('/decisions', { method: 'POST', body: { question: f.question, choices: f.choices } }).then(function () {
+        state.form = { question: '', choices: ['', ''] };
+        location.hash = '#';
+      }).catch(function (err) {
+        fail(err && err.code && err.code !== 'account_required' ? String(err.code) : null);
+      });
+    }
+
+    function postComment() {
+      var box = document.getElementById('cbox');
+      var body = box ? box.value.trim() : '';
+      var errEl = document.getElementById('cErr');
+      if (!body) { if (errEl) errEl.hidden = false; return; }
+      api('/decisions/' + state.detailId + '/comments', { method: 'POST', body: { body: body } }).then(function () {
+        state.draft = '';
+        withScroll(loadDetail(state.detailId)).catch(function () {});
+      }).catch(function (err) {
+        if (err && err.code === 'account_required') return;
+        if (errEl) errEl.hidden = false;
+      });
+    }
+
+    // ── Routing ───────────────────────────────────────────────────────────
+    function route() {
+      var h = location.hash || '';
+      if (h === '#/new') { renderNew(); return; }
+      var m = h.match(/^#\/d\/(\d+)/);
+      if (m) { loadDetail(Number(m[1])); return; }
+      loadList();
+    }
+    window.addEventListener('hashchange', route);
+    route();
+  })();
+  </script>
 </body>
 </html>

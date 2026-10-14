@@ -55,6 +55,8 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        calm: token('calm'), // closed results, calm blue-green
+        'calm-bg': token('calm-bg'), // the calm colour's background
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

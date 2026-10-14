@@ -44,17 +44,19 @@
     --calm-bg: 226 238 239; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;     /* the page */
+    --surface: 34 29 25;    /* lists, cards, fields */
+    --raised: 46 40 35;     /* hovers, badges */
+    --fg: 245 240 233;      /* text */
+    --muted: 176 166 154;   /* secondary text */
+    --line: 64 56 49;       /* borders, dividers, skeletons */
+    --accent: 236 116 84;   /* the one accent: voting, brick red */
+    --on-accent: 36 14 6;   /* text on the accent */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 125 196 204;   /* the keyboard focus ring */
+    --calm: 125 196 204;    /* closed results, calm blue-green */
+    --calm-bg: 30 52 56;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

@@ -95,22 +95,29 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+One list of the club's decisions, so the group can decide things together:
+anyone posts a question with choices, everyone votes by tapping (and can
+change their vote until the vote is closed), and each decision has its own
+comment thread. The person who posted closes the vote; the result stays on
+the list as the club's record. Votes are shown as counts only, never who
+voted what. Reporting exists but never hides content.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** brick red accent (`accent` 178 58 30 light / 236 116 84
+  dark, white-on-accent in light, near-black in dark); calm blue-green
+  (`calm` 44 98 106 / 125 196 204, with `calm-bg` behind it) reserved for
+  closed results; warm neutrals everywhere else.
+- **Signature element:** the tally strip — one stroke per member, grouped
+  in fives where every fifth stroke is struck diagonally, filled in accent
+  as votes come in, pale (`line`) where they haven't, calm blue-green once
+  the vote is closed. When the member count is unavailable, show only
+  filled strokes plus "N voted" with no total.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +147,19 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `votes` and `reports` tables are `staging:private` (never seeded or
+  read by Homeroom tooling); the other tables are public.
+- Staging demo rows live in fixed id bands (decisions 900001+, choices
+  910001+, comments 950001+) and carry a `demo_owner_id`; they only appear
+  in `?demo=1` requests by their owner, and non-demo responses filter them
+  out. Real rows use the ordinary BIGSERIAL ids, so never assume demo ids
+  cover everything.
+- Author ids are stored as TEXT (JWT ids arrive as numbers): compare ids
+  with a string comparison everywhere, server (`String(d.author_id) !==
+  String(req.user.id)`) and client alike.
+- Votes are counts only: the API never returns who voted what, and the
+  schema has no per-vote identity exposed beyond the (decision, user) row
+  that upserts the viewer's own choice.
+- Reports are idempotent (unique on kind/target/reporter) and never hide
+  the reported content.
+- Closing a vote is idempotent; the first close time wins.

@@ -20,7 +20,9 @@
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   box-sizing: border-box;
   padding: 0 16px 32px;
 }
@@ -70,7 +72,7 @@
 
 .opt.me {border-color:rgb(var(--accent));border-width:2px}
 
-.opt.me em {background:rgb(178 58 30/.1)}
+.opt.me em {background:rgb(var(--accent)/.1)}
 
 .foot {display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
@@ -97,7 +99,9 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   box-sizing: border-box;
   padding: 0 16px 32px;
 }
@@ -134,3 +138,15 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
 .field {width:100%;min-height:88px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:10px 12px;font-family:inherit;font-size:16px;color:rgb(var(--muted))}
 
 .lbl {display:block;font-size:14px;line-height:20px;font-weight:500;margin:16px 0 6px}
+
+/* First version: pieces the drawing didn't cover. A single-line field and
+   the rows it sits in on the new-decision form, on the same tokens. */
+.input {width:100%;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:10px 12px;font-family:inherit;font-size:16px;color:rgb(var(--fg))}
+
+.input:focus {outline:none;border-color:rgb(var(--focus));box-shadow:0 0 0 2px rgb(var(--focus)/.4)}
+
+.choice-row {display:flex;gap:8px;align-items:center;margin-bottom:8px}
+
+.choice-row .input {flex:1;min-width:0}
+
+.list-row p {margin-top:2px}

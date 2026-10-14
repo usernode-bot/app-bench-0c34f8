@@ -3,5 +3,9 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Decisions screen loads", "path": "/", "expectSelector": "[data-decisions]" },
+    { "name": "Populated demo", "id": "populated-demo", "visual": true, "impact": ["public/**"], "path": "/?demo=1", "expectText": "Where do we meet on Saturday?" },
+    { "name": "Decision discussion", "path": "/?demo=1#/d/900001", "expectText": "Post comment" }
+  ]
 }
