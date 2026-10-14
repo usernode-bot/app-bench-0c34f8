@@ -95,22 +95,33 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator. The user picks one of five breads
+(Sourdough, Bagels, Sourdough bagels, Rye, Sandwich loaf), sets hydration
+(50-90%), count (1-12 loaves, 1-24 bagels) and size (preset grams per
+bread, or a Custom 50-3000 g field), and the screen live-updates: total
+dough weight, every ingredient in grams with baker's percentages, a rise
+schedule strip (Mix, First rise, Proof, Bake) and the bake (°C with °F
+underneath, time, per-bread note), plus a "Copy recipe" button. First
+version: no saved recipes, accounts, unit switch, editable flour mixes,
+timers or share links.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent is crust brown (light `128 70 24`, dark `226 160 92`
+  with dark on-accent `38 22 8`); neutrals are warm bread-crust greys
+  (light ground `249 248 245` / surface `255 255 255` / raised `242 238 230`;
+  dark ground `22 18 15` / surface `33 27 22` / raised `46 38 31`); wheat
+  gold (`214 160 60` light, `200 150 64` dark) is decoration only, never
+  for text.
+- **Signature element:** the rise schedule strip, a horizontal bar whose
+  four segments (Mix, First rise, Proof, Bake) are sized by how long each
+  takes: the cold proof segment is muted, the bake segment is the accent.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  _(change their sizes in `tailwind.config.js` if you must, not their number)_;
+  headings and big numbers use the `font-rounded` face.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

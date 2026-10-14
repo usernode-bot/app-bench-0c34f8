@@ -55,6 +55,11 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the rise strip's grain gold, never for text
+      },
+      fontFamily: {
+        // The rounded face for headings and big numbers, as the screens drew.
+        rounded: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

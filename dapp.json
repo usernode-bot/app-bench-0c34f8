@@ -3,5 +3,26 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator shows a recipe",
+      "path": "/",
+      "expectSelector": "#ingredients li",
+      "expectText": "Ingredients"
+    },
+    {
+      "name": "Rise schedule and bake",
+      "path": "/",
+      "expectSelector": ".rise-strip",
+      "expectText": "Bake"
+    },
+    {
+      "id": "demo",
+      "name": "Staging demo preset",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    }
+  ]
 }

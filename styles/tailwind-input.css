@@ -39,21 +39,22 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 128 70 24;      /* the keyboard focus ring */
     --wheat: 214 160 60; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 22 18 15;
+    --surface: 33 27 22;
+    --raised: 46 38 31;
+    --fg: 244 237 226;
+    --muted: 184 168 150;
+    --line: 66 55 45;
+    --accent: 226 160 92;
+    --on-accent: 38 22 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 226 160 92;
+    --wheat: 200 150 64;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

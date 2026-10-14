@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -96,6 +97,17 @@ function requestNow(req) {
   return typeof raw === 'string' && PREVIEW_NOW.test(raw) ? new Date(raw) : new Date();
 }
 
+// The HTML shell, read ONCE at boot and served from memory by the catch-all
+// below. On staging the <html> tag gets data-staging, which is what gates
+// the demo preset (?demo=1) in app.js: DATA (a staging-only populated
+// preview) keyed off the environment, never a feature.
+const INDEX_HTML = (() => {
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  return IS_STAGING && /<html(?=[\s>])/.test(html)
+    ? html.replace(/<html(?=[\s>])/, '<html data-staging')
+    : html;
+})();
+
 // Verify platform-issued JWT if one was passed, then enforce auth on
 // anything not explicitly marked public. The iframe adds `?token=…`
 // on load; the frontend script forwards the token via `x-usernode-token`
@@ -154,7 +166,10 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// index: false — every HTML visit goes through the catch-all below, so the
+// shell is always the one read at boot (with data-staging on staging), never
+// the raw file static would serve at "/".
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -188,13 +203,25 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(INDEX_HTML);
 });
 
+let server;
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// The platform stops this app with SIGTERM (an interrupted run sends
+// SIGINT): stop accepting connections, let in-flight requests finish within
+// about 3 s, then exit. There is no database pool to close.
+function shutdown() {
+  if (!server) process.exit(0);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });
