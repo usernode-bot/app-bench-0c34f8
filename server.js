@@ -147,6 +147,207 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── The app's own routes ──────────────────────────────────────────────────
+// Each person's feeds are private to them: every query filters on
+// user_id = req.user.id. Both tables are staging:private (see ensureSchema).
+
+const { safeFetch, parseFeed } = require('./lib/feeds');
+const { demoFeeds, demoItems } = require('./lib/demo');
+
+// The schema, created idempotently on boot.
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      url text NOT NULL,
+      title text NOT NULL DEFAULT '',
+      site_url text,
+      demo boolean NOT NULL DEFAULT false,
+      last_error text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_url_idx ON feeds (user_id, url);
+    CREATE TABLE IF NOT EXISTS read_marks (
+      feed_id integer NOT NULL REFERENCES feeds (id) ON DELETE CASCADE,
+      guid text NOT NULL,
+      read_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (feed_id, guid)
+    );
+  `);
+  await pool.query(`COMMENT ON TABLE feeds IS 'staging:private'`);
+  await pool.query(`COMMENT ON TABLE read_marks IS 'staging:private'`);
+}
+
+// Demo seeding: staging only, and only when the viewer opened the app with
+// ?demo=1. Writes the four made-up feeds once (ON CONFLICT DO NOTHING), so
+// tapping, removing and marking read work on real rows. The demo flag keeps
+// them out of every response without ?demo=1, so the plain app still shows
+// its real empty state.
+async function seedDemoFeeds(userId) {
+  // Seed once per viewer: the seeds are real rows, so a feed the viewer
+  // removed stays removed on the next demo visit (and a viewer who
+  // removed all four has opted out of the demo).
+  const { rows: have } = await pool.query(
+    `SELECT 1 FROM feeds WHERE user_id = $1 AND demo = true LIMIT 1`, [userId]);
+  if (have.length) return;
+  const values = demoFeeds();
+  await pool.query(
+    `INSERT INTO feeds (user_id, url, title, site_url, demo)
+     SELECT $1, f.url, f.title, f.site_url, true
+     FROM unnest($2::text[], $3::text[], $4::text[]) AS f(url, title, site_url)
+     ON CONFLICT (user_id, url) DO NOTHING`,
+    [userId, values.map((f) => f.url), values.map((f) => f.title), values.map((f) => f.siteUrl)]
+  );
+}
+
+const MAX_FEEDS = 50;
+
+// GET /api/posts: the viewer's unread posts, newest first. Each feed is
+// fetched in parallel; a feed that fails does not fail the response, it
+// becomes feeds[i].error (and feeds.last_error) and shows as a line under
+// the header. Demo feeds (with ?demo=1) are served from lib/demo.js with no
+// network touched. A guest gets { feeds: [], posts: [] }.
+app.get('/api/posts', async (req, res) => {
+  if (!req.user) return res.json({ feeds: [], posts: [], demo: req.query.demo === '1' });
+  const wantDemo = req.query.demo === '1';
+  try {
+    if (wantDemo && IS_STAGING) await seedDemoFeeds(req.user.id);
+    const { rows: feedRows } = await pool.query(
+      wantDemo
+        ? `SELECT id, url, title, site_url, demo, last_error FROM feeds WHERE user_id = $1 ORDER BY created_at, id`
+        : `SELECT id, url, title, site_url, demo, last_error FROM feeds WHERE user_id = $1 AND demo = false ORDER BY created_at, id`,
+      [req.user.id]
+    );
+    const feeds = [];
+    const postLists = await Promise.all(feedRows.map(async (row) => {
+      const feed = { id: row.id, title: row.title, url: row.url, error: null };
+      feeds.push(feed);
+      try {
+        let items;
+        if (row.demo) {
+          if (!IS_STAGING) return [];
+          items = demoItems(row.url, req.now);
+        } else {
+          const xml = await safeFetch(row.url);
+          items = parseFeed(xml).items;
+        }
+        const { rows: read } = await pool.query(
+          `SELECT guid FROM read_marks WHERE feed_id = $1`, [row.id]);
+        const readSet = new Set(read.map((r) => r.guid));
+        // The feed came back fine: drop any stale failure note.
+        if (row.last_error) {
+          pool.query(`UPDATE feeds SET last_error = NULL WHERE id = $1 AND last_error IS NOT NULL`, [row.id])
+            .catch((e) => console.warn('last_error clear failed: ' + e.message));
+        }
+        return items
+          .filter((it) => !readSet.has(it.guid))
+          .map((it) => ({
+            feedId: row.id,
+            feedTitle: row.title || hostOf(row.url),
+            guid: it.guid,
+            title: it.title,
+            link: it.link,
+            publishedAt: it.publishedAt,
+            excerpt: it.excerpt,
+            preview: it.preview,
+          }));
+      } catch (err) {
+        feed.error = err && err.message ? String(err.message) : 'The feed did not load.';
+        // Keep last_error as the most recent failure note for this feed.
+        pool.query(`UPDATE feeds SET last_error = $2 WHERE id = $1`, [row.id, feed.error])
+          .catch((e) => console.warn('last_error update failed: ' + e.message));
+        return [];
+      }
+    }));
+    // Sort the merged list newest first; a post with no date sorts last.
+    const posts = [].concat(...postLists).sort((a, b) => {
+      const ta = a.publishedAt ? Date.parse(a.publishedAt) : -Infinity;
+      const tb = b.publishedAt ? Date.parse(b.publishedAt) : -Infinity;
+      return tb - ta;
+    });
+    res.json({ feeds, posts, demo: wantDemo });
+  } catch (err) {
+    console.error('GET /api/posts failed: ' + (err.stack || err));
+    res.status(500).json({ error: 'Your posts did not load. Your feeds are saved.' });
+  }
+});
+
+function hostOf(url) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
+
+// POST /api/feeds { url }: validate that the address really serves an RSS or
+// Atom feed, then save it. 201 { feed }, or 400 with a message fit to show.
+app.post('/api/feeds', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  const url = req.body && typeof req.body.url === 'string' ? req.body.url.trim() : '';
+  if (!url) return res.status(400).json({ error: 'Give the address of the feed.' });
+  let target;
+  try {
+    target = new URL(url);
+  } catch {
+    return res.status(400).json({ error: 'That is not a valid address. Check it and try again.' });
+  }
+  if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+    return res.status(400).json({ error: 'Only http and https addresses work.' });
+  }
+  const { rows: existing } = await pool.query(
+    `SELECT id FROM feeds WHERE user_id = $1 AND url = $2`, [req.user.id, target.href]);
+  if (existing.length) return res.status(400).json({ error: 'You already follow this feed.' });
+  const { rows: countRows } = await pool.query(
+    `SELECT count(*)::int AS n FROM feeds WHERE user_id = $1 AND demo = false`, [req.user.id]);
+  if (countRows[0].n >= MAX_FEEDS) {
+    return res.status(400).json({ error: `You follow the most feeds this version allows (${MAX_FEEDS}).` });
+  }
+  let parsed;
+  try {
+    parsed = parseFeed(await safeFetch(target.href));
+  } catch (err) {
+    const message = err && err.message ? String(err.message) : 'That address is not an RSS or Atom feed.';
+    return res.status(400).json({ error: message === 'That address is not an RSS or Atom feed.' ? message : `Could not read that feed: ${message}` });
+  }
+  const title = parsed.title || target.hostname;
+  const { rows } = await pool.query(
+    `INSERT INTO feeds (user_id, url, title, site_url) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (user_id, url) DO UPDATE SET title = EXCLUDED.title, site_url = EXCLUDED.site_url, last_error = NULL
+     RETURNING id, url, title, site_url`,
+    [req.user.id, target.href, title, parsed.siteUrl || null]);
+  res.status(201).json({ feed: rows[0] });
+});
+
+// DELETE /api/feeds/:id: the viewer's own feed only; its read marks go with
+// it (ON DELETE CASCADE).
+app.delete('/api/feeds/:id', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'That feed does not exist.' });
+  const { rows } = await pool.query(
+    `DELETE FROM feeds WHERE id = $1 AND user_id = $2 RETURNING id`, [id, req.user.id]);
+  if (!rows.length) return res.status(404).json({ error: 'That feed does not exist.' });
+  res.json({ ok: true });
+});
+
+// POST /api/read { feedId, guid }: one read mark, for the viewer's own feed.
+// Idempotent: marking again is fine.
+app.post('/api/read', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  const feedId = Number(req.body && req.body.feedId);
+  const guid = req.body && typeof req.body.guid === 'string' ? req.body.guid.slice(0, 500) : '';
+  if (!Number.isInteger(feedId) || feedId <= 0 || !guid) {
+    return res.status(400).json({ error: 'That read mark is missing its post.' });
+  }
+  const { rows } = await pool.query(
+    `SELECT id FROM feeds WHERE id = $1 AND user_id = $2`, [feedId, req.user.id]);
+  if (!rows.length) return res.status(403).json({ error: 'That feed is not one of yours.' });
+  await pool.query(
+    `INSERT INTO read_marks (feed_id, guid, read_at) VALUES ($1, $2, $3)
+     ON CONFLICT (feed_id, guid) DO NOTHING`,
+    [feedId, guid, req.now]);
+  res.json({ ok: true });
+});
+
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +393,23 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await ensureSchema();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Stop cleanly: stop taking connections, drain briefly, close the pool.
+  let stopping = false;
+  const stop = (signal) => {
+    if (stopping) return;
+    stopping = true;
+    console.log(`${signal}: shutting down`);
+    server.close(() => {
+      pool.end().then(() => process.exit(0), () => process.exit(0));
+    });
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', () => stop('SIGTERM'));
+  process.on('SIGINT', () => stop('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

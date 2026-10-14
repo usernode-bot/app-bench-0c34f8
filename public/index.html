@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23ea580c'/><circle cx='50' cy='50' r='20' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -120,7 +120,7 @@
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div><main>
+    <div><main id="app">
     <div class="head">
     <h1>Unread</h1>
     <button class="btn-secondary icon-btn" aria-label="Refresh"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 21v-5h-5"/></svg></button>
@@ -162,5 +162,6 @@
     </main></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

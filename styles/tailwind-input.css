@@ -40,20 +40,21 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
-    --unread: 234 88 12; /* from the spec's screens */
+    --unread: 234 88 12;      /* the unread dot, RSS orange */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 13 17 23;       /* the page */
+    --surface: 22 27 34;      /* lists, cards, fields */
+    --raised: 33 39 48;       /* hovers, badges */
+    --fg: 236 239 243;        /* text */
+    --muted: 156 165 178;     /* secondary text */
+    --line: 48 55 66;         /* borders, dividers, skeletons */
+    --accent: 94 196 182;     /* the one accent */
+    --on-accent: 6 40 37;     /* text on the accent */
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 94 196 182;      /* the keyboard focus ring */
+    --unread: 251 146 60;     /* the unread dot, RSS orange */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

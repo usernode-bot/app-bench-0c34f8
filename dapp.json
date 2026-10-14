@@ -3,5 +3,28 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "unread",
+      "name": "Unread list (demo)",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "id": "empty",
+      "name": "Empty state",
+      "path": "/",
+      "expectText": "Add your first feed",
+      "impact": ["public/**"]
+    },
+    {
+      "id": "health",
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok",
+      "impact": ["server.js"]
+    }
+  ]
 }

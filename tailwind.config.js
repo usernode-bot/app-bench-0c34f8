@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        unread: token('unread'), // the unread dot (the app's signature mark)
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
