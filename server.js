@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { resource } = require('./kit/server');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -145,7 +146,242 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+// ── Club Votes ──────────────────────────────────────────────────────────────
+// One resource, the kit's: decisions with options to vote on and comments.
+// Closures, reports and the per-viewer demo decision are this app's own and
+// live below, mounted before the kit so a closed decision refuses votes.
+const GONE = 'This was removed, or the link is wrong.';
+
+// Demo content (staging, ?demo=1 only). The kit seeds the made-up decisions
+// and the viewer's votes on two of them; the two entries below are closed and
+// one is the viewer's own copy, seeded here. Kit rows use ids from 900001;
+// this file's extra rows start at 900101 to stay clear of them.
+const DEMO = {
+  titles: [
+    'Order club badges for the new members?',
+    { title: 'Club t-shirt colour', options: ['Forest green', 'Navy', 'Charcoal'] },
+    { title: 'Where should we meet in November?', options: ['Library room B', 'Cafe Ostra', 'Online'] },
+    { title: 'Pick the next book for December', options: ['The Overstory', 'Piranesi', 'Project Hail Mary'] },
+    'Move meetings to Thursdays?',
+    { title: 'Film night: documentary or comedy?', options: ['Documentary', 'Comedy'] },
+    { title: 'Which day for the summer barbecue?', options: ['Saturday 11 July', 'Sunday 12 July'] },
+    { title: 'Where should the raffle money go?', options: ['New equipment', 'Trip fund'] },
+    'Try a monthly guest speaker?',
+    { title: 'Best time for the photo walk?', options: ['Saturday morning', 'Sunday afternoon'] },
+  ],
+  bodies: [
+    'Adding it here so we can settle it this week.',
+    'Please vote for what works for you; we will go with the majority.',
+    'Comment if none of the options suit you and we can add one.',
+  ],
+  comments: [
+    'Sounds good to me.',
+    'Happy with either, whatever most people pick.',
+    'Can we not do a weekday evening? I finish late.',
+    'I can help organise this.',
+    'Last time we tried this it went well, so yes from me.',
+  ],
+};
+
+// Closures must exist before the kit answers its list route in the same
+// request, so the demo rows the kit would seed are written here first, with
+// exactly the kit's arguments (kit/server.js seedDemo: seed 7, ids from
+// 900001). Keep this in step with that code if either changes.
+// A closed decision takes no votes: this guard runs before the kit's own
+// vote route (registered below), so the 409 answers instead of the vote
+// being recorded.
+app.post('/api/decisions/:id/vote', (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!(Number.isInteger(id) && id > 0)) return next();
+  pool.query('SELECT 1 FROM decision_closures WHERE decision_id = $1', [id])
+    .then(({ rows }) => {
+      if (rows.length) return res.status(409).json({ error: 'This decision is closed.' });
+      next();
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+    });
+});
+
+// Staging demo (?demo=1, staging only): seed before the kit's routes, so a
+// list or detail answer already carries the closures and the viewer's own
+// decision. seedDemoExtras also writes the kit's own rows (same call, same
+// ids), because the closures must hang off rows that exist; the kit then
+// finds them there and only adds its per-viewer votes.
+app.get(['/api/decisions', '/api/decisions/:id', '/api/decision-closures'], (req, res, next) => {
+  if (!(IS_STAGING && req.query.demo === '1' && req.user)) return next();
+  seedDemoExtras(req).catch((err) => console.error('demo seed failed', err)).finally(() => next());
+});
+
+const decisions = resource(app, pool, {
+  name: 'decisions',
+  options: ['Yes', 'No'],
+  demo: DEMO,
+});
+const KIT_DEMO_ID = 900001;
+const DEMO_CLOSED = [KIT_DEMO_ID + 1, KIT_DEMO_ID + 6]; // t-shirt colour, barbecue day
+const DEMO_VIEWER_ID = 900101; // the viewer's own "Spring trip" decision
+const DEMO_VIEWER_COMMENT_ID = 900201;
+
+async function migrate() {
+  await decisions.migrate();
+  // The mark that a decision is closed: voting stops, the winner is read
+  // from the votes as they stood. Closed by the decision's author only.
+  await pool.query(`CREATE TABLE IF NOT EXISTS decision_closures (
+    decision_id INTEGER PRIMARY KEY REFERENCES decisions(id) ON DELETE CASCADE,
+    closed_by INTEGER NOT NULL, closed_at TIMESTAMPTZ NOT NULL)`);
+  // Which staging viewers have had their own demo decision written, so it is
+  // written once per viewer, never twice.
+  await pool.query(`CREATE TABLE IF NOT EXISTS decisions_demo_viewers (
+    user_id INTEGER PRIMARY KEY)`);
+  // Reports of other people's decisions and comments, for a person to review
+  // later. `staging:private` (see "Public vs private tables" in the platform
+  // conventions): copied to staging as schema only, so made-up demo reports
+  // are never read as real ones. No foreign keys on purpose: a report keeps
+  // its target's id even after the target is deleted, and the same table
+  // holds reports of two different kinds of thing.
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY, kind TEXT NOT NULL, target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL, reporter_name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL, UNIQUE (kind, target_id, reporter_id))`);
+  await pool.query("COMMENT ON TABLE reports IS 'staging:private'");
+}
+
+// Which decisions are closed, for the page to mark rows and stop voting.
+app.get('/api/decision-closures', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT decision_id AS id, closed_at AS "closedAt" FROM decision_closures LIMIT 500');
+    return res.json({ closures: rows });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Close as decided: the author only, once (asking twice changes nothing).
+app.post('/api/decisions/:id/close', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const id = Number(req.params.id);
+    if (!(Number.isInteger(id) && id > 0)) return res.status(404).json({ error: GONE });
+    const { rows } = await pool.query('SELECT author_id FROM decisions WHERE id = $1', [id]);
+    if (!rows.length) return res.status(404).json({ error: GONE });
+    if (rows[0].author_id !== Number(req.user.id)) {
+      return res.status(403).json({ error: 'Only the person who posted this can close it.' });
+    }
+    const put = await pool.query(
+      `INSERT INTO decision_closures (decision_id, closed_by, closed_at) VALUES ($1, $2, $3)
+       ON CONFLICT (decision_id) DO NOTHING RETURNING closed_at`, [id, Number(req.user.id), req.now]);
+    const closedAt = put.rows.length ? put.rows[0].closed_at
+      : (await pool.query('SELECT closed_at FROM decision_closures WHERE decision_id = $1', [id])).rows[0].closed_at;
+    return res.json({ closedAt });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Delete one of your own comments. (Deleting a decision is the kit's route.)
+app.delete('/api/decisions/:id/comments/:commentId', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const commentId = Number(req.params.commentId);
+    const id = Number(req.params.id);
+    if (!(Number.isInteger(commentId) && commentId > 0)) return res.status(404).json({ error: GONE });
+    const gone = await pool.query(
+      'DELETE FROM decisions_comments WHERE id = $1 AND item_id = $2 AND author_id = $3 RETURNING id',
+      [commentId, id, Number(req.user.id)]);
+    if (gone.rows.length) return res.json({ ok: true });
+    const still = await pool.query('SELECT 1 FROM decisions_comments WHERE id = $1 AND item_id = $2', [commentId, id]);
+    if (!still.rows.length) return res.status(404).json({ error: GONE });
+    return res.status(403).json({ error: 'Only the person who wrote this can delete it.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Report someone else's decision or comment. Reporting twice is the same as
+// reporting once. Reports are listed nowhere yet; they wait in the table.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const kind = (req.body || {}).kind;
+    const id = Number((req.body || {}).id);
+    if ((kind !== 'decision' && kind !== 'comment') || !(Number.isInteger(id) && id > 0)) {
+      return res.status(400).json({ error: 'Say what you are reporting.' });
+    }
+    await pool.query(
+      `INSERT INTO reports (kind, target_id, reporter_id, reporter_name, created_at)
+       VALUES ($1, $2, $3, $4, $5) ON CONFLICT (kind, target_id, reporter_id) DO NOTHING`,
+      [kind, id, Number(req.user.id), String(req.user.username || 'Someone'), req.now]);
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Staging demo extras (?demo=1, staging only): the two closed decisions and
+// the viewer's own copy of the spring trip, so Close and Delete can be tried
+// on something that is theirs.
+const loadDemo = () => import(new URL('./public/kit/demo.js', `file://${__dirname}/`).href);
+
+async function seedDemoExtras(req) {
+  const uid = Number(req.user.id);
+  // The kit's demo rows, if they are not in yet (same call, same ids).
+  const there = await pool.query('SELECT 1 FROM decisions WHERE id = $1', [KIT_DEMO_ID]);
+  if (!there.rows.length) {
+    const { demoItems } = await loadDemo();
+    const rows = demoItems({ seed: 7, options: ['Yes', 'No'], ...DEMO, now: req.now, firstId: KIT_DEMO_ID });
+    const put = (table, cols, list) => pool.query(`INSERT INTO ${table} (${cols.replace(/ \w+(,|$)/g, '$1')})
+      SELECT * FROM json_to_recordset($1::json) AS x(${cols}) ON CONFLICT DO NOTHING`, [JSON.stringify(list)]);
+    await put('decisions', 'id int, title text, body text, category text, options jsonb, author_id int, author_name text, created_at timestamptz',
+      rows.map((r) => ({ id: r.id, title: r.title, body: r.body, category: r.category, options: r.options.map((o) => o.label), author_id: r.authorId, author_name: r.author, created_at: r.createdAt })));
+    await put('decisions_votes', 'item_id int, user_id int, choice int, created_at timestamptz',
+      rows.flatMap((r) => r.votes.map((v) => ({ item_id: r.id, user_id: v.userId, choice: v.optionId, created_at: v.createdAt }))));
+    await put('decisions_comments', 'id int, item_id int, author_id int, author_name text, body text, created_at timestamptz',
+      rows.flatMap((r) => r.comments.map((c) => ({ id: c.id, item_id: r.id, author_id: c.authorId, author_name: c.author, body: c.body, created_at: c.createdAt }))));
+  }
+  // Close the two decided demo rows, closed by their own author a few hours
+  // after they were posted (never after right now).
+  await pool.query(
+    `INSERT INTO decision_closures (decision_id, closed_by, closed_at)
+     SELECT id, author_id, LEAST(created_at + INTERVAL '4 hours', $2) FROM decisions WHERE id = ANY($1)
+     ON CONFLICT DO NOTHING`, [DEMO_CLOSED, req.now]);
+  // The viewer's own spring trip, once per viewer, with a tie in the votes
+  // (no vote of the viewer's own: they can try voting, changing it, and
+  // taking it back) and a few made-up comments.
+  const first = await pool.query(
+    'INSERT INTO decisions_demo_viewers (user_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING user_id', [uid]);
+  if (first.rows.length) {
+    await pool.query(
+      `INSERT INTO decisions (id, title, body, options, author_id, author_name, created_at)
+       VALUES ($1, 'Spring trip: coast or hills?', $2, $3::jsonb, $4, $5, $6) ON CONFLICT DO NOTHING`,
+      [DEMO_VIEWER_ID,
+       'One Saturday in April. The coast means the 8:10 train, the hills mean sharing cars. Vote for the one you would come to.',
+       JSON.stringify(['Coast', 'Hills']), uid, String(req.user.username || 'Someone'),
+       new Date(req.now.getTime() - 26 * 3600 * 1000)]);
+    await pool.query(
+      `INSERT INTO decisions_votes (item_id, user_id, choice, created_at)
+       SELECT $1, u, c, $2 FROM (VALUES (-1, 0), (-2, 0), (-3, 0), (-4, 0), (-5, 1), (-6, 1), (-7, 1), (-8, 1)) AS t(u, c)
+       ON CONFLICT DO NOTHING`, [DEMO_VIEWER_ID, req.now]);
+    await pool.query(
+      `INSERT INTO decisions_comments (id, item_id, author_id, author_name, body, created_at)
+       VALUES ($1, $2, -3, 'Chioma', 'Coast for me, if we can get the early train.', $3::timestamptz),
+              ($1 + 1, $2, -6, 'Farah', 'Hills are cheaper if four of us drive. Happy either way.', $3::timestamptz + INTERVAL '5 hours'),
+              ($1 + 2, $2, -9, 'Ivo', 'Let''s close this on Friday so we can book.', $3::timestamptz + INTERVAL '20 hours')
+       ON CONFLICT DO NOTHING`, [DEMO_VIEWER_COMMENT_ID, DEMO_VIEWER_ID,
+        new Date(req.now.getTime() - 21 * 3600 * 1000)]);
+  }
+}
+
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting down' });
+  return res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -191,8 +427,38 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Shutdown ────────────────────────────────────────────────────────────────
+// SIGTERM (the platform scaling or redeploying) and SIGINT (Ctrl+C) stop
+// new requests, give live ones about three seconds to finish, close the
+// database pool and leave. /health answers 503 while this is happening so
+// the platform stops sending traffic before the process is gone.
+let server = null;
+let shuttingDown = false;
+
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`${signal}: shutting down`);
+  const leave = () => process.exit(0);
+  const drained = new Promise((resolve) => {
+    if (!server) return resolve();
+    server.close(resolve);
+    server.closeIdleConnections?.();
+    // Anything still open after three seconds goes too; the timer is
+    // unref'd so it never keeps the process alive on its own.
+    setTimeout(() => server.closeAllConnections?.(), 3000).unref?.();
+    setTimeout(resolve, 3100).unref?.();
+  });
+  Promise.all([drained, pool.end().catch(() => {})]) .then(leave, leave);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  // keepAliveTimeout assignment: capture the listening server so shutdown
+  // can stop it.
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }

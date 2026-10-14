@@ -39,7 +39,7 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 99 102 241;      /* the keyboard focus ring */
     --decided: 146 64 14; /* from the spec's screens */
     --decided-soft: 254 243 199; /* from the spec's screens */
   }
@@ -50,11 +50,13 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 165 160 255;
+    --on-accent: 30 27 75;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 129 140 248;
+    --decided: 252 211 77;
+    --decided-soft: 69 46 10;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

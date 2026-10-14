@@ -3,5 +3,16 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Health", "path": "/health", "expectText": "ok" },
+    { "name": "Decision list", "path": "/", "expectText": "Club Votes" },
+    {
+      "id": "demo-list",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"]
+    }
+  ]
 }

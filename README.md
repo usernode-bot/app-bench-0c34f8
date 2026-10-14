@@ -1,27 +1,38 @@
 # Club Votes
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A club decision-making app on [Homeroom](https://app.onhomeroom.com). Anyone
+posts a decision — with options, or as a plain Yes/No — everyone votes (one
+vote per person, changeable or take-backable until it closes), and people
+comment under each decision. The person who posted a decision can **Close as
+decided**, which stops voting and marks the leading option as the outcome.
 
-The scaffold is a small working demo that proves the plumbing works:
+## Screens
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **Decisions** — open decisions first (newest at the top), then decided ones
+  marked with an amber badge. Each row shows the question, who posted it and
+  when, a tally bar, the leading option, whether you voted, and the comment
+  count.
+- **A decision** — the full question, its options as wide buttons whose fill
+  shows each share, your vote (tap again to take it back), a summary line,
+  Close as decided (the author only), and comments oldest first with a
+  composer. The ⋯ menus offer Report on other people's posts and Delete on
+  your own.
 
-## Replacing the template
+## How it is built
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- `server.js` — Express + Postgres. The decision, vote and comment tables and
+  their API come from the Homeroom kit (`kit/server.js`, mounted as the
+  `decisions` resource). On top of it: closures (`decision_closures`, author
+  only, checked before every vote), reports (`reports`, marked
+  `staging:private`), and graceful shutdown.
+- `public/index.html` + `public/app.js` — the two screens the spec drew,
+  filled with live data by the Homeroom fill kit (`public/kit/`).
+- `styles/tailwind-input.css` — the design kit: ballot-ink indigo accent,
+  decided amber, warm grey neutrals; `npm run build` compiles it to
+  `public/tailwind.css`.
 
-Once the real app exists, rewrite this README to describe it.
+## Staging demo
+
+With `?demo=1` on staging, the app seeds about ten made-up decisions by fake
+members (plus one copy of a decision posted by the viewer, so Close and
+Delete can be tried on it) and marks the screen "Staging demo".

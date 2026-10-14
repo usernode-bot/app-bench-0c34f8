@@ -64,9 +64,12 @@
 
 .badge svg {width:13px;height:13px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Everything here is
+   scoped to [data-spec-screen="2"] so the detail view's shapes (the flex
+   comment rows, the option buttons, the wide secondary button) never leak
+   onto the list screen, whose rules above stand. */
 
-.cv {
+[data-spec-screen="2"] .cv {
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
@@ -77,60 +80,62 @@
   line-height: 24px;
 }
 
-.nav {display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+[data-spec-screen="2"] .nav {display:flex;justify-content:space-between;align-items:center;padding:8px 0}
 
-.back,.more {display:inline-flex;align-items:center;gap:2px;min-height:44px;min-width:44px;background:none;border:0;color:rgb(var(--accent));font:500 16px system-ui,sans-serif;padding:0}
+[data-spec-screen="2"] .back,[data-spec-screen="2"] .more {display:inline-flex;align-items:center;gap:2px;min-height:44px;min-width:44px;background:none;border:0;color:rgb(var(--accent));font:500 16px system-ui,sans-serif;padding:0}
 
-.more {justify-content:center;color:rgb(var(--muted))}
+[data-spec-screen="2"] .more {justify-content:center;color:rgb(var(--muted))}
 
-.back svg,.more svg {width:22px;height:22px}
+[data-spec-screen="2"] .back svg,[data-spec-screen="2"] .more svg {width:22px;height:22px}
 
-h1 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:26px;line-height:32px;font-weight:700;margin:4px 0 4px}
+[data-spec-screen="2"] h1 {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;font-size:26px;line-height:32px;font-weight:700;margin:4px 0 4px}
 
-.by {margin:0;font-size:14px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .by {margin:0;font-size:14px;color:rgb(var(--muted))}
 
-.body {margin:12px 0 0}
+[data-spec-screen="2"] .body {margin:12px 0 0}
 
-.section-label {margin:24px 4px 8px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
+[data-spec-screen="2"] .section-label {margin:24px 4px 8px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
 
-.opts {display:flex;flex-direction:column;gap:8px}
+[data-spec-screen="2"] .opts {display:flex;flex-direction:column;gap:8px}
 
-.opt {position:relative;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;font:500 16px system-ui,sans-serif;color:rgb(var(--fg));text-align:left}
+[data-spec-screen="2"] .opt {position:relative;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;font:500 16px system-ui,sans-serif;color:rgb(var(--fg));text-align:left}
 
-.opt .fill {position:absolute;left:0;top:0;bottom:0;background:rgb(var(--accent)/.10)}
+[data-spec-screen="2"] .opt .fill {position:absolute;left:0;top:0;bottom:0;background:rgb(var(--accent)/.10)}
 
-.opt>span {position:relative;display:inline-flex;align-items:center;gap:8px}
+[data-spec-screen="2"] .opt>span {position:relative;display:inline-flex;align-items:center;gap:8px}
 
-.opt .n {color:rgb(var(--muted));font-weight:400;font-size:14px}
+[data-spec-screen="2"] .opt .n {color:rgb(var(--muted));font-weight:400;font-size:14px}
 
-.opt.on {border:2px solid rgb(var(--accent))}
+[data-spec-screen="2"] .opt.on {border:2px solid rgb(var(--accent))}
 
-.opt.on .fill {background:rgb(var(--accent)/.18)}
+[data-spec-screen="2"] .opt.on .fill {background:rgb(var(--accent)/.18)}
 
-.chk {display:inline-flex;width:22px;height:22px;border-radius:11px;background:rgb(var(--accent));color:rgb(var(--on-accent));align-items:center;justify-content:center}
+[data-spec-screen="2"] .chk {display:inline-flex;width:22px;height:22px;border-radius:11px;background:rgb(var(--accent));color:rgb(var(--on-accent));align-items:center;justify-content:center}
 
-.chk svg {width:14px;height:14px}
+[data-spec-screen="2"] .chk svg {width:14px;height:14px}
 
-.ring {width:22px;height:22px;border-radius:11px;border:2px solid rgb(var(--line))}
+[data-spec-screen="2"] .ring {width:22px;height:22px;border-radius:11px;border:2px solid rgb(var(--line))}
 
-.sum {margin:8px 4px 0;font-size:14px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .sum {margin:8px 4px 0;font-size:14px;color:rgb(var(--muted))}
 
-.btn-secondary {display:flex;width:100%;justify-content:center;align-items:center;gap:8px;min-height:44px;margin-top:16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:500 16px system-ui,sans-serif}
+[data-spec-screen="2"] .btn-secondary {display:flex;width:100%;justify-content:center;align-items:center;gap:8px;min-height:44px;margin-top:16px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font:500 16px system-ui,sans-serif}
 
-.btn-secondary svg {width:18px;height:18px;color:rgb(var(--decided))}
+[data-spec-screen="2"] .btn-secondary svg {width:18px;height:18px;color:rgb(var(--decided))}
 
-.list-row {display:flex;gap:8px;padding:12px 4px 12px 16px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .list-row {display:flex;gap:8px;padding:12px 4px 12px 16px;border-top:1px solid rgb(var(--line))}
 
-.c {flex:1}
+[data-spec-screen="2"] .c {flex:1}
 
-.c b {font-size:14px;font-weight:600}
+[data-spec-screen="2"] .c b {font-size:14px;font-weight:600}
 
-.c small {font-size:13px;color:rgb(var(--muted));margin-left:6px}
+[data-spec-screen="2"] .c small {font-size:13px;color:rgb(var(--muted));margin-left:6px}
 
-.c p {margin:2px 0 0;font-size:15px;line-height:22px}
+[data-spec-screen="2"] .c p {margin:2px 0 0;font-size:15px;line-height:22px}
 
-.compose {display:flex;gap:8px;margin-top:12px;align-items:flex-end}
+[data-spec-screen="2"] .compose {display:flex;gap:8px;margin-top:12px;align-items:flex-end}
 
-.field {flex:1;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));padding:10px 12px;font-size:16px;color:rgb(var(--muted)/.6)}
+[data-spec-screen="2"] .compose .field {flex:1;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));padding:10px 12px;font-size:16px;color:rgb(var(--fg))}
 
-.btn-primary {min-height:44px;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 15px system-ui,sans-serif}
+[data-spec-screen="2"] .compose .field::placeholder {color:rgb(var(--muted)/.6)}
+
+[data-spec-screen="2"] .btn-primary {min-height:44px;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 15px system-ui,sans-serif}
