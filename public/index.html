@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,80 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <main class="app">
+     <header class="head">
       <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button>
+     </header>
+     <section>
+      <h2 class="section-label">Open, 3 decisions</h2>
+      <div class="stack">
+       <article class="card">
+        <div><h3 class="q">Where should we meet in November?</h3><p class="by">Asked by Robin M., 2 hours ago</p></div>
+        <div class="kit-votes">
+         <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:55%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="kit-vote-label">Library meeting room</span><span class="kit-vote-count">6</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:27%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Back room at Dot's Cafe</span><span class="kit-vote-count">3</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:18%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Someone's garden</span><span class="kit-vote-count">2</span></button>
+        </div>
+        <div class="foot">
+         <button class="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>5 comments</button>
+         <span class="sum">11 votes</span>
+         <button class="icon" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        </div>
+       </article>
+       <article class="card">
+        <div><h3 class="q">Spring trip: coast walk or museum day?</h3><p class="by">Asked by you, yesterday</p></div>
+        <div class="kit-votes">
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:50%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Coast walk</span><span class="kit-vote-count">4</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:50%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Museum day</span><span class="kit-vote-count">4</span></button>
+        </div>
+        <div class="foot">
+         <button class="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>2 comments</button>
+         <span class="sum">8 votes, tied</span>
+         <button class="icon" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        </div>
+       </article>
+       <article class="card">
+        <div><h3 class="q">Should we raise yearly dues to 15?</h3><p class="by">Asked by Sam K., 3 days ago</p></div>
+        <div class="kit-votes">
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:71%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Yes</span><span class="kit-vote-count">5</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:29%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">No</span><span class="kit-vote-count">2</span></button>
+        </div>
+        <div class="foot">
+         <button class="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Comment</button>
+         <span class="sum">7 votes</span>
+         <button class="icon" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        </div>
+       </article>
+      </div>
+     </section>
+     <section>
+      <h2 class="section-label">Decided</h2>
+      <div class="stack">
+       <article class="card is-decided">
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Decided</span>
+        <div><h3 class="q">What should the October project be?</h3><p class="by">Asked by Alex T., 2 weeks ago</p></div>
+        <div class="kit-votes">
+         <div class="kit-vote win"><span class="kit-vote-fill" style="width:60%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="kit-vote-label">Park clean-up</span><span class="kit-vote-count">9</span></div>
+         <div class="kit-vote"><span class="kit-vote-fill" style="width:27%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Book swap</span><span class="kit-vote-count">4</span></div>
+         <div class="kit-vote"><span class="kit-vote-fill" style="width:13%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Quiz night</span><span class="kit-vote-count">2</span></div>
+        </div>
+        <div class="foot">
+         <button class="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>9 comments</button>
+         <span class="sum">15 votes</span>
+         <button class="icon" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+        </div>
+       </article>
+      </div>
+     </section>
+    </main>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
