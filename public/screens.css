@@ -75,45 +75,63 @@
 
 .list-row.rd .h {font-weight:500;color:rgb(var(--muted))}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: the sheet overlay. It is the whole viewport, above the list;
+   the drawn backdrop (.behind) is gone because the real list sits behind
+   the scrim. Its rules are scoped to the overlay so they never restyle
+   screen 1's rows and buttons. */
 
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  height: 844px;
-  width: 390px;
-  font-family: ui-serif,Georgia,"Times New Roman",serif;
-  font-size: 16px;
-  line-height: 24px;
-  position: relative;
+[data-spec-screen="2"] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  max-width: none;
+  margin: 0;
   overflow: hidden;
 }
 
-.behind {
-  padding: 56px 20px;
-  font-size: 28px;
-  line-height: 36px;
-  font-weight: 700;
-}
+[data-spec-screen="2"] .scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
 
-.scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
+[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;bottom:0;top:120px;max-width:42rem;margin-inline:auto;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 32px;display:flex;flex-direction:column;overflow:hidden}
 
-.sheet {position:absolute;left:0;right:0;bottom:0;top:120px;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 32px;display:flex;flex-direction:column}
+[data-spec-screen="2"] .grab {width:36px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 8px;flex:none}
 
-.grab {width:36px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 8px}
+[data-spec-screen="2"] .bar {display:flex;justify-content:flex-end;flex:none}
 
-.bar {display:flex;justify-content:flex-end}
+[data-spec-screen="2"] .btn-icon {width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:0;background:transparent;color:rgb(var(--muted))}
 
-.btn-icon {width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:0;background:transparent;color:rgb(var(--muted))}
+[data-spec-screen="2"] .meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:8px;flex:none}
 
-.meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:8px}
+[data-spec-screen="2"] .h {font-size:24px;line-height:30px;font-weight:700;margin-bottom:16px;flex:none}
 
-.h {font-size:24px;line-height:30px;font-weight:700;margin-bottom:16px}
+[data-spec-screen="2"] .summary {font-size:17px;line-height:28px;flex:1;min-height:0;overflow-y:auto}
 
-.summary {font-size:17px;line-height:28px;flex:1}
+[data-spec-screen="2"] .summary p {margin-bottom:14px}
 
-.summary p {margin-bottom:14px}
+[data-spec-screen="2"] .note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:12px;flex:none}
 
-.note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:12px}
+[data-spec-screen="2"] .btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:500;border:0;width:100%;flex:none}
 
-.btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:500;border:0;width:100%}
+/* The Open full article button fills the sheet, as drawn; the buttons in a
+   sheet's top bar or a feeds row sit at their own width. */
+[data-spec-screen="2"] .bar .btn-primary,
+[data-spec-screen="2"] .list-row .btn-primary {width:auto}
+
+/* The Add feed sheet's bar: Cancel, title, Add. */
+[data-spec-screen="2"] .bar-form {align-items:center;gap:8px;justify-content:flex-end}
+
+[data-spec-screen="2"] .bar-title {flex:1;text-align:center;font-size:16px;line-height:24px;font-weight:600}
+
+[data-spec-screen="2"] .field-label {display:block;font-size:14px;line-height:20px;color:rgb(var(--muted));margin:16px 0 8px;flex:none}
+
+[data-spec-screen="2"] .field {flex:none}
+
+[data-spec-screen="2"] .form-note {font-size:14px;line-height:20px;color:rgb(var(--danger));margin-top:12px;flex:none}
+
+/* The Feeds sheet's rows: name over address, and the two-step Remove. */
+[data-spec-screen="2"] .feed-name {font-weight:600;font-size:16px;line-height:22px}
+
+[data-spec-screen="2"] .feed-url {font-size:14px;line-height:20px;color:rgb(var(--muted));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+[data-spec-screen="2"] .list-row.confirm {flex-wrap:wrap}
+
+[data-spec-screen="2"] .confirm-q {flex-basis:100%;font-size:14px;line-height:20px;color:rgb(var(--muted))}

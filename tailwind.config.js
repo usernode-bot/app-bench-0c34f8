@@ -43,6 +43,12 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      fontFamily: {
+        // Titles read like a printed page; dates, feed names and controls
+        // are a rounded sans. System families only, nothing downloaded.
+        serif: ['ui-serif', 'Georgia', '"Times New Roman"', 'serif'],
+        rounded: ['ui-rounded', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

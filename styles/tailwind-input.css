@@ -43,17 +43,18 @@
     --source: 146 84 38; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 23 21 19;
+    --surface: 32 29 27;
+    --raised: 44 40 37;
+    --fg: 245 243 240;
+    --muted: 168 162 156;
+    --line: 64 60 56;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --source: 230 167 112;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

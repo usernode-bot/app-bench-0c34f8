@@ -1,27 +1,40 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A quiet, personal RSS reader on Homeroom: add the feed of a site you
+follow, and its unread posts show up in one scrolling list, newest first.
+Tap a post for a preview with a link to open the full article on the
+site. Feeds are private to the person who added them.
 
-The scaffold is a small working demo that proves the plumbing works:
+## What it does
+
+- **Unread list** — every feed's new posts in one list, grouped by day
+  (Today, Yesterday, and so on), each row with an unread dot, the feed's
+  name, the time, the title and a two-line summary from the feed.
+- **Preview** — tapping a row marks it read and opens a sheet with the
+  feed-provided summary and an *Open full article* button that opens the
+  post in the browser.
+- **Add feed** — paste the address of a site's feed; the app fetches and
+  validates it server-side before saving it under the name the feed
+  gives. Errors say which problem it was (not a feed, unreachable, or
+  already in the list) and keep what was typed.
+- **Manage feeds** — a Feeds sheet lists every feed with its address;
+  removing one (with a confirm) removes its posts too.
+- **Honest states** — caught-up, no-feeds-yet, loading (the list's own
+  shape with skeleton bars) and a retry-able error state.
+
+`?demo=1` (staging only) seeds six made-up feeds and twenty posts so the
+populated screen can be seen; everything works on the demo rows exactly
+as it would on real ones.
+
+## How it runs
 
 - **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
+  (an RS256 JWT) on every request. Feeds and posts are private per user.
+- **Database** — a private Postgres database holds two tables, `feeds`
+  and `posts`; the server creates them on boot if missing.
+- **Feed fetching** — done server-side through an SSRF-guarded fetch
+  (http/https only, private addresses blocked, redirects re-checked,
+  short timeout and a size cap). RSS 2.0, RSS 1.0 and Atom are parsed.
 - **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
-
-## Replacing the template
-
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+  image creation, in a light and a dark look that follow the viewer's
+  Homeroom theme. See `CLAUDE.md` for the design notes.

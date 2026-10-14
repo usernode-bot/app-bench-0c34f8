@@ -56,61 +56,32 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
-
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
-
----
-
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader, like a quieter Feedly: the user adds the feed of
+a site they follow, and every unread post across all their feeds shows
+up in one scrolling list, newest first, grouped by day. Tapping a post
+marks it read and opens a preview sheet with the feed's own summary and
+an *Open full article* link to the site. Feeds, and their posts, are
+private to the person who added them.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm paper greys for the neutrals; deep teal
+  (`--accent`) for the primary action and the unread dots; a source
+  brown (`--source`) for feed names and their RSS badge.
+- **Signature element:** the unread dot — solid teal, becoming an empty
+  ring once read — and the brown RSS badge naming the source next to
+  every time.
+- **Type scale:** `text-title`, `text-heading`, `text-body`,
+  `text-small`; post titles read serif (`font-serif`), dates, feed
+  names and controls are the rounded sans (`font-rounded`).
+- The screen has a light and a dark look and follows the viewer's
+  Homeroom theme, switching live: the theme `<script>` in
+  `public/index.html` sets a `dark` class on `<html>`.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +111,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `feeds` and `posts` tables are per-user (`user_id` on every feed,
+  posts reach it through `feed_id`); both are marked
+  `COMMENT ... 'staging:private'`.
+- Feed URLs are only ever fetched server-side, through `guardedFetch`
+  in `server.js`: http/https only, private and loopback addresses
+  blocked (re-checked on every redirect), 10s timeout, 2MB cap. Never
+  fetch a user-supplied URL any other way.
+- `?demo=1` seeds six made-up feeds and twenty posts on staging only
+  (`IS_STAGING`); demo rows carry `is_demo = TRUE` and are excluded
+  from every response without `demo=1`, so the plain route stays empty.
+  Demo guids are fixed (`demo-001`..`demo-020`), so seeding is
+  idempotent.
+- Titles and summaries come from the feed; the app stores them as text
+  (no HTML) and renders with `textContent` only.
+- Avoid new dependencies; fast-xml-parser is the one parsing library.

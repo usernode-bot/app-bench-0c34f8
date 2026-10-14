@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,11 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (typeof val === 'object' && val !== null) {
+            if (seen.has(val)) return '[Circular]';
+            seen.add(val);
+          }
+          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +68,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%230f766e'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -111,54 +115,432 @@
 <body class="min-h-screen bg-ground text-fg">
   <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
        that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+       lists, cards and data states. -->
+  <!-- usernode-spec-screens@1: the screens the spec drew. Screen 1 is the
+       Unread list; screen 2 is the post preview sheet, moved out of the
+       template into the overlay below and wired to data. -->
   <div data-spec-screen="1">
     <div class="app">
     <div class="top sans"><div class="title">Unread</div>
-    <button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
-    <div class="sub sans">14 new from 6 feeds, updated 8:12 am</div>
-    <div class="section-label sans">Today</div>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">42 min ago</span></div><div class="h">The quiet return of the dumbphone</div><div class="ex sans">Sales of basic handsets are up for a third year as people look for ways to switch off.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">2 h ago</span></div><div class="h">Why your focaccia needs more water than you think</div><div class="ex sans">A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">3 h ago</span></div><div class="h">Notes on a smaller, faster text editor</div><div class="ex sans">A week with an editor that opens instantly and does very little else, and why that was enough.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">5 h ago</span></div><div class="h">A map of every lighthouse still staffed</div><div class="ex sans">Fewer than twenty keepers remain worldwide. Their stories, and where to find them.</div></div></li>
-    </ul>
-    <div class="section-label sans">Yesterday</div>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">Tue, 9:40 pm</span></div><div class="h">Handheld consoles are getting weirdly good</div><div class="ex sans">Battery life is the new spec race, and the newest models finally last a full flight.</div></div></li>
-    <li class="list-row rd"><span class="dot read"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Tue, 4:15 pm</span></div><div class="h">The best way to cook a weeknight rice</div><div class="ex sans">Rinse, rest, and trust the lid. A method that works every time.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">Tue, 11:02 am</span></div><div class="h">What a hundred-year-old seed vault teaches us</div><div class="ex sans">Inside the cold room where forgotten varieties wait for a second chance.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">Tue, 8:30 am</span></div><div class="h">On the slow death of the home screen widget</div><div class="ex sans">Why the most promising idea in phone design never quite found its audience.</div></div></li>
-    </ul>
+    <button class="btn-secondary" id="feeds-btn" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary" id="add-btn" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
+    <div class="sub sans" id="sub" hidden></div>
+    <!-- Loading: the list's own shape, skeleton bars where the text goes. -->
+    <div id="loading-state">
+      <div class="section-label sans">Today</div>
+      <ul class="list">
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-28"></span></div><div class="skeleton h-4 w-3/4 mt-1"></div><div class="skeleton h-3 w-full mt-2"></div></div></li>
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-24"></span></div><div class="skeleton h-4 w-2/3 mt-1"></div><div class="skeleton h-3 w-full mt-2"></div></div></li>
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-32"></span></div><div class="skeleton h-4 w-5/6 mt-1"></div><div class="skeleton h-3 w-full mt-2"></div></div></li>
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-24"></span></div><div class="skeleton h-4 w-1/2 mt-1"></div><div class="skeleton h-3 w-5/6 mt-2"></div></div></li>
+      </ul>
+      <div class="section-label sans">Yesterday</div>
+      <ul class="list">
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-28"></span></div><div class="skeleton h-4 w-2/3 mt-1"></div><div class="skeleton h-3 w-full mt-2"></div></div></li>
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-24"></span></div><div class="skeleton h-4 w-3/4 mt-1"></div><div class="skeleton h-3 w-2/3 mt-2"></div></div></li>
+      <li class="list-row"><span class="skeleton rounded-full h-2.5 w-2.5"></span><div class="body"><div class="meta sans"><span class="skeleton h-3 w-28"></span></div><div class="skeleton h-4 w-5/6 mt-1"></div><div class="skeleton h-3 w-full mt-2"></div></div></li>
+      </ul>
+    </div>
+    <div class="state-empty sans" id="empty-feeds" hidden>
+      <p>No feeds yet. Add the address of a site's feed and its new posts show up here.</p>
+      <button class="btn-primary" id="empty-add" type="button">Add feed</button>
+    </div>
+    <div class="state-empty sans" id="empty-caughtup" hidden>
+      <p id="caughtup-text"></p>
+    </div>
+    <div class="state-error sans" id="error-state" hidden>
+      <p>Couldn't load your posts. Your feeds are still saved.</p>
+      <button class="btn-primary" id="retry-btn" type="button">Retry</button>
+    </div>
+    <div id="groups"></div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="behind sans">Unread</div>
-      <div class="scrim"></div>
-      <div class="sheet">
-      <div class="grab"></div>
-      <div class="bar"><button class="btn-icon" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Today, 6:10 am</span></div>
-      <div class="h">Why your focaccia needs more water than you think</div>
-      <div class="summary"><p>A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</p><p>We baked twelve loaves at rising hydration, from a stiff 65 percent to a loose 85, and the wettest ones won every blind tasting. The trick is to stop kneading and start folding: four sets of folds, half an hour apart, and an oiled tin that does the shaping for you.</p></div>
-      <div class="note sans">This is the summary the feed shares. The full article is on the site.</div>
-      <button class="btn-primary sans"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
-      </div>
-      </div>
-    </div>
+  <!-- One drawn row, kept as the shape every rendered row copies. -->
+  <template id="row-tpl">
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg><span class="feed-name"></span></span><span class="time"></span></div><div class="h"></div><div class="ex sans"></div></div></li>
   </template>
+  <!-- Screen 2 as the spec drew it: the post preview sheet, plus the two
+       sheets the app also needs (Add feed, Feeds). One overlay, one sheet at
+       a time. -->
+  <div data-spec-screen="2" id="overlay" hidden>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet-preview" hidden>
+      <div class="grab"></div>
+      <div class="bar"><button class="btn-icon" id="preview-close" aria-label="Close" type="button"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg><span id="preview-feed"></span></span><span class="time" id="preview-time"></span></div>
+      <div class="h" id="preview-title"></div>
+      <div class="summary" id="preview-summary"></div>
+      <div class="note sans" id="preview-note">This is the summary the feed shares. The full article is on the site.</div>
+      <button class="btn-primary sans" id="preview-open" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
+    </div>
+    <div class="sheet" id="sheet-add" hidden>
+      <div class="grab"></div>
+      <div class="bar bar-form">
+        <button class="btn-secondary sans" id="add-cancel" type="button">Cancel</button>
+        <div class="bar-title sans">Add feed</div>
+        <button class="btn-primary sans" id="add-submit" type="button">Add</button>
+      </div>
+      <label class="field-label sans" for="add-url">Feed address</label>
+      <input class="field sans" id="add-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+      <div class="form-note sans" id="add-error" hidden></div>
+    </div>
+    <div class="sheet" id="sheet-feeds" hidden>
+      <div class="grab"></div>
+      <div class="bar"><div class="bar-title sans">Feeds</div><button class="btn-icon" id="feeds-close" aria-label="Close" type="button"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <ul class="list" id="feeds-list"></ul>
+    </div>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var TOKEN = params.get('token') || '';
+    var DEMO = params.get('demo') === '1' ? '1' : '';
+    var RSS_SVG = '<svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>';
+
+    var state = { posts: [], feedCount: 0, failedFeeds: [], updatedAt: null, demo: false };
+
+    var el = function (id) { return document.getElementById(id); };
+    var els = {
+      addBtn: el('add-btn'), feedsBtn: el('feeds-btn'), sub: el('sub'),
+      loading: el('loading-state'), groups: el('groups'),
+      emptyFeeds: el('empty-feeds'), emptyAdd: el('empty-add'),
+      emptyCaughtup: el('empty-caughtup'), caughtupText: el('caughtup-text'),
+      errorState: el('error-state'), retryBtn: el('retry-btn'),
+      overlay: el('overlay'), scrim: el('scrim'),
+      sheetPreview: el('sheet-preview'), sheetAdd: el('sheet-add'), sheetFeeds: el('sheet-feeds'),
+      previewClose: el('preview-close'), previewFeed: el('preview-feed'),
+      previewTime: el('preview-time'), previewTitle: el('preview-title'),
+      previewSummary: el('preview-summary'), previewNote: el('preview-note'), previewOpen: el('preview-open'),
+      addCancel: el('add-cancel'), addSubmit: el('add-submit'), addUrl: el('add-url'), addError: el('add-error'),
+      feedsClose: el('feeds-close'), feedsList: el('feeds-list'),
+      rowTpl: el('row-tpl'),
+    };
+
+    function api(path, opts) {
+      opts = opts || {};
+      var url = new URL(path, location.origin);
+      if (DEMO) url.searchParams.set('demo', '1');
+      var headers = {};
+      if (opts.body) headers['content-type'] = 'application/json';
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      return fetch(url.toString(), Object.assign({}, opts, { headers: headers }));
+    }
+
+    // ── Times ────────────────────────────────────────────────────────────
+    function clock(d) {
+      return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+    }
+    function dayKey(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+    function rowTime(d) {
+      var mins = Math.round((Date.now() - d.getTime()) / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + ' min ago';
+      var h = Math.floor(mins / 60);
+      if (h < 12) return h + ' h ago';
+      return d.toLocaleDateString([], { weekday: 'short' }) + ', ' + clock(d);
+    }
+    function dayPrefix(d) {
+      var now = new Date();
+      var y = new Date(now.getTime() - 86400000);
+      if (dayKey(d) === dayKey(now)) return 'Today';
+      if (dayKey(d) === dayKey(y)) return 'Yesterday';
+      return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    function groupLabel(d) { return dayPrefix(d); }
+    function previewTime(d) { return dayPrefix(d) + ', ' + clock(d); }
+
+    function subtitle() {
+      var n = state.posts.length;
+      var s = n + ' new from ' + state.feedCount + (state.feedCount === 1 ? ' feed' : ' feeds') +
+        ', updated ' + clock(new Date(state.updatedAt));
+      if (state.demo) s = 'Staging demo, ' + s;
+      if (state.failedFeeds.length) {
+        var names = state.failedFeeds.join(', ').replace(/, ([^,]*)$/, ' and $1');
+        s += '. ' + names + (state.failedFeeds.length === 1 ? ' could' : ' could') + ' not be updated';
+      }
+      return s;
+    }
+
+    // ── Sheets ───────────────────────────────────────────────────────────
+    var SHEETS = ['sheet-preview', 'sheet-add', 'sheet-feeds'];
+    function openSheet(id) {
+      SHEETS.forEach(function (s) { el(s).hidden = s !== id; });
+      els.overlay.hidden = false;
+    }
+    function closeOverlay() { els.overlay.hidden = true; }
+    els.scrim.addEventListener('click', closeOverlay);
+    els.previewClose.addEventListener('click', closeOverlay);
+    els.feedsClose.addEventListener('click', closeOverlay);
+    els.addCancel.addEventListener('click', closeOverlay);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !els.overlay.hidden) closeOverlay();
+    });
+
+    // ── Preview (screen 2) ───────────────────────────────────────────────
+    function openPreview(post) {
+      els.previewFeed.textContent = post.feedTitle;
+      els.previewTime.textContent = previewTime(new Date(post.publishedAt));
+      els.previewTitle.textContent = post.title;
+      els.previewSummary.innerHTML = '';
+      var paras = (post.summary || '').split(/\n+/).filter(Boolean);
+      els.previewSummary.hidden = !paras.length;
+      els.previewNote.hidden = !paras.length;
+      paras.forEach(function (t) {
+        var p = document.createElement('p');
+        p.textContent = t;
+        els.previewSummary.appendChild(p);
+      });
+      els.previewOpen.hidden = !post.link;
+      els.previewOpen.onclick = function () {
+        if (post.link) window.open(post.link, '_blank', 'noopener');
+      };
+      openSheet('sheet-preview');
+    }
+
+    // ── The unread list (screen 1) ───────────────────────────────────────
+    function markRead(post, li) {
+      if (post.read) return;
+      post.read = true;
+      if (li) {
+        li.classList.add('rd');
+        var dot = li.querySelector('.dot');
+        if (dot) dot.classList.add('read');
+      }
+      api('/api/posts/' + post.id + '/read', { method: 'POST' }).catch(function () {});
+    }
+
+    function buildRow(post) {
+      var li = els.rowTpl.content.querySelector('li').cloneNode(true);
+      li.querySelector('.feed-name').textContent = post.feedTitle;
+      li.querySelector('.time').textContent = rowTime(new Date(post.publishedAt));
+      li.querySelector('.h').textContent = post.title;
+      li.querySelector('.ex').textContent = post.summary || '';
+      if (post.read) {
+        li.classList.add('rd');
+        li.querySelector('.dot').classList.add('read');
+      }
+      li.setAttribute('tabindex', '0');
+      li.setAttribute('role', 'button');
+      function activate() {
+        openPreview(post);
+        markRead(post, li);
+      }
+      li.addEventListener('click', activate);
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+      });
+      return li;
+    }
+
+    function renderGroups() {
+      els.groups.innerHTML = '';
+      var lastKey = null, list = null;
+      state.posts.forEach(function (post) {
+        var d = new Date(post.publishedAt);
+        var key = dayKey(d);
+        if (key !== lastKey) {
+          var label = document.createElement('div');
+          label.className = 'section-label sans';
+          label.textContent = groupLabel(d);
+          els.groups.appendChild(label);
+          list = document.createElement('ul');
+          list.className = 'list';
+          els.groups.appendChild(list);
+          lastKey = key;
+        }
+        list.appendChild(buildRow(post));
+      });
+    }
+
+    function hideStates() {
+      els.sub.hidden = true;
+      els.loading.hidden = true;
+      els.emptyFeeds.hidden = true;
+      els.emptyCaughtup.hidden = true;
+      els.errorState.hidden = true;
+      els.groups.innerHTML = '';
+    }
+
+    function showLoading() {
+      hideStates();
+      els.loading.hidden = false;
+    }
+
+    function showError() {
+      hideStates();
+      els.errorState.hidden = false;
+    }
+
+    function render() {
+      hideStates();
+      els.addBtn.hidden = state.feedCount === 0;
+      if (state.feedCount === 0) {
+        els.emptyFeeds.hidden = false;
+        return;
+      }
+      if (!state.posts.length) {
+        var n = state.feedCount;
+        var msg = "You're all caught up. Nothing new in your " + n + (n === 1 ? ' feed.' : ' feeds.');
+        if (state.failedFeeds.length) {
+          var names = state.failedFeeds.join(', ').replace(/, ([^,]*)$/, ' and $1');
+          msg += ' ' + names + ' could not be updated.';
+        }
+        els.caughtupText.textContent = msg;
+        els.emptyCaughtup.hidden = false;
+        return;
+      }
+      els.sub.hidden = false;
+      els.sub.textContent = subtitle();
+      renderGroups();
+    }
+
+    async function load() {
+      showLoading();
+      try {
+        var r = await api('/api/posts');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        var data = await r.json();
+        state.posts = data.posts || [];
+        state.feedCount = data.feedCount || 0;
+        state.failedFeeds = data.failedFeeds || [];
+        state.updatedAt = data.updatedAt;
+        state.demo = !!data.demo;
+        render();
+      } catch (err) {
+        showError();
+      }
+    }
+
+    // ── Add feed ─────────────────────────────────────────────────────────
+    function openAdd() {
+      els.addError.hidden = true;
+      els.addError.textContent = '';
+      openSheet('sheet-add');
+      els.addUrl.focus();
+    }
+    function showAddError(msg) {
+      els.addError.textContent = msg;
+      els.addError.hidden = false;
+    }
+    els.addBtn.addEventListener('click', openAdd);
+    els.emptyAdd.addEventListener('click', openAdd);
+    els.addSubmit.addEventListener('click', async function () {
+      var url = els.addUrl.value.trim();
+      if (!url) { showAddError('Enter a feed address.'); return; }
+      els.addSubmit.disabled = true;
+      try {
+        var r = await api('/api/feeds', { method: 'POST', body: JSON.stringify({ url: url }) });
+        var data = await r.json().catch(function () { return {}; });
+        if (!r.ok) { showAddError(data.error || 'Could not add that feed.'); return; }
+        els.addUrl.value = '';
+        closeOverlay();
+        await load();
+      } catch (err) {
+        showAddError('Could not add that feed. Check the address and try again.');
+      } finally {
+        els.addSubmit.disabled = false;
+      }
+    });
+
+    // ── Feeds ────────────────────────────────────────────────────────────
+    var feedsCache = [];
+    var confirmRemoveId = null;
+
+    function renderFeeds() {
+      els.feedsList.innerHTML = '';
+      if (!feedsCache.length) {
+        var li = document.createElement('li');
+        li.className = 'list-row';
+        var span = document.createElement('span');
+        span.className = 'sans text-small text-muted';
+        span.textContent = 'No feeds yet.';
+        li.appendChild(span);
+        els.feedsList.appendChild(li);
+        return;
+      }
+      feedsCache.forEach(function (f) {
+        var li = document.createElement('li');
+        li.className = 'list-row';
+        var info = document.createElement('div');
+        info.className = 'flex-1 min-w-0';
+        var name = document.createElement('div');
+        name.className = 'feed-name sans';
+        name.textContent = f.title;
+        var url = document.createElement('div');
+        url.className = 'feed-url sans';
+        url.textContent = f.url;
+        info.appendChild(name);
+        info.appendChild(url);
+        li.appendChild(info);
+        if (confirmRemoveId === f.id) {
+          li.classList.add('confirm');
+          var q = document.createElement('span');
+          q.className = 'confirm-q sans';
+          q.textContent = 'Remove this feed and its posts?';
+          var keep = document.createElement('button');
+          keep.className = 'btn-secondary sans';
+          keep.type = 'button';
+          keep.textContent = 'Keep';
+          keep.addEventListener('click', function () {
+            confirmRemoveId = null;
+            renderFeeds();
+          });
+          var remove = document.createElement('button');
+          remove.className = 'btn-primary sans';
+          remove.type = 'button';
+          remove.textContent = 'Remove';
+          remove.addEventListener('click', async function () {
+            remove.disabled = true;
+            try {
+              await api('/api/feeds/' + f.id, { method: 'DELETE' });
+              confirmRemoveId = null;
+              await openFeeds();
+              await load();
+            } catch (err) {}
+          });
+          li.appendChild(q);
+          li.appendChild(keep);
+          li.appendChild(remove);
+        } else {
+          var removeBtn = document.createElement('button');
+          removeBtn.className = 'btn-secondary sans';
+          removeBtn.type = 'button';
+          removeBtn.textContent = 'Remove';
+          removeBtn.addEventListener('click', function () {
+            confirmRemoveId = f.id;
+            renderFeeds();
+          });
+          li.appendChild(removeBtn);
+        }
+        els.feedsList.appendChild(li);
+      });
+    }
+
+    async function openFeeds() {
+      openSheet('sheet-feeds');
+      els.feedsList.innerHTML = '';
+      var li = document.createElement('li');
+      li.className = 'list-row';
+      var bar = document.createElement('span');
+      bar.className = 'skeleton h-4 w-40';
+      li.appendChild(bar);
+      els.feedsList.appendChild(li);
+      try {
+        var r = await api('/api/feeds');
+        var data = await r.json();
+        feedsCache = data.feeds || [];
+      } catch (err) {
+        feedsCache = [];
+      }
+      renderFeeds();
+    }
+    els.feedsBtn.addEventListener('click', openFeeds);
+
+    // ── Start ────────────────────────────────────────────────────────────
+    els.retryBtn.addEventListener('click', load);
+    load();
+  })();
+  </script>
 </body>
 </html>

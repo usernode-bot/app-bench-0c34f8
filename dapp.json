@@ -3,5 +3,26 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "empty-state",
+      "path": "/",
+      "type": "text",
+      "text": "No feeds yet"
+    },
+    {
+      "name": "demo-unread",
+      "path": "/?demo=1",
+      "type": "visual",
+      "selector": ".list-row",
+      "text": "Staging demo",
+      "impact": ["public/**", "server.js", "styles/**"]
+    },
+    {
+      "name": "health",
+      "path": "/health",
+      "type": "text",
+      "text": "ok"
+    }
+  ]
 }
