@@ -135,21 +135,18 @@
       <ul id="decision-list" class="list flex-col">
         <li class="list-row cursor-pointer">
           <div class="cv-main">
-            <div class="cv-top">
-              <p class="q">Where should we meet in November?</p>
-              <div class="cv-side">
-                <span class="tag" hidden>Closed</span>
-                <button type="button" class="kit-icon-button cv-more" aria-label="More" hidden>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
-                </button>
-              </div>
-            </div>
+            <p class="q"><span class="cv-q">Where should we meet in November?</span> <span class="tag" hidden>Closed</span></p>
             <p class="lead">No votes yet</p>
-            <div class="bar" aria-hidden="true"><i></i></div>
             <p class="won" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cv-won">Closed in a tie</span></p>
-            <p class="meta"><span class="cv-when">just now</span><span class="cv-talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cv-bubble"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9 9 0 0 1-3.9-.9L3 20l1.2-3.9A8.2 8.2 0 0 1 3 11.5a8.4 8.4 0 0 1 9-8.3 8.4 8.4 0 0 1 9 8.3Z"/></svg><span class="cv-count">0</span></span><span class="cv-by">Ana</span><span class="you" hidden>You voted <b class="cv-your">Yes</b></span></p>
+            <div class="bar" aria-hidden="true"><i></i></div>
+            <p class="meta"><span class="you" hidden>You voted <b class="cv-your">Yes</b></span><span class="cv-talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cv-bubble"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9 9 0 0 1-3.9-.9L3 20l1.2-3.9A8.2 8.2 0 0 1 3 11.5a8.4 8.4 0 0 1 9-8.3 8.4 8.4 0 0 1 9 8.3Z"/></svg><span class="cv-count">0</span></span><span class="cv-ago"><span class="cv-by">Ana</span>, <span class="cv-when">just now</span></span></p>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="chev"><path d="M9 6l6 6-6 6"/></svg>
+          <div class="cv-edge">
+            <button type="button" class="kit-icon-button cv-more" aria-label="More" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
+            </button>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="chev"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
         </li>
       </ul>
       <p id="signin-hint" class="text-small text-muted" data-guest="show" hidden>Sign in to vote or post a decision of your own.</p>

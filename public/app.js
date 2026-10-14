@@ -44,12 +44,21 @@ const load = () => states.run(async (box) => {
   if (data.demo) showDemoLabel(box);
   items = data.items;
   drawList();
+  headerActionAsFilled(items.length > 0);
   return items.length > 0;
 });
 
 /** The drawn list screen lives inside the states' content once loaded. */
 function mountList(box) {
   if (listScreen.parentElement !== box) box.append(listScreen);
+}
+
+/** In the empty state, "Post a decision" is the only filled button, so the
+ * header's New decision steps down to secondary until there is content. */
+function headerActionAsFilled(filled) {
+  const btn = document.getElementById('new-decision');
+  btn.classList.toggle('btn-primary', filled);
+  btn.classList.toggle('btn-secondary', !filled);
 }
 
 function drawList() {
@@ -63,7 +72,7 @@ function rowEl(it) {
   const closed = !!it.closedAt;
   const li = makeRow();
   fillIn(li, {
-    '.q': it.title,
+    '.cv-q': it.title,
     '.lead': { hidden: closed, text: leadLine(t) },
     '.won': { hidden: !closed },
     '.cv-won': wonLine(t),
@@ -102,9 +111,11 @@ function wonLine(t) {
   return `${lead.label} won with ${lead.count} of ${t.total} votes`;
 }
 
-/** The tally bar's segments: one per option with votes, the leader in accent. */
+/** The tally bar's segments: one per option with votes, largest first so the
+ * leader starts at the left, the leader in accent. */
 function barSegs(t) {
   return t.options.filter((o) => o.count > 0)
+    .sort((a, b) => b.count - a.count)
     .map((o) => h('i', { class: o.leading ? 'top' : null, style: `flex-grow:${o.count}` }));
 }
 
@@ -238,6 +249,7 @@ function newDecision() {
       items.unshift(saved);
       mountList(states.content);
       drawList();
+      headerActionAsFilled(true);
       states.ready(); // also lifts the empty state if this was the first
     },
   });
@@ -296,7 +308,7 @@ async function deleteDecision(it) {
     items = items.filter((x) => x.id !== it.id);
     toast('Deleted');
     if (!detailScreen.hidden && currentId === it.id) showList();
-    if (!items.length) { states.empty(); } else { drawList(); }
+    if (!items.length) { states.empty(); headerActionAsFilled(false); } else { drawList(); }
   } catch (err) {
     toast(err.message);
   }
