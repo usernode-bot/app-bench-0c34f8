@@ -28,6 +28,14 @@
 
 .btn-primary svg {width:16px;height:16px}
 
+/* The top bar's plain Add feed (no feeds yet): the filled button's geometry
+   and type, the secondary button's colours. Set here, past the drawn reset
+   (`.s *` strips padding), so the icon stays 16 px, the label stays on one
+   line and the button keeps the bar's height. */
+.bar .btn-secondary {display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;font-weight:600;white-space:nowrap}
+
+.bar .btn-secondary svg {width:16px;height:16px}
+
 .wrap {padding:12px 16px 24px}
 
 .sum {display:flex;align-items:baseline;justify-content:space-between;padding:4px 4px 10px}
@@ -66,6 +74,28 @@
 .title {font-family:ui-serif,Charter,"Iowan Old Style",Georgia,serif;font-size:18px;line-height:24px;font-weight:600;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 .ex {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Loading: four placeholder rows the size of a real row (public/app.js builds
+   them), so loading reads as the list it stands in for and the layout does
+   not jump when the posts arrive. Past the drawn reset, which strips
+   padding. */
+.skeleton-post {display:flex;gap:12px;padding:14px 16px 14px 14px}
+
+.skeleton-post .sk-dot {width:9px;height:9px;border-radius:50%;margin-top:7px;flex-shrink:0}
+
+.skeleton-post .sk-bar {display:block;border-radius:4px}
+
+/* The empty and error states: room under the top bar, air between the text
+   and its button, and the button at the kit's size (the drawn reset strips
+   the kit's padding, so it is set again here). */
+.s .state-empty,
+.s .state-error {margin-top:48px;gap:16px}
+
+.s .state-empty button,
+.s .state-error button {padding:0 16px;min-height:44px}
+
+/* The staging-demo line: its kit padding back, stripped by the drawn reset. */
+.s .kit-demo-label {padding:8px 12px}
 
 /* Screen 2, the post preview, shown in the kit's sheet: only the rules the
    first screen has not got, scoped to the preview container so they never

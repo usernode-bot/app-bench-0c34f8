@@ -39,6 +39,18 @@ const states = createStates(statesBox, {
 statesBox.querySelector('.state-error button').textContent = 'Retry';
 const emptyEl = statesBox.querySelector('.state-empty');
 
+// Where posts will show, the loading placeholders match a real row — a dot,
+// a short meta bar, two title bars and an excerpt bar, at a row's height —
+// not the kit's thin generic bars.
+statesBox.querySelector('[aria-busy] ul').replaceWith(h('ul', { class: 'list', 'aria-hidden': 'true' },
+  Array.from({ length: 4 }, () => h('li', { class: 'skeleton-post' },
+    h('span', { class: 'skeleton sk-dot' }),
+    h('div', { class: 'txt' },
+      h('span', { class: 'skeleton sk-bar', style: 'height:12px;width:33%' }),
+      h('span', { class: 'skeleton sk-bar', style: 'height:16px;width:75%;margin-top:6px' }),
+      h('span', { class: 'skeleton sk-bar', style: 'height:16px;width:50%;margin-top:2px' }),
+      h('span', { class: 'skeleton sk-bar', style: 'height:12px;width:66%;margin-top:6px' }))))));
+
 let unreadCount = 0;
 let feedCount = 0;
 let feeds = [];
@@ -77,7 +89,9 @@ async function load() {
     }
 
     content.replaceChildren();
-    if (isDemo() || data.demo) showDemoLabel(content, 'Staging demo: made-up feeds and posts');
+    // The one demo line sits above the summary row, so "14 unread posts"
+    // stays directly above the list it counts.
+    if (isDemo() || data.demo) showDemoLabel(sum.parentElement, 'Staging demo: made-up feeds and posts');
     for (const f of feeds) {
       if (f.error) {
         content.append(h('p', { class: 'fail' },
