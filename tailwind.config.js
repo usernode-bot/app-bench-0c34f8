@@ -55,6 +55,14 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the wheat tone: percentage bars, the tag
+        'wheat-ink': token('wheat-ink'), // text on the wheat tone
+      },
+      // Headings and the notebook's figures are a serif, like a
+      // handwritten recipe book; the rest is the rounded system face.
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
+        rounded: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

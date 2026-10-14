@@ -35,26 +35,28 @@
     --fg: 41 30 22;           /* text */
     --muted: 102 88 76;        /* secondary text */
     --line: 230 222 210;      /* borders, dividers, skeletons */
-    --accent: 132 78 38;     /* the one accent */
+    --accent: 132 78 38;     /* the one accent: crust brown */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --wheat: 226 190 120; /* from the spec's screens */
-    --wheat-ink: 92 60 10; /* from the spec's screens */
+    --focus: 132 78 38;      /* the keyboard focus ring: the accent */
+    --wheat: 226 190 120; /* the wheat tone: percentage bars, the tag */
+    --wheat-ink: 92 60 10; /* text on the wheat tone */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 26 20 16;
+    --surface: 38 30 24;
+    --raised: 50 40 32;
+    --fg: 246 239 230;
+    --muted: 190 176 160;
+    --line: 76 63 52;
+    --accent: 222 166 112;   /* crust brown, toasted for the dark look */
+    --on-accent: 43 25 10;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 222 166 112;
+    --wheat: 201 163 92;
+    --wheat-ink: 43 29 6;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

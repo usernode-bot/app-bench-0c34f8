@@ -58,59 +58,42 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
+The starter's placeholder screen was replaced by the app's first version
+(the bread recipe calculator). The `usernode-spec-screens@1` block in
+`public/index.html` is the real screen now, wired by `public/app.js`.
 
 ---
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: pick a bread (sourdough, bagels, sourdough
+bagels, rye, sandwich loaf), set the hydration, the number of loaves and
+the size of each, then tap Calculate. It answers with the grams of every
+ingredient, the baker's percentages, the rise time, and the oven
+temperature and bake time. Nothing is saved — each visit calculates
+fresh, by the creator's choice.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm flour-paper neutrals (ground `250 247 242`, surface
+  white, raised `243 237 227`); the accent is crust brown `132 78 38` for
+  the selected bread and the Calculate button; wheat `226 190 120` (with
+  wheat ink `92 60 10` on it) for the percentage bars and the
+  "flour = 100%" tag. Dark look, same tokens: ground `26 20 16`, surface
+  `38 30 24`, raised `50 40 32`, text `246 239 230`, muted `190 176 160`,
+  line `76 63 52`, crust brown toasted to `222 166 112` with dark text
+  `43 25 10` on it, wheat `201 163 92` with wheat ink `43 29 6`.
+- **Signature element:** the baker's percentage page — a ruled notebook
+  card on the raised tone with a wheat border, one ruled line per
+  ingredient: its name, a wheat bar, and its percent of the flour.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Headings and the notebook's figures are a serif (`ui-serif`, Georgia),
+  like a handwritten recipe book; the rest is the rounded system face.
+- The header is the name and tagline with no tile (this app's rules allow
+  only its own icon or no mark there).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +123,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Recipes, their hydration/count/size limits and their rise and bake
+  rules live in `RECIPES` in `public/app.js`; adjust them there.
+- Nothing is stored: no table, no local storage. The calculation is a
+  pure function in the page. The `?demo=1` demo is page state and writes
+  nothing.
+- Hydration counts only the water you add; the starter is its own
+  ingredient and its water is not subtracted.
+- Grams and degrees Celsius only (no Fahrenheit, ounces or cups).
+- The staging demo, opened with `?demo=1`, shows the page already
+  calculated for two 800 g sourdough loaves at 75%.

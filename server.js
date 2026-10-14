@@ -191,10 +191,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
 
-start().catch(err => { console.error(err); process.exit(1); });
+// Stop accepting connections, drain for ~3 s, close the pool and exit.
+function shutdown(signal) {
+  console.log(`${signal} received: shutting down`);
+  let done = false;
+  const finish = () => { if (!done) { done = true; process.exit(0); } };
+  const closePool = () => pool.end().then(finish, finish);
+  if (server) {
+    server.close(() => closePool());
+    if (server.closeIdleConnections) server.closeIdleConnections();
+  } else {
+    closePool();
+  }
+  setTimeout(closePool, 3000).unref(); // drained long enough
+  setTimeout(finish, 3500).unref();    // never hang the container
+}
+
+start().then(() => {
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}).catch(err => { console.error(err); process.exit(1); });
