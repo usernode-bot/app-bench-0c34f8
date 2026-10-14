@@ -58,32 +58,15 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter template screen has been replaced by the real app (first
+version, spec'd in issue #1). The `usernode-dev-console@1` forwarder
+`<script>`, the bridge `<script>` and the theme `<script>` in
+`public/index.html` are platform infrastructure, not template content —
+keep them. The real screens (the unread list and the preview sheet) are
+drawn screen markup in `public/index.html` with styles in
+`public/screens.css`, filled from data by `public/app.js` using the kit
+in `public/kit/` (`rowsFrom`/`fillIn`, `createStates`, `openSheet`,
+`openFormSheet`).
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +78,27 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-style reader for a Homeroom group: add an RSS feed by link, see
+all unread posts from all your feeds in one newest-first list, tap a post
+for a preview (tapping marks it read) with an "Open in browser" link, and
+remove feeds. Feeds, posts and read state are per-user and private. This
+first version does nothing more: no site-to-feed discovery, OPML,
+folders, filters, mark-all-read or background fetching.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** RSS orange accent (`--accent` in light, a brighter tangerine
+  in dark) over warm paper neutrals (warm off-white ground, warm browns for
+  text and lines); danger red for error states only.
+- **Signature element:** the RSS broadcast mark (a dot with two arcs, in
+  `--signal`) and the orange unread dot beside every unread post; titles
+  and the preview body are set in serif.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (`text-heading` is 1.125rem for row titles).
+- **One fixed look:** none — both looks follow the viewer's Homeroom theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +126,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Both tables, `feeds` and `posts`, are `staging:private` (per-user data).
+- Upserts of posts (`ON CONFLICT (feed_id, guid) DO NOTHING`) never touch
+  `read_at`: adding or refreshing a feed must not mark anything read.
+- A post counts read as soon as it is tapped; the row fades but stays in
+  place until the next load.
+- Demo rows (`is_demo = true`, seeded only on staging with `?demo=1`, feeds
+  never fetched) are excluded from every response without `?demo=1`.

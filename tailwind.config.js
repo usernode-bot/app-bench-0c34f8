@@ -55,13 +55,17 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        signal: token('signal'), // the app's mark and the unread dot only
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
+        heading: ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      fontFamily: {
+        serif: ['ui-serif', 'Charter', '"Iowan Old Style"', 'Georgia', 'serif'],
       },
     },
   },

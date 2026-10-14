@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ea6a18'/><circle cx='30' cy='70' r='9' fill='white'/><path d='M28 46a26 26 0 0 1 26 26M26 20a54 54 0 0 1 54 54' stroke='white' stroke-width='11' fill='none' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -129,33 +129,34 @@
     <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </header>
     <main class="wrap">
-    <div class="sum"><p class="count">14 unread</p><a class="feeds">3 feeds</a></div>
+    <div class="sum" hidden><p class="count"></p><a class="feeds" href="#">0 feeds</a></div>
+    <div id="states"></div>
     <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="txt">
+    <li><button type="button" class="list-row kit-row" data-post-row><span class="dot"></span><div class="txt">
     <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Pretend Garden Weekly</span><span class="time">12 min</span></p>
     <h2 class="title">Ten imaginary tomatoes we grew on a balcony that does not exist</h2>
     <p class="ex">A made-up season of watering, staking and waiting, with notes on which of the invented varieties did best in the pretend shade.</p>
-    </div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt">
+    </div></button></li>
+    <li><button type="button" class="list-row kit-row" data-post-row><span class="dot"></span><div class="txt">
     <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Sample Tech Digest</span><span class="time">1 h</span></p>
     <h2 class="title">Example Corp ships version 0.0.1 of its sample widget</h2>
     <p class="ex">The release notes for a product nobody makes: faster pretend loading, a fictional dark mode and fixes for bugs that never happened.</p>
-    </div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt">
+    </div></button></li>
+    <li><button type="button" class="list-row kit-row" data-post-row><span class="dot"></span><div class="txt">
     <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Make-believe Bike Blog</span><span class="time">3 h</span></p>
     <h2 class="title">Riding the placeholder coast road in one long afternoon</h2>
     <p class="ex">Forty fictional kilometres, two invented cafes and a headwind we made up for the story.</p>
-    </div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt">
+    </div></button></li>
+    <li><button type="button" class="list-row kit-row" data-post-row><span class="dot"></span><div class="txt">
     <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Pretend Garden Weekly</span><span class="time">Yesterday</span></p>
     <h2 class="title">How to compost leaves from a sample tree</h2>
     <p class="ex">Layering, turning and patience, explained with a pile of entirely fictional leaves.</p>
-    </div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt">
+    </div></button></li>
+    <li><button type="button" class="list-row kit-row" data-post-row><span class="dot"></span><div class="txt">
     <p class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="5.5" cy="18.5" r="1.8" fill="currentColor" stroke="none"/><path d="M4 11.5a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4 4.5A15.5 15.5 0 0 1 19.5 20"/></svg><span class="feed">Sample Tech Digest</span><span class="time">2 days</span></p>
     <h2 class="title">A beginner's tour of an example keyboard</h2>
     <p class="ex">Every key on a keyboard drawn for this demo, and the one we could not find a use for.</p>
-    </div></li>
+    </div></button></li>
     </ul>
     </main>
     </div>
@@ -187,5 +188,6 @@
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
