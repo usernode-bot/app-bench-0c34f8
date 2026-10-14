@@ -44,17 +44,21 @@
     --paper: 250 244 226; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    /* The spec's dark look: warm browns (paper stays warmer than the page),
+       teal accent, brick-red No. */
+    --ground: 22 19 15;
+    --surface: 33 29 24;
+    --raised: 46 41 34;
+    --fg: 242 236 224;
+    --muted: 176 166 150;
+    --line: 70 63 54;
+    --accent: 94 196 180;
+    --on-accent: 6 40 36;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 94 196 180;
+    --no: 240 128 108;
+    --paper: 44 39 30;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

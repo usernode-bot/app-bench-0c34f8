@@ -95,20 +95,33 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club decision board. Anyone in the club posts a question the club needs
+to decide; members vote Yes, No or Abstain and see a live tally; the
+poster closes the vote when it is settled. A vote passes by simple
+majority of votes cast; abstentions show in the tally but do not count;
+ties do not pass; closed votes stay closed with their counts frozen.
+Decisions carry a comment thread for discussion, and every post can be
+reported to the club's moderators.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** teal accent over warm paper neutrals; a brick red is the
+  "No" colour. The dark look is warm browns (the paper card stays warmer
+  than the page), with a brighter teal. The exact token values are in
+  `styles/tailwind-input.css`; the `--no` and `--paper` tokens are this
+  app's additions to the kit.
+- **Signature element:** decisions are drawn as ballot-paper cards —
+  cream paper with a folded top-right corner (clip-path polygon and an
+  `:after` fold in `public/screens.css`) — and every decision carries a
+  plain-words result line ("Passed 7 to 1", "Not passed 3 to 5",
+  "Tied 4 to 4, not passed"). Questions and the title are set in a serif
+  (ui-serif, Georgia); everything else is ui-rounded/system-ui.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
+  _(change their sizes in `tailwind.config.js` if you must, not their
+  number)_
 - **One fixed look:** _(only for an app drawn as its own scene, such as a
   game: which look, and why. Otherwise delete this line.)_
 
@@ -140,6 +153,21 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All person ids (author_id, voter_id, reporter_id) are stored as `text`;
+  the token's id is a number, so the auth middleware normalises
+  `req.user.id` to a string once — keep it that way rather than comparing
+  a number against a selected row value.
+- Demo rows are written once per viewer (`demo_for` on decisions carries
+  the viewer id); seed data never changes an existing viewer's rows, so
+  editing the seed only shows for a fresh viewer or after the rows are
+  deleted.
+- The `reports` table is staging:private (see the `COMMENT ON TABLE` in
+  `server.js`): it records who reported what, never the content, and no
+  public table may hold a foreign key to it.
+- Express 4 does not catch thrown errors from async handlers: every API
+  route is wrapped in `wrap(...)` and the file ends with a terminal error
+  middleware. Keep that pattern for new routes.
+- Postgres cannot infer a bind parameter's type from an `IS NOT NULL`
+  test (42P08); the queries that take the nullable viewer id cast it
+  explicitly (`$1::text`). Do the same in new queries that mix a
+  parameter into null-tests.

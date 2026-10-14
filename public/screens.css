@@ -1,7 +1,10 @@
 /* The screens the spec drew, carried over by the platform before the first
-   version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+   version was built (the markup is rendered by public/app.js into the
+   [data-spec-screen] wrappers in public/index.html). Colours are the design
+   kit's tokens, rgb(var(--accent)), so they follow the light and the dark
+   look. Screen 2's rules restyle shared classes (app, card, q, bar, votes…),
+   so they are scoped to [data-spec-screen="2"] to leave screen 1 and the
+   design kit untouched. */
 
 /* Each screen is one centred column: the phone width it was drawn at grows
    to a readable column on a wider window, never rows and buttons stretched
@@ -16,8 +19,9 @@
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 1260px;
-  width: 390px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -73,69 +77,63 @@ clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,0 100%)}
 
 .meta {display:flex;align-items:center;gap:6px;font-size:14px;color:rgb(var(--muted));min-height:44px}
 
-.fab {position:absolute;left:16px;right:16px;bottom:24px;box-shadow:0 4px 14px rgba(33,29,24,.2);min-height:52px}
+/* Floating, and fixed to the viewport so it stays at the bottom while the
+   list scrolls; the .app's 104px bottom padding keeps it off the last card. */
+.fab {position:fixed;left:16px;right:16px;bottom:24px;margin-inline:auto;max-width:calc(42rem - 32px);box-shadow:0 4px 14px rgba(33,29,24,.2);min-height:52px;z-index:10}
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 .label {font-size:14px;line-height:20px;color:rgb(var(--muted));padding:8px 4px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* ── Screen 2: its rules the first screen has not got. ── */
 
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  min-height: 1180px;
-  width: 390px;
-  font-family: ui-rounded,system-ui,sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  box-sizing: border-box;
-  padding: 0 16px 32px;
-}
+[data-spec-screen="2"] .app {padding: 0 16px 32px}
 
-.nav {
+[data-spec-screen="2"] .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 0;
 }
 
-.ghost {min-height:44px;padding:0 8px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:rgb(var(--muted));background:none;border:0}
+[data-spec-screen="2"] .ghost {min-height:44px;padding:0 8px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:rgb(var(--muted));background:none;border:0;cursor:pointer}
 
-.card {position:relative;background:rgb(var(--paper));border:1px solid rgb(var(--line));border-radius:12px;padding:20px 16px 16px;overflow:hidden;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,0 100%)}
+[data-spec-screen="2"] .card {padding:20px 16px 16px;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,0 100%)}
 
-.card:after {content:"";position:absolute;top:0;right:0;width:30px;height:30px;background:rgb(var(--raised));border-left:1px solid rgb(var(--line));border-bottom:1px solid rgb(var(--line));border-bottom-left-radius:6px}
+[data-spec-screen="2"] .card:after {width:30px;height:30px}
 
-.q {font-size:28px;line-height:36px;font-weight:700;font-family:ui-serif,Georgia,serif;padding-right:24px}
+[data-spec-screen="2"] .q {font-size:28px;line-height:36px;font-weight:700;padding-right:24px}
 
-.body {margin-top:10px;font-family:ui-serif,Georgia,serif;line-height:26px}
+[data-spec-screen="2"] .body {margin-top:10px;font-family:ui-serif,Georgia,serif;line-height:26px}
 
-.bar {display:flex;height:12px;border-radius:6px;overflow:hidden;margin:18px 0 10px;background:rgb(var(--line))}
+[data-spec-screen="2"] .bar {height:12px;border-radius:6px;margin:18px 0 10px}
 
-.tally {display:flex;gap:16px;font-size:14px;line-height:20px;font-weight:500}
+[data-spec-screen="2"] .tally {gap:16px}
 
-.votes {display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px}
+[data-spec-screen="2"] .votes {display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px}
 
-.row {display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:4px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .row {display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:4px;border-top:1px solid rgb(var(--line))}
 
-.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));padding:24px 4px 8px}
+[data-spec-screen="2"] .section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));padding:24px 4px 8px;margin:0}
 
-.list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
+[data-spec-screen="2"] .list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
 
-.list-row {padding:12px 16px 4px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .list-row {display:block;padding:12px 16px 4px;border-top:1px solid rgb(var(--line));border-radius:0;min-height:0}
 
-.list-row:first-child {border-top:0}
+[data-spec-screen="2"] .list-row:first-child {border-top:0}
 
-.who {display:flex;gap:8px;font-size:14px;line-height:20px}
+[data-spec-screen="2"] .who {display:flex;gap:8px;font-size:14px;line-height:20px}
 
-.who b {font-weight:600}
+[data-spec-screen="2"] .who b {font-weight:600}
 
-.act {display:flex;justify-content:flex-end}
+[data-spec-screen="2"] .list-row p {margin:2px 0 0}
 
-.compose {margin-top:12px;display:flex;flex-direction:column;gap:8px}
+[data-spec-screen="2"] .act {display:flex;justify-content:flex-end}
 
-.lab {font-size:14px;font-weight:500}
+[data-spec-screen="2"] .compose {margin-top:12px;display:flex;flex-direction:column;gap:8px}
 
-.field {min-height:88px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;color:rgb(var(--muted));opacity:.8}
+[data-spec-screen="2"] .lab {font-size:14px;font-weight:500}
 
-.compose .btn-primary {align-self:flex-end;min-height:44px}
+[data-spec-screen="2"] .compose .field {min-height:88px;border-radius:8px}
+
+[data-spec-screen="2"] .compose .btn-primary {align-self:flex-end;min-height:44px}

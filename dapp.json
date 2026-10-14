@@ -3,5 +3,23 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "demo list shows ballot cards",
+      "path": "/?demo=1",
+      "expectSelector": "[data-decision]",
+      "visual": true,
+      "impact": "public/**"
+    },
+    {
+      "name": "plain route shows the honest empty state",
+      "path": "/",
+      "expectText": "No open decisions yet"
+    },
+    {
+      "name": "health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
