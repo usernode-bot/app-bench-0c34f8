@@ -58,17 +58,8 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
+Replaced in the first version: the calculator screen is the app now, and
+`README.md` describes it. The notes below are about the real app.
 
 Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
 HTML — that block is platform infrastructure, not template content. So is
@@ -95,22 +86,32 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot turns a bread choice and a few numbers into a full recipe: pick
+a bread (sourdough, bagels, sourdough bagels, rye, sandwich loaf), set
+hydration, how many loaves (or bagels) and how big, tap Bake It, and get
+the grams of every ingredient, the rise time and the oven temperature and
+time. Pure client-side calculator — nothing is saved between visits.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour and parchment neutrals (warm off-whites and greys)
+  with crust brown as the one action colour. Tokens live in
+  `styles/tailwind-input.css`; light ground 250 247 242, dark ground
+  28 22 18, crust brown light 140 82 40 with white text on it, dark
+  217 154 98 with near-black text on it. Focus ring is the same as accent.
+- **Signature element:** the baker's percentage dial — a ring that fills
+  to the hydration with the number in its centre, next to the same number
+  in plain words ("720 g water for every 1,000 g flour"). The recipe
+  repeats the baker's formula: each ingredient row shows its grams large
+  and its percentage of the flour small and muted.
+- **Type scale:** `text-title` (28 px), `text-heading` (20 px),
+  `text-body` (16 px), `text-small` (14 px), in the system's rounded face
+  (`ui-rounded`), friendly like a kitchen notebook.
+- **Chip rule:** Bake It is the only filled control on the screen. The
+  selected bread chip is outlined in crust brown with a check, not filled.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

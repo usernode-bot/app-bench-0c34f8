@@ -43,6 +43,9 @@ module.exports = {
   // and keep these names.
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
+      },
       colors: {
         ground: token('ground'), // the page
         surface: token('surface'), // lists, cards, fields

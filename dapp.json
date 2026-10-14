@@ -3,5 +3,24 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator loads",
+      "path": "/",
+      "expectText": "Bake It"
+    },
+    {
+      "name": "Empty recipe before Bake It",
+      "path": "/",
+      "expectSelector": "#recipe-empty"
+    },
+    {
+      "name": "Demo recipe",
+      "id": "demo-recipe",
+      "visual": true,
+      "impact": ["public/**", "styles/**"],
+      "path": "/?demo=1",
+      "expectText": "Your recipe: 2 sourdough loaves"
+    }
+  ]
 }

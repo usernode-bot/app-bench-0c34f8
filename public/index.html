@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 18c26 0 42 14 42 32 0 20-14 32-42 32S8 70 8 50c0-18 16-32 42-32z' fill='%238c5228'/><path d='M32 38c4 8 4 24 0 32M50 34c4 10 4 30 0 38M68 38c4 8 4 24 0 32' stroke='%23f5ede2' stroke-width='6' stroke-linecap='round' fill='none'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -123,41 +123,43 @@
     <div>
     <div class="bb">
     <h1 class="title">Bread Bot</h1>
+    <p class="small" id="demo-note" hidden style="margin:-8px 4px 12px">Staging demo: a sample bake. Change anything to try your own.</p>
 
     <div class="section-label" style="margin-top:4px">Bread</div>
-    <div class="chips"><span class="chip on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
+    <div class="chips" id="chips"><button type="button" class="chip on" data-bread="sourdough" aria-pressed="true"><svg hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sourdough</button><button type="button" class="chip" data-bread="bagels" aria-pressed="false"><svg hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Bagels</button><button type="button" class="chip" data-bread="sourdough-bagels" aria-pressed="false"><svg hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sourdough bagels</button><button type="button" class="chip" data-bread="rye" aria-pressed="false"><svg hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Rye</button><button type="button" class="chip" data-bread="sandwich-loaf" aria-pressed="false"><svg hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sandwich loaf</button></div>
 
     <div class="section-label">Hydration</div>
     <div class="card">
     <div class="dialrow">
-    <svg width="96" height="96" viewBox="0 0 96 96" fill="none"><circle class="dial-track" cx="48" cy="48" r="38" stroke-width="10"/><circle class="dial-fill" cx="48" cy="48" r="38" stroke-width="10" stroke-linecap="round" stroke-dasharray="172 239" transform="rotate(-90 48 48)"/><text class="dial-num" x="48" y="55" text-anchor="middle" font-size="20" font-weight="700" font-family="ui-rounded,system-ui">72%</text></svg>
-    <div><p class="big">72% water</p><p>720 g water for every 1,000 g flour. Higher is wetter and more open.</p></div></div>
-    <div class="step"><div class="sb">−</div><div class="bar"><i></i><b></b></div><div class="sb">+</div></div>
+    <svg width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true"><circle class="dial-track" cx="48" cy="48" r="38" stroke-width="10"/><circle class="dial-fill" id="dial-fill" cx="48" cy="48" r="38" stroke-width="10" stroke-linecap="round" transform="rotate(-90 48 48)"/><text class="dial-num" id="dial-num" x="48" y="55" text-anchor="middle" font-size="20" font-weight="700" font-family="ui-rounded,system-ui"></text></svg>
+    <div><p class="big" id="h-big"></p><p id="h-words"></p></div></div>
+    <div class="step"><button type="button" class="sb" id="h-minus" aria-label="Less hydration">−</button><input type="range" class="range" id="hydration" min="50" max="100" step="1" aria-label="Hydration"><button type="button" class="sb" id="h-plus" aria-label="More hydration">+</button></div>
     </div>
 
     <div class="two" style="margin-top:12px">
-    <div class="card"><div class="small">Loaves</div><div class="step" style="margin-top:4px"><div class="sb">−</div><span class="val" style="flex:1;text-align:center">2</span><div class="sb">+</div></div></div>
-    <div class="card"><div class="small">Size per loaf</div><div class="step" style="margin-top:4px"><div class="sb">−</div><span class="val" style="flex:1;text-align:center">750 g</span><div class="sb">+</div></div></div>
+    <div class="card"><div class="small" id="count-label">Loaves</div><div class="step" style="margin-top:4px"><button type="button" class="sb" id="count-minus" aria-label="One less">−</button><span class="val" id="count-val" style="flex:1;text-align:center"></span><button type="button" class="sb" id="count-plus" aria-label="One more">+</button></div></div>
+    <div class="card"><div class="small" id="size-label">Size per loaf</div><div class="step" style="margin-top:4px"><button type="button" class="sb" id="size-minus" aria-label="Smaller">−</button><span class="val" id="size-val" style="flex:1;text-align:center"></span><button type="button" class="sb" id="size-plus" aria-label="Bigger">+</button></div></div>
     </div>
 
-    <button class="btn-primary">Bake It</button>
+    <button type="button" class="btn-primary" id="bake">Bake It</button>
 
-    <div class="h">Your recipe: 2 sourdough loaves</div>
-    <ul class="list">
+    <div class="state-empty" id="recipe-empty"><p>Pick your bread and tap Bake It to see your recipe.</p></div>
+    <div id="recipe" hidden>
+    <div class="h" id="recipe-title"></div>
+    <ul class="list" id="recipe-rows">
     <li class="list-row"><span class="n">Bread flour</span><b>773 g</b><span class="pct">100%</span></li>
-    <li class="list-row"><span class="n">Water</span><b>557 g</b><span class="pct">72%</span></li>
-    <li class="list-row"><span class="n">Salt</span><b>15 g</b><span class="pct">2%</span></li>
-    <li class="list-row"><span class="n">Starter</span><b>155 g</b><span class="pct">20%</span></li>
     </ul>
-    <div class="small" style="margin:8px 4px 0">Total dough 1,500 g. Percentages are of the flour, the baker's way.</div>
+    <div class="small" style="margin:8px 4px 0" id="recipe-total"></div>
 
     <div class="two" style="margin-top:16px">
-    <div class="card"><div class="small ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4"/></svg>Rise</div><div class="val">4 to 6 hr</div><div class="small">at 24°C, then 1 to 2 hr shaped</div></div>
-    <div class="card"><div class="small ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>Bake</div><div class="val">230°C</div><div class="small">45 min, steam first 20</div></div>
+    <div class="card"><div class="small ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4"/></svg>Rise</div><div class="val" id="rise-val"></div><div class="small" id="rise-note"></div></div>
+    <div class="card"><div class="small ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>Bake</div><div class="val" id="bake-val"></div><div class="small" id="bake-note"></div></div>
+    </div>
     </div>
     </div>
     </div>
   </div>
+  <script src="/app.js"></script>
   <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
