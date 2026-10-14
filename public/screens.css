@@ -9,15 +9,15 @@
    design, such as a map. */
 [data-spec-screen] {
   width: 100%;
-  max-width: 42rem;
-  margin-inline: auto;
+  max-width: 40rem;
+  margin: 0 auto;
 }
 
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1080px;
-  width: 390px;
+  width: 100%;
   font-family: ui-serif,Georgia,"Times New Roman",serif;
   font-size: 16px;
   line-height: 24px;
@@ -75,7 +75,7 @@
 
 .time {color:rgb(var(--muted))}
 
-.h {font-family:ui-serif,Georgia,"Iowan Old Style",serif;font-size:16px;line-height:22px;font-weight:600}
+.h {font-family:ui-serif,'Iowan Old Style',Georgia,serif;font-size:16px;line-height:22px;font-weight:600}
 
 .ex {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
@@ -97,7 +97,7 @@
 
 [data-spec-screen="2"] .scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
 
-[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;bottom:0;top:120px;max-width:42rem;margin-inline:auto;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 32px;display:flex;flex-direction:column;overflow:hidden}
+[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;bottom:0;top:120px;max-width:40rem;margin-inline:auto;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 32px;display:flex;flex-direction:column;overflow:hidden}
 
 [data-spec-screen="2"] .grab {width:36px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 8px;flex:none}
 
