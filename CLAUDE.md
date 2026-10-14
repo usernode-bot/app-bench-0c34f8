@@ -95,22 +95,27 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club decision board: anyone posts something for the club to decide,
+everyone votes (one vote per person, changeable, takeable back), people
+discuss in comments under each decision, and the person who posted it
+closes it; after that the winner stays visible and voting is shut. See
+README.md for the whole model (routes, tables, the demo seed).
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm stone greys for everything; indigo is the only action
+  colour (accent, focus ring); the tally track is a soft grey line
+  (`tally` token). Both looks carry all of it.
+- **Signature element:** the segmented tally bar on every decision row: one
+  segment per option with votes, the leader in indigo, everyone else soft
+  grey; when a decision is closed the leader's segment goes to ink (`text-fg`)
+  and stays there.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  on `system-ui`; nothing in capitals anywhere.
+- No mark in the header, by choice (wordmark "Club Votes" only).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +143,12 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- `reports` is the only `staging:private` table; `decisions`,
+  `decisions_votes` and `decisions_comments` are public.
+- In the kit's `choices` form field, leave `max` unset: the kit also uses it
+  as each option input's `maxlength`, so `max: 6` (meant as "at most six
+  options") stops a user after six characters. The kit's own default of six
+  options and the server's option-count check do the limiting instead.
+- Two-option decisions vote as a row of buttons; three or more stack.
+- A closed decision is closed for good: no reopening route exists, on
+  purpose.

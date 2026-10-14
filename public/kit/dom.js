@@ -46,9 +46,10 @@ const ICONS = {
   back: 'M15 6l-6 6 6 6',
   close: 'M6 6l12 12M18 6L6 18',
   plus: 'M12 5v14M5 12h14',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
-/** A line icon drawn in the text colour: check, chevron, back, close, plus. */
+/** A line icon drawn in the text colour: check, chevron, back, close, plus, more. */
 export function icon(name, cls = 'h-5 w-5') {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');

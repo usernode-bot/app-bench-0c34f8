@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234338ca' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 11h14v9H5z'/><path d='M9 11V8h6v3'/><path d='M12 3v7'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -115,21 +115,49 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <main class="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-8">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
+    <!-- The list screen. One sample row sits in the list so the kit can fill
+         it in (rowsFrom fills the drawn markup by selector); app.js clones
+         it per decision and replaces it with real rows once loaded. -->
+    <header class="flex items-center justify-between gap-3">
       <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+      <button type="button" id="new-decision" class="btn-primary" data-guest="hide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5"><path d="M12 5v14M5 12h14"/></svg>
+        New decision
+      </button>
+    </header>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
+    <div id="decisions"></div>
+
+    <section id="list-screen" class="flex flex-col gap-3">
+      <h2 class="section-label">Decisions, newest first</h2>
+      <ul id="decision-list" class="list flex-col">
+        <li class="list-row cursor-pointer">
+          <div class="cv-main">
+            <div class="cv-top">
+              <p class="q">Where should we meet in November?</p>
+              <div class="cv-side">
+                <span class="tag" hidden>Closed</span>
+                <button type="button" class="kit-icon-button cv-more" aria-label="More" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
+                </button>
+              </div>
+            </div>
+            <p class="lead">No votes yet</p>
+            <div class="bar" aria-hidden="true"><i></i></div>
+            <p class="won" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cv-won">Closed in a tie</span></p>
+            <p class="meta"><span class="cv-when">just now</span><span class="cv-talk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cv-bubble"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9 9 0 0 1-3.9-.9L3 20l1.2-3.9A8.2 8.2 0 0 1 3 11.5a8.4 8.4 0 0 1 9-8.3 8.4 8.4 0 0 1 9 8.3Z"/></svg><span class="cv-count">0</span></span><span class="cv-by">Ana</span><span class="you" hidden>You voted <b class="cv-your">Yes</b></span></p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="chev"><path d="M9 6l6 6-6 6"/></svg>
+        </li>
+      </ul>
+      <p id="signin-hint" class="text-small text-muted" data-guest="show" hidden>Sign in to vote or post a decision of your own.</p>
+    </section>
+
+    <!-- The detail screen, filled in by app.js when a row is opened. -->
+    <section id="detail-screen" hidden></section>
   </main>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

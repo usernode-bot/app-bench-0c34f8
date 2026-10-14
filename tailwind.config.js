@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        tally: token('tally'), // a tally bar's also-ran segments
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

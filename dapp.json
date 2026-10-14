@@ -3,5 +3,24 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Empty list on the plain route",
+      "path": "/",
+      "expectText": "No decisions yet"
+    },
+    {
+      "id": "demo-list",
+      "name": "Demo list shows the board",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Demo rows show tally bars",
+      "path": "/?demo=1",
+      "expectSelector": ".bar .top"
+    }
+  ]
 }

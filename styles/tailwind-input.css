@@ -35,11 +35,12 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 67 56 202;      /* the one accent: indigo, the action colour */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 99 102 241;      /* the keyboard focus ring */
+    --tally: 214 211 209;     /* a tally bar's also-ran segments */
   }
   .dark {
     --ground: 12 10 9;
@@ -48,11 +49,12 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 165 180 252;
+    --on-accent: 30 27 75;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 129 140 248;
+    --tally: 87 83 78;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -259,4 +261,32 @@
   .kit-bar { @apply mt-1 block h-2 overflow-hidden rounded-full bg-line; }
   .kit-bar-fill { @apply block h-full rounded-full bg-accent; }
   .kit-report-total { @apply mt-3 text-small text-muted; }
+
+  /* ── The decision list row (the spec's markup, on the tokens) ─────────────
+   * The signature element: a segmented tally bar under each question. The
+   * leader's segment is indigo, the others soft grey on a hairline track,
+   * and on a closed row the winning segment goes to ink. Segments are
+   * <i> elements sized with an inline flex-grow (a whole number, never a
+   * class), so proportions come from the counts.
+   */
+  .cv-main { @apply flex min-w-0 flex-1 flex-col gap-1.5; }
+  .cv-top { @apply flex items-start justify-between gap-2; }
+  .cv-side { @apply -mr-2 flex shrink-0 items-center gap-1; }
+  .q { @apply break-words text-body font-semibold leading-snug; }
+  .lead { @apply text-small text-muted; }
+  .lead b { @apply font-medium text-fg; }
+  .won { @apply flex items-center gap-1 text-small font-medium text-fg; }
+  .won b { @apply font-semibold; }
+  .bar { @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-line; }
+  .bar i { @apply block min-w-0.5 bg-tally; }
+  .bar i.top { @apply bg-accent; }
+  .closed .bar i.top { @apply bg-fg; }
+  .meta { @apply flex flex-wrap items-center gap-x-2 gap-y-0.5 text-small text-muted; }
+  .you { @apply font-medium text-accent; }
+  .tag { @apply shrink-0 rounded-full bg-raised px-2.5 py-0.5 text-small font-medium text-muted; }
+  .chev { @apply h-5 w-5 shrink-0 text-muted; }
+  .cv-bubble { @apply h-4 w-4 shrink-0 text-muted; }
+
+  /* A closed or read-only vote: no tapping, the counts stay. */
+  .kit-vote:disabled { @apply cursor-not-allowed opacity-60 hover:border-line; }
 }

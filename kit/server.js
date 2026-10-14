@@ -48,7 +48,8 @@ function resource(app, pool, opts = {}) {
     const labels = Array.isArray(r.options) && r.options.length ? r.options : defaults;
     return {
       id: r.id, title: r.title, body: r.body, category: r.category, author: r.author_name,
-      byMe: uid != null && r.author_id === uid, createdAt: r.created_at, commentCount: r.comment_count,
+      byMe: uid != null && r.author_id === uid, createdAt: r.created_at, closedAt: r.closed_at ?? null,
+      commentCount: r.comment_count,
       votes: { options: labels.map((label, k) => ({ id: k, label, count: Number(r.counts[k]) || 0 })), mine: r.my_vote ?? null },
     };
   };
@@ -62,6 +63,8 @@ function resource(app, pool, opts = {}) {
     await pool.query(`CREATE TABLE IF NOT EXISTS ${T} (
       id SERIAL PRIMARY KEY, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', category TEXT, options JSONB,
       author_id INTEGER NOT NULL, author_name TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL)`);
+    // The poster closes a decision; closed_at set means final (irreversible).
+    await pool.query(`ALTER TABLE ${T} ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ`);
     await pool.query(`CREATE TABLE IF NOT EXISTS ${V} (
       item_id INTEGER NOT NULL REFERENCES ${T}(id) ON DELETE CASCADE, user_id INTEGER NOT NULL,
       choice INTEGER NOT NULL, created_at TIMESTAMPTZ NOT NULL, PRIMARY KEY (item_id, user_id))`);
@@ -78,11 +81,20 @@ function resource(app, pool, opts = {}) {
     if (!rows.length) {
       const { demoItems } = await loadDemo();
       const rowsIn = demoItems({ seed: 7, options: defaults, ...opts.demo, now: req.now, firstId: DEMO_ID });
+      // Two rows that drew votes are shown closed: the winner stays visible.
+      // Closed a while after they were posted, always before "now".
+      for (const i of [1, 6]) {
+        const r = rowsIn[i];
+        if (r && r.votes.length) {
+          const made = new Date(r.createdAt).getTime();
+          r.closedAt = new Date(made + (new Date(req.now).getTime() - made) / 2).toISOString();
+        }
+      }
       // Each table's rows in one query: `cols` names and types them, as json_to_recordset reads them.
       const put = (table, cols, list) => pool.query(`INSERT INTO ${table} (${cols.replace(/ \w+(,|$)/g, '$1')})
         SELECT * FROM json_to_recordset($1::json) AS x(${cols}) ON CONFLICT DO NOTHING`, [JSON.stringify(list)]);
-      await put(T, 'id int, title text, body text, category text, options jsonb, author_id int, author_name text, created_at timestamptz',
-        rowsIn.map((r) => ({ id: r.id, title: r.title, body: r.body, category: r.category, options: r.options.map((o) => o.label), author_id: r.authorId, author_name: r.author, created_at: r.createdAt })));
+      await put(T, 'id int, title text, body text, category text, options jsonb, author_id int, author_name text, created_at timestamptz, closed_at timestamptz',
+        rowsIn.map((r) => ({ id: r.id, title: r.title, body: r.body, category: r.category, options: r.options.map((o) => o.label), author_id: r.authorId, author_name: r.author, created_at: r.createdAt, closed_at: r.closedAt ?? null })));
       await put(V, 'item_id int, user_id int, choice int, created_at timestamptz',
         rowsIn.flatMap((r) => r.votes.map((v) => ({ item_id: r.id, user_id: v.userId, choice: v.optionId, created_at: v.createdAt }))));
       await put(C, 'id int, item_id int, author_id int, author_name text, body text, created_at timestamptz',
@@ -100,17 +112,26 @@ function resource(app, pool, opts = {}) {
 
   app.get(base, route(false, async (req, res) => {
     const demo = await seedDemo(req);
-    const { rows } = await pool.query(`${ITEM} ORDER BY i.created_at DESC, i.id DESC LIMIT 200`, [viewer(req)]);
-    res.json({ items: rows.map((r) => itemOut(r, viewer(req))), demo });
+    // Without ?demo=1 the demo rows (staging only, id >= 900001) stay out,
+    // so the plain route shows just what this club really posted.
+    const onlyReal = demo ? '' : ` WHERE i.id < ${DEMO_ID}`;
+    const { rows } = await pool.query(`${ITEM}${onlyReal} ORDER BY i.created_at DESC, i.id DESC LIMIT 200`, [viewer(req)]);
+    res.json({
+      items: rows.map((r) => itemOut(r, viewer(req))), demo,
+      user: req.user ? { id: viewer(req), name: String(req.user.username || 'Someone') } : null,
+    });
   }));
 
   app.get(`${base}/:id`, route(false, async (req, res) => {
     const id = idOf(req);
     const demo = await seedDemo(req);
-    const item = id && await one(id, viewer(req));
+    const item = id && (demo || id < DEMO_ID) && await one(id, viewer(req));
     if (!item) return bad(res, 404, GONE);
     const { rows } = await pool.query(`SELECT * FROM ${C} WHERE item_id = $1 ORDER BY created_at, id LIMIT 500`, [id]);
-    return res.json({ item, comments: rows.map((c) => commentOut(c, viewer(req))), demo });
+    return res.json({
+      item, comments: rows.map((c) => commentOut(c, viewer(req))), demo,
+      user: req.user ? { id: viewer(req), name: String(req.user.username || 'Someone') } : null,
+    });
   }));
 
   app.post(base, route(true, async (req, res) => {
@@ -137,6 +158,7 @@ function resource(app, pool, opts = {}) {
     const id = idOf(req);
     const item = id && await one(id, viewer(req));
     if (!item) return bad(res, 404, GONE);
+    if (item.closedAt) return bad(res, 409, 'This decision is closed.');
     const choice = (req.body || {}).option;
     if (choice === null) {
       await pool.query(`DELETE FROM ${V} WHERE item_id = $1 AND user_id = $2`, [id, viewer(req)]);
@@ -165,7 +187,7 @@ function resource(app, pool, opts = {}) {
     return res.json({ ok: true });
   }));
 
-  return { migrate, base };
+  return { migrate, base, one };
 }
 
 module.exports = { resource };

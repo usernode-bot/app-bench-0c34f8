@@ -154,6 +154,114 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Club Votes ──────────────────────────────────────────────────────────────
+// The decisions board: anyone posts something to decide, everyone votes
+// (one vote per person, changeable), comments go under each decision, and
+// the poster closes it; the winner then stays visible. Tables decisions,
+// decisions_votes and decisions_comments are public; reports (who reported
+// what) is not, so nothing is hidden by it and nobody's report is exposed.
+const { resource } = require('./kit/server');
+
+const decisions = resource(app, pool, {
+  name: 'decisions',
+  demo: {
+    titles: [
+      { title: 'Where should we meet in November?', body: 'The hall is booked for both weeks we tried. Somewhere with parking would help the evening crowd.', options: ['The community hall', "Rowan's place", 'The library room', 'Online'] },
+      { title: 'Pick the winter reading list', body: 'Three picks fit between November and February. We read one a month and talk about it at game night.', options: ['The Long Winter', 'Snow Country', 'A Field Guide to Getting Lost'] },
+      { title: 'December outing: skating or bowling?', options: ['Skating at the rink', 'Bowling at Rollway Lanes'] },
+      { title: 'Move game night to Fridays?', body: 'Thursdays keep clashing with choir practice. Fridays look free for almost everyone who answered last month.', options: ['Yes', 'No'] },
+      { title: 'A shorter name for the club?', body: 'The Wednesday Evening Society is a mouthful on posters.', options: ['The Wednesday Club', 'Midweek Society', 'Keep it as it is'] },
+      { title: 'June picnic at the meadow again?', body: 'Same spot as last year, or by the pond where the shade is better after lunch.', options: ['Yes', 'No'] },
+      { title: 'Snacks rota for the autumn meetings', body: 'One of us brings something each week. Say which week suits you.', options: ['Week 1, November 4', 'Week 2, November 11', 'Week 3, November 18', 'Week 4, November 25'] },
+      { title: 'Start meetings at 7 instead of 7:30?', body: 'The room is ours until 9 either way. Starting earlier leaves time for announcements.', options: ['Yes', 'No'] },
+      { title: 'What should the winter quiz theme be?', options: ['Films of the nineties', 'Local history', 'Food and drink', 'Sport'] },
+      { title: 'A second coffee urn for big nights', body: 'The queue at the last break ran ten minutes. A second urn costs about two weeks of the tea tin.', options: ['Yes', 'No'] },
+      { title: 'Who fancies running the February quiz?', body: 'Kemal did the last one brilliantly and has earned a break.', options: ['I will do it', 'I will co-run it', 'Not this time'] },
+      { title: 'Keep the noticeboard by the entrance?', body: 'It blocks the light in that corner. The wall by the kitchen is free and more people pass it.', options: ['Yes', 'No'] },
+    ],
+    bodies: ['Shout if any of this clashes with something you already do that night.', 'Numbers and fine print at the next meeting if you want them.'],
+    comments: [
+      'I can bring the projector if we end up online.',
+      'Parking at the hall is free after six.',
+      'The library room shuts at eight, mind.',
+      'Skating for me, the lanes booked out on us last time.',
+      'Fridays suit me much better.',
+      'Happy to host, we have chairs for twelve.',
+      'The pond side gets wasps in June, just saying.',
+      'I can do week 2, no problem.',
+      'A shorter name is overdue, honestly.',
+      'Second urn gets my vote, that queue was silly.',
+      'Local history, please.',
+      'I will co-run the quiz with whoever fancies it.',
+    ],
+  },
+});
+
+// A report records that somebody flagged a decision or a comment. It never
+// hides anything and it is not shown to anyone; the club's people look at
+// them. No foreign keys: a decision or comment may be gone by the time the
+// row is written.
+async function migrateReports() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY, kind TEXT NOT NULL, target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL, created_at TIMESTAMPTZ NOT NULL)`);
+  await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS reports_once_idx ON reports (kind, target_id, reporter_id)');
+  await pool.query("COMMENT ON TABLE reports IS 'staging:private'");
+}
+
+const NOT_FOUND = 'This was removed, or the link is wrong.';
+
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  const kind = (req.body || {}).kind;
+  const target = Number((req.body || {}).id);
+  if ((kind !== 'decision' && kind !== 'comment') || !Number.isInteger(target) || target <= 0) {
+    return res.status(400).json({ error: 'Say what you are reporting.' });
+  }
+  try {
+    await pool.query('INSERT INTO reports (kind, target_id, reporter_id, created_at) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
+      [kind, target, req.user.id, req.now]);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'That did not work. Try again in a moment.' });
+  }
+  return res.status(201).json({ ok: true });
+});
+
+// The poster closes a decision. Final: no reopening, and the winning
+// option's tally bar segment stays on screen in ink.
+app.post('/api/decisions/:id/close', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ error: NOT_FOUND });
+  const { rows } = await pool.query('UPDATE decisions SET closed_at = $3 WHERE id = $1 AND author_id = $2 AND closed_at IS NULL RETURNING id',
+    [id, req.user.id, req.now]);
+  if (!rows.length) {
+    const { rows: existing } = await pool.query('SELECT author_id, closed_at FROM decisions WHERE id = $1', [id]);
+    if (!existing.length) return res.status(404).json({ error: NOT_FOUND });
+    if (existing[0].author_id !== req.user.id) {
+      return res.status(403).json({ error: 'Only the person who posted this can close it.' });
+    }
+    return res.json({ item: await decisions.one(id, req.user.id) });
+  }
+  return res.json({ item: await decisions.one(id, req.user.id) });
+});
+
+// A comment's own writer may delete it; nobody else can.
+app.delete('/api/decisions/:id/comments/:cid', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  const id = Number(req.params.id);
+  const cid = Number(req.params.cid);
+  if (!Number.isInteger(id) || !Number.isInteger(cid)) return res.status(404).json({ error: NOT_FOUND });
+  const { rows } = await pool.query('SELECT author_id FROM decisions_comments WHERE id = $1 AND item_id = $2', [cid, id]);
+  if (!rows.length) return res.status(404).json({ error: NOT_FOUND });
+  if (rows[0].author_id !== req.user.id) {
+    return res.status(403).json({ error: 'Only the person who wrote a comment can delete it.' });
+  }
+  await pool.query('DELETE FROM decisions_comments WHERE id = $1', [cid]);
+  return res.json({ ok: true });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -192,9 +300,25 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await decisions.migrate();
+  await migrateReports();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // The platform stops this container kindly: stop accepting, let the
+  // requests already in flight finish (at most a few seconds), close the
+  // database pool, and go. A second signal is still answered at once.
+  let stopping = false;
+  const stop = (signal) => {
+    if (stopping) process.exit(0);
+    stopping = true;
+    console.log(`${signal}: stopping`);
+    server.close(() => pool.end().then(() => process.exit(0)));
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', () => stop('SIGTERM'));
+  process.on('SIGINT', () => stop('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
