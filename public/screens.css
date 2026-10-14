@@ -44,17 +44,22 @@
 
 .v {font-weight:600;font-variant-numeric:tabular-nums}
 
-.sl {position:relative;height:44px;display:flex;align-items:center}
+/* The real slider behind the drawn one (behaviour needed it): themed by the
+   accent token, tall enough to tap. */
+.rng {width:100%;min-height:44px;accent-color:rgb(var(--accent));color:rgb(var(--accent))}
 
-.tr {height:6px;border-radius:3px;background:rgb(var(--line));width:100%}
-
-.tf {position:absolute;left:0;height:6px;border-radius:3px;background:rgb(var(--accent));width:62.5%}
-
-.th {position:absolute;left:calc(62.5% - 14px);width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+.rng:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .st {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px;overflow:hidden}
 
 .st span {min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+
+/* The stepper's ends are buttons now, not drawn spans: same size, no chrome. */
+.st button {min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;font:inherit;font-size:1.25rem;color:rgb(var(--fg));background:none;border:0;cursor:pointer}
+
+.st button:disabled {color:rgb(var(--muted));cursor:default}
+
+.st button:focus-visible,.b:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .st .n {border-left:1px solid rgb(var(--line));border-right:1px solid rgb(var(--line));min-width:52px;font-weight:600}
 

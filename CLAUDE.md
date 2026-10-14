@@ -95,22 +95,25 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A baking calculator for home bakers: pick one of five breads, set
+hydration, loaf count and loaf weight, tap Calculate, and get the
+baker's formula in grams, the rise stages and the bake. All maths runs
+in the browser (`public/bread.js`); nothing is saved or sent anywhere.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** amber accent (the baked crust: `180 83 9` light, `245 158 11`
+  dark) on warm flour-toned neutrals (cream page, oat surfaces, brown-grey
+  text), set in `styles/tailwind-input.css`.
+- **Signature element:** the baker's formula card, where each ingredient's
+  share of the flour gets its own amber bar next to its grams.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged sizes in `tailwind.config.js`).
+- Grams are whole numbers, or to the half under 10 g; ingredient lines name
+  the real thing the baker weighs ("Active starter", not "starter 20%").
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

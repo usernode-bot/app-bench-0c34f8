@@ -3,5 +3,17 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Calculator empty", "path": "/", "expectSelector": "#recipe-empty", "expectText": "Your recipe shows here" },
+    {
+      "id": "calculator.demo-formula",
+      "name": "Demo formula card",
+      "path": "/?demo=1",
+      "expectSelector": "#formula-card",
+      "expectText": "1,800 g",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    { "name": "Demo rise and bake", "path": "/?demo=1", "expectSelector": "#rise-section", "expectText": "Bulk rise" }
+  ]
 }
