@@ -3,5 +3,25 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator screen offers the five breads and the calculate action",
+      "path": "/",
+      "selector": "[role=radiogroup]",
+      "text": "Calculate recipe"
+    },
+    {
+      "name": "Staging demo renders a real calculated recipe",
+      "path": "/?demo=1",
+      "id": "demo",
+      "visual": true,
+      "impact": "public/**",
+      "text": "Total dough"
+    },
+    {
+      "name": "Staging demo is labelled as a demo",
+      "path": "/?demo=1",
+      "text": "Staging demo"
+    }
+  ]
 }

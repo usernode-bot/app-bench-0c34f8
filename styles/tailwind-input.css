@@ -39,21 +39,22 @@
     --on-accent: 255 250 242; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --dough: 240 222 186; /* from the spec's screens */
+    --focus: 217 119 6;      /* the keyboard focus ring */
+    --dough: 240 222 186;    /* the pale dough colour: chosen tile, dial track, step icons */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 18 13;
+    --surface: 36 28 21;
+    --raised: 50 39 30;
+    --fg: 245 237 224;
+    --muted: 184 168 148;
+    --line: 74 60 47;
+    --accent: 230 160 94;
+    --on-accent: 43 24 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 253 224 71;
+    --dough: 92 66 38;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -151,6 +152,10 @@
     --un-toast-text: rgb(var(--ground));
     --un-toast-action: rgb(var(--ground));
   }
+
+  /* The dial's tick marks: muted ink in the light look, pale in the dark
+     one (they sit on the dark ground between the arc ends). */
+  .dial-ticks { stroke: rgb(var(--muted)); }
 
   /* Lists: ul.un-group.kit-group of li.un-group-row, the native grouped
      list with this app's edge, and its hairlines without the native kit. */

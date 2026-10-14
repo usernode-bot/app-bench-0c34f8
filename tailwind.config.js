@@ -55,6 +55,11 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        dough: token('dough'), // the pale dough colour: chosen tile, dial track, step icons
+      },
+      // Headings and numbers use the rounded system face; body stays system sans.
+      fontFamily: {
+        display: ['ui-rounded', '"SF Pro Rounded"', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

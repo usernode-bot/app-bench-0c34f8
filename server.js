@@ -191,10 +191,26 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// The platform stops this app with SIGTERM (and a Ctrl+C in the logs is
+// SIGINT). Close the listener so no new request is taken, give in-flight
+// ones a few seconds to finish, then let the pg pool close its sockets
+// before exiting — so a redeploy never drops a request mid-response.
+function shutdown() {
+  if (!server) process.exit(0);
+  server.close(() => process.exit(0));
+  setTimeout(() => {
+    pool.end().catch(() => {}).finally(() => process.exit(0));
+  }, 3000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });
