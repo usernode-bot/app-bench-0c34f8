@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the pale golden second colour
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

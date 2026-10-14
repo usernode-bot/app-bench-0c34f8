@@ -95,22 +95,34 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator for home bakers: pick one of five breads
+(sourdough, bagels, sourdough bagels, rye, sandwich loaf), set hydration,
+how many loaves (or bagels) and their size, tap Calculate, and read the
+grams of every ingredient, the rise times, and the bake temperature and
+time. Nothing is saved or shared — a calculator you fill in each time, with
+no tables; everything runs in the browser.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by the first version's spec; every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** the accent is **crust**, a baked brown (light `140 74 32`
+  with white text on it; dark `222 150 92` with dark text `40 20 6` on it),
+  used for Calculate, the chosen bread, the slider and the step icons. The
+  second colour is **wheat**, a pale golden (`224 190 120` light,
+  `176 140 78` dark), filling the formula bars and tinting the chosen
+  bread. The neutrals are flour and crumb: a near-white flour page with
+  white fields and warm brown-black text in the light look; warm dark
+  browns in the dark. Values live in `styles/tailwind-input.css`.
+- **Signature element:** the baker's formula bar — under each ingredient a
+  thin wheat bar showing it against the flour, which always fills the bar
+  at 100%, with the percentage beside it.
+- **Type scale:** `text-title` (24/700), `text-heading` (19/650),
+  `text-body` (16), `text-small` (13). Grams and times use tabular
+  numerals.
+- Plain baking words and line icons for each bread and each step (rising
+  bowl, proofing loaf, oven, timer, pot).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

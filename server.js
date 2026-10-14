@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -90,6 +91,14 @@ app.get(/^\/usernode-(?:bridge|native|tailwind)\//, async (req, res) => {
 // staging container reads either. See "Time-dependent features" in the
 // platform conventions.
 const IS_STAGING = process.env.USERNODE_ENV === 'staging';
+
+// The HTML shell, read once. On staging it carries data-env="staging" on
+// <html> so the page can offer its ?demo=1 sample bake; production serves
+// the file exactly as committed.
+const INDEX_HTML = (() => {
+  const source = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  return IS_STAGING ? source.replace('<html lang="en">', '<html lang="en" data-env="staging">') : source;
+})();
 const PREVIEW_NOW = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 function requestNow(req) {
   const raw = IS_STAGING ? (req.headers['x-usernode-now'] || req.query['un-now']) : null;
@@ -154,7 +163,9 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// index: false — the shell below serves index.html itself, so the staging
+// data-env replacement cannot be bypassed by the static middleware.
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -188,13 +199,17 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(INDEX_HTML);
 });
 
 async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Stop accepting connections, drain briefly, then exit cleanly.
+  const stop = () => server.close(() => process.exit(0));
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

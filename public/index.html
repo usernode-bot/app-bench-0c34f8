@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c4a20' stroke-width='1.8' stroke-linecap='round'><path d='M4 14c0-5 3.6-8 8-8s8 3 8 8v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z'/><path d='M9 9.5l1.5 2M12.5 8.5l1.5 2M16 10l1 1.5'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -120,55 +120,58 @@
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div><main>
+    <div><main id="app">
     <div class="hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 14c0-5 3.6-8 8-8s8 3 8 8v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M9 9.5l1.5 2M12.5 8.5l1.5 2M16 10l1 1.5"/></svg><h1 class="text-title">Bread Bot</h1></div>
 
     <div class="card">
     <div><div class="lbl">Bread</div>
-    <div class="types">
-    <span class="type on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 15c0-5 4-8 9-8s9 3 9 8v1H3z"/><path d="M9 10l2 2M13 9.5l2 2"/></svg>Sourdough</span>
-    <span class="type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>Bagels</span>
-    <span class="type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M8 7.5l1.2 1.2M15.5 15.5l1 1"/></svg>Sourdough bagels</span>
-    <span class="type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="5.5"/><path d="M8 11l1.5 3M12 10.5l1.5 3M16 11l1.2 2.5"/></svg>Rye</span>
-    <span class="type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 11a4 4 0 0 1 2-6h10a4 4 0 0 1 2 6v8H5z"/><path d="M5 15h14"/></svg>Sandwich loaf</span>
+    <div class="types" role="group" aria-label="Bread">
+    <button type="button" class="type on" data-bread="sourdough" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 15c0-5 4-8 9-8s9 3 9 8v1H3z"/><path d="M9 10l2 2M13 9.5l2 2"/></svg>Sourdough</button>
+    <button type="button" class="type" data-bread="bagels" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>Bagels</button>
+    <button type="button" class="type" data-bread="sourdough-bagels" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M8 7.5l1.2 1.2M15.5 15.5l1 1"/></svg>Sourdough bagels</button>
+    <button type="button" class="type" data-bread="rye" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9" ry="5.5"/><path d="M8 11l1.5 3M12 10.5l1.5 3M16 11l1.2 2.5"/></svg>Rye</button>
+    <button type="button" class="type" data-bread="sandwich-loaf" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 11a4 4 0 0 1 2-6h10a4 4 0 0 1 2 6v8H5z"/><path d="M5 15h14"/></svg>Sandwich loaf</button>
     </div></div>
 
-    <div><div class="lbl"><span>Hydration</span><span class="val">75%</span></div>
-    <div class="range"><div class="track"><i></i></div><span class="thumb"></span></div>
+    <div><div class="lbl"><span>Hydration</span><span class="val" id="hydration-val">75%</span></div>
+    <div class="range"><input id="hydration" type="range" min="55" max="90" step="1" value="75" aria-label="Hydration, percent water"><div class="track"><i></i></div><span class="thumb"></span></div>
     <div class="ends text-small muted"><span>55% stiff</span><span>Water per 100 g flour</span><span>90% wet</span></div></div>
 
     <div class="row2">
-    <div><div class="lbl">Loaves</div><div class="stepper"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></b><span>2</span><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg></b></div></div>
-    <div><div class="lbl">Loaf size</div><div class="seg"><span>450 g</span><span>680 g</span><span class="on">900 g</span></div></div>
+    <div><div class="lbl" id="count-label">Loaves</div><div class="stepper"><button type="button" class="less" aria-label="One fewer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button><span id="count">2</span><button type="button" class="more" aria-label="One more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12M12 6v12"/></svg></button></div></div>
+    <div><div class="lbl" id="size-label">Loaf size</div><div class="seg" role="group" aria-label="Loaf size"><button type="button" data-size="0" aria-pressed="false">450 g</button><button type="button" data-size="1" aria-pressed="false">680 g</button><button type="button" data-size="2" class="on" aria-pressed="true">900 g</button></div></div>
     </div>
 
-    <div class="btn-primary">Calculate</div>
+    <button type="button" class="btn-primary" id="calculate">Calculate</button>
     </div>
 
-    <div><h2 class="text-heading">Sourdough, 2 loaves of 900 g</h2><p class="text-small muted">1,800 g of dough at 75% hydration</p></div>
+    <div data-recipe id="recipe" hidden>
+    <div><h2 class="text-heading" id="recipe-title"></h2><p class="text-small muted" id="recipe-sub"></p><p class="text-small" id="stale" hidden>Settings changed. Tap Calculate to update.</p></div>
 
     <div><div class="section-label">Ingredients, against the flour</div>
-    <ul class="list">
-    <li class="list-row"><div class="ing"><span class="n">Bread flour</span><span class="g">914 g</span></div><div class="bar"><span class="t"><i style="width:100%"></i></span><span class="p">100%</span></div></li>
-    <li class="list-row"><div class="ing"><span class="n">Water</span><span class="g">685 g</span></div><div class="bar"><span class="t"><i style="width:75%"></i></span><span class="p">75%</span></div></li>
-    <li class="list-row"><div class="ing"><span class="n">Starter</span><span class="text-small muted">fed, bubbly</span><span class="g">183 g</span></div><div class="bar"><span class="t"><i style="width:20%"></i></span><span class="p">20%</span></div></li>
-    <li class="list-row"><div class="ing"><span class="n">Salt</span><span class="g">18 g</span></div><div class="bar"><span class="t"><i style="width:2%"></i></span><span class="p">2%</span></div></li>
-    </ul></div>
+    <ul class="list" id="ing-list"></ul></div>
 
     <div><div class="section-label">Rise</div>
-    <ul class="list">
-    <li class="list-row"><div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 20h12M7 20V9h10v11"/><path d="M8 9c0-3 2-4 4-4s4 1 4 4"/></svg><div><div class="n">Bulk rise</div><div class="d">At about 24°C. Stretch and fold every 30 min for the first 2 h.</div></div><span class="v">4 to 5 h</span></div></li>
-    <li class="list-row"><div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 15c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5v2H4z"/><path d="M12 3v3"/></svg><div><div class="n">Shape and proof</div><div class="d">Or overnight in the fridge, 8 to 14 h.</div></div><span class="v">1 to 2 h</span></div></li>
-    </ul></div>
+    <ul class="list" id="rise-list"></ul></div>
 
     <div><div class="section-label">Bake</div>
-    <ul class="list">
-    <li class="list-row"><div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M7 14h10"/></svg><div><div class="n">Preheat</div><div class="d">With a Dutch oven inside, 45 min.</div></div><span class="v">250°C / 480°F</span></div></li>
-    <li class="list-row"><div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 3h4"/></svg><div><div class="n">Lid on</div><div class="d">At 250°C / 480°F, one loaf at a time.</div></div><span class="v">20 min</span></div></li>
-    <li class="list-row"><div class="step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 3h4"/></svg><div><div class="n">Lid off</div><div class="d">At 230°C / 445°F, until deep brown.</div></div><span class="v">25 min</span></div></li>
-    </ul></div>
+    <ul class="list" id="bake-list"></ul></div>
+    </div>
+
+    <div class="state-empty" id="recipe-empty">
+    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="text-muted"><path d="M4 14c0-5 3.6-8 8-8s8 3 8 8v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M9 9.5l1.5 2M12.5 8.5l1.5 2M16 10l1 1.5"/></svg>
+    <h2 class="text-heading">No recipe yet</h2>
+    <p class="text-body text-muted">Pick your bread above and tap Calculate.</p>
+    </div>
+
+    <div class="state-error" id="recipe-error" role="alert" hidden>
+    <h2 class="text-heading">Could not work out this recipe</h2>
+    <p class="text-body text-muted">Your settings are still here. Check them and try again.</p>
+    <button type="button" class="btn-secondary mt-2" id="retry">Retry</button>
+    </div>
     </main></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

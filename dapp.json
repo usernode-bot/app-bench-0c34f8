@@ -3,5 +3,25 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator controls are on the screen",
+      "path": "/",
+      "expectSelector": "#calculate"
+    },
+    {
+      "name": "The recipe area starts empty with an invitation to calculate",
+      "path": "/",
+      "expectSelector": ".state-empty",
+      "expectText": "No recipe yet"
+    },
+    {
+      "id": "demo-recipe",
+      "visual": true,
+      "impact": ["public/**"],
+      "name": "Staging demo opens on a calculated recipe with formula bars",
+      "path": "/?demo=1",
+      "expectSelector": "[data-recipe] .formula-bar"
+    }
+  ]
 }
