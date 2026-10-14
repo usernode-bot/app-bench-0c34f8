@@ -186,10 +186,13 @@
     $('hydration-words').textContent =
       thousands(state.hydration * 10) + ' g water for every 1,000 g flour. Higher is wetter and more open.';
 
-    // The hydration slider: 0 at 50%, 100 at 100%.
+    // The hydration slider: the fill and the thumb both come from the same
+    // value, (hydration − 50) / 50 of the range, so the fill always ends at
+    // the thumb's centre.
     var range = $('hydration');
     range.value = state.hydration;
-    range.style.setProperty('--fill', (state.hydration - HYDRATION_MIN) + '%');
+    range.style.setProperty('--fill',
+      (state.hydration - HYDRATION_MIN) / (HYDRATION_MAX - HYDRATION_MIN) * 100 + '%');
 
     // Loaves (or bagels) and size, with the steppers disabled at the ends.
     $('count').textContent = String(state.count);

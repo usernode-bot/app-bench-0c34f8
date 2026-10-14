@@ -47,7 +47,15 @@
 
 .dialrow {display:flex;align-items:center;gap:16px}
 
+/* The dial is the signature element: a fixed 96 × 96 on every width. The
+   words beside it do the wrapping, never the ring. */
+.dialrow > svg {flex-shrink:0}
+
 .dialrow p {margin:0;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+/* "72% water" is the 20 px heading of the dial's reading, not a caption:
+   it keeps .big's type even though .dialrow p styles the plain words. */
+.dialrow .big {font-size:20px;line-height:28px}
 
 .dial-track {stroke:rgb(var(--raised))}
 
@@ -64,7 +72,8 @@
 .sb:disabled {opacity:40%;cursor:default}
 
 /* The hydration slider, drawn as a track with a thumb: a real range input
-   over the same look. --fill is set from JS (0 at 50%, 100 at 100%). */
+   over the same look. --fill is set from JS, (hydration − 50) / 50 × 100%,
+   the same fraction that places the thumb. */
 input.bar {appearance:none;-webkit-appearance:none;flex:1;height:24px;background:transparent;margin:0;cursor:pointer}
 
 input.bar::-webkit-slider-runnable-track {height:8px;border-radius:4px;background:linear-gradient(to right,rgb(var(--accent)) var(--fill,44%),rgb(var(--raised)) var(--fill,44%))}
@@ -80,9 +89,17 @@ input.bar::-moz-range-thumb {width:20px;height:20px;border-radius:10px;backgroun
 .two .card {padding:12px 16px}
 
 /* The two stepper cards: the 44 px steppers leave little room between them,
-   so they sit a little tighter and their value never wraps — even the
-   largest size, "2,000 g", stays on one line. */
-.step-card {padding:12px 8px}
+   so on a phone the card keeps no horizontal padding of its own — the label
+   carries it, and even the largest size, "2,000 g", keeps 8 px clear of
+   each button on one line. Wider screens have room to spare and keep the
+   usual padding. */
+.two .card.step-card {padding:12px 8px}
+
+.step-card > .small {padding:0 8px}
+
+@media (max-width: 480px) {
+  .two .card.step-card {padding:12px 0}
+}
 
 .step-card .step {gap:4px}
 
