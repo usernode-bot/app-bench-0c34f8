@@ -1,0 +1,113 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1290px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 20px 16px 32px;
+  box-sizing: border-box;
+}
+
+.app * {box-sizing:border-box}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {font-size:28px;line-height:36px;font-weight:700;margin:0;font-family:ui-serif,Georgia,serif}
+
+.small {font-size:14px;line-height:20px}
+
+.muted {color:rgb(var(--muted))}
+
+.section-label {margin:20px 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {min-height:44px;padding:0 16px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:inline-flex;align-items:center;font-size:16px;color:rgb(var(--fg))}
+
+.chip.on {background:rgb(var(--crust));border-color:rgb(var(--crust));color:rgb(var(--on-crust));font-weight:600}
+
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
+
+.row {display:flex;justify-content:space-between;align-items:center}
+
+.val {font-weight:600;font-variant-numeric:tabular-nums}
+
+.track {height:6px;border-radius:3px;background:rgb(var(--line));position:relative;margin:16px 0 8px}
+
+.fill {position:absolute;left:0;top:0;bottom:0;width:63%;background:rgb(var(--accent));border-radius:3px}
+
+.knob {position:absolute;left:63%;top:-11px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:rgb(var(--surface));border:3px solid rgb(var(--accent))}
+
+.step {display:flex;align-items:center;gap:4px}
+
+.sb {width:44px;height:44px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center}
+
+.sv {min-width:56px;text-align:center;font-size:20px;line-height:28px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.grid {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.btn-primary {width:100%;min-height:48px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;font-family:inherit}
+
+.btn-secondary {min-height:44px;padding:0 16px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font-size:16px;font-weight:500;display:inline-flex;align-items:center;gap:8px;font-family:inherit}
+
+.field {min-height:44px;flex:1;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));padding:0 12px;display:flex;align-items:center;color:rgb(var(--muted));font-size:16px}
+
+.sheet {border:1px solid rgb(var(--crust));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.sh {background:rgb(var(--raised));padding:12px 16px;border-bottom:1px solid rgb(var(--crust))}
+
+.h {font-size:20px;line-height:28px;font-weight:600;font-family:ui-serif,Georgia,serif}
+
+.ing {display:grid;grid-template-columns:1fr 72px 72px;padding:12px 16px;border-bottom:1px solid rgb(var(--line));align-items:center}
+
+.ing.flour {background:rgb(var(--raised));font-weight:600}
+
+.ing .n {text-align:right;font-variant-numeric:tabular-nums}
+
+.ing .p {text-align:right;color:rgb(var(--muted));font-variant-numeric:tabular-nums;font-size:14px}
+
+.cols {display:grid;grid-template-columns:1fr 72px 72px;padding:8px 16px;font-size:14px;color:rgb(var(--muted));border-bottom:1px solid rgb(var(--line))}
+
+.cols span:not(:first-child) {text-align:right}
+
+.stat {padding:14px 16px;border-right:1px solid rgb(var(--line))}
+
+.stat:last-child {border:0}
+
+.stats {display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid rgb(var(--crust))}
+
+.big {font-size:20px;line-height:28px;font-weight:600}
+
+.list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
+
+.list-row {display:flex;gap:12px;align-items:center;padding:8px 8px 8px 16px;border-bottom:1px solid rgb(var(--line));min-height:60px}
+
+.list-row:last-child {border:0}
+
+.dot {width:36px;height:36px;border-radius:50%;background:rgb(var(--raised));display:flex;align-items:center;justify-content:center;color:rgb(var(--crust));flex:none}
+
+.del {width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:rgb(var(--muted));flex:none}
+
+svg {width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

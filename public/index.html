@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,54 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="top"><div><h1 class="title">Bread Bot</h1><div class="small muted">Formula for your next bake</div></div>
+    <button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</button></div>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <div class="section-label">Bread</div>
+    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <div class="section-label">Dough</div>
+    <div class="card">
+    <div class="row"><span>Hydration</span><span class="val">72%</span></div>
+    <div class="track"><div class="fill"></div><div class="knob"></div></div>
+    <div class="row small muted"><span>50%</span><span>85%</span></div>
+    <div style="height:1px;background:rgb(var(--line));margin:16px 0"></div>
+    <div class="grid">
+    <div><div class="small muted" style="margin-bottom:6px">Loaves</div><div class="step"><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div><div class="sv">2</div><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></div></div></div>
+    <div><div class="small muted" style="margin-bottom:6px">Flour per loaf</div><div class="step"><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></div><div class="sv">500 g</div><div class="sb"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></div></div></div>
+    </div>
+    </div>
+    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Calculate recipe</button>
+
+    <div class="section-label">Formula</div>
+    <div class="sheet">
+    <div class="sh"><div class="h">Sourdough, 2 loaves</div><div class="small muted">1,000 g flour, 1,940 g dough</div></div>
+    <div class="cols"><span>Ingredient</span><span>Grams</span><span>Baker's %</span></div>
+    <div class="ing flour"><span>Bread flour</span><span class="n">1,000 g</span><span class="p">100%</span></div>
+    <div class="ing"><span>Water</span><span class="n">720 g</span><span class="p">72%</span></div>
+    <div class="ing"><span>Starter</span><span class="n">200 g</span><span class="p">20%</span></div>
+    <div class="ing" style="border:0"><span>Salt</span><span class="n">20 g</span><span class="p">2%</span></div>
+    <div class="stats">
+    <div class="stat"><div class="small muted">Rise</div><div class="big">5 h</div><div class="small muted">at 24°C</div></div>
+    <div class="stat"><div class="small muted">Bake</div><div class="big">240°C</div><div class="small muted">then 220°C</div></div>
+    <div class="stat"><div class="small muted">Time</div><div class="big">45 min</div><div class="small muted">lidded 25</div></div>
+    </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px"><div class="field">e.g. Weekend rye</div><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
+
+    <div class="section-label">Your saved recipes</div>
+    <div class="list">
+    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><path d="M4 15c0-5 4-9 8-9s8 4 8 9v3H4z"/><path d="M9 10l1 2M14 10l1 2"/></svg></div><div style="flex:1"><div style="font-weight:600">Weekend rye</div><div class="small muted">Rye, 3 loaves, 78% hydration</div></div><span class="small muted">Sat</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
+    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></div><div style="flex:1"><div style="font-weight:600">Sunday bagels</div><div class="small muted">Sourdough bagels, 12 bagels, 58%</div></div><span class="small muted">Oct 4</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
+    <div class="list-row"><div class="dot"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M4 11c0-4 4-5 8-5s8 1 8 5"/></svg></div><div style="flex:1"><div style="font-weight:600">School lunch loaf</div><div class="small muted">Sandwich loaf, 2 loaves, 65%</div></div><span class="small muted">Sep 27</span><div class="del"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></div></div>
+    </div>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
