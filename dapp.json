@@ -3,5 +3,9 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Empty list", "path": "/", "expectText": "Add your first feed" },
+    { "id": "demo-list", "name": "Populated demo", "path": "/?demo=1", "expectText": "Staging demo", "expectSelector": ".list-row", "visual": true, "impact": ["public/**", "server.js", "styles/**"] },
+    { "name": "Health", "path": "/health", "expectText": "ok" }
+  ]
 }

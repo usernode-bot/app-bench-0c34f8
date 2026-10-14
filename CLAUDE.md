@@ -95,22 +95,35 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A reading app in the spirit of Feedly: a member adds their own RSS or Atom
+feeds and gets one scrolling list of unread posts from all of them, newest
+first. Tapping a post marks it read and opens a preview of what the feed
+shares, with a button to open the full article in the browser. Feeds and
+read state are per member and private.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Set by the first version's spec; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm paper neutrals (light ground 250 249 246, surface white,
+  raised 243 241 236, text 28 25 23, muted 87 83 78, lines 229 226 220;
+  dark ground 24 22 20, surface 33 30 28, raised 45 42 39, text 245 243 240,
+  muted 176 170 163, lines 64 60 56). Action colour is a deep teal
+  (15 118 110 with white text in light; 45 212 191 with 4 47 46 text in
+  dark); the unread dot uses the same teal. Feed names are a calm amber ink
+  (146 64 14 light, 251 191 120 dark).
+- **Signature element:** the masthead chip, a small tile like a newspaper's
+  nameplate beside each post. Each feed always gets the same one of five ink
+  colours (`--mast-1`…`--mast-5`: amber, teal, blue, violet, rose, hashed
+  from the feed's url) with a white serif letter; the chips keep the same
+  colours in the dark look.
+- **Type scale:** the kit's `text-title`, `text-heading`, `text-body`,
+  `text-small`. Post text is serif (ui-serif, Georgia, set in
+  `tailwind.config.js`); meta text and controls are sans.
+- Add feed and Open full article are the filled actions; everything else is
+  secondary. On the empty screen the header's Add feed goes outlined so the
+  empty state's own button is the only filled one.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +153,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All three tables (`feeds`, `posts`, `post_reads`) are `staging:private`:
+  feeds and read state are personal.
+- Feed content is stored and rendered as plain text only: tags stripped,
+  entities decoded, rendered with `textContent` in paragraphs. Feed HTML is
+  never injected. Links are kept only if they are http(s).
+- Outbound feed fetches go through `safeFetch` in `server.js` (SSRF guard:
+  http/https on ports 80/443 only, private/loopback/metadata addresses
+  blocked, ≤3 re-checked redirects, 8 s timeout, 2 MB cap). Use it for any
+  new fetch.
+- `guid` falls back to the link, then the title, so demo fixtures must use
+  fixed guids.
+- Staging demo data is the `?demo=1` writer in `server.js` only
+  (`IS_STAGING`-gated, idempotent); demo feeds are never refreshed over the
+  network.

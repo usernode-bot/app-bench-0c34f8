@@ -17,7 +17,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1100px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   font-family: ui-serif,Georgia,"Iowan Old Style",serif;
   font-size: 16px;
   line-height: 24px;
@@ -37,11 +39,17 @@
   gap: 8px;
 }
 
+.top > div:first-child {min-width: 0}
+
+.acts .btn-primary, .acts .btn-secondary {white-space: nowrap; padding: 0 10px}
+
 .title {font-size:28px;line-height:36px;font-weight:700;margin:0;letter-spacing:-.01em}
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0}
 
-.acts {display:flex;gap:8px}
+.demo-note {padding: 0 20px; margin: 0 0 4px}
+
+.acts {display:flex;gap:8px;flex:none}
 
 .btn-primary,.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
 
@@ -87,46 +95,49 @@
 
 .end {text-align:center;font-family:system-ui,sans-serif;font-size:14px;color:rgb(var(--muted));padding:20px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got, scoped to screen 2 so
+   they do not restyle screen 1. */
 
-.app {
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 844px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   font-family: ui-serif,Georgia,"Iowan Old Style",serif;
   font-size: 16px;
   line-height: 26px;
   box-sizing: border-box;
 }
 
-.sans {
+[data-spec-screen="2"] .sans {
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 
-.bar {
+[data-spec-screen="2"] .bar {
   display: flex;
   align-items: center;
   padding: 8px 12px;
   border-bottom: 1px solid rgb(var(--line));
 }
 
-.btn-secondary,.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
+[data-spec-screen="2"] .btn-secondary,[data-spec-screen="2"] .btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
 
-.btn-secondary {background:transparent;color:rgb(var(--fg));border:0}
+[data-spec-screen="2"] .btn-secondary {background:transparent;color:rgb(var(--fg));border:0}
 
-.art {padding:24px 24px 32px}
+[data-spec-screen="2"] .art {padding:24px 24px 32px}
 
-.src {display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .src {display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
-.src b {color:rgb(var(--feed));font-weight:600}
+[data-spec-screen="2"] .src b {color:rgb(var(--feed));font-weight:600}
 
-.fav {flex:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:rgb(var(--on-mast));background:rgb(var(--mast-1));font-family:ui-serif,Georgia,serif}
+[data-spec-screen="2"] .fav {flex:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:rgb(var(--on-mast));background:rgb(var(--mast-1));font-family:ui-serif,Georgia,serif}
 
-.h {font-size:28px;line-height:36px;font-weight:700;margin:16px 0 8px;letter-spacing:-.01em}
+[data-spec-screen="2"] .h {font-size:28px;line-height:36px;font-weight:700;margin:16px 0 8px;letter-spacing:-.01em}
 
-.by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 20px}
+[data-spec-screen="2"] .by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 20px}
 
-.txt p {margin:0 0 16px;max-width:34em}
+[data-spec-screen="2"] .txt p {margin:0 0 16px;max-width:34em}
 
-.more {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:24px 0 12px}
+[data-spec-screen="2"] .more {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:24px 0 12px}

@@ -50,17 +50,25 @@
     --on-mast: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 24 22 20;
+    --surface: 33 30 28;
+    --raised: 45 42 39;
+    --fg: 245 243 240;
+    --muted: 176 170 163;
+    --line: 64 60 56;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --feed: 251 191 120; /* calm amber ink for feed names */
+    --unread: 45 212 191; /* the unread dot */
+    --mast-1: 180 83 9; /* masthead chips keep their colours in the dark look */
+    --mast-2: 15 118 110;
+    --mast-3: 29 78 216;
+    --mast-4: 126 34 206;
+    --mast-5: 190 18 60;
+    --on-mast: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -142,5 +150,78 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* The skeleton version of a masthead chip: grey, not white. */
+  .fav.skeleton {
+    background: rgb(var(--line));
+  }
+
+  /* Bottom sheets: Add feed and Feeds. Cancel, the title and the primary
+     action sit at the top, above the keyboard. */
+  .sheet-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+  }
+  .sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.45);
+  }
+  .sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 26rem;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: rgb(var(--surface));
+    border: 1px solid rgb(var(--line));
+    border-bottom: 0;
+    border-radius: 16px 16px 0 0;
+    padding: 8px 16px 24px;
+  }
+  .sheet-head {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .sheet-cancel {
+    @apply inline-flex min-h-11 items-center justify-self-start text-body font-medium text-accent;
+  }
+  .sheet-title {
+    @apply text-body font-semibold text-fg;
+  }
+  .sheet-go {
+    @apply justify-self-end text-small px-3;
+  }
+  .sheet-gap {
+    @apply justify-self-end;
+  }
+  .sheet-label {
+    @apply mb-1 block text-small font-medium text-muted;
+  }
+  .sheet-error {
+    @apply mt-2 text-small text-danger;
+  }
+  .sheet-note {
+    @apply text-small text-muted;
+  }
+
+  /* Rows of the Feeds sheet. */
+  .feed-name {
+    @apply text-body font-medium text-fg;
+  }
+  .feed-err {
+    @apply text-small text-danger;
+  }
+  .btn-remove {
+    @apply inline-flex min-h-11 items-center justify-center text-small font-medium text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
   }
 }
