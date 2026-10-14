@@ -337,8 +337,8 @@
         row.className = 'list-row';
         row.innerHTML =
           '<div class="dot"><svg viewBox="0 0 24 24">' + ICONS[KIND[r.bread] || 'domed'] + '</svg></div>' +
-          '<div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(r.name) + '</div>' +
-          '<div class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(labelOf(r.bread)) + ', ' + r.count + ' ' + unitOf(r.bread, r.count) + ', ' + r.hydration + '%</div></div>' +
+          '<div style="flex:1;min-width:0"><div style="font-weight:600">' + esc(r.name) + '</div>' +
+          '<div class="small muted">' + esc(rowSubtitle(r)) + '</div></div>' +
           '<span class="small muted">' + esc(fmtDate(r.created_at)) + '</span>' +
           '<button type="button" class="del" aria-label="Delete ' + esc(r.name) + '"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>';
         row.addEventListener('click', function (e) {
@@ -352,6 +352,18 @@
 
     function labelOf(key) {
       return (F.BREADS[key] || {}).label || key;
+    }
+    // The subtitle drops the bread's name when the recipe's own name already
+    // says it ("Weekend rye" → "3 loaves, 78%"), so count and hydration
+    // always fit beside the date.
+    function rowSubtitle(r) {
+      var label = labelOf(r.bread);
+      var title = ' ' + String(r.name || '').toLowerCase() + ' ';
+      var named = label.toLowerCase().split(' ').some(function (w) {
+        return title.indexOf(' ' + w) !== -1;
+      });
+      var rest = r.count + ' ' + unitOf(r.bread, r.count) + ', ' + r.hydration + '%';
+      return named ? rest : label + ', ' + rest;
     }
     function unitOf(key, count) {
       var b = F.BREADS[key];

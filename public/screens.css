@@ -64,13 +64,13 @@
 
 .knob {position:absolute;left:63%;top:-11px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:rgb(var(--surface));border:3px solid rgb(var(--accent))}
 
-.step {display:flex;align-items:center;gap:8px}
+.step {display:flex;align-items:center;gap:4px}
 
 .sb {width:44px;height:44px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center}
 
-.sv {min-width:64px;text-align:center;font-size:18px;line-height:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.sv {min-width:64px;text-align:center;font-size:16px;line-height:24px;font-weight:600;font-variant-numeric:tabular-nums}
 
-.grid {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid {display:grid;grid-template-columns:1fr 1fr;gap:6px}
 
 .btn-primary {width:100%;min-height:48px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;font-family:inherit}
 
