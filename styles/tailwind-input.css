@@ -59,6 +59,12 @@
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --feed-1: 251 191 36;  /* amber */
+    --feed-2: 165 180 252; /* indigo */
+    --feed-3: 249 168 212; /* rose */
+    --feed-4: 74 222 128;  /* green */
+    --feed-5: 56 189 248;  /* blue */
+    --f2: 165 180 252;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -123,6 +129,16 @@
   /* The label above a section: sentence case, never uppercase or tracked. */
   .section-label {
     @apply mb-2 px-1 text-small font-medium text-muted;
+  }
+
+  /* A post card: the reading list's row, with the feed spine down its left
+     edge — the app's signature element. The spine colour comes from the
+     card's own --c, which the page sets to one of the feed-1…feed-5
+     tokens. */
+  .post-card {
+    @apply block border border-line bg-surface px-3.5 py-3;
+    border-left: 6px solid rgb(var(--c, var(--accent)));
+    border-radius: 4px 12px 12px 4px;
   }
 
   /* The states of anything that loads data. Show exactly one at a time:

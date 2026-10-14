@@ -92,3 +92,41 @@
 .rss .foot {margin:8px 16px 0;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 
 .rss .note {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0}
+
+/* ── Built for the first version: views and states the spec did not draw
+   (Feeds, the Add feed sheet, the read-fade, the state copy). Same
+   vocabulary: serif titles, rounded-sans details, the feed spine. ── */
+
+/* Buttons keep their one-line label at phone width. */
+.rss .btn-primary,.rss .btn-secondary,.rss .ghost {white-space:nowrap}
+
+/* The design kit's .list component (a bordered grouped list) would wrap the
+   drawn post list in a card of its own; the drawn list is a stack of cards
+   with gaps between them. Neutralise the wrapper, keep the drawn look. */
+.rss ul.list {background:none;border:0;border-radius:0;overflow:visible}
+.rss ul.list > li {border-top:0}
+
+/* A post that was read during this visit stays in place, faded. */
+.rss .card.read {opacity:.55}
+
+.rss .refresh-note {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));padding:0 17px;margin:0 0 8px}
+
+.rss .empty-title {font-size:20px;line-height:28px;font-weight:700;margin:0}
+.rss .empty-sub {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0}
+
+/* Feeds: one row per feed, its spine colour carrying over from the list. */
+#view-feeds {width:100%;max-width:42rem;margin-inline:auto}
+.rss .feeds-list {list-style:none;margin:0 16px;padding:0;display:flex;flex-direction:column;gap:10px}
+.rss .feed-row {display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:12px 14px}
+.rss .fr-name {font:700 16px/22px ui-serif,Georgia,serif;color:rgb(var(--c));margin:0}
+.rss .fr-site,.rss .fr-unread {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:2px 0 0}
+.rss .fr-error {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--danger));margin:6px 0 0}
+
+/* Add feed sheet: Cancel, the title and Add stay above the keyboard. */
+#sheet-backdrop {position:fixed;inset:0;background:rgb(var(--fg) / .4);z-index:40}
+#add-sheet {position:fixed;bottom:0;left:0;right:0;margin-inline:auto;max-width:42rem;z-index:41;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-bottom:0;border-radius:16px 16px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
+#add-sheet .sheet-head {display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px}
+#add-sheet .ghost {display:inline-flex;align-items:center;min-height:44px;min-width:44px;border:0;background:none;color:rgb(var(--muted));padding:0 10px;border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif}
+#add-sheet #sheet-title {font:600 16px/24px ui-serif,Georgia,serif;margin:0}
+.sheet-label {display:block;font:500 14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--fg));margin:4px 0 6px}
+.sheet-error {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--danger));margin:8px 0 0}

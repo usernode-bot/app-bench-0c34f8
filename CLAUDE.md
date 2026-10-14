@@ -95,22 +95,38 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A private RSS reader, like Feedly: each member adds their own RSS feed
+addresses and reads every unread post from them in one scrolling list,
+newest first. Tapping a post marks it read and opens a preview of the
+summary the feed sends, with a link to the full article in the browser.
+Feeds, posts and read state are per member, never shared. Feeds are
+re-checked when the app is opened; nothing fetches in the background. Words:
+a *feed*, a *post*, the list is *Unread*, the feed list is *Feeds*.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by the first version's spec. Every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm grey neutrals (ground, surface, raised, text, muted,
+  line — see the tokens in `styles/tailwind-input.css`); a calm teal as the
+  action colour; and five feed colours handed out in turn as feeds are
+  added: feed-1 amber, feed-2 indigo, feed-3 rose, feed-4 green, feed-5
+  blue. Colour comes only from the tokens, both looks.
+- **Signature element:** the feed spine, a 6 px band of the feed's own
+  colour down the left edge of each post card (slightly squared spine
+  corner, rounded outer corners), like a row of magazines. It returns on
+  the preview's heading and in the Feeds list.
+- **Type:** a serif for titles and reading text (`ui-serif`/Georgia), a
+  rounded sans for the small details — feed names, times, counts, buttons
+  (`ui-rounded`/system-ui). The kit's four sizes (`text-title`,
+  `text-heading`, `text-body`, `text-small`) hold; the preview's summary is
+  set a little larger with generous line spacing.
+- **States:** loading shows post-card shapes with skeleton bars; the empty
+  screen says "No feeds yet" with its own "Add your first feed" button (the
+  top bar's add button hides); the caught-up end line says "You're all
+  caught up"; the error state says what failed, that feeds are still saved,
+  and offers Retry.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,6 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -65,13 +64,10 @@
   </script>
   <title>RSS Reader</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
+  <!-- Tailwind, PRECOMPILED for this app. The config lives in
+       tailwind.config.js in the repo root; npm run build compiles it to
+       public/tailwind.css on every image build, so the stylesheet is
+       regenerated from THIS commit's markup every deploy.
        Writing class names as whole literals is what keeps this working — a
        class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
        is invisible to the compiler. If you genuinely need runtime-generated
@@ -79,18 +75,10 @@
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
   <link rel="stylesheet" href="/screens.css">
-  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
-       handler in server.js serves it under a plain "node server.js"; the
-       platform's edge answers it everywhere else). Never vendor it and never
-       write a hostname in front of it.
-       It is NOT conditional on this app calling a bridge API: it is also how
-       the app ANSWERS the shell, so a scaffold without it is invisible to
-       anything that asks the frame a question. Offline launch is one of those.
-       Another is the page's colour: the bridge reports this document's opaque
-       ground to the shell (#1581), which is what makes the platform bar above
-       the app take the app's tone instead of the viewer's theme (#1945).
-       The bridge is also where the app learns the viewer's light/dark theme:
-       the script below reads it. -->
+  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path. It
+       is also how the app ANSWERS the shell, so a scaffold without it is
+       invisible to anything that asks the frame a question. It reports the
+       viewer's light/dark theme, which the script below follows. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
@@ -109,56 +97,71 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <!-- The Unread list: the screen the spec drew, its values emptied and
+       filled from the API by public/app.js. -->
+  <div data-spec-screen="1" id="view-list">
     <div class="rss">
-    <div class="top"><div><h1>Unread</h1><p class="sub">23 new from 5 feeds</p></div>
-    <div class="acts"><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
-    <p class="section-label">Newest first</p>
-    <ul class="list">
-    <li><a class="card" style="--c:var(--feed-2)"><div class="meta"><b>Pixel Daily</b><span>12 min ago</span></div><p class="t">A calmer way to build design tokens</p><p class="ex">Why one small palette beats forty near-duplicates, and how a team of three cut theirs down in an afternoon.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-1)"><div class="meta"><b>Field Notes</b><span>1 hr ago</span></div><p class="t">Notes from a week of slow cycling in Portugal</p><p class="ex">Seven days, four hundred kilometres, and the small villages where the cafés open at six.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-4)"><div class="meta"><b>Garden Ledger</b><span>2 hr ago</span></div><p class="t">What to sow in March if the ground is still cold</p><p class="ex">Peas, broad beans and spinach all cope with frost. Start them indoors and harden off.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-3)"><div class="meta"><b>Salt</b><span>4 hr ago</span></div><p class="t">The bread that fed a harbour town</p><p class="ex">A baker in Cádiz still uses a starter older than her grandmother.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-5)"><div class="meta"><b>Tidewatch</b><span>Yesterday, 18:40</span></div><p class="t">Spring tides: what the numbers actually mean</p><p class="ex">A plain guide to reading tide tables before your next coastal walk.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-2)"><div class="meta"><b>Pixel Daily</b><span>Yesterday, 09:15</span></div><p class="t">Type scales you can explain in one sentence</p><p class="ex">Four sizes are enough for most apps. Here is how to choose them.</p></a></li>
-    <li><a class="card" style="--c:var(--feed-1)"><div class="meta"><b>Field Notes</b><span>Mon, 16:02</span></div><p class="t">Packing list for a night on the ridge</p><p class="ex">Light, warm and dry: the short list.</p></a></li>
-    </ul>
-    <p class="end">That is everything unread</p>
+    <div class="top"><div><h1>Unread</h1><p class="sub" id="count-line"></p></div>
+    <div class="acts"><button class="btn-secondary" id="feeds-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary" id="add-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
+    <p class="refresh-note" id="refresh-note" hidden>Some feeds could not be checked just now. Your posts are still here.</p>
+    <p class="section-label" id="newest-label">Newest first</p>
+    <ul class="list" id="post-list"></ul>
+    <p class="end" id="caught-up" hidden>You're all caught up</p>
+    <div class="state-empty" id="list-empty" hidden>
+      <p class="empty-title">No feeds yet</p>
+      <p class="empty-sub">Add a feed and its unread posts will show up here.</p>
+      <button class="btn-primary" id="add-button-empty" type="button">Add your first feed</button>
+    </div>
+    <div class="state-error" id="list-error" hidden>
+      <p class="empty-title">Your posts couldn't be loaded</p>
+      <p class="empty-sub">Your feeds are still saved. Check your connection and try again.</p>
+      <button class="btn-secondary" id="retry-button" type="button">Retry</button>
+    </div>
+    <!-- The row the list renders from; hidden, its values set from data. -->
+    <li id="row-template" hidden><a class="card post-card" href="#"><div class="meta"><b></b><span></span></div><p class="t"></p><p class="ex"></p></a></li>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="rss">
-      <div class="bar"><button class="ghost"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Unread</button></div>
-      <div class="art" style="--c:67 56 202">
-      <p class="src">Pixel Daily</p>
-      <h2>A calmer way to build design tokens</h2>
-      <p class="when">Today, 09:30 · by Staging demo writer</p>
-      </div>
-      <div class="body">
-      <p>Why one small palette beats forty near-duplicates, and how a team of three cut theirs down in an afternoon.</p>
-      <p>They started by printing every colour in the codebase on one page. Most of them were the same grey, written six different ways. The rest were one blue nobody had chosen on purpose.</p>
-      <p>By lunch they had named eight colours, each with a light and a dark value, and deleted the others.</p>
-      </div>
-      <div class="foot">
-      <p class="note">This is the summary the feed sends. The full article is on pixeldaily.example.</p>
-      <a class="btn-primary"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
-      </div>
-      </div>
+  <!-- The post preview: the screen the spec drew (screen 2), moved out of
+       its template and filled from data by public/app.js. -->
+  <div data-spec-screen="2" id="view-preview" hidden>
+    <div class="rss">
+    <div class="bar"><button class="ghost" id="preview-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Unread</button></div>
+    <div class="art" id="preview-art">
+    <p class="src" id="preview-source"></p>
+    <h2 id="preview-title"></h2>
+    <p class="when" id="preview-when"></p>
     </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    <div class="body" id="preview-body"></div>
+    <div class="foot">
+    <p class="note" id="preview-note"></p>
+    <a class="btn-primary" id="preview-link" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
+    </div>
+    </div>
+  </div>
+  <!-- Feeds: see and remove what you added. Not drawn by the spec, built in
+       the same vocabulary. -->
+  <div id="view-feeds" hidden>
+    <div class="rss">
+    <div class="bar"><button class="ghost" id="feeds-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Unread</button></div>
+    <div class="top"><div><h1>Feeds</h1><p class="sub" id="feeds-count"></p></div>
+    <div class="acts"><button class="btn-primary" id="add-button-feeds" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
+    <ul class="list feeds-list" id="feeds-list"></ul>
+    <p class="end" id="feeds-end" hidden></p>
+    </div>
+  </div>
+  <!-- Add feed sheet: Cancel, the title and Add stay above the keyboard. -->
+  <div id="sheet-backdrop" hidden></div>
+  <div id="add-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <button class="ghost" id="sheet-cancel" type="button">Cancel</button>
+      <p id="sheet-title">Add feed</p>
+      <button class="btn-primary" id="sheet-add" type="button">Add</button>
+    </div>
+    <label class="sheet-label" for="feed-url">Feed address</label>
+    <input class="field" id="feed-url" name="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+    <p class="sheet-error" id="sheet-error" hidden></p>
+  </div>
+  <script src="/app.js"></script>
 </body>
 </html>

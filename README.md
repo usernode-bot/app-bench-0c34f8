@@ -1,27 +1,26 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Follow your favourite feeds in one scrolling list. You add your own RSS
+feeds, read every unread post from them in one list with the newest first,
+and tap a post to read a preview. From the preview you can open the full
+article in your browser. Your feeds belong to you: each person signs in as
+themselves and sees only their own feeds.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Unread** — all unread posts from your feeds, mixed together, newest
+  first, each carrying its feed's colour down its left edge.
+- **Add feed** — paste a feed's own address; the app checks it and adds its
+  posts. Your feeds are re-checked for new posts when you open the app.
+- **Preview** — tapping a post marks it read and shows the summary the feed
+  sends, with a link to open the full article.
+- **Feeds** — see and remove what you added.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+## Running it
 
-## Replacing the template
+The server is `server.js` (`node server.js`); the stylesheet is compiled
+from `styles/tailwind-input.css` by `npm run build` on every image build.
+The staging preview's populated demo lives behind `?demo=1` and writes the
+viewer's own made-up feeds and posts (`staging:private` tables).
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+To change this app, ask Homeroom bot, or run Claude Code against this repo
+directly; start with `CLAUDE.md`, which carries the app-specific notes and
+points at the platform rules.
