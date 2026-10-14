@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b45309'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -119,52 +119,49 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <main id="app" data-spec-screen="1">
     <div><div class="app">
     <header class="head">
     <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>
     <div class="ttl"><h1>Unread</h1><p>14 posts from 4 feeds</p></div>
     <button class="ico" aria-label="Refresh feeds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
     </header>
-    <label class="lbl">Feed address</label>
-    <div class="add"><div class="field">e.g. example.com/feed.xml</div><button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</button></div>
+    <label class="lbl" for="feed-url">Feed address</label>
+    <div class="add"><input id="feed-url" class="field" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. example.com/feed.xml"><button class="btn-primary" id="add-feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</button></div>
+    <p id="add-error" class="field-error" role="alert" hidden></p>
+    <div id="feeds-area">
     <div class="chips">
-    <span class="chip">Tiny Garden Notes <span class="n">5</span><span class="x" aria-label="Remove feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
-    <span class="chip">Bread Lab Weekly <span class="n">4</span><span class="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
-    <span class="chip">Pixel Trail <span class="n">3</span><span class="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
+    <span class="chip"><span class="name">Tiny Garden Notes</span><span class="n">5</span><span class="warn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><button class="x" aria-label="Remove feed Tiny Garden Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+    <span class="chip"><span class="name">Bread Lab Weekly</span><span class="n">4</span><span class="warn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><button class="x" aria-label="Remove feed Bread Lab Weekly"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+    <span class="chip"><span class="name">Pixel Trail</span><span class="n">3</span><span class="warn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg></span><button class="x" aria-label="Remove feed Pixel Trail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
     </div>
     <p class="section-label">Newest first</p>
     <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span>2h ago</span></div><h2 class="pt">Why my balcony tomatoes finally ripened in October</h2><p class="sum">A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p></div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Bread Lab Weekly</b><span>5h ago</span></div><h2 class="pt">A slower rye starter, fed twice a day</h2><p class="sum">Our test loaves rose higher on a cooler schedule. The method, the timings we logged and the one mistake that cost us a batch.</p></div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Pixel Trail</b><span>Yesterday</span></div><h2 class="pt">Drawing a whole forest in sixteen colours</h2><p class="sum">Limiting the palette forced better choices about light. A walkthrough of the tiles, the shading rules and the final scene.</p></div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Quiet Maps</b><span>Oct 11</span></div><h2 class="pt">Contour lines, explained with a potato</h2><p class="sum">Slice it, trace it, stack the outlines. The easiest way we have found to show how a hill turns into a topographic map.</p></div></li>
-    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span>Oct 10</span></div><h2 class="pt">Saving seeds from this summer's beans</h2><p class="sum">Dry them on the vine, shell them indoors and label everything twice. A short checklist for next year's planting.</p></div></li>
+    <li class="list-row post-row" tabindex="0" role="button"><span class="dot unread-dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span class="when">2h ago</span></div><h2 class="pt">Why my balcony tomatoes finally ripened in October</h2><p class="sum">A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p></div></li>
+    <li class="list-row post-row" tabindex="0" role="button"><span class="dot unread-dot"></span><div class="txt"><div class="meta"><b>Bread Lab Weekly</b><span class="when">5h ago</span></div><h2 class="pt">A slower rye starter, fed twice a day</h2><p class="sum">Our test loaves rose higher on a cooler schedule. The method, the timings we logged and the one mistake that cost us a batch.</p></div></li>
+    <li class="list-row post-row" tabindex="0" role="button"><span class="dot unread-dot"></span><div class="txt"><div class="meta"><b>Pixel Trail</b><span class="when">Yesterday</span></div><h2 class="pt">Drawing a whole forest in sixteen colours</h2><p class="sum">Limiting the palette forced better choices about light. A walkthrough of the tiles, the shading rules and the final scene.</p></div></li>
+    <li class="list-row post-row" tabindex="0" role="button"><span class="dot unread-dot"></span><div class="txt"><div class="meta"><b>Quiet Maps</b><span class="when">Oct 11</span></div><h2 class="pt">Contour lines, explained with a potato</h2><p class="sum">Slice it, trace it, stack the outlines. The easiest way we have found to show how a hill turns into a topographic map.</p></div></li>
+    <li class="list-row post-row" tabindex="0" role="button"><span class="dot unread-dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span class="when">Oct 10</span></div><h2 class="pt">Saving seeds from this summer's beans</h2><p class="sum">Dry them on the vine, shell them indoors and label everything twice. A short checklist for next year's planting.</p></div></li>
     </ul>
+    </div>
     </div></div>
-  </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  </main>
+  <!-- Screen 2 as the spec drew it: its inner pieces are cloned into the
+       preview sheet (public/app.js, the kit's openSheet) — the sheet's own
+       scrim, grab and close come from the kit. -->
   <template data-spec-screen="2">
     <div data-spec-screen="2">
-      <div><div class="app">
-      <div class="under"><h1>Unread</h1></div>
-      <div class="scrim"></div>
-      <div class="sheet">
-      <div class="grab"></div>
-      <div class="bar"><div class="feed"><span class="ring"></span><b>Tiny Garden Notes</b><span>2h ago</span></div>
-      <span class="ico" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div>
-      <h2>Why my balcony tomatoes finally ripened in October</h2>
-      <p class="by">By Rowan the gardener</p>
-      <div class="body">
-      <p>A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p>
-      <p>The short version: I stopped feeding in August, moved the pots against the warm wall and pinched off every new flower so the plant put its effort into the fruit it already had.</p>
-      <p>The full post has photos of each week and the notes I kept on watering.</p>
-      </div>
-      <div class="acts"><span class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</span><p class="host">tinygarden.example</p></div>
-      </div>
-      </div></div>
+    <div class="bar"><div class="feed"><span class="ring"></span><b>Tiny Garden Notes</b><span class="when">2h ago</span></div></div>
+    <p class="by">By Rowan the gardener</p>
+    <div class="body">
+    <p>A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p>
+    <p>The short version: I stopped feeding in August, moved the pots against the warm wall and pinched off every new flower so the plant put its effort into the fruit it already had.</p>
+    <p>The full post has photos of each week and the notes I kept on watering.</p>
+    </div>
+    <div class="acts"><a class="btn-primary" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</a><p class="host">tinygarden.example</p></div>
     </div>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

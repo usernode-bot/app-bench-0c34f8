@@ -32,19 +32,29 @@
 
 .lbl {display:block;font-size:.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted));padding:0 4px 6px}
 
-.field {flex:1;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));padding:8px 12px;font-size:1rem;color:rgb(var(--muted) / .6)}
+.field {flex:1;min-height:44px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));padding:8px 12px;font-size:1rem;color:rgb(var(--fg));width:100%}
+
+.field::placeholder {color:rgb(var(--muted) / .6)}
 
 .btn-primary {min-height:44px;padding:0 16px;border-radius:10px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;font-size:1rem;display:inline-flex;align-items:center;gap:6px}
 
 .btn-primary svg {width:18px;height:18px}
 
-.chips {display:flex;gap:8px;overflow:hidden;margin:16px -16px 20px;padding:0 16px}
+.chips {display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;margin:16px -16px 20px;padding:0 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+
+.chips::-webkit-scrollbar {display:none}
 
 .chip {flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px 0 12px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font-size:.875rem;font-weight:500}
 
+.chip.chip-warn {border-color:rgb(var(--danger))}
+
 .chip .n {color:rgb(var(--accent));font-variant-numeric:tabular-nums}
 
-.chip .x {width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;color:rgb(var(--muted));border-radius:18px}
+.chip .warn {display:inline-flex;color:rgb(var(--danger))}
+
+.chip .warn svg {width:16px;height:16px}
+
+.chip .x {width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;color:rgb(var(--muted));border-radius:18px;border:0;background:none;padding:0}
 
 .chip .x svg {width:16px;height:16px}
 
@@ -68,49 +78,61 @@
 
 .sum {margin:0;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2, moved into the kit's preview sheet (public/app.js): its shell —
+   scrim, grab, panel, close — is the kit's, so what is left are the pieces
+   the drawn sheet had and the kit's sheet has not. */
 
-.app {
-  position: relative;
-  height: 844px;
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  font: 16px/1.5 system-ui,-apple-system,sans-serif;
-  overflow: hidden;
-}
+[data-spec-screen="2"] .bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 
-.under {padding:16px;opacity:.5}
+[data-spec-screen="2"] .feed {display:flex;align-items:center;gap:8px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
 
-.under h1 {margin:4px 0 0;font:700 1.75rem/2.25rem ui-serif,Charter,Georgia,serif}
+[data-spec-screen="2"] .feed b {color:rgb(var(--fg));font-weight:500}
 
-.scrim {position:absolute;inset:0;background:rgb(var(--fg) / .35)}
+[data-spec-screen="2"] .ring {width:10px;height:10px;border-radius:5px;border:2px solid rgb(var(--unread));flex:none}
 
-.sheet {position:absolute;left:0;right:0;bottom:0;top:96px;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 24px;display:flex;flex-direction:column}
+[data-spec-screen="2"] .by {margin:0 0 16px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
 
-.grab {width:36px;height:5px;border-radius:3px;background:rgb(var(--line));margin:0 auto 10px}
+[data-spec-screen="2"] .body {font-family:ui-serif,Charter,Georgia,serif;font-size:1.0625rem;line-height:1.7rem}
 
-.bar {display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+[data-spec-screen="2"] .body p {margin:0 0 14px}
 
-.feed {display:flex;align-items:center;gap:8px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+[data-spec-screen="2"] .acts {border-top:1px solid rgb(var(--line));padding-top:14px;margin-top:4px}
 
-.feed b {color:rgb(var(--fg));font-weight:500}
+[data-spec-screen="2"] .acts .btn-primary {width:100%;text-decoration:none}
 
-.ring {width:10px;height:10px;border-radius:5px;border:2px solid rgb(var(--unread))}
+[data-spec-screen="2"] .host {margin:8px 0 0;text-align:center;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
 
-.ico {width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:22px;background:rgb(var(--raised));color:rgb(var(--fg))}
+/* The preview sheet's title, where the kit's head draws it: serif, like the
+   post titles on the list. */
+.kit-sheet-head h2 {font-family:ui-serif,Charter,Georgia,serif;font-size:1.25rem;line-height:1.75rem;margin:0}
 
-.ico svg {width:20px;height:20px}
+/* ── The app's own pieces ────────────────────────────────────────────────── */
 
-h2 {margin:8px 0 6px;font:600 1.75rem/2.25rem ui-serif,Charter,Georgia,serif}
+/* Why a feed could not be added, under the field. */
+.field-error {margin:6px 4px 0;font-size:.875rem;line-height:1.25rem;color:rgb(var(--danger))}
 
-.by {margin:0 0 16px;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+/* A feed that could not be fetched: the line above the list, and the
+   warning mark on its chip. */
+.feed-error {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin:0 0 12px;border:1px solid rgb(var(--danger));border-radius:12px;background:rgb(var(--surface));font-size:.875rem;line-height:1.25rem;color:rgb(var(--danger))}
 
-.body {flex:1;font-family:ui-serif,Charter,Georgia,serif;font-size:1.0625rem;line-height:1.7rem}
+.feed-error .why {flex:1;min-width:0;color:rgb(var(--muted))}
 
-.body p {margin:0 0 14px}
+.feed-error .why b {color:rgb(var(--fg));font-weight:500}
 
-.acts {border-top:1px solid rgb(var(--line));padding-top:14px}
+.feed-error .btn-secondary {min-height:36px;padding:0 10px;font-size:.875rem;flex:none}
 
-.btn-primary {width:100%;min-height:44px;border-radius:10px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.post-row {cursor:pointer}
 
-.host {margin:8px 0 0;text-align:center;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+.post-row:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+/* Every post here is unread: the filled dot; a read one is the hollow ring
+   (it keeps its place until the preview closes). */
+.dot.is-read {background:rgb(var(--surface));border:2px solid rgb(var(--unread));box-sizing:border-box}
+
+/* All caught up. */
+.caught-up {margin:0;padding:24px 16px;text-align:center;font-size:.875rem;line-height:1.25rem;color:rgb(var(--muted))}
+
+/* The refresh button while its fetch runs. */
+@keyframes ico-spin {to {transform:rotate(360deg)}}
+
+.ico[aria-busy="true"] svg {animation:ico-spin 1s linear infinite}

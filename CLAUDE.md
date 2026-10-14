@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A minimal RSS reader: the viewer adds their own feeds, and one screen
+shows every unread post from all of them in a single newest-first list.
+Tapping a post opens a preview sheet (full summary plus a link to the
+site); opening it marks the post read, and it leaves the list when the
+sheet closes. Feeds are only ever checked on open, on add, and from the
+refresh button — no background scheduling. Feeds, posts and read marks
+are per-viewer (the `feeds`, `posts` and `demo_seeded` tables are
+`staging:private`).
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+- **Palette:** accent amber (light `#b45309` for buttons/chips with
+  white on it, `#d97706` unread dot; dark `#f59e0b` with near-black on
+  it, `#fbb03b` unread dot); neutrals warm greys (light ground
+  `#faf8f5` on white surfaces, dark ground `#181512` on `#221e1a`).
+  The exact token values live in `styles/tailwind-input.css`.
+- **Signature element:** the amber unread dot beside each post, which
+  goes hollow the moment the post is opened and leaves the list when
+  the preview sheet closes.
+- **Type scale:** `text-title`, `text-heading`, `text-body`,
+  `text-small` unchanged in `tailwind.config.js`; post titles and
+  preview body text are serif (`ui-serif`, Charter, Georgia), the rest
+  system sans.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +146,16 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- No new dependencies: the feed parser and fetch guard in `lib/feeds.js`
+  are hand-written against Node built-ins only.
+- Every server fetch of a feed goes through `fetchGuarded` (http(s) only,
+  public addresses only, every redirect re-checked, 10s timeout, 5 MB
+  cap, no cookies) — never bypass it by fetching elsewhere.
+- Post summaries are stored stripped to plain text (paragraphs kept,
+  separated by blank lines) and rendered as text, never as HTML.
+- Refresh upserts posts with `ON CONFLICT DO NOTHING`, so stored rows
+  keep their first-seen title/summary; to refresh parsed data for a
+  feed in staging, remove and re-add it.
+- The staging demo (`?demo=1`) seeds via a `demo_seeded` table row, so
+  it seeds once per viewer and stays idempotent; plain `/` never shows
+  demo rows (all checks share one staging DB).

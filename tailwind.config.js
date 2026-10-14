@@ -63,6 +63,11 @@ module.exports = {
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
+      // Post titles and the preview's text read like a page, not a list
+      // item; everything else stays in the system sans.
+      fontFamily: {
+        serif: ['ui-serif', 'Charter', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [],

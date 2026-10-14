@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "reader-demo",
+      "name": "demo list shows unread posts",
+      "path": "/?demo=1",
+      "expectSelector": ".post-row .unread-dot"
+    },
+    {
+      "id": "reader-empty",
+      "name": "empty state with no feeds",
+      "path": "/",
+      "expectText": "No feeds yet"
+    },
+    {
+      "id": "add-field",
+      "name": "feed address field present",
+      "path": "/",
+      "expectSelector": "#feed-url"
+    }
+  ]
 }
