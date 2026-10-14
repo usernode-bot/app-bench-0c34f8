@@ -175,7 +175,7 @@
 
       <!-- The screen's one filled button, at the bottom with the 104px of
            padding below the list keeping it off the cards. -->
-      <div class="fab"><button class="btn-primary" id="btn-new" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></div>
+      <div class="fab" id="fab"><button class="btn-primary" id="btn-new" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></div>
     </div>
     </div>
   </div>
@@ -367,6 +367,7 @@
       var seq = ++listSeq;
       $('hdr-sub').hidden = false;
       $('hdr-sub').textContent = 'Loading…';
+      $('fab').hidden = false;
       $('list-loading').hidden = false;
       $('list-error').hidden = true;
       $('list-empty').hidden = true;
@@ -412,9 +413,13 @@
           tab === 'closed' ? 'Nothing has been closed yet.' :
           'Nothing to decide yet.';
         $('list-empty').hidden = false;
+        // The empty Open tab's one button is Post the first decision; the
+        // pinned bar comes back as soon as a decision exists.
+        $('fab').hidden = tab === 'open';
         return;
       }
       $('list-empty').hidden = true;
+      $('fab').hidden = false;
       renderCards(ds, data.member_count);
       if (tab === 'open' && data.recent_closed && data.recent_closed.length) {
         renderClosed(data.recent_closed);
