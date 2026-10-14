@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,8 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -57,40 +56,29 @@
     });
     window.addEventListener('unhandledrejection', function (e) {
       var r = e.reason;
-      var msg = (r && (r.stack || r.message)) || String(r);
+      var msg = (r && (r && (r.stack || r.message))) || String(r);
       post('error', [msg], { kind: 'unhandledrejection' });
     });
     try { post('info', ['[dev-console ready]'], { kind: 'ready' }); } catch (_) {}
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232e7042' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 10h14l-1.3 9.2a1.5 1.5 0 0 1-1.5 1.3H7.8a1.5 1.5 0 0 1-1.5-1.3L5 10z'/><path d='M8.5 10V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V10'/><path d='M9.5 7h5'/></svg>">
+  <!-- Tailwind, PRECOMPILED for this app. The config lives in
+       tailwind.config.js in the repo root; npm run build compiles it to
+       public/tailwind.css with Docker or Paketo on every image build, so the
+       stylesheet is regenerated from THIS commit's markup every deploy.
        Writing class names as whole literals is what keeps this working — a
-       class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
-       is invisible to the compiler. If you genuinely need runtime-generated
-       classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+       class assembled from fragments at runtime is invisible to the
+       compiler. This app's states and buttons come from the design kit's
+       components (styles/tailwind-input.css); the drawn screens' own styles
+       are in /screens.css. -->
   <link rel="stylesheet" href="/tailwind.css">
   <link rel="stylesheet" href="/screens.css">
-  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
-       handler in server.js serves it under a plain "node server.js"; the
-       platform's edge answers it everywhere else). Never vendor it and never
-       write a hostname in front of it.
-       It is NOT conditional on this app calling a bridge API: it is also how
-       the app ANSWERS the shell, so a scaffold without it is invisible to
-       anything that asks the frame a question. Offline launch is one of those.
-       Another is the page's colour: the bridge reports this document's opaque
-       ground to the shell (#1581), which is what makes the platform bar above
-       the app take the app's tone instead of the viewer's theme (#1945).
-       The bridge is also where the app learns the viewer's light/dark theme:
-       the script below reads it. -->
+  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path.
+       It is also how the app ANSWERS the shell (offline launch, theme
+       reporting) — never vendor it and never write a hostname in front of
+       it. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
@@ -109,91 +97,590 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
-    <div>
-    <div class="cv">
-    <div class="top"><h1>Club Votes</h1><p>3 open, 2 waiting on your vote</p></div>
-    <div class="tabs"><span class="tab on">Open</span><span class="tab">Closed</span><span class="tab">Posted by you</span></div>
+  <!-- Club Votes: the club's decisions list, a single decision with its
+       votes and comments, and the new-decision form. Hash routing
+       (#/, #/d/<id>, #/new), vanilla JS, the screens' drawn styles. -->
+  <div id="view" data-spec-screen="1" aria-live="polite"></div>
 
-    <div class="card">
-    <div class="meta"><span>Mina, 2 days ago</span><span>9 of 12 voted</span></div>
-    <div class="q">Move Thursday meetings to the library?</div>
-    <div class="bar"><i class="y" style="width:58%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>7</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
-    <div class="act"><span class="btn-secondary sel">Yes</span><span class="btn-secondary">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>7 comments, latest from Dev</div>
-    </div>
+  <script>
+  (function () {
+    'use strict';
 
-    <div class="card">
-    <div class="meta"><span>You, yesterday</span><span>5 of 12 voted</span></div>
-    <div class="q">Run a spring tree planting in April?</div>
-    <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>5</b> yes</span><span><i class="dot n"></i><b>0</b> no</span></div>
-    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>3 comments</div>
-    </div>
+    // ── Platform plumbing ──────────────────────────────────────────────────
+    var params = new URLSearchParams(location.search);
+    var TOKEN = params.get('token') || '';
+    var DEMO = params.get('demo') === '1'; // forwarded to every API call
 
-    <div class="card">
-    <div class="meta"><span>Tomas, 4 hours ago</span><span>3 of 12 voted</span></div>
-    <div class="q">Raise dues to $5 a month for supplies?</div>
-    <div class="bar"><i class="y" style="width:8%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>1</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
-    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary seln">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>1 comment</div>
-    </div>
+    function api(path, options) {
+      options = options || {};
+      var url = '/api' + path;
+      if (DEMO) url += (url.indexOf('?') === -1 ? '?' : '&') + 'demo=1';
+      var headers = { 'Content-Type': 'application/json' };
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      // A staging preview may be shown as of a chosen moment; the bridge
+      // exposes it and the server reads it from this header.
+      try {
+        if (window.usernode && typeof window.usernode.now === 'function') {
+          var now = window.usernode.now();
+          if (now) headers['x-usernode-now'] = String(new Date(now).toISOString());
+        }
+      } catch (e) {}
+      return fetch(url, {
+        method: options.method || 'GET',
+        headers: headers,
+        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok) {
+            var err = new Error(data.error || 'Something went wrong.');
+            err.status = res.status;
+            err.code = data.error;
+            throw err;
+          }
+          return data;
+        });
+      });
+    }
 
-    <div class="section-label">Recently closed</div>
-    <div class="list">
-    <div class="list-row"><div>Order pizza for the end-of-term party?<small>Closed by Priya, 11 votes</small></div><span class="res">Yes 9</span></div>
-    <div class="list-row"><div>Buy a second folding table?<small>Closed by you, 10 votes</small></div><span class="res no">No 6</span></div>
-    </div>
+    // ── Small helpers ──────────────────────────────────────────────────────
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function ago(iso) {
+      var t = new Date(iso).getTime();
+      if (isNaN(t)) return '';
+      var s = Math.max(0, (Date.now() - t) / 1000);
+      if (s < 60) return 'just now';
+      var m = Math.floor(s / 60);
+      if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago');
+      var h = Math.floor(m / 60);
+      if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+      var d = Math.floor(h / 24);
+      if (d === 1) return 'yesterday';
+      if (d < 7) return d + ' days ago';
+      var w = Math.floor(d / 7);
+      if (w < 5) return w + (w === 1 ? ' week ago' : ' weeks ago');
+      return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    function authorName(username, isMine) { return isMine ? 'You' : username; }
 
-    <div class="fab"><span class="btn-primary"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</span></div>
-    </div>
-    </div>
-  </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="cv">
-      <div class="nav"><span class="lnk"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Decisions</span></div>
-      <div class="meta">Posted by you, yesterday</div>
-      <h1>Run a spring tree planting in April?</h1>
-      <p class="det">The parks office has 40 saplings for groups. We would need about 8 people on a Saturday morning.</p>
+    var ICONS = {
+      bubble: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>',
+      plus: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+      back: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+      lock: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+    };
 
-      <div class="card">
-      <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
-      <div class="leg"><span><i class="dot y"></i><b>5</b> yes &nbsp; <i class="dot n"></i><b>0</b> no</span><span>5 of 12 voted</span></div>
-      <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
-      <p class="hint">You have not voted. You can change your vote until it closes.</p>
-      <div class="own"><span class="btn-secondary"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Close decision</span><span class="btn-secondary danger">Delete</span></div>
-      </div>
+    var view = document.getElementById('view');
+    var route = { name: 'list', tab: 'open' };
+    // Cached per view so going back does not flash the skeleton again.
+    var cache = { list: {}, decision: {} };
+    var noteTimer = null;
 
-      <div class="section-label">3 comments</div>
-      <div class="list">
-      <div class="list-row"><div class="who"><span><b>Mina</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>I can bring gloves and two spades.</p></div>
-      <div class="list-row"><div class="who"><span><b>Dev</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>Saturday the 12th works for me, the 19th does not.</p></div>
-      <div class="list-row"><div class="who"><span><b>Ana</b>3 hours ago</span><span class="lnk m">Report</span></div><p>Is there parking near the site?</p></div>
-      </div>
+    function setScreen(n) { view.setAttribute('data-spec-screen', n); }
 
-      <label class="lbl">Your comment</label>
-      <div class="field">e.g. I can help on the 12th</div>
-      <div class="post"><span class="btn-primary">Post comment</span></div>
-      </div>
-      </div>
-    </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    function showNote(text) {
+      var el = document.getElementById('note');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'note';
+        el.setAttribute('role', 'status');
+        var host = document.querySelector('.cv');
+        if (host) host.insertBefore(el, host.firstChild);
+        else document.body.appendChild(el);
+      }
+      el.textContent = text;
+      el.hidden = false;
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(function () { el.hidden = true; }, 5000);
+    }
+
+    function demoBanner(demo) {
+      return demo
+        ? '<p class="demo-note">Staging demo: made-up club decisions</p>'
+        : '';
+    }
+
+    // ── The tally bar (the app's signature element) ────────────────────────
+    function tally(yes, no, big) {
+      var total = yes + no;
+      var yw = total ? Math.round((yes / total) * 100) : 0;
+      var nw = total ? Math.round((no / total) * 100) : 0;
+      if (yw + nw > 100) nw = 100 - yw;
+      return '<div class="bar">' +
+        (yes ? '<i class="y" style="width:' + yw + '%"></i>' : '') +
+        (no ? '<i class="n" style="width:' + nw + '%"></i>' : '') +
+        '<i class="e"></i></div>';
+    }
+    function votedText(voted, memberCount) {
+      return memberCount ? voted + ' of ' + memberCount + ' voted' : voted + ' voted';
+    }
+    function resultOf(d) {
+      if (d.yes > d.no) return 'Yes ' + d.yes;
+      if (d.no > d.yes) return 'No ' + d.no;
+      return 'Tied at ' + d.yes;
+    }
+
+    // ── A decision card (list screen) ──────────────────────────────────────
+    function cardHtml(d, memberCount) {
+      var voted = d.yes + d.no;
+      var sel = d.my_vote === 'yes' ? ' sel' : d.my_vote === 'no' ? ' seln' : '';
+      var act = d.closed_at ? '' :
+        '<div class="act">' +
+        '<button type="button" class="btn-secondary' + (d.my_vote === 'yes' ? ' sel' : '') +
+          '" data-vote="yes" data-id="' + d.id + '">Yes</button>' +
+        '<button type="button" class="btn-secondary' + (d.my_vote === 'no' ? ' seln' : '') +
+          '" data-vote="no" data-id="' + d.id + '">No</button>' +
+        '</div>';
+      var cm = d.comment_count === 0 ? 'No comments yet'
+        : d.comment_count === 1 ? '1 comment'
+        : d.comment_count + ' comments, latest from ' + esc(d.latest_commenter || 'a member');
+      return '<div class="card" data-open="' + d.id + '">' +
+        '<div class="meta"><span>' + esc(authorName(d.author_username, d.is_mine)) + ', ' +
+          esc(ago(d.created_at)) + '</span><span>' + esc(votedText(voted, memberCount)) + '</span></div>' +
+        '<div class="q">' + esc(d.question) + '</div>' +
+        tally(d.yes, d.no) +
+        '<div class="leg"><span><i class="dot y"></i><b>' + d.yes + '</b> yes</span>' +
+        '<span><i class="dot n"></i><b>' + d.no + '</b> no</span></div>' +
+        act +
+        '<div class="cm">' + ICONS.bubble + esc(cm) + '</div>' +
+        '</div>';
+    }
+
+    function closedRowHtml(d) {
+      var win = d.yes > d.no ? '' : ' no';
+      return '<div class="list-row" data-open="' + d.id + '"><div>' + esc(d.question) +
+        '<small>Closed by ' + esc(authorName(d.author_username, d.is_mine)) + ', ' +
+        (d.yes + d.no) + ' votes</small></div><span class="res' + win + '">' +
+        esc(resultOf(d)) + '</span></div>';
+    }
+
+    function skeletonCards() {
+      var one = '<div class="card"><div class="skeleton" style="height:14px;width:55%"></div>' +
+        '<div class="skeleton" style="height:22px;width:90%;margin-top:10px"></div>' +
+        '<div class="skeleton" style="height:14px;width:100%;margin-top:14px"></div>' +
+        '<div class="skeleton" style="height:14px;width:40%;margin-top:10px"></div>' +
+        '<div class="skeleton" style="height:44px;width:100%;margin-top:12px"></div></div>';
+      return one + one + one;
+    }
+
+    // ── Screen 1: the decisions list ───────────────────────────────────────
+    function renderList() {
+      setScreen('1');
+      var tab = route.tab;
+      var state = cache.list[tab] || { loading: true };
+      var html = '<div class="cv">';
+
+      if (state.loading) {
+        html += '<div class="top"><h1>Club Votes</h1></div>';
+        html += '<div class="tabs">' + tabHtml(tab) + '</div>' + skeletonCards() + '</div>';
+        view.innerHTML = html;
+        return;
+      }
+      if (state.error) {
+        html += '<div class="top"><h1>Club Votes</h1></div>';
+        html += '<div class="state-error"><p>The decisions could not be loaded.</p>' +
+          '<p class="dim">Nothing you posted is lost. Check your connection and try again.</p>' +
+          '<button type="button" class="btn-primary" data-retry="1">Retry</button></div></div>';
+        view.innerHTML = html;
+        return;
+      }
+
+      var d = state.data;
+      html += demoBanner(d.demo);
+      html += '<div class="top"><h1>Club Votes</h1><p>' + d.open_count + ' open, ' +
+        d.waiting_count + ' waiting on your vote</p></div>';
+      html += '<div class="tabs">' + tabHtml(tab) + '</div>';
+
+      var list = d.decisions;
+      if (!list.length) {
+        var emptyCopy = tab === 'open'
+          ? { t: 'Nothing to decide yet', b: 'Post something the club should vote on.' }
+          : tab === 'closed'
+          ? { t: 'Nothing closed yet', b: 'Decisions appear here once someone closes them.' }
+          : { t: 'You have not posted anything yet', b: 'Ask the club to decide something.' };
+        html += '<div class="state-empty"><p class="empty-t">' + emptyCopy.t + '</p><p class="dim">' +
+          emptyCopy.b + '</p>' +
+          (tab === 'open' ? '<button type="button" class="btn-primary" data-new="1">Post the first decision</button>' : '') +
+          '</div>';
+      } else {
+        html += list.map(function (x) { return cardHtml(x, d.member_count); }).join('');
+      }
+
+      if (tab === 'open' && d.recent_closed && d.recent_closed.length) {
+        html += '<div class="section-label">Recently closed</div><div class="list">' +
+          d.recent_closed.map(closedRowHtml).join('') + '</div>';
+      }
+
+      html += '<div class="fab"><button type="button" class="btn-primary" data-new="1">' +
+        ICONS.plus + 'New decision</button></div>';
+      html += '</div>';
+      view.innerHTML = html;
+    }
+
+    function tabHtml(current) {
+      function t(key, label) {
+        return '<button type="button" class="tab' + (current === key ? ' on' : '') +
+          '" data-tab="' + key + '">' + label + '</button>';
+      }
+      return t('open', 'Open') + t('closed', 'Closed') + t('mine', 'Posted by you');
+    }
+
+    function loadList(tab) {
+      var state = cache.list[tab];
+      if (!state || state.error) state = cache.list[tab] = { loading: true };
+      renderList();
+      api('/decisions?tab=' + tab).then(function (data) {
+        cache.list[tab] = { data: data };
+      }).catch(function () {
+        cache.list[tab] = { error: true };
+      }).then(renderList);
+    }
+
+    // ── Voting (optimistic, rolls back if the save fails) ──────────────────
+    function castVote(id, choice, onDone) {
+      var lists = Object.keys(cache.list).map(function (k) { return cache.list[k]; })
+        .filter(function (s) { return s.data; });
+      var previous = null;
+      lists.concat([cache.decision[id] && cache.decision[id].data ?
+        { data: cache.decision[id].data } : null]).filter(Boolean).forEach(function (state) {
+        var pool = state.data.decisions || (state.data.decision ? [state.data.decision] : []);
+        pool.concat(state.data.recent_closed || []).forEach(function (d) {
+          if (Number(d.id) === Number(id)) {
+            if (previous === null) previous = d.my_vote;
+            d.my_vote = choice;
+          }
+        });
+      });
+      api('/decisions/' + id + '/vote', { method: 'PUT', body: { choice: choice } })
+        .then(function (counts) {
+          lists.forEach(function (state) {
+            (state.data.decisions || []).concat(state.data.recent_closed || [])
+              .forEach(function (d) {
+                if (Number(d.id) === Number(id)) { d.yes = counts.yes; d.no = counts.no; }
+              });
+          });
+          var dd = cache.decision[id] && cache.decision[id].data;
+          if (dd) { dd.decision.yes = counts.yes; dd.decision.no = counts.no; dd.decision.my_vote = choice; }
+        })
+        .catch(function (err) {
+          // Roll back the optimistic change and say so.
+          lists.forEach(function (state) {
+            (state.data.decisions || []).concat(state.data.recent_closed || [])
+              .forEach(function (d) {
+                if (Number(d.id) === Number(id)) d.my_vote = previous;
+              });
+          });
+          showNote(err.code === 'account_required'
+            ? 'Make an account to vote.' : 'Your vote could not be saved.');
+        })
+        .then(function () { if (onDone) onDone(); else render(); });
+    }
+
+    // ── Screen 2: one decision, its votes and its comments ─────────────────
+    function commentRowHtml(c) {
+      var tag = c.vote ? '<span class="vt">' + (c.vote === 'yes' ? 'Yes' : 'No') + '</span>' : '';
+      var action = c.is_mine
+        ? '<button type="button" class="lnk m" data-del-comment="' + c.id + '">Delete</button>'
+        : '<button type="button" class="lnk m" data-report-comment="' + c.id + '">Report</button>';
+      return '<div class="list-row"><div class="who"><span><b>' +
+        esc(authorName(c.author_username, c.is_mine)) + '</b>' + esc(ago(c.created_at)) + tag +
+        '</span>' + action + '</div><p>' + esc(c.body) + '</p></div>';
+    }
+
+    function renderDecision() {
+      setScreen('2');
+      var id = route.id;
+      var state = cache.decision[id] || { loading: true };
+      var html = '<div class="cv">';
+
+      if (state.loading) {
+        html += '<div class="nav"><button type="button" class="lnk" data-back="1">' + ICONS.back + 'Decisions</button></div>';
+        html += '<div class="skeleton" style="height:14px;width:40%;margin:8px 4px 0"></div>' +
+          '<div class="skeleton" style="height:28px;width:85%;margin:10px 4px 14px"></div>' +
+          '<div class="skeleton" style="height:14px;width:100%;margin:0 4px 14px"></div>' +
+          '<div class="card"><div class="skeleton" style="height:18px;width:100%"></div>' +
+          '<div class="skeleton" style="height:14px;width:60%;margin-top:10px"></div>' +
+          '<div class="skeleton" style="height:44px;width:100%;margin-top:12px"></div></div>' +
+          '<div class="skeleton" style="height:14px;width:30%;margin:20px 4px 8px"></div>' +
+          '<div class="list"><div class="list-row"><div class="skeleton" style="height:14px;width:45%"></div></div></div>';
+        html += '</div>';
+        view.innerHTML = html;
+        return;
+      }
+      if (state.error) {
+        html += '<div class="nav"><button type="button" class="lnk" data-back="1">' + ICONS.back + 'Decisions</button></div>';
+        html += '<div class="state-error"><p>This decision could not be loaded.</p>' +
+          '<p class="dim">Nothing you posted is lost. Check your connection and try again.</p>' +
+          '<button type="button" class="btn-primary" data-retry="1">Retry</button></div></div>';
+        view.innerHTML = html;
+        return;
+      }
+
+      var data = state.data;
+      var d = data.decision;
+      var closed = !!d.closed_at;
+      var voted = d.yes + d.no;
+      var hint;
+      if (closed) hint = 'This decision is closed.';
+      else if (!d.my_vote) hint = 'You have not voted. You can change your vote until it closes.';
+      else hint = 'You voted ' + d.my_vote + '. Tap it again to take your vote back.';
+
+      html += demoBanner(data.demo);
+      html += '<div class="nav"><button type="button" class="lnk" data-back="1">' + ICONS.back + 'Decisions</button>' +
+        (d.is_mine || closed ? '' : '<button type="button" class="lnk m" data-report-decision="' + d.id + '">Report</button>') +
+        '</div>';
+      html += '<div class="meta">Posted by ' + esc(authorName(d.author_username, d.is_mine)) +
+        ', ' + esc(ago(d.created_at)) + (closed ? ' · closed ' + esc(ago(d.closed_at)) : '') + '</div>';
+      html += '<h1>' + esc(d.question) + '</h1>';
+      if (d.details) html += '<p class="det">' + esc(d.details) + '</p>';
+
+      html += '<div class="card">';
+      html += tally(d.yes, d.no);
+      html += '<div class="leg"><span><i class="dot y"></i><b>' + d.yes + '</b> yes &nbsp; ' +
+        '<i class="dot n"></i><b>' + d.no + '</b> no</span><span>' +
+        esc(votedText(voted, data.member_count)) + '</span></div>';
+      if (!closed) {
+        html += '<div class="act">' +
+          '<button type="button" class="btn-secondary' + (d.my_vote === 'yes' ? ' sel' : '') +
+          '" data-vote="yes" data-id="' + d.id + '">Yes</button>' +
+          '<button type="button" class="btn-secondary' + (d.my_vote === 'no' ? ' seln' : '') +
+          '" data-vote="no" data-id="' + d.id + '">No</button></div>';
+      }
+      html += '<p class="hint">' + esc(hint) + '</p>';
+      if (d.is_mine) {
+        html += '<div class="own">' +
+          (closed ? '' : '<button type="button" class="btn-secondary" data-close="1">' + ICONS.lock + 'Close decision</button>') +
+          '<button type="button" class="btn-secondary danger" data-delete="1">Delete</button></div>';
+      }
+      html += '</div>';
+
+      var cs = data.comments;
+      html += '<div class="section-label">' + (cs.length === 1 ? '1 comment' : cs.length + ' comments') + '</div>';
+      if (cs.length) {
+        html += '<div class="list">' + cs.map(commentRowHtml).join('') + '</div>';
+      } else {
+        html += '<div class="state-empty"><p class="dim">No comments yet. Start the discussion.</p></div>';
+      }
+      html += '<label class="lbl" for="comment-body">Your comment</label>' +
+        '<textarea id="comment-body" class="field" maxlength="2000" ' +
+        'placeholder="e.g. I can help on the 12th"></textarea>' +
+        '<div class="post"><button type="button" class="btn-primary" data-comment="1">Post comment</button></div>';
+      html += '</div>';
+      view.innerHTML = html;
+    }
+
+    function loadDecision(id) {
+      cache.decision[id] = { loading: true };
+      renderDecision();
+      api('/decisions/' + id).then(function (data) {
+        cache.decision[id] = { data: data };
+      }).catch(function (err) {
+        cache.decision[id] = { error: err };
+      }).then(renderDecision);
+    }
+
+    function refreshDecision(id) {
+      return api('/decisions/' + id).then(function (data) {
+        cache.decision[id] = { data: data };
+        renderDecision();
+      }).catch(function () {
+        showNote('Could not refresh. Check your connection.');
+      });
+    }
+
+    // ── New decision form ──────────────────────────────────────────────────
+    function renderNew() {
+      setScreen('2');
+      view.innerHTML = '<div class="cv">' +
+        '<div class="nav"><button type="button" class="lnk" data-back="1">' + ICONS.back + 'Decisions</button></div>' +
+        '<div class="top"><h1>New decision</h1><p>Ask the club something it should vote on.</p></div>' +
+        '<label class="lbl" for="q">Question</label>' +
+        '<input id="q" class="field" maxlength="200" placeholder="e.g. Where should we meet in May?">' +
+        '<label class="lbl" for="det">Details <span class="opt">optional</span></label>' +
+        '<textarea id="det" class="field" maxlength="2000" ' +
+        'placeholder="e.g. Costs, times, anything people should know"></textarea>' +
+        '<div class="post"><button type="button" class="btn-primary" data-post="1">Post decision</button></div>' +
+        '<p id="new-error" class="hint" hidden></p>' +
+        '</div>';
+    }
+
+    function submitNew() {
+      var q = document.getElementById('q');
+      var det = document.getElementById('det');
+      var errEl = document.getElementById('new-error');
+      var question = q.value.trim();
+      var details = det.value.trim();
+      function fail(msg) {
+        errEl.textContent = msg;
+        errEl.hidden = false;
+      }
+      errEl.hidden = true;
+      if (!question) return fail('Write a question first.');
+      if (question.length > 200) return fail('The question must be 200 characters or fewer.');
+      api('/decisions', { method: 'POST', body: { question: question, details: details } })
+        .then(function (data) {
+          cache.list = {}; // the new decision belongs at the top of Open
+          location.hash = '#/';
+          route.tab = 'open';
+          loadList('open');
+        })
+        .catch(function (err) {
+          fail(err.code === 'account_required'
+            ? 'Make an account to post a decision.' : 'It could not be posted. Try again.');
+        });
+    }
+
+    // ── Comments ───────────────────────────────────────────────────────────
+    function postComment(id) {
+      var box = document.getElementById('comment-body');
+      var body = box.value.trim();
+      if (!body) { showNote('Write a comment first.'); return; }
+      api('/decisions/' + id + '/comments', { method: 'POST', body: { body: body } })
+        .then(function () { return refreshDecision(id); })
+        .catch(function (err) {
+          showNote(err.code === 'account_required'
+            ? 'Make an account to comment.' : 'Your comment could not be posted. It is still in the box.');
+        });
+    }
+
+    // ── Router and events ──────────────────────────────────────────────────
+    function parseHash() {
+      var h = location.hash.replace(/^#/, '');
+      var m = h.match(/^\/d\/(\d+)/);
+      if (m) return { name: 'decision', id: m[1] };
+      if (h === '/new') return { name: 'new' };
+      return { name: 'list', tab: route.tab || 'open' };
+    }
+
+    function render() {
+      route = parseHash();
+      if (route.name === 'decision') {
+        if (!cache.decision[route.id] || cache.decision[route.id].error) loadDecision(route.id);
+        else renderDecision();
+      } else if (route.name === 'new') {
+        renderNew();
+      } else {
+        var state = cache.list[route.tab];
+        if (!state || state.error) loadList(route.tab);
+        else renderList();
+      }
+    }
+
+    window.addEventListener('hashchange', render);
+
+    view.addEventListener('click', function (ev) {
+      var t = ev.target.closest('button, .card, .list-row');
+      if (!t) return;
+
+      if (t.hasAttribute('data-tab')) {
+        route.tab = t.getAttribute('data-tab');
+        if (location.hash.replace(/^#/, '') !== '/' && location.hash !== '' && location.hash !== '#/') {
+          history.replaceState(null, '', location.pathname + location.search + '#/');
+        }
+        var state = cache.list[route.tab];
+        if (!state) loadList(route.tab); else renderList();
+        return;
+      }
+      if (t.hasAttribute('data-new')) { location.hash = '#/new'; return; }
+      if (t.hasAttribute('data-back')) { location.hash = '#/'; return; }
+      if (t.hasAttribute('data-retry')) { render(); return; }
+      if (t.hasAttribute('data-post')) { submitNew(); return; }
+      if (t.hasAttribute('data-comment')) { postComment(route.id); return; }
+      if (t.hasAttribute('data-close')) { closeDecision(route.id); return; }
+      if (t.hasAttribute('data-delete')) { deleteDecision(route.id); return; }
+      if (t.hasAttribute('data-vote')) {
+        var vid = t.getAttribute('data-id');
+        var choice = t.getAttribute('data-vote');
+        var current = currentVote(vid);
+        castVote(vid, current === choice ? null : choice);
+        return;
+      }
+      if (t.hasAttribute('data-report-comment')) {
+        report('comment', t.getAttribute('data-report-comment'), t);
+        return;
+      }
+      if (t.hasAttribute('data-del-comment')) {
+        deleteComment(route.id, t.getAttribute('data-del-comment'));
+        return;
+      }
+      if (t.hasAttribute('data-report-decision')) {
+        report('decision', t.getAttribute('data-report-decision'), t);
+        return;
+      }
+      // Opening a decision from a card or a closed row.
+      var openId = t.getAttribute('data-open');
+      if (openId && !ev.target.closest('button')) {
+        location.hash = '#/d/' + openId;
+      }
+    });
+
+    function currentVote(id) {
+      var s = cache.decision[id] && cache.decision[id].data;
+      if (s) return s.decision.my_vote;
+      var lists = Object.keys(cache.list).map(function (k) { return cache.list[k]; })
+        .filter(function (st) { return st.data; });
+      for (var i = 0; i < lists.length; i++) {
+        var all = (lists[i].data.decisions || []).concat(lists[i].data.recent_closed || []);
+        for (var j = 0; j < all.length; j++) {
+          if (Number(all[j].id) === Number(id)) return all[j].my_vote;
+        }
+      }
+      return null;
+    }
+
+    function closeDecision(id) {
+      api('/decisions/' + id + '/close', { method: 'POST' })
+        .then(function () { return refreshDecision(id); })
+        .catch(function (err) {
+          showNote(err.code === 'account_required' ? 'Make an account first.'
+            : 'It could not be closed. Try again.');
+        });
+    }
+
+    function deleteDecision(id) {
+      api('/decisions/' + id, { method: 'DELETE' })
+        .then(function () {
+          cache.list = {};
+          delete cache.decision[id];
+          location.hash = '#/';
+          loadList(route.tab || 'open');
+        })
+        .catch(function (err) {
+          showNote(err.code === 'account_required' ? 'Make an account first.'
+            : 'It could not be deleted. Try again.');
+        });
+    }
+
+    function deleteComment(decisionId, commentId) {
+      api('/comments/' + commentId, { method: 'DELETE' })
+        .then(function () { return refreshDecision(decisionId); })
+        .catch(function (err) {
+          showNote(err.code === 'account_required' ? 'Make an account first.'
+            : 'It could not be deleted. Try again.');
+        });
+    }
+
+    function report(type, targetId, btn) {
+      api('/reports', { method: 'POST', body: { target_type: type, target_id: Number(targetId) } })
+        .then(function () {
+          btn.textContent = 'Reported, thanks';
+          btn.disabled = true;
+        })
+        .catch(function (err) {
+          showNote(err.code === 'account_required' ? 'Make an account to report.'
+            : 'It could not be reported. Try again.');
+        });
+    }
+
+    // Report a decision from its own screen: handled by data-report-decision
+    // in the click handler above.
+
+    // Start.
+    render();
+  })();
+  </script>
 </body>
 </html>

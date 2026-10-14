@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        no: token('no'), // the No side of a tally bar and a No vote
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
@@ -62,6 +63,9 @@ module.exports = {
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+      },
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
       },
     },
   },

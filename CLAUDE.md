@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club's decision board. Members post something the club needs to
+decide (a question, optional details), everyone votes Yes or No, and
+people talk it through in flat comments under each decision. The person
+who posted a decision closes it when the club has had its say, and can
+delete it. One Yes or No per person, changeable until it closes; there
+is no Maybe. Reports on other people's decisions and comments are
+recorded and change nothing on screen beyond "Reported, thanks".
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** fern green accent (Yes and the main action), brick red
+  for No (the `no` token, named in `tailwind.config.js`), warm
+  green-grey neutrals. Dark values: ground 18 20 17, surface 28 31 27,
+  raised 38 42 36, text 236 239 232, muted 160 166 155, lines 52 57 50,
+  accent 112 196 132 with dark text on it, No 224 142 118.
+- **Signature element:** the tally bar, a green and red split bar with
+  an empty track for the not-yet-voted, on every decision card, larger
+  on a decision's own screen.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  in the rounded system face (`ui-rounded`).
+- **One fixed look:** none. Both looks, following the viewer's Homeroom
+  theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

@@ -3,5 +3,26 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "decisions.demo-list",
+      "name": "Demo list renders with a tally bar",
+      "path": "/?demo=1",
+      "expectSelector": ".bar i.y",
+      "expectText": "Club Votes",
+      "visual": true,
+      "impact": ["public/**", "server.js"]
+    },
+    {
+      "name": "List renders on a fresh database, no demo rows",
+      "path": "/",
+      "expectText": "Club Votes"
+    },
+    {
+      "name": "Decision view renders comments and the comment box",
+      "path": "/?demo=1#/d/900002",
+      "expectSelector": ".who",
+      "expectText": "Post comment"
+    }
+  ]
 }

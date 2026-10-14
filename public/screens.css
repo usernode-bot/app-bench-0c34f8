@@ -1,12 +1,15 @@
 /* The screens the spec drew, carried over by the platform before the first
-   version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+   version was built (screen 1 is the decisions list; screen 2, a decision
+   with its votes and comments — and the new-decision form, which shares
+   screen 2's column). Colours are the design kit's tokens, rgb(var(--accent)),
+   so they follow the light and the dark look.
+
+   Rules shared by both screens come first; screen 2's own rules are scoped
+   to [data-spec-screen="2"] so they never restyle the list. */
 
 /* Each screen is one centred column: the phone width it was drawn at grows
    to a readable column on a wider window, never rows and buttons stretched
-   across the window. Remove this only for an app that fills the window by
-   design, such as a map. */
+   across the window. */
 [data-spec-screen] {
   width: 100%;
   max-width: 42rem;
@@ -16,14 +19,18 @@
 .cv {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 1180px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   box-sizing: border-box;
   font-family: ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
   font-size: 16px;
   line-height: 24px;
+  /* 104px of reserved room under the content: the New decision button
+     pinned at the bottom never covers a card. */
   padding: 0 16px 104px;
   position: relative;
+  min-height: 100vh;
 }
 
 .cv * {box-sizing:border-box}
@@ -64,7 +71,7 @@
 
 .act {display:flex;gap:8px;align-items:center}
 
-.btn-secondary,.btn-primary {min-height:44px;min-width:44px;padding:0 16px;border-radius:8px;font-size:16px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
+.btn-secondary,.btn-primary {min-height:44px;min-width:44px;padding:0 16px;border-radius:8px;font-size:16px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;cursor:pointer}
 
 .btn-secondary {border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));flex:1}
 
@@ -100,51 +107,57 @@
 
 .res.no {color:rgb(var(--no))}
 
-/* Screen 2: its rules the first screen has not got. */
+.lnk {min-height:44px;min-width:44px;display:inline-flex;align-items:center;gap:4px;font-size:16px;font-weight:500;color:rgb(var(--fg));padding:0 8px;background:none;border:0;font-family:inherit;cursor:pointer}
 
-.cv {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  min-height: 1100px;
-  width: 390px;
-  box-sizing: border-box;
-  font-family: ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  padding: 0 16px 32px;
+.lnk.m {color:rgb(var(--muted));font-size:14px;min-height:44px}
+
+/* Keyboard focus is visible on every control, in both looks. */
+.btn-primary:focus-visible,.btn-secondary:focus-visible,.tab:focus-visible,.lnk:focus-visible {
+  outline:2px solid rgb(var(--focus));
+  outline-offset:2px;
 }
 
-.nav {display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+/* The staging demo banner and the small status line. */
+.demo-note {margin:12px 4px 0;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
-.lnk {min-height:44px;min-width:44px;display:inline-flex;align-items:center;gap:4px;font-size:16px;font-weight:500;color:rgb(var(--fg));padding:0 8px}
+#note {
+  margin:12px 4px 0;padding:8px 12px;border-radius:8px;
+  background:rgb(var(--raised));font-size:14px;line-height:20px;color:rgb(var(--fg));
+}
 
-.lnk.m {color:rgb(var(--muted));font-size:14px}
+/* States (from the design kit's components) inside the drawn screens. */
+.state-empty,.state-error {font-size:16px;line-height:24px}
 
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 4px 0}
+.state-empty .empty-t {font-weight:600;margin:0}
 
-.cv h1 {font-size:28px;line-height:36px;font-weight:700;margin:4px 4px 8px;letter-spacing:-.01em}
+.dim {color:rgb(var(--muted));font-size:14px;line-height:20px;margin:0}
 
-.det {margin:0 4px 16px;color:rgb(var(--fg))}
+/* Screen 2: its rules the list has not got. */
+[data-spec-screen="2"] .cv {padding:0 16px 32px}
 
-.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
+[data-spec-screen="2"] .nav {display:flex;align-items:center;justify-content:space-between;padding:8px 0}
 
-.bar {display:flex;gap:2px;height:18px}
+[data-spec-screen="2"] .meta {display:block;margin:8px 4px 0}
 
-.leg {display:flex;justify-content:space-between;font-size:14px;line-height:20px;margin:8px 0 12px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .cv h1 {margin:4px 4px 8px}
 
-.act {display:flex;gap:8px}
+[data-spec-screen="2"] .det {margin:0 4px 16px;color:rgb(var(--fg))}
 
-.own {display:flex;gap:8px;margin-top:12px}
+[data-spec-screen="2"] .card {margin-bottom:0}
 
-.own .btn-secondary {flex:none}
+[data-spec-screen="2"] .bar {height:18px}
 
-.danger {color:rgb(var(--no))}
+[data-spec-screen="2"] .leg {display:flex;justify-content:space-between}
 
-.hint {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 0 0}
+[data-spec-screen="2"] .own {display:flex;gap:8px;margin-top:12px}
 
-.section-label {font-size:14px;font-weight:500;color:rgb(var(--muted));margin:24px 4px 8px}
+[data-spec-screen="2"] .own .btn-secondary {flex:none}
 
-.list-row {padding:12px 16px}
+[data-spec-screen="2"] .danger {color:rgb(var(--no))}
+
+[data-spec-screen="2"] .hint {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 0 0}
+
+[data-spec-screen="2"] .section-label {margin:24px 4px 8px}
 
 .who {display:flex;align-items:center;justify-content:space-between;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
@@ -154,8 +167,16 @@
 
 .list-row p {margin:4px 0 0}
 
-.field {display:block;width:100%;min-height:88px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--muted));font-family:inherit}
+.field {display:block;width:100%;min-height:88px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--fg));font-family:inherit}
+
+.field::placeholder {color:rgb(var(--muted));opacity:.6}
+
+.field:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:1px}
+
+input.field {min-height:44px}
 
 .lbl {display:block;font-size:14px;font-weight:500;margin:16px 4px 6px}
+
+.lbl .opt {font-weight:400;color:rgb(var(--muted))}
 
 .post {display:flex;justify-content:flex-end;margin-top:8px}
