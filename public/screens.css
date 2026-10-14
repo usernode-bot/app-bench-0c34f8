@@ -87,9 +87,11 @@
 
 .end {text-align:center;font-family:system-ui,sans-serif;font-size:14px;color:rgb(var(--muted));padding:20px}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. These re-declare .app,
+   .sans, .fav and .btn-secondary, which screen 1 also uses, so they are
+   scoped to the preview screen — the drawn file let them leak. */
 
-.app {
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 844px;
@@ -100,7 +102,7 @@
   box-sizing: border-box;
 }
 
-.sans {
+[data-spec-screen="2"] .sans {
   font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 
@@ -113,7 +115,7 @@
 
 .btn-secondary,.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font-size:16px;font-weight:500}
 
-.btn-secondary {background:transparent;color:rgb(var(--fg));border:0}
+[data-spec-screen="2"] .btn-secondary {background:transparent;color:rgb(var(--fg));border:0}
 
 .art {padding:24px 24px 32px}
 
@@ -121,7 +123,46 @@
 
 .src b {color:rgb(var(--feed));font-weight:600}
 
-.fav {flex:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:rgb(var(--on-mast));background:rgb(var(--mast-1));font-family:ui-serif,Georgia,serif}
+[data-spec-screen="2"] .fav {flex:none;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:rgb(var(--on-mast));background:rgb(var(--mast-1));font-family:ui-serif,Georgia,serif}
+
+/* ── Sheets, states and small helpers the wired app adds. Token colours
+   only, same as above. ───────────────────────────────────────────────── */
+
+.sheet-wrap {position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+
+.sheet-backdrop {position:fixed;inset:0;border:0;padding:0;background:rgb(var(--fg) / .35);cursor:default}
+
+.sheet {position:relative;width:100%;max-width:26rem;max-height:80vh;overflow-y:auto;background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line));border-bottom:0;border-radius:16px 16px 0 0;padding:16px 20px 28px;box-shadow:0 -8px 32px rgb(var(--fg) / .18)}
+
+.sheet-head {display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+.sheet-title {font-size:20px;line-height:26px;font-weight:700;margin:0 auto}
+
+.sheet-label {display:block;font-family:system-ui,sans-serif;font-size:14px;line-height:20px;font-weight:500;margin:0 0 6px}
+
+.sheet-input {width:100%;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--ground));color:rgb(var(--fg));padding:10px 12px;font-family:system-ui,sans-serif;font-size:16px;line-height:22px}
+
+.sheet-input:focus {outline:none;border-color:rgb(var(--focus));box-shadow:0 0 0 2px rgb(var(--focus) / .35)}
+
+.sheet-error {font-family:system-ui,sans-serif;font-size:14px;line-height:20px;color:rgb(var(--danger));margin:10px 0 0}
+
+.sheet .list {margin:0}
+
+.state-title {font-family:ui-serif,Georgia,serif;font-size:17px;line-height:24px;font-weight:600;margin:0}
+
+.state-sub {font-family:system-ui,sans-serif;font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;max-width:24em}
+
+.state-note {padding:8px 16px}
+
+.btn-small {min-height:44px;padding:0 12px;font-size:14px}
+
+.feed-name {font-family:system-ui,sans-serif;font-size:15px;line-height:20px;font-weight:600;color:rgb(var(--feed))}
+
+.feed-err {display:block;font-family:system-ui,sans-serif;font-size:13px;line-height:18px;color:rgb(var(--danger));margin-top:2px}
+
+.row-spacer {flex:1}
+
+.demo-line {color:rgb(var(--feed))}
 
 .h {font-size:28px;line-height:36px;font-weight:700;margin:16px 0 8px;letter-spacing:-.01em}
 

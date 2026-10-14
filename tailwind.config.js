@@ -55,6 +55,19 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        feed: token('feed'), // feed names
+        unread: token('unread'), // the unread dot
+        'mast-1': token('mast-1'), // masthead chip inks
+        'mast-2': token('mast-2'),
+        'mast-3': token('mast-3'),
+        'mast-4': token('mast-4'),
+        'mast-5': token('mast-5'),
+        'on-mast': token('on-mast'), // the letter on a masthead chip
+      },
+      // Reading is serif, meta is sans (the spec's screens).
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'Iowan Old Style', 'serif'],
+        sans: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

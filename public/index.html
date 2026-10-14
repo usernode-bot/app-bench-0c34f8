@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -109,61 +109,413 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <!-- Screen 1 as the spec drew it, wired to the data. Empty state, error
+       state and rows are rendered by the script below; the drawn sample
+       rows are gone before the first request goes out. -->
+  <div data-spec-screen="1" id="view-list">
     <div class="app">
     <div class="top">
-    <div><h1 class="title">Unread</h1><p class="sub sans">23 new from 7 feeds</p></div>
+    <div>
+      <h1 class="title">Unread</h1>
+      <p class="sub sans" id="count-line"></p>
+      <p class="sub sans demo-line" id="demo-line" hidden>Staging demo: made-up feeds and posts</p>
+    </div>
     <div class="acts sans">
-    <button class="btn-secondary" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
+    <button class="btn-secondary" id="btn-feeds" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary" id="btn-add-top"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </div>
     </div>
     <div class="section-label sans">Newest first</div>
-    <ul class="list">
-    <li class="list-row"><span class="fav m1">A</span><div class="body"><div class="meta"><b>A List Apart</b><span>12 min ago</span><span class="dot"></span></div><p class="ph">Designing for the slow connection</p><p class="ex">Most of the web is built on fast wifi. Here is what changes when the page has to load on a train.</p></div></li>
-    <li class="list-row"><span class="fav m2">S</span><div class="body"><div class="meta"><b>Serious Eats</b><span>1 hr ago</span><span class="dot"></span></div><p class="ph">The best way to cook rice on the stove</p><p class="ex">A tested method with exact water ratios for short, medium and long grain.</p></div></li>
-    <li class="list-row read"><span class="fav m3">K</span><div class="body"><div class="meta"><b>Kottke</b><span>2 hr ago</span></div><p class="ph">A map of every lighthouse still staffed</p><p class="ex">Fewer than thirty remain, and one keeper explains what a night shift looks like.</p></div></li>
-    <li class="list-row"><span class="fav m4">D</span><div class="body"><div class="meta"><b>Daring Fireball</b><span>4 hr ago</span><span class="dot"></span></div><p class="ph">Notes on the new keyboard shortcuts</p><p class="ex">A short list of the changes that actually matter for daily use.</p></div></li>
-    <li class="list-row"><span class="fav m1">A</span><div class="body"><div class="meta"><b>A List Apart</b><span>6 hr ago</span><span class="dot"></span></div><p class="ph">Writing CSS that ages well</p><p class="ex">Small habits that keep a stylesheet readable three years after you wrote it.</p></div></li>
-    <li class="list-row"><span class="fav m5">B</span><div class="body"><div class="meta"><b>Bon Appétit</b><span>Yesterday</span><span class="dot"></span></div><p class="ph">Twelve soups for the first cold week</p><p class="ex">Lentil, miso, white bean and more, all done in under an hour.</p></div></li>
-    <li class="list-row"><span class="fav m2">S</span><div class="body"><div class="meta"><b>Serious Eats</b><span>Yesterday</span><span class="dot"></span></div><p class="ph">Why your bread is dense, and how to fix it</p><p class="ex">Under-proofing is the usual cause. Look for these three signs before baking.</p></div></li>
-    <li class="list-row"><span class="fav m3">K</span><div class="body"><div class="meta"><b>Kottke</b><span>Tue</span><span class="dot"></span></div><p class="ph">The quiet return of the paper map</p><p class="ex">Sales of printed atlases are up for the third year running.</p></div></li>
-    </ul>
+    <ul class="list" id="post-list" hidden></ul>
+    <div class="state-note" id="list-state" hidden></div>
     <div class="end">Your feeds refresh each time you open this list.</div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="bar sans">
-      <button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button>
-      </div>
-      <div class="art">
-      <div class="src sans"><span class="fav">P</span><b>Pixel Lantern</b><span>Today, 9:41</span></div>
-      <h1 class="h">Designing for the slow connection</h1>
-      <p class="by sans">By Rae Fictional</p>
-      <div class="txt">
-      <p>Most of the web is built on fast wifi. Here is what changes when the page has to load on a train, in a lift, or at the far end of a field.</p>
-      <p>Start with the first screen a person sees. If it needs four requests before anything appears, they will see nothing for a long time. Send the words first, then the pictures.</p>
-      <p>Next, measure what you actually ship. A single hero image can outweigh every script on the page, and nobody misses it when it is gone.</p>
-      </div>
-      <p class="more sans">This is the preview the feed shares. The full article is on its site.</p>
-      <button class="btn-primary sans"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
-      </div>
-      </div>
+
+  <!-- Screen 2 as the spec drew it: the post preview. Filled from the tapped
+       row by the script below; hidden until then. -->
+  <div data-spec-screen="2" id="view-preview" hidden>
+    <div class="app">
+    <div class="bar sans">
+    <button class="btn-secondary" id="btn-back" aria-label="Back to Unread"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Unread</button>
     </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    <div class="art">
+    <div class="src sans"><span class="fav" id="prev-fav">P</span><b id="prev-feed"></b><span id="prev-date"></span></div>
+    <h1 class="h" id="prev-title"></h1>
+    <p class="by sans" id="prev-author" hidden></p>
+    <div class="txt" id="prev-body"></div>
+    <p class="more sans">This is the preview the feed shares. The full article is on its site.</p>
+    <a class="btn-primary sans" id="btn-open" target="_blank" rel="noopener" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a>
+    </div>
+    </div>
+  </div>
+
+  <!-- The Add feed sheet: a field, the one filled button, and the typed
+       value kept when an address fails. -->
+  <div class="sheet-wrap" id="sheet-add" hidden>
+    <button class="sheet-backdrop" data-close-sheet aria-label="Close"></button>
+    <div class="sheet sans" role="dialog" aria-modal="true" aria-label="Add feed">
+    <div class="sheet-head">
+    <button class="btn-secondary btn-small" data-close-sheet>Cancel</button>
+    <b class="sheet-title">Add feed</b>
+    <button class="btn-primary btn-small" id="btn-add-save">Add feed</button>
+    </div>
+    <label class="sheet-label" for="add-url">Feed address</label>
+    <input class="sheet-input" id="add-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+    <p class="sheet-error" id="add-error" hidden></p>
+    </div>
+  </div>
+
+  <!-- The Feeds sheet: every feed with its chip, its name and a Remove
+       button; a failing feed says so under its name. -->
+  <div class="sheet-wrap" id="sheet-feeds" hidden>
+    <button class="sheet-backdrop" data-close-sheet aria-label="Close"></button>
+    <div class="sheet sans" role="dialog" aria-modal="true" aria-label="Your feeds">
+    <div class="sheet-head">
+    <b class="sheet-title">Feeds</b>
+    <button class="btn-secondary btn-small" data-close-sheet>Close</button>
+    </div>
+    <ul class="list" id="feed-list"></ul>
+    <p class="state-sub" id="feeds-empty" hidden>You have no feeds yet. Add one and its new posts will show up in your list.</p>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+    // Staging demo pages ask with ?demo=1; every API call carries it so the
+    // list, the sheets and the reads all run against the same demo data.
+    var params = new URLSearchParams(location.search);
+    var demo = params.get('demo') === '1';
+    // The page URL carries the viewer's token in Homeroom; forward it on
+    // every call (the edge injects it too, this keeps it working anywhere).
+    var token = params.get('token') || '';
+
+    function url(path) {
+      return demo ? path + (path.indexOf('?') < 0 ? '?' : '&') + 'demo=1' : path;
+    }
+    function api(path, opts) {
+      opts = opts || {};
+      opts.headers = opts.headers || {};
+      if (token) opts.headers['x-usernode-token'] = token;
+      return fetch(url(path), opts).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          return { ok: res.ok, status: res.status, body: body };
+        });
+      });
+    }
+
+    var $ = function (id) { return document.getElementById(id); };
+    var viewList = $('view-list'), viewPreview = $('view-preview');
+    var postList = $('post-list'), listState = $('list-state'), countLine = $('count-line');
+    var btnAddTop = $('btn-add-top'), btnFeeds = $('btn-feeds');
+    var sheetAdd = $('sheet-add'), sheetFeeds = $('sheet-feeds');
+    var addUrl = $('add-url'), addError = $('add-error'), btnAddSave = $('btn-add-save');
+    var feedList = $('feed-list'), feedsEmpty = $('feeds-empty');
+
+    var state = { feeds: 0, posts: [], rows: {}, emptyAddButton: null, current: null };
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    // A chip's ink is stable per feed: hash of the feed's URL, mod 5.
+    function mastClass(urlStr) {
+      var h = 0, s = String(urlStr || '');
+      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return 'm' + ((h % 5) + 1);
+    }
+    function initial(name) {
+      var s = String(name || '').trim();
+      return s ? s[0].toUpperCase() : '?';
+    }
+    function ago(iso) {
+      var d = iso ? new Date(iso) : null;
+      if (!d || isNaN(d.getTime())) return '';
+      var s = Math.max(0, (Date.now() - d.getTime()) / 1000);
+      if (s < 60) return 'just now';
+      var m = Math.floor(s / 60);
+      if (m < 60) return m + ' min ago';
+      var h = Math.floor(m / 60);
+      if (h < 24) return h + ' hr ago';
+      if (h < 48) return 'Yesterday';
+      if (h < 168) return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    function previewDate(iso) {
+      var d = iso ? new Date(iso) : null;
+      if (!d || isNaN(d.getTime())) return '';
+      var time = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      var now = new Date();
+      if (d.toDateString() === now.toDateString()) return 'Today, ' + time;
+      var yest = new Date(now.getTime() - 86400000);
+      if (d.toDateString() === yest.toDateString()) return 'Yesterday, ' + time;
+      return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) + ', ' + time;
+    }
+
+    // ── List rendering ─────────────────────────────────────────────────
+    var ROW = '<span class="fav"></span><div class="body"><div class="meta"><b></b><span></span><span class="dot"></span></div><p class="ph"></p><p class="ex"></p></div>';
+    var SKELETON_ROW = '<li class="list-row"><span class="fav skeleton"></span><div class="body"><div class="meta"><span class="skeleton block h-3.5 w-28"></span></div><p class="ph"><span class="skeleton block h-4 w-3/4"></span></p><p class="ex"><span class="skeleton block h-3 w-full"></span><span class="skeleton mt-1 block h-3 w-2/3"></span></p></div></li>';
+
+    function renderSkeleton() {
+      var html = '';
+      for (var i = 0; i < 8; i++) html += SKELETON_ROW;
+      postList.innerHTML = html;
+      postList.hidden = false;
+      listState.hidden = true;
+    }
+
+    function rowEl(p) {
+      var li = document.createElement('li');
+      li.className = 'list-row';
+      li.innerHTML = ROW;
+      var fav = li.querySelector('.fav');
+      fav.className = 'fav ' + mastClass(p.feed_url);
+      fav.textContent = initial(p.feed_title);
+      li.querySelector('.meta b').textContent = p.feed_title;
+      li.querySelector('.meta span').textContent = ago(p.published_at);
+      li.querySelector('.ph').textContent = p.title;
+      li.querySelector('.ex').textContent = p.excerpt || '';
+      li.tabIndex = 0;
+      li.setAttribute('role', 'button');
+      li.setAttribute('aria-label', p.title);
+      function open() { openPost(p, li); }
+      li.addEventListener('click', open);
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+      return li;
+    }
+
+    function render() {
+      var n = state.posts.length;
+      countLine.textContent = n + ' new from ' + state.feeds + (state.feeds === 1 ? ' feed' : ' feeds');
+      // The header's Add feed goes outlined while there are no feeds.
+      btnAddTop.className = state.feeds === 0 ? 'btn-secondary' : 'btn-primary';
+      state.rows = {};
+      if (state.feeds === 0) {
+        postList.hidden = true;
+        listState.innerHTML = '';
+        var empty = document.createElement('div');
+        empty.className = 'state-empty';
+        empty.innerHTML = '<p class="state-title">Add your first feed</p><p class="state-sub">Add an RSS or Atom feed and its new posts will show up here.</p>';
+        var btn = document.createElement('button');
+        btn.className = 'btn-primary';
+        btn.id = 'btn-add-empty';
+        btn.textContent = 'Add feed';
+        btn.addEventListener('click', openAddSheet);
+        empty.appendChild(btn);
+        state.emptyAddButton = btn;
+        listState.appendChild(empty);
+        listState.hidden = false;
+      } else if (n === 0) {
+        postList.hidden = true;
+        listState.innerHTML = '';
+        var caught = document.createElement('div');
+        caught.className = 'state-empty';
+        caught.innerHTML = '<p class="state-title">You’re all caught up</p><p class="state-sub">New posts will show up here when your feeds publish something.</p>';
+        listState.appendChild(caught);
+        state.emptyAddButton = null;
+        listState.hidden = false;
+      } else {
+        listState.hidden = true;
+        postList.innerHTML = '';
+        var frag = document.createDocumentFragment();
+        state.posts.forEach(function (p) {
+          var li = rowEl(p);
+          state.rows[p.id] = li;
+          frag.appendChild(li);
+        });
+        postList.appendChild(frag);
+        postList.hidden = false;
+        state.emptyAddButton = null;
+      }
+    }
+
+    function renderError() {
+      postList.hidden = true;
+      listState.innerHTML = '';
+      var err = document.createElement('div');
+      err.className = 'state-error';
+      err.innerHTML = '<p class="state-title">Couldn’t load your posts</p><p class="state-sub">Your feeds are still saved. This error is about loading the list, not about your feeds.</p>';
+      var retry = document.createElement('button');
+      retry.className = 'btn-secondary';
+      retry.textContent = 'Retry';
+      retry.addEventListener('click', function () { load(); });
+      err.appendChild(retry);
+      listState.appendChild(err);
+      listState.hidden = false;
+    }
+
+    function load() {
+      renderSkeleton();
+      return api('/api/posts').then(function (r) {
+        if (!r.ok) { renderError(); return; }
+        state.feeds = r.body.feeds || 0;
+        state.posts = r.body.posts || [];
+        $('demo-line').hidden = !r.body.demo;
+        render();
+      }, function () { renderError(); });
+    }
+
+    // ── Preview ────────────────────────────────────────────────────────
+    function openPost(p, li) {
+      state.current = p;
+      var fav = $('prev-fav');
+      fav.className = 'fav ' + mastClass(p.feed_url);
+      fav.textContent = initial(p.feed_title);
+      $('prev-feed').textContent = p.feed_title;
+      $('prev-date').textContent = previewDate(p.published_at);
+      $('prev-title').textContent = p.title;
+      var by = $('prev-author');
+      if (p.author) { by.textContent = 'By ' + p.author; by.hidden = false; } else { by.hidden = true; }
+      var body = $('prev-body');
+      body.innerHTML = '';
+      String(p.body_text || '').split(/\n\n+/).forEach(function (par) {
+        if (!par.trim()) return;
+        var el = document.createElement('p');
+        el.textContent = par;
+        body.appendChild(el);
+      });
+      var open = $('btn-open');
+      if (p.link) { open.href = p.link; open.hidden = false; } else { open.hidden = true; }
+      // Tapping a post marks it read; on the way back its row is dimmed
+      // without its dot, and it is gone the next time the list opens.
+      markRead(p, li);
+      viewPreview.hidden = false;
+      viewList.hidden = true;
+      window.scrollTo(0, 0);
+    }
+
+    function markRead(p, li) {
+      if (p.read) return;
+      p.read = true;
+      if (li) {
+        li.classList.add('read');
+        var dot = li.querySelector('.dot');
+        if (dot) dot.remove();
+      }
+      // The header count drops with the dot, so it never claims an unread
+      // post the list no longer shows as unread.
+      var n = Math.max(0, state.posts.filter(function (x) { return !x.read; }).length);
+      countLine.textContent = n + ' new from ' + state.feeds + (state.feeds === 1 ? ' feed' : ' feeds');
+      api('/api/posts/' + p.id + '/read', { method: 'POST' }).catch(function () {});
+    }
+
+    $('btn-back').addEventListener('click', function () {
+      viewList.hidden = false;
+      viewPreview.hidden = true;
+    });
+
+    // ── Sheets ─────────────────────────────────────────────────────────
+    function openAddSheet() {
+      sheetAdd.hidden = false;
+      addError.hidden = true;
+      // The empty state's Add feed hides while its sheet is open.
+      if (state.emptyAddButton) state.emptyAddButton.hidden = true;
+      addUrl.focus();
+    }
+    function openFeedsSheet() {
+      sheetFeeds.hidden = false;
+      feedList.innerHTML = '';
+      feedsEmpty.hidden = true;
+      loadFeeds();
+    }
+    function closeSheets() {
+      sheetAdd.hidden = true;
+      sheetFeeds.hidden = true;
+      if (state.emptyAddButton) state.emptyAddButton.hidden = false;
+    }
+    btnAddTop.addEventListener('click', openAddSheet);
+    btnFeeds.addEventListener('click', openFeedsSheet);
+    document.querySelectorAll('[data-close-sheet]').forEach(function (el) {
+      el.addEventListener('click', closeSheets);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeSheets();
+    });
+
+    function showAddError(msg) {
+      addError.textContent = msg;
+      addError.hidden = false;
+    }
+
+    btnAddSave.addEventListener('click', function () {
+      var raw = addUrl.value.trim();
+      if (!raw) { showAddError('Add a feed address first.'); return; }
+      btnAddSave.disabled = true;
+      var label = btnAddSave.textContent;
+      btnAddSave.textContent = 'Adding…';
+      api('/api/feeds', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ url: raw }),
+      }).then(function (r) {
+        if (r.ok) {
+          addUrl.value = '';
+          addError.hidden = true;
+          closeSheets();
+          load();
+        } else if (r.status === 422) {
+          showAddError('That address isn’t a feed.');
+        } else if (r.status === 502) {
+          showAddError('Couldn’t reach that address.');
+        } else if (r.status === 409) {
+          showAddError('You already added that feed.');
+        } else if (r.status === 401) {
+          showAddError('Make an account to add feeds.');
+        } else {
+          showAddError('Something went wrong. Try again.');
+        }
+      }, function () {
+        showAddError('Couldn’t reach that address.');
+      }).then(function () {
+        btnAddSave.disabled = false;
+        btnAddSave.textContent = label;
+      });
+    });
+
+    function loadFeeds() {
+      // Demo feeds live in the demo world, so the sheet asks in it too.
+      return api('/api/feeds' + (demo ? '?demo=1' : '')).then(function (r) {
+        if (!r.ok || sheetFeeds.hidden) return;
+        renderFeeds(r.body.feeds || []);
+      }, function () {
+        if (!sheetFeeds.hidden) renderFeeds([]);
+      });
+    }
+
+    function renderFeeds(feeds) {
+      feedList.innerHTML = '';
+      feedsEmpty.hidden = feeds.length > 0;
+      feeds.forEach(function (f) {
+        var li = document.createElement('li');
+        li.className = 'list-row';
+        li.innerHTML = '<span class="fav"></span><div class="body"><span class="feed-name"></span><span class="feed-err" hidden>Couldn’t update just now</span></div>';
+        var fav = li.querySelector('.fav');
+        fav.className = 'fav ' + mastClass(f.url);
+        fav.textContent = initial(f.title);
+        li.querySelector('.feed-name').textContent = f.title;
+        if (f.last_error) li.querySelector('.feed-err').hidden = false;
+        var spacer = document.createElement('span');
+        spacer.className = 'row-spacer';
+        li.appendChild(spacer);
+        var rm = document.createElement('button');
+        rm.className = 'btn-secondary btn-small';
+        rm.textContent = 'Remove';
+        rm.setAttribute('aria-label', 'Remove ' + f.title);
+        rm.addEventListener('click', function () {
+          rm.disabled = true;
+          api('/api/feeds/' + f.id, { method: 'DELETE' }).then(function () {
+            loadFeeds();
+            load();
+          }, function () { rm.disabled = false; });
+        });
+        li.appendChild(rm);
+        feedList.appendChild(li);
+      });
+    }
+
+    // ── Start ──────────────────────────────────────────────────────────
+    load();
+  })();
+  </script>
 </body>
 </html>

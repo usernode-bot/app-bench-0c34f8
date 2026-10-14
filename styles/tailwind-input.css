@@ -50,17 +50,25 @@
     --on-mast: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 24 22 20;
+    --surface: 33 30 28;
+    --raised: 45 42 39;
+    --fg: 245 243 240;
+    --muted: 176 170 163;
+    --line: 64 60 56;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --feed: 251 191 120;
+    --unread: 45 212 191;
+    --mast-1: 180 83 9;
+    --mast-2: 15 118 110;
+    --mast-3: 29 78 216;
+    --mast-4: 126 34 206;
+    --mast-5: 190 18 60;
+    --on-mast: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

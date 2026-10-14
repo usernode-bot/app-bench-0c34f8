@@ -56,34 +56,18 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## Starter template (replaced)
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter-template hero screen was replaced by the real app in the
+first version, as that section instructed. Platform infrastructure in
+`public/index.html` that must never be dropped when editing it: the
+`usernode-dev-console@1` forwarder `<script>`, the bridge `<script>`,
+and the theme `<script>` right after the bridge tag (it sets a `dark`
+class on `<html>` from the viewer's Homeroom theme). Everything ships in
+both looks — the colour tokens carry them — and there is no theme
+picker: the viewer's Homeroom setting is the control. "The platform's
+light/dark theme inside the app frame" in the platform conventions has
+the details.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +79,40 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-like RSS reader: each member adds the RSS/Atom feeds they
+follow, and reads everything from all of them in one scrolling unread
+list, newest first. Tapping a post opens a plain-text preview with a
+link to the original article, and marks the post read. Feeds and
+reading state are private to each member (all tables are
+`staging:private`). Posts refresh when the list opens; there is no
+background refresh, folders, or mark-all-read in the first version.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
+This app's look. The first real version filled in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm paper neutrals (light ground `250 249 246`, dark
+  `24 22 20`) with a deep teal accent — `15 118 110` on white text in
+  light, `45 212 191` with `4 47 46` text in dark. Feed names are amber
+  ink (`146 64 14` light / `251 191 120` dark); the unread dot is the
+  accent teal. All values live in `styles/tailwind-input.css`.
+- **Signature element:** the masthead chip — a feed's first letter in
+  white serif on one of five fixed ink colours (amber, teal, blue,
+  violet, rose; same in both looks), picked by hashing the feed's URL
+  mod 5, so each feed keeps its colour everywhere it appears.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (change their sizes in `tailwind.config.js` if you must, not their
+  number). Reading text is serif (`ui-serif`, Georgia); the meta lines —
+  feed name, time, excerpts, buttons in sheets — are sans.
+- One filled button per view: the header's Add feed (outlined while the
+  list is empty, because the empty state carries the filled one), and
+  Open full article in the preview.
+
+Marked intentionally different from the generic kit: the drawn spec's
+screens are reproduced (screen 1 as the main view, screen 2 as the
+preview), with their own `390px` `.app` column rather than
+`page-column`, so rows keep the drawn rhythm at phone width.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +142,25 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All four tables (`feeds`, `posts`, `post_reads`, `demo_removed_feeds`)
+  are marked `staging:private`.
+- Plain text only: feed content is stored tag-stripped and
+  entity-decoded; links must be http(s).
+- The only dependency beyond the starter set is `fast-xml-parser`.
+- On staging, `?demo=1` seeds made-up feeds/posts (urls under
+  `https://staging-demo.invalid/`); a removed demo feed is tombstoned in
+  `demo_removed_feeds` so it stays removed.
+- Outbound feed fetches all go through the SSRF-guarded `safeFetch`
+  (http/https, ports 80/443 only, private/loopback IPs refused, 8 s
+  timeout, 2 MB cap). Never fetch a feed URL another way.
+- The two page checks in `dapp.json` set `allowConsoleErrors: true`. The
+  platform's bridge script probes the platform's custom-domain endpoint
+  when the page's own host could be one (two or more dots), and the
+  checks load the app via `127.0.0.1` — three dots, so the probe fires
+  and the platform answers 404 ("not a custom domain"). The bridge
+  handles that answer gracefully, but Chromium still logs it as a
+  console error, which fails any check without the flag. The app itself
+  loads with zero console errors (verified against a fresh `localhost`
+  link, which the bridge never probes). If a check ever fails with a
+  console error again, reproduce with a `localhost` link first to see
+  whether the app or the platform bridge emitted it.

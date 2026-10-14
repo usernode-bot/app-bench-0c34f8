@@ -1,7 +1,18 @@
 {
-  "icon": {
-    "emoji": "📰"
-  },
+  "icon": { "emoji": "📰" },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Empty list", "path": "/", "expectText": "Add your first feed", "allowConsoleErrors": true },
+    {
+      "id": "demo-list",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "expectSelector": ".list-row",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"],
+      "allowConsoleErrors": true
+    },
+    { "name": "Health", "path": "/health", "expectText": "ok" }
+  ]
 }
