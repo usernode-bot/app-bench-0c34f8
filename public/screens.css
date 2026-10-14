@@ -84,6 +84,12 @@ main {max-width:448px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dir
 
 .post-row .prev {margin:0 16px 12px 50px}
 
-.add-error,.feed-fail {padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+.add-error {padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--danger))}
 
-.add-error {color:rgb(var(--danger))}
+/* A feed whose check just failed: a notice above the list, not a caption —
+   one block on the raised surface, the feed symbol in grey before the words. */
+.feed-fail {display:flex;gap:8px;align-items:flex-start;padding:12px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--raised));font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.feed-fail .sig {width:16px;height:16px;margin-top:2px;color:rgb(var(--muted))}
+
+.feed-fail>span {flex:1;min-width:0}

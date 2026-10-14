@@ -65,10 +65,11 @@ async function load(content) {
   following.textContent = data.feeds.length ? `Following ${plural(data.feeds.length, 'feed')}` : '';
 
   // A feed that could not be read just now: its line sits above the list and
-  // its earlier posts are still here.
+  // its earlier posts are still here. It is a notice, not a caption: a block
+  // on the raised surface, with the feed symbol in grey before the words.
   for (const name of data.failed) {
-    content.append(h('p', { class: 'feed-fail' },
-      `${name} could not be read just now. Its earlier posts are still here.`));
+    content.append(h('p', { class: 'feed-fail' }, failSig(),
+      h('span', null, `${name} could not be read just now. Its earlier posts are still here.`)));
   }
 
   if (!data.feeds.length) return false; // the drawn empty state
@@ -96,12 +97,23 @@ async function load(content) {
   for (const day of days) {
     const g = dayGroup(day.label);
     g.list.append(...day.posts.map((post) => row(post, at)));
-    content.append(g.heading, g.list);
+    // Each heading and its card in one section, as the spec drew it: the
+    // 8 px heading margin stays inside, the 20 px gap sits between groups.
+    content.append(h('section', null, g.heading, g.list));
   }
   return true;
 }
 
-states.run(load);
+// The feeds row shows a placeholder while the first load runs and no place
+// in the error state ('Manage feeds' alone would read as half-rendered).
+states.run(async (content) => {
+  try {
+    return await load(content);
+  } catch (err) {
+    feedsLine.hidden = true;
+    throw err;
+  }
+});
 
 // ── A post row ─────────────────────────────────────────────────────────────
 
@@ -174,6 +186,17 @@ addForm.addEventListener('submit', async (e) => {
 function showAddError(message) {
   addError.textContent = message;
   addError.hidden = false;
+}
+
+// The feed symbol, small and grey, before the failure notice's words.
+function failSig() {
+  return h('svg', {
+    class: 'sig', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+    'stroke-width': '2', 'stroke-linecap': 'round', 'aria-hidden': 'true',
+  },
+  h('circle', { cx: '6', cy: '18', r: '2', fill: 'currentColor' }),
+  h('path', { d: 'M4 11a9 9 0 0 1 9 9' }),
+  h('path', { d: 'M4 4a16 16 0 0 1 16 16' }));
 }
 
 // ── Manage feeds ───────────────────────────────────────────────────────────
