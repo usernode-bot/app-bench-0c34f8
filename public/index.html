@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,100 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🗳️</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Club Votes</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="app">
+     <header class="top">
+      <h1>Club Votes</h1>
+      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button>
+     </header>
+     <section>
+      <h2 class="section-label">Open decisions</h2>
+      <div class="stack">
+       <button class="card">
+        <p class="q">Where should we meet in November?</p>
+        <p class="by">Posted by you, 2 days ago</p>
+        <div class="tally"><i class="s1" style="width:55%"></i><i class="s2" style="width:27%"></i><i class="s3" style="width:18%"></i></div>
+        <p class="lead"><b>Library back room leads</b><span>11 votes</span></p>
+        <p class="foot"><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>You voted</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>3 comments</span></p>
+       </button>
+       <button class="card">
+        <p class="q">Spring outing: hike, museum or picnic?</p>
+        <p class="by">Posted by Chioma, yesterday</p>
+        <div class="tally"><i class="s1" style="width:40%"></i><i class="s2" style="width:40%"></i><i class="s3" style="width:20%"></i></div>
+        <p class="lead"><b>Hike and Museum are tied</b><span>5 votes</span></p>
+        <p class="foot"><span>Not voted yet</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>4 comments</span></p>
+       </button>
+       <button class="card">
+        <p class="q">Move meetings to Thursday evenings?</p>
+        <p class="by">Posted by Dev, 3 hours ago</p>
+        <div class="tally"><i class="s1" style="width:67%"></i><i class="s2" style="width:33%"></i></div>
+        <p class="lead"><b>Yes leads</b><span>3 votes</span></p>
+        <p class="foot"><span class="mine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>You voted</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>No comments</span></p>
+       </button>
+      </div>
+     </section>
+     <section>
+      <h2 class="section-label">Decided</h2>
+      <div class="stack">
+       <button class="card done">
+        <p class="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg>Decided: Bake sale</p>
+        <p class="q">What should our next fundraiser be?</p>
+        <p class="by">Closed by Elif, last week</p>
+        <div class="tally"><i class="s1" style="width:64%"></i><i class="s2" style="width:36%"></i></div>
+        <p class="foot"><span>14 votes</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>9 comments</span></p>
+       </button>
+      </div>
+     </section>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="app">
+      <article class="kit-detail">
+       <header class="kit-detail-head">
+        <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button>
+        <h2 class="kit-detail-title">Where should we meet in November?</h2>
+        <p class="meta">Posted by you, 2 days ago</p>
+        <p class="kit-detail-body">The café is closing for renovations. Pick the place that works for most of us, I will book it once we decide.</p>
+       </header>
+       <section>
+        <h3 class="section-label">Your vote</h3>
+        <div class="kit-votes">
+         <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:55%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><span class="kit-vote-label">Library back room</span><span class="kit-vote-count">6</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:27%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Community hall</span><span class="kit-vote-count">3</span></button>
+         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:18%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Someone's garden</span><span class="kit-vote-count">2</span></button>
+        </div>
+        <p class="kit-vote-summary">11 votes, Library back room leads</p>
+        <div class="owner">
+         <button class="btn-secondary">Close decision</button>
+         <button class="btn-secondary">Delete</button>
+        </div>
+       </section>
+       <section>
+        <h3 class="section-label">Comments</h3>
+        <ul class="kit-group">
+         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ana</span><span>yesterday</span><button class="rep">Report</button></p><p>The library room has the projector, which helps for the planning night.</p></li>
+         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ben</span><span>yesterday</span><button class="rep">Report</button></p><p>Hall is bigger if more people come back after the summer.</p></li>
+         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">You</span><span>5 hours ago</span><button class="rep">Delete</button></p><p>I can ask the library about Tuesday slots too.</p></li>
+        </ul>
+        <form class="kit-composer">
+         <label class="kit-label">Add a comment</label>
+         <div class="field">e.g. The hall has better parking</div>
+         <div class="kit-composer-actions"><button class="btn-secondary">Post comment</button></div>
+        </form>
+       </section>
+      </article>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

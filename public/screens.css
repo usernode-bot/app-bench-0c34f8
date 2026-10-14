@@ -1,0 +1,136 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+
+.app {
+  padding: 16px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.top {display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+.top h1 {font:700 28px/36px ui-serif,Charter,Georgia,serif}
+
+.btn-primary {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px/1 system-ui,sans-serif}
+
+.btn-primary svg {width:20px;height:20px}
+
+.section-label {margin-bottom:8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.stack {display:flex;flex-direction:column;gap:12px}
+
+.card {display:block;width:100%;text-align:left;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px}
+
+.q {font:600 20px/28px ui-serif,Charter,Georgia,serif;margin-bottom:4px}
+
+.by {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.tally {display:flex;gap:2px;height:12px;margin:14px 0 8px;border-radius:6px;overflow:hidden;background:rgb(var(--raised))}
+
+.tally i {display:block;height:100%}
+
+.s1 {background:rgb(var(--accent))}
+
+.s2 {background:rgb(var(--accent)/.5)}
+
+.s3 {background:rgb(var(--accent)/.25)}
+
+.lead {display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;line-height:20px}
+
+.lead b {font-weight:600}
+
+.lead span {color:rgb(var(--muted));white-space:nowrap}
+
+.foot {display:flex;align-items:center;gap:16px;margin-top:10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.foot svg {width:18px;height:18px;vertical-align:-4px;margin-right:4px}
+
+.mine {color:rgb(var(--accent));font-weight:500}
+
+.done .tally .s1 {background:rgb(var(--fg)/.75)}
+
+.done .tally .s2 {background:rgb(var(--fg)/.3)}
+
+.stamp {display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgb(var(--raised));font-size:14px;line-height:20px;font-weight:500;margin-bottom:8px}
+
+.stamp svg {width:16px;height:16px}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  padding: 16px 16px 32px;
+}
+
+.kit-detail {display:flex;flex-direction:column;gap:24px}
+
+.kit-detail-head {display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font:500 16px/1 system-ui,sans-serif}
+
+.btn-secondary svg {width:20px;height:20px}
+
+.kit-detail-title {font:700 28px/36px ui-serif,Charter,Georgia,serif}
+
+.meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.kit-detail-body {font-size:16px}
+
+.kit-votes {display:flex;flex-direction:column;gap:8px}
+
+.kit-vote {position:relative;isolation:isolate;display:flex;align-items:center;gap:12px;width:100%;min-height:44px;overflow:hidden;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;text-align:left;font:16px/1.5 system-ui,sans-serif;color:rgb(var(--fg))}
+
+.kit-vote-fill {position:absolute;top:0;bottom:0;left:0;z-index:-1;background:rgb(var(--raised))}
+
+.kit-vote-mark {display:flex;width:24px;height:24px;flex-shrink:0;align-items:center;justify-content:center;border-radius:999px;border:2px solid rgb(var(--line));background:rgb(var(--surface));color:transparent}
+
+.kit-vote-mark svg {width:14px;height:14px}
+
+.kit-vote-label {flex:1}
+
+.kit-vote-count {font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.kit-vote[aria-pressed="true"] {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));font-weight:500}
+
+.kit-vote[aria-pressed="true"] .kit-vote-fill {background:rgb(var(--accent)/.15)}
+
+.kit-vote[aria-pressed="true"] .kit-vote-mark {border-color:rgb(var(--accent));background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.kit-vote[aria-pressed="true"] .kit-vote-count {color:rgb(var(--fg))}
+
+.kit-vote-summary {margin-top:8px;padding:0 4px;font-size:14px;color:rgb(var(--muted))}
+
+.owner {display:flex;gap:8px;margin-top:12px}
+
+.kit-group {list-style:none;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.kit-comment-meta {display:flex;gap:8px;align-items:baseline;font-size:14px;color:rgb(var(--muted))}
+
+.kit-comment-author {font-weight:500;color:rgb(var(--fg))}
+
+.rep {margin-left:auto;min-height:44px;margin-top:-12px;margin-bottom:-12px;padding:0 4px;border:0;background:none;color:rgb(var(--muted));font:14px system-ui,sans-serif;text-decoration:underline}
+
+.kit-composer {display:flex;flex-direction:column;gap:8px;margin-top:12px}
+
+.kit-label {font-size:14px;font-weight:500;color:rgb(var(--muted));padding:0 4px}
+
+.field {display:block;width:100%;min-height:72px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font:16px system-ui,sans-serif;color:rgb(var(--muted)/.6)}
+
+.kit-composer-actions {display:flex;justify-content:flex-end}
