@@ -18,6 +18,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 720px; /* a reading column: centred on wide screens, the 16 px side padding keeps the gutters below it */
+  margin: 0 auto;
   padding: 16px 16px 32px;
 }
 
@@ -43,6 +45,11 @@ body {
 
 .section-label {font:500 14px/20px system-ui;color:rgb(var(--muted));padding:0 4px;margin-top:4px}
 
+/* The count line belongs to the list below it: 8 px to the list, while the
+   blocks around stay 16 px apart (the .wrap gap). */
+.list-block {display:flex;flex-direction:column;gap:8px}
+.list-block .section-label {margin:0}
+
 .list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;list-style:none;padding:0}
 
 .list-row {display:flex;gap:12px;padding:14px 16px;align-items:flex-start}
@@ -63,7 +70,7 @@ body {
 
 .snip {font-size:14px;line-height:20px;color:rgb(var(--muted));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-.thumb {width:64px;height:64px;border-radius:8px;flex:none;background:rgb(var(--raised));display:flex;align-items:center;justify-content:center;color:rgb(var(--muted))}
+.thumb {width:64px;height:64px;border-radius:8px;flex:none;background:rgb(var(--raised));border:1px solid rgb(var(--line));display:flex;align-items:center;justify-content:center;color:rgb(var(--muted))}
 
 .thumb svg {width:26px;height:26px}
 

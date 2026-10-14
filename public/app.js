@@ -6,7 +6,6 @@ import { createStates } from './kit/states.js';
 import { rowsFrom, fillIn } from './kit/fill.js';
 import { openSheet } from './kit/sheet.js';
 import { toast, native } from './kit/native.js';
-import { showDemoLabel } from './kit/demo.js';
 
 const $ = (sel, el = document) => el.querySelector(sel);
 
@@ -31,8 +30,28 @@ function swap(mutate, type) {
 // on every successful load they move into its content and fill with data.
 const postRow = rowsFrom(listEl);
 
+// The loading rows mirror the real ones — a dot, a feed line, a title bar, a
+// snippet bar, a thumbnail square in some rows, under a short bar for the
+// count line — so the layout does not jump when the posts arrive.
+function drawSkeleton(rows) {
+  return h('div', { class: 'list-block', 'aria-busy': 'true' },
+    h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+    h('p', { class: 'section-label', 'aria-hidden': 'true' }, h('span', { class: 'skeleton h-3 w-40 inline-block' })),
+    h('ul', { class: 'list', 'aria-hidden': 'true' },
+      Array.from({ length: rows }, (_, i) => h('li', { class: 'list-row' },
+        h('span', { class: 'dot skeleton' }),
+        h('div', { class: 'txt' },
+          h('span', { class: 'skeleton h-3 w-1/4' }),
+          h('span', { class: 'skeleton h-4 w-3/4' }),
+          h('span', { class: 'skeleton h-3 w-full' })),
+        i % 2 ? null : h('span', { class: 'skeleton h-16 w-16' })))));
+}
+
+const listBlock = h('div', { class: 'list-block' }, countEl, failedEl, listEl);
+
 const states = createStates(document.getElementById('main-states'), {
   rows: 5,
+  skeleton: drawSkeleton,
   empty: {
     title: 'Add your first feed',
     text: 'Paste the address of a site\'s RSS feed above. Its new posts show up here as they are published.',
@@ -51,10 +70,7 @@ async function load() {
   await states.run(async (content) => {
     data = await api('GET', '/api/posts');
     if (!data.feeds.length && !data.posts.length) return false; // the empty state
-    content.append(countEl, failedEl, listEl);
-    if (data.demo) {
-      showDemoLabel(content, 'Staging demo: these sample feeds and posts are made up. Open the app without the demo and they are gone.');
-    }
+    content.append(listBlock);
     render();
     return true;
   });
@@ -62,9 +78,9 @@ async function load() {
 
 function render() {
   if (!data) return;
-  countEl.textContent = data.posts.length
+  countEl.textContent = (data.demo ? 'Staging demo: ' : '') + (data.posts.length
     ? `${data.posts.length} unread from ${plural(data.feeds.length, 'feed')}`
-    : 'You are all caught up';
+    : 'You are all caught up');
   listEl.hidden = !data.posts.length;
   if (data.errors.length) {
     failedEl.textContent = `${plural(data.errors.length, 'feed')} could not be reached just now: ${data.errors.join(', ')}. Showing the posts saved earlier.`;
