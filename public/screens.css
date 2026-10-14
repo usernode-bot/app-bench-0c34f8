@@ -52,9 +52,9 @@
 
 .seg {display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--raised));padding:3px;gap:3px}
 
-.seg span {min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:15px;line-height:18px}
+.seg button {min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:15px;line-height:18px}
 
-.seg span i {font-style:normal;font-size:12px;color:rgb(var(--muted))}
+.seg button i {font-style:normal;font-size:12px;color:rgb(var(--muted))}
 
 .seg .on {background:rgb(var(--surface));font-weight:600;box-shadow:0 1px 2px rgb(var(--fg)/.12)}
 
@@ -97,3 +97,14 @@
 .steps .v {text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 
 .steps .v small {display:block;font-weight:400;font-size:14px;color:rgb(var(--muted))}
+
+/* Behaviour, not looks: the drawn slider and segments carry real controls
+   (an invisible range input over the track; buttons where the spans were),
+   so buttons get the text styles a <span> inherited for free. */
+.slider input[type="range"] {position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+
+.slider:focus-within .thumb {box-shadow:0 0 0 2px rgb(var(--focus))}
+
+.chip,.seg button,.stepper .btn-secondary {font:inherit;color:inherit;cursor:pointer}
+
+.seg button {border:0;background:none;padding:0;width:100%;appearance:none;-webkit-appearance:none}

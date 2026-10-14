@@ -95,22 +95,31 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a personal bread recipe calculator. The baker picks a bread
+(sourdough, bagels, sourdough bagels, rye, sandwich loaf), sets the
+hydration, the count, and the size of the loaves or bagels, and the app
+answers with the grams of each ingredient, the rise times, and the bake
+temperature and time. Every change redraws the formula card at once —
+there is no Calculate button. Nothing is stored and nothing is fetched:
+the whole app is one screen of pure maths.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: crust brown (light `rgb(140 74 24)`, dark a
+  warm gold `rgb(232 168 92)`); second: wheat gold, only as the flour
+  half of the formula bar's two-colour bar; neutrals: warm cream and
+  umber (the ground, surface, raised and line tokens).
+- **Signature element:** the formula card — a huge serif hydration
+  percentage, a two-colour flour-to-water bar under it, and the
+  ingredient list with hand-drawn-style line icons (flour sack, water
+  drop, starter jar, salt cellar, yeast, malt, sugar, butter).
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  a serif face for the display numbers and section headings, the system
+  sans for everything else.
+- Both looks required; no fixed look — the app is a calculator, not a scene.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +147,15 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All recipe maths lives in `public/bread.js` as a pure module with no
+  DOM in it; `public/app.js` only fills the drawn screen from its
+  `calc()`. Keep that split.
+- Baker's percentages: flour is 100%, and a 100%-hydration starter's
+  percentage is NOT part of the denominator's sum — it contributes half
+  its weight as flour and half as water (the starter row shows its own
+  percentage; the flour and water rows show their net percentages).
+- Nothing is stored and there are no API endpoints; the recipe is
+  computed in the browser only. Add a table or endpoint only when a
+  request actually needs one.
+- Grams are whole numbers shown with `fmtG` (rounded, `en-US` grouping);
+  no ounces, cups or Fahrenheit-only displays unless a request asks.

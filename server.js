@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fsp = require('fs/promises');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -154,7 +155,9 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Static assets only: no default index. The HTML shell is served by the
+// catch-all below (auth-gated, and stamped with the staging mark).
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -164,7 +167,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // without Sec-Fetch-*) gets the "open in Homeroom" landing page instead
 // of a redirect, so the platform shell is never loaded INSIDE its own
 // app iframe and stray visits still don't reveal the app.
-app.get('*', (req, res) => {
+app.get('*', async (req, res) => {
   if (!req.user && !req.guest) {
     // Deep-link pass-through (platform #743): carry the visited
     // path+query into the chromeless view so share links land on the
@@ -188,11 +191,27 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // The shell, stamped so the page knows staging: app.js uses it to gate the
+  // ?demo=1 line ("Staging demo: …") to staging previews.
+  const html = await fsp.readFile(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  res.type('html').send(
+    IS_STAGING ? html.replace('<html lang="en">', '<html lang="en" data-env="staging">') : html);
 });
 
+let server;
+
+// The platform stops the app with SIGTERM (and a Ctrl+C sends SIGINT):
+// stop accepting connections, let in-flight requests finish (3s), exit.
+function stop() {
+  if (!server) process.exit(0);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+process.on('SIGTERM', stop);
+process.on('SIGINT', stop);
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }

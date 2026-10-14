@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the flour half of the formula card's bar
+      },
+      // The two faces the screens use: serif for display numbers and
+      // headings, the system sans for everything else.
+      fontFamily: {
+        serif: ['ui-serif', '"Iowan Old Style"', 'Georgia', 'serif'],
+        sans: ['system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M18 62c0-22 14-36 32-36s32 14 32 36v12a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6z' fill='%238c4a18'/><path d='M36 34v42M50 30v46M64 34v42' stroke='%23f6f3ec' stroke-width='7' stroke-linecap='round' fill='none'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -125,45 +125,49 @@
     <p class="small muted" style="margin:2px 0 0">Pick a bread, set your dough, get the recipe.</p>
 
     <div class="grp"><p class="section-label">Bread</p>
-    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div></div>
+    <div class="chips"><button type="button" class="chip on" data-type="sourdough" aria-pressed="true">Sourdough</button><button type="button" class="chip" data-type="bagels" aria-pressed="false">Bagels</button><button type="button" class="chip" data-type="sourdough-bagels" aria-pressed="false">Sourdough bagels</button><button type="button" class="chip" data-type="rye" aria-pressed="false">Rye</button><button type="button" class="chip" data-type="sandwich-loaf" aria-pressed="false">Sandwich loaf</button></div></div>
 
-    <div class="grp"><div class="row"><p class="section-label" style="margin:0">Hydration</p><span class="small muted">Sourdough usually 70 to 80%</span></div>
-    <div class="row" style="gap:12px"><div class="slider" style="flex:1"><div class="track"></div><div class="fill"></div><div class="thumb"></div></div><b class="serif" style="font-size:20px;width:48px;text-align:right">75%</b></div></div>
+    <div class="grp"><div class="row"><p class="section-label" style="margin:0">Hydration</p><span class="small muted" id="hyd-note">Sourdough usually 70 to 80%</span></div>
+    <div class="row" style="gap:12px"><div class="slider" style="flex:1"><div class="track"></div><div class="fill"></div><div class="thumb"></div><input id="hydration" type="range" min="65" max="90" step="1" value="75" aria-label="Hydration"></div><b class="serif" id="hyd-val" style="font-size:20px;width:48px;text-align:right">75%</b></div></div>
 
-    <div class="grp row"><div><p class="section-label" style="margin:0">Loaves</p></div>
-    <div class="stepper"><span class="btn-secondary" aria-label="One fewer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><b>2</b><span class="btn-secondary" aria-label="One more"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></div>
+    <div class="grp row"><div><p class="section-label" style="margin:0" id="count-label">Loaves</p></div>
+    <div class="stepper"><button type="button" class="btn-secondary" id="count-minus" aria-label="One fewer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button><b id="count-val">2</b><button type="button" class="btn-secondary" id="count-plus" aria-label="One more"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
 
-    <div class="grp"><p class="section-label">Loaf size</p>
-    <div class="seg"><span>Small<i>500 g</i></span><span class="on">Medium<i>900 g</i></span><span>Large<i>1200 g</i></span><span>Custom<i>grams</i></span></div></div>
+    <div class="grp"><p class="section-label" id="size-label">Loaf size</p>
+    <div class="seg"><button type="button" data-size="small">Small<i>500 g</i></button><button type="button" data-size="medium" class="on" aria-pressed="true">Medium<i>900 g</i></button><button type="button" data-size="large">Large<i>1200 g</i></button><button type="button" data-size="custom">Custom<i>grams</i></button></div></div>
+    <div id="custom-grp" hidden style="margin-top:12px"><label class="section-label" for="custom-g" style="display:block">Custom weight, grams</label><input id="custom-g" class="field" type="number" inputmode="numeric" min="50" max="3000" step="1" placeholder="e.g. 800"></div>
 
-    <section class="card">
+    <section class="card" id="formula">
     <p class="small muted" style="margin:0">Your formula</p>
-    <div class="hyd"><span class="big serif">75%</span><span class="muted" style="padding-bottom:8px">hydration</span></div>
+    <div id="formula-body">
+    <div class="hyd"><span class="big serif" id="hyd-big">75%</span><span class="muted" style="padding-bottom:8px">hydration</span></div>
     <div class="bar"><span class="f"></span><span class="w"></span></div>
-    <p class="small muted" style="margin:0">1,017 g flour to 763 g water, counting what is in the starter</p>
-    <ul class="list">
+    <p class="small muted" style="margin:0" id="flour-water-note">1,017 g flour to 763 g water, counting what is in the starter</p>
+    <ul class="list" id="ingredients">
     <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 4h10l-1 3 3 4v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8l3-4z"/><path d="M8 7h8"/><path d="M12 12v5M10 15l2 2 2-2"/></svg><span class="n">Bread flour</span><span class="pct">90%</span><span class="g">915 g</span></li>
     <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg><span class="n">Water</span><span class="pct">65%</span><span class="g">661 g</span></li>
     <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 3h8v4H8z"/><path d="M7 7h10v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 12h10"/><circle cx="12" cy="16" r="1"/></svg><span class="n">Starter<br><span class="small muted">active, 100% hydration</span></span><span class="pct">20%</span><span class="g">203 g</span></li>
     <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 9h8l1 10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M9 9a3 3 0 0 1 6 0"/><circle cx="11" cy="5" r=".5"/><circle cx="13" cy="4" r=".5"/></svg><span class="n">Salt</span><span class="pct">2%</span><span class="g">20 g</span></li>
     </ul>
-    <div class="tot"><span>Dough for 2 loaves of 900 g</span><b style="color:rgb(var(--fg))">1,800 g</b></div>
+    <div class="tot"><span id="tot-label">Dough for 2 loaves of 900 g</span><b id="tot-g" style="color:rgb(var(--fg))">1,800 g</b></div>
 
     <div class="sub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg><h2 class="heading serif">Rise</h2></div>
-    <ol class="steps">
+    <ol class="steps" id="rise-steps">
     <li><span class="k">Bulk rise<br><span class="small muted">covered, at about 24°C / 75°F, with folds in the first 2 h</span></span><span class="v">4 to 6 h</span></li>
     <li><span class="k">Shape, then final proof<br><span class="small muted">in the fridge, or 1 to 2 h on the counter</span></span><span class="v">8 to 14 h</span></li>
     </ol>
 
     <div class="sub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/><path d="M12 11v6"/></svg><h2 class="heading serif">Bake</h2></div>
-    <ol class="steps">
+    <ol class="steps" id="bake-steps">
     <li><span class="k">Lid on<br><span class="small muted">in a preheated Dutch oven</span></span><span class="v">250°C / 480°F<small>20 min</small></span></li>
     <li><span class="k">Lid off<br><span class="small muted">until deep brown, 96°C / 205°F inside</span></span><span class="v">230°C / 450°F<small>20 to 25 min</small></span></li>
     </ol>
+    </div>
     </section>
     <p class="small muted" style="text-align:center;margin:16px 0 0">Times are a guide: a warm kitchen rises faster.</p>
     </div></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

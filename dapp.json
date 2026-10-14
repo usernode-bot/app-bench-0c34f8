@@ -3,5 +3,25 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "calculator.default",
+      "name": "Calculator shows a recipe",
+      "path": "/",
+      "expectSelector": "#formula",
+      "expectText": "hydration",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Staging demo label",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    },
+    {
+      "name": "Bake step shown",
+      "path": "/",
+      "expectText": "250°C / 480°F"
+    }
+  ]
 }
