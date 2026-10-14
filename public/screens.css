@@ -1,0 +1,111 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+main {padding:16px 16px 32px;display:flex;flex-direction:column;gap:20px}
+
+.hdr {display:flex;align-items:center;gap:10px}
+
+.hdr svg {width:28px;height:28px;color:rgb(var(--accent))}
+
+.text-title {font-size:24px;font-weight:700;letter-spacing:-.01em}
+
+.text-heading {font-size:19px;font-weight:650}
+
+.text-small {font-size:13px}
+
+.muted {color:rgb(var(--muted))}
+
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:18px}
+
+.lbl {display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:15px;margin-bottom:8px}
+
+.types {display:flex;flex-wrap:wrap;gap:8px}
+
+.type {display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid rgb(var(--line));border-radius:22px;background:rgb(var(--surface));font-size:15px}
+
+.type svg {width:20px;height:20px;color:rgb(var(--muted))}
+
+.type.on {border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent));background:rgb(var(--wheat)/.22);font-weight:600}
+
+.type.on svg {color:rgb(var(--accent))}
+
+.val {font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.range {position:relative;height:44px;display:flex;align-items:center}
+
+.track {height:6px;width:100%;border-radius:3px;background:rgb(var(--raised))}
+
+.track i {display:block;height:6px;width:57%;border-radius:3px;background:rgb(var(--accent))}
+
+.thumb {position:absolute;left:calc(57% - 14px);width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;margin-top:-6px}
+
+.row2 {display:flex;gap:12px}
+
+.row2>div:first-child {flex:0 0 132px}
+
+.row2>div:last-child {flex:1}
+
+.stepper {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px;height:44px}
+
+.stepper span {flex:1;text-align:center;font-weight:700;font-size:17px}
+
+.stepper b {width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:rgb(var(--accent))}
+
+.stepper svg {width:20px;height:20px}
+
+.seg {display:flex;background:rgb(var(--raised));border-radius:8px;padding:2px;height:44px}
+
+.seg span {flex:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:15px;font-variant-numeric:tabular-nums}
+
+.seg .on {background:rgb(var(--surface));font-weight:650;box-shadow:0 0 0 1px rgb(var(--line))}
+
+.btn-primary {display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600;font-size:16px}
+
+.section-label {font-size:13px;font-weight:600;color:rgb(var(--muted));padding:0 4px;margin-bottom:8px}
+
+.list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;list-style:none;padding:0;overflow:hidden}
+
+.list-row {padding:12px 16px;display:flex;flex-direction:column;gap:6px;min-height:44px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.ing {display:flex;align-items:baseline;gap:8px}
+
+.ing .n {flex:1;font-weight:600}
+
+.ing .g {font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.bar {display:flex;align-items:center;gap:10px}
+
+.bar .t {flex:1;height:8px;border-radius:4px;background:rgb(var(--raised))}
+
+.bar .t i {display:block;height:8px;border-radius:4px;background:rgb(var(--wheat))}
+
+.bar .p {width:42px;text-align:right;font-size:13px;color:rgb(var(--muted));font-variant-numeric:tabular-nums}
+
+.step {display:flex;gap:12px;align-items:flex-start}
+
+.step svg {width:22px;height:22px;flex:none;color:rgb(var(--accent));margin-top:1px}
+
+.step .n {font-weight:600}
+
+.step .d {font-size:15px;color:rgb(var(--muted))}
+
+.step .v {margin-left:auto;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
