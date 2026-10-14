@@ -147,6 +147,11 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// The decisions API: mounting it after the auth middleware (so req.user and
+// req.guest are set) and before express.static.
+const decisionsApi = require('./decisions')(app, pool);
+
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +197,19 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await decisionsApi.migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Stop cleanly when the platform shuts the app down: stop accepting,
+  // let in-flight requests finish (a short drain), then close the pool.
+  const stop = (signal) => {
+    console.log(`${signal}: shutting down`);
+    server.close(() => pool.end().then(() => process.exit(0)).catch(() => process.exit(0)));
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', () => stop('SIGTERM'));
+  process.on('SIGINT', () => stop('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

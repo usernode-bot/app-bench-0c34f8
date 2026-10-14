@@ -63,6 +63,11 @@ module.exports = {
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
         title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
+      // The serif the drawn slips use (public/screens.css has the .serif
+      // class); kit-built titles share it.
+      fontFamily: {
+        serif: ['ui-serif', '"Iowan Old Style"', 'Charter', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [],

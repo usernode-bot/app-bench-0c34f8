@@ -43,17 +43,18 @@
     --stamp: 122 42 74; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 14 20 18;
+    --surface: 23 31 28;
+    --raised: 33 43 39;
+    --fg: 232 238 234;
+    --muted: 158 172 165;
+    --line: 52 64 59;
+    --accent: 94 196 182;
+    --on-accent: 6 38 35;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --stamp: 232 140 176; /* the decided stamp, from the spec's screens */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

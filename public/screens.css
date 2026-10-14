@@ -55,7 +55,7 @@
 
 .kit-vote-fill {position:absolute;inset:0 auto 0 0;background:rgb(var(--raised));z-index:0}
 
-.kit-vote>* {position:relative}
+.kit-vote>*:not(.kit-vote-fill) {position:relative}
 
 .kit-vote-mark {width:24px;height:24px;border-radius:50%;border:2px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center;color:transparent;flex:none}
 

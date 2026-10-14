@@ -3,5 +3,26 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "main",
+      "name": "Open decisions show as slips",
+      "visual": true,
+      "impact": ["public/**", "decisions.js", "server.js"],
+      "path": "/?demo=1",
+      "expectSelector": ".slip .kit-vote"
+    },
+    {
+      "id": "decided",
+      "name": "Decided list shows the outcome",
+      "path": "/?demo=1",
+      "expectText": "Decided:"
+    },
+    {
+      "id": "empty",
+      "name": "Plain route shows the empty state",
+      "path": "/",
+      "expectText": "Nothing to decide yet"
+    }
+  ]
 }

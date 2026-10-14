@@ -58,22 +58,10 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+Replaced: the first real app fills the drawn screens (`usernode-spec-screens@1`)
+instead. `public/index.html` keeps the `usernode-dev-console@1` forwarder, the
+bridge `<script>` and the theme `<script>` — those are platform infrastructure,
+not template content.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
@@ -95,22 +83,28 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A decision board for clubs. Anyone posts something to decide, with a set of
+choices. Every member votes with one vote each, which they can change or
+take back until the decision closes. Each decision has a comment thread.
+Whoever posted it closes it with the winning choice, and closed decisions
+move to the Decided list with their outcome stamped on.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** ledger green-grey neutrals (the paper of a club minute
+  book); one deep ballot-ink teal accent; a plum `--stamp` reserved for
+  the "Decided:" outcome stamp.
+- **Signature element:** the ballot slip — a card with a four-pixel accent
+  band at the top and a dashed tear line above its footer, votes counted in
+  hand-drawn tally strokes (groups of five), and the plum stamp on the
+  decided winner.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  titles are serif (`.serif`, the `fontFamily.serif` stack in
+  `tailwind.config.js`).
+- **One fixed look:** none; both looks follow the viewer's Homeroom theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -138,6 +132,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `reports` table is marked private (`COMMENT ON TABLE reports IS
+  'staging:private'`): what members report stays between the app and the
+  platform. Reporting the same thing twice changes nothing.
+- A closed decision is closed for good: votes are final, the outcome and
+  the closed time are written together, and only the person who posted it
+  can close or delete it. Decisions are open by default; closing needs at
+  least one vote, and a tie can only close with the poster's pick among the
+  leaders.
+- Demo rows (staging, `?demo=1`) carry ids from 900001 and a `demo` flag on
+  every table; reads exclude them unless the query asked for the demo, so
+  the plain route shows the real (empty) board.
+- The kit files in `public/kit/` are shared platform pieces; extend them
+  additively only (the one extension so far: `renderVotes`'s optional
+  `mark(count)` hook, which draws the tally strokes).
