@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,55 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="app">
+    <header class="head">
+    <svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/></svg>
+    <div class="ttl"><h1>Unread</h1><p>14 posts from 4 feeds</p></div>
+    <button class="ico" aria-label="Refresh feeds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
+    </header>
+    <label class="lbl">Feed address</label>
+    <div class="add"><div class="field">e.g. example.com/feed.xml</div><button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</button></div>
+    <div class="chips">
+    <span class="chip">Tiny Garden Notes <span class="n">5</span><span class="x" aria-label="Remove feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
+    <span class="chip">Bread Lab Weekly <span class="n">4</span><span class="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
+    <span class="chip">Pixel Trail <span class="n">3</span><span class="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
+    </div>
+    <p class="section-label">Newest first</p>
+    <ul class="list">
+    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span>2h ago</span></div><h2 class="pt">Why my balcony tomatoes finally ripened in October</h2><p class="sum">A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p></div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Bread Lab Weekly</b><span>5h ago</span></div><h2 class="pt">A slower rye starter, fed twice a day</h2><p class="sum">Our test loaves rose higher on a cooler schedule. The method, the timings we logged and the one mistake that cost us a batch.</p></div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Pixel Trail</b><span>Yesterday</span></div><h2 class="pt">Drawing a whole forest in sixteen colours</h2><p class="sum">Limiting the palette forced better choices about light. A walkthrough of the tiles, the shading rules and the final scene.</p></div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Quiet Maps</b><span>Oct 11</span></div><h2 class="pt">Contour lines, explained with a potato</h2><p class="sum">Slice it, trace it, stack the outlines. The easiest way we have found to show how a hill turns into a topographic map.</p></div></li>
+    <li class="list-row"><span class="dot"></span><div class="txt"><div class="meta"><b>Tiny Garden Notes</b><span>Oct 10</span></div><h2 class="pt">Saving seeds from this summer's beans</h2><p class="sum">Dry them on the vine, shell them indoors and label everything twice. A short checklist for next year's planting.</p></div></li>
+    </ul>
+    </div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="app">
+      <div class="under"><h1>Unread</h1></div>
+      <div class="scrim"></div>
+      <div class="sheet">
+      <div class="grab"></div>
+      <div class="bar"><div class="feed"><span class="ring"></span><b>Tiny Garden Notes</b><span>2h ago</span></div>
+      <span class="ico" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div>
+      <h2>Why my balcony tomatoes finally ripened in October</h2>
+      <p class="by">By Rowan the gardener</p>
+      <div class="body">
+      <p>A late heat wave, a bucket of rainwater and one stubborn plant. Here is what changed this year and what I would try again next spring.</p>
+      <p>The short version: I stopped feeding in August, moved the pots against the warm wall and pinched off every new flower so the plant put its effort into the fruit it already had.</p>
+      <p>The full post has photos of each week and the notes I kept on watering.</p>
+      </div>
+      <div class="acts"><span class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</span><p class="host">tinygarden.example</p></div>
+      </div>
+      </div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
