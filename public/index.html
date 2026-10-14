@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,40 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="wrap">
+    <header class="top">
+    <h1>Unread</h1>
+    <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="19" r="1.5"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>Feeds</button>
+    </header>
+    <form class="add"><label>Add a feed</label><div class="row"><div class="field">e.g. example.com/feed.xml</div><button class="btn-primary">Add</button></div></form>
+    <p class="section-label">14 unread from 4 feeds</p>
+    <ul class="list">
+    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-1))"></span><div class="txt"><div class="src"><b>Harbor Lane Garden Notes</b><span>· 25 min ago</span></div><p class="title">Five tomatoes that shrug off a cold spring</p><p class="snip">We grew twelve varieties on the windy plot this year. These five set fruit weeks before the rest.</p></div><div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div></li>
+    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-2))"></span><div class="txt"><div class="src"><b>Night Sky Weekly</b><span>· 2 h ago</span></div><p class="title">The best week this autumn to spot the Andromeda galaxy</p><p class="snip">A dark moon and clear forecasts line up on Thursday. Here is where to look and what to bring.</p></div></li>
+    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-3))"></span><div class="txt"><div class="src"><b>The Pocket Kitchen</b><span>· 5 h ago</span></div><p class="title">One-pan lentils for a Tuesday night</p><p class="snip">Twenty minutes, one pan and a lemon. The trick is to toast the spices before the lentils go in.</p></div><div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div></li>
+    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-4))"></span><div class="txt"><div class="src"><b>Tidewater Cycling Club</b><span>· Yesterday</span></div><p class="title">Route notes: the coast loop is open again</p><p class="snip">The bridge repairs finished early. Expect fresh gravel on the north side for another week.</p></div></li>
+    <li class="list-row"><span class="dot" style="background:rgb(var(--feed-2))"></span><div class="txt"><div class="src"><b>Night Sky Weekly</b><span>· 2 days ago</span></div><p class="title">How to read a star chart in five minutes</p><p class="snip">Hold it overhead, find north, and start from the brightest thing you can see.</p></div></li>
+    </ul>
+    </div></div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div><div class="wrap">
+      <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>Unread</button>
+      <div class="src"><span class="dot"></span>Harbor Lane Garden Notes · 14 Oct, 09:40</div>
+      <h1>Five tomatoes that shrug off a cold spring</h1>
+      <div class="img"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg></div>
+      <div class="body"><p>We grew twelve varieties on the windy plot this year. These five set fruit weeks before the rest, and none of them needed a cloche after mid-May.</p><p>First up is a small yellow cherry that ripened in early July, even after two nights near freezing...</p></div>
+      <a class="btn-primary">Open full article<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+      <p class="note">Opens harborlane.example in your browser.</p>
+      </div></div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
