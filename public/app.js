@@ -38,6 +38,25 @@ const states = createStates(board, {
   },
 });
 
+// The kit's skeleton is a generic list card; replace it with slip-shaped
+// placeholders, so what is loading looks like what will replace it. The
+// skeleton is the board's first child (states appends loading, empty,
+// error, content in that order).
+const skeleton = board.firstElementChild;
+skeleton.replaceChildren(
+  h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+  h('div', { class: 'stack', 'aria-hidden': 'true' },
+    Array.from({ length: 3 }, (_, i) => h('div', { class: 'card slip' },
+      h('span', { class: 'skeleton skel-bar', style: 'height:19px;width:62%;margin-bottom:6px' }),
+      h('span', { class: 'skeleton skel-bar', style: 'height:12px;width:34%;margin-bottom:12px' }),
+      h('div', { class: 'stack', style: 'gap:8px' },
+        Array.from({ length: 2 + (i % 2) }, () =>
+          h('span', { class: 'skeleton skel-choice' }))),
+      h('div', { class: 'tear' }),
+      h('div', { class: 'foot' },
+        h('span', { class: 'skeleton', style: 'height:12px;width:42%' }),
+        h('span', { class: 'skeleton', style: 'height:12px;width:20%' }))))));
+
 let signedIn = false;
 let openCount = 0;
 
@@ -66,6 +85,9 @@ const shortDate = (when) => new Date(when).toLocaleDateString(undefined, { day: 
 states.run(load);
 
 async function load(content) {
+  // Loading and failed loads keep only the skeleton's or Try again's
+  // action: the header button comes back when a load succeeds.
+  newBtn.hidden = true;
   const data = await api('GET', '/api/decisions');
   signedIn = data.signedIn;
   // createStates shows the empty state only when the task returns false.
@@ -92,19 +114,26 @@ async function load(content) {
 
 function slip(d) {
   const sl = makeSlip();
-  const footSpan = sl.querySelector('.foot span');
   fillIn(sl, {
     'h3': d.title,
     '.by': `${d.byMe ? 'You' : d.author} asked, ${timeAgo(d.createdAt, now())}`,
   });
-  const drawSummary = () => footSpan.replaceChildren(...summaryNodes(d));
+  // The whole strip below the tear line is one button that opens the
+  // decision (the spec's "bottom strip"), not just the comment count.
+  const summarySpan = h('span');
+  const drawSummary = () => summarySpan.replaceChildren(...summaryNodes(d));
   drawSummary();
-  const comments = h('button', {
+  const foot = h('button', {
     type: 'button',
-    style: 'display:flex;align-items:center;gap:4px;background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0',
+    class: 'foot',
+    'aria-label': `Open ${d.title}`,
     on: { click: (e) => { e.stopPropagation(); openDetail(d.id); } },
-  }, d.commentCount ? `${d.commentCount} comment${d.commentCount === 1 ? '' : 's'}` : 'Comment', icon('chevron', 'ic'));
-  footSpan.nextElementSibling.replaceWith(comments);
+  },
+  summarySpan,
+  h('span', { style: 'display:flex;align-items:center;gap:4px' },
+    d.commentCount ? `${d.commentCount} comment${d.commentCount === 1 ? '' : 's'}` : 'Comment',
+    icon('chevron', 'ic')));
+  sl.querySelector('.foot').replaceWith(foot);
 
   const votesBox = sl.querySelector('.kit-votes');
   renderVotes(votesBox, {
@@ -161,10 +190,10 @@ function openNew() {
     returnFocus: newBtn,
     fields: [
       { name: 'title', label: 'What is the decision?', type: 'text', required: true, max: 120, placeholder: 'e.g. Where to meet in December' },
-      { name: 'body', label: 'Tell the club more', type: 'textarea', max: 2000, placeholder: 'Anything people should know before voting (optional)' },
+      { name: 'body', label: 'Tell the club more', type: 'textarea', max: 2000, placeholder: 'Anything people should know before voting' },
       // No `max` here: the kit reuses it as each choice's maxlength. It
       // caps the count at 6 on its own; the server enforces that too.
-      { name: 'options', label: 'Choices', type: 'choices', min: 2, required: true, placeholder: ['e.g. Library back room', 'e.g. Corner cafe'] },
+      { name: 'options', label: 'Choices', type: 'choices', min: 2, required: true, addLabel: 'Add a choice', placeholder: ['e.g. Library back room', 'e.g. Corner cafe'] },
     ],
     onSubmit: async (v) => {
       const saved = await api('POST', '/api/decisions', v);

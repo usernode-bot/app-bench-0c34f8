@@ -165,7 +165,9 @@ function fieldRow(f, value) {
   if (f.type === 'choices') {
     const min = f.min ?? 2;
     const list = h('div', { class: 'kit-choices' });
-    const more = h('button', { type: 'button', class: 'btn-secondary self-start', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, 'Add an option');
+    // f.addLabel renames the add button so it can match the field's own
+    // word ("Choices" → "Add a choice"); the default keeps the old text.
+    const more = h('button', { type: 'button', class: 'btn-secondary self-start', on: { click: () => { addChoice(''); inputs[inputs.length - 1].focus(); } } }, f.addLabel || 'Add an option');
     const addChoice = (text) => {
       const n = inputs.length + 1;
       const hintText = Array.isArray(f.placeholder) ? f.placeholder[n - 1] : f.placeholder;

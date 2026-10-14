@@ -144,5 +144,6 @@ Re-theme by changing the token values there, keeping every text pair at
   every table; reads exclude them unless the query asked for the demo, so
   the plain route shows the real (empty) board.
 - The kit files in `public/kit/` are shared platform pieces; extend them
-  additively only (the one extension so far: `renderVotes`'s optional
-  `mark(count)` hook, which draws the tally strokes).
+  additively only (the extensions so far: `renderVotes`'s optional
+  `mark(count)` hook, which draws the tally strokes, and the choices
+  field's optional `addLabel`, which renames its add button).
