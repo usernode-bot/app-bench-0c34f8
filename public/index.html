@@ -136,13 +136,13 @@
     <div style="height:1px;background:rgb(var(--line));margin:16px 0"></div>
     <div class="grid">
     <div><div class="small muted" style="margin-bottom:6px" id="countLabel">Loaves</div><div class="step"><button class="sb" type="button" data-target="count" data-dir="-1" id="countMinus" aria-label="Fewer loaves"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><div class="sv" id="countVal">2</div><button class="sb" type="button" data-target="count" data-dir="1" id="countPlus" aria-label="More loaves"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
-    <div><div class="small muted" style="margin-bottom:6px" id="flourLabel">Flour per loaf</div><div class="step"><button class="sb" type="button" data-target="flour" data-dir="-1" id="flourMinus" aria-label="Less flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><div class="sv" id="flourVal">500 g</div><button class="sb" type="button" data-target="flour" data-dir="1" id="flourPlus" aria-label="More flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
+    <div><div class="small muted" style="margin-bottom:6px" id="flourLabel">Flour per loaf</div><div class="step"><button class="sb" type="button" data-target="flour" data-dir="-1" id="flourMinus" aria-label="Less flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button><div class="sv" id="flourVal"><span id="flourNum">500</span> <span class="sv-unit">g</span></div><button class="sb" type="button" data-target="flour" data-dir="1" id="flourPlus" aria-label="More flour per loaf"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
     </div>
     </div>
     <button class="btn-primary" id="calcBtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Calculate recipe</button>
 
     <div class="section-label">Formula</div>
-    <div class="state-empty" id="formulaEmpty">Your formula appears here. Pick a bread and tap Calculate recipe.</div>
+    <div class="state-empty formula-empty" id="formulaEmpty">Your formula appears here. Pick a bread and tap Calculate recipe.</div>
     <div class="stale-note" id="formulaStale" hidden>Settings changed, tap Calculate recipe</div>
     <div class="sheet" id="formulaSheet" hidden>
     <div class="sh"><div class="h" id="sheetTitle"></div><div class="small muted" id="sheetSub"></div></div>
@@ -154,14 +154,14 @@
     <div class="stat"><div class="small muted">Time</div><div class="big" id="timeBig"></div><div class="small muted" id="timeNote"></div></div>
     </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px"><input class="field" id="recipeName" placeholder="e.g. Weekend rye" maxlength="60" aria-label="Recipe name"><button class="btn-secondary" id="saveBtn" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
+    <div style="display:flex;gap:8px;margin-top:12px"><input class="field" id="recipeName" placeholder="e.g. Weekend rye" maxlength="60" aria-label="Recipe name" disabled><button class="btn-secondary" id="saveBtn" type="button" disabled><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
     <div class="save-msg small" id="saveMsg" hidden></div>
 
     <div class="section-label" id="savedHeading">Your saved recipes</div>
     <div class="list" id="savedSkeleton" hidden>
-      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:45%"></div><div class="skeleton" style="height:13px;width:72%;margin-top:6px"></div></div></div>
-      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:38%"></div><div class="skeleton" style="height:13px;width:64%;margin-top:6px"></div></div></div>
-      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:52%"></div><div class="skeleton" style="height:13px;width:58%;margin-top:6px"></div></div></div>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:45%"></div><div class="skeleton" style="height:13px;width:72%;margin-top:6px"></div></div><div class="del"><div class="skeleton" style="width:20px;height:20px;background:rgb(var(--line))"></div></div></div>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:38%"></div><div class="skeleton" style="height:13px;width:64%;margin-top:6px"></div></div><div class="del"><div class="skeleton" style="width:20px;height:20px;background:rgb(var(--line))"></div></div></div>
+      <div class="list-row"><div class="dot skeleton" style="background:rgb(var(--line))"></div><div style="flex:1"><div class="skeleton" style="height:16px;width:52%"></div><div class="skeleton" style="height:13px;width:58%;margin-top:6px"></div></div><div class="del"><div class="skeleton" style="width:20px;height:20px;background:rgb(var(--line))"></div></div></div>
     </div>
     <div class="list" id="savedList" hidden></div>
     <div class="state-empty" id="savedEmpty" hidden><div class="small" style="font-weight:600">No saved recipes yet</div><div class="small muted">Calculate one and tap Save recipe.</div></div>
@@ -235,7 +235,7 @@
       $('flourMinus').setAttribute('aria-label', 'Less flour per ' + one);
       $('flourPlus').setAttribute('aria-label', 'More flour per ' + one);
       $('countVal').textContent = state.count;
-      $('flourVal').textContent = state.flourPer + ' g';
+      $('flourNum').textContent = state.flourPer;
     }
 
     function syncSlider() {
@@ -329,6 +329,9 @@
       var sheet = $('formulaSheet');
       sheet.classList.remove('dim');
       show(sheet, true);
+      // With a formula on the sheet there is something to save.
+      $('recipeName').disabled = false;
+      $('saveBtn').disabled = false;
     }
 
     $('calcBtn').addEventListener('click', calculate);

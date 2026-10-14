@@ -60,11 +60,12 @@
 
 .knob {position:absolute;left:63%;top:-11px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:rgb(var(--surface));border:3px solid rgb(var(--accent))}
 
-.step {display:flex;align-items:center;gap:4px}
+.step {display:flex;align-items:center;gap:8px}
 
 .sb {width:44px;height:44px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:center}
 
-.sv {min-width:56px;text-align:center;font-size:20px;line-height:28px;font-weight:600;font-variant-numeric:tabular-nums}
+.sv {min-width:52px;text-align:center;font-size:18px;line-height:24px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sv-unit {font-size:14px;font-weight:600;color:rgb(var(--muted))}
 
 .grid {display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
@@ -139,3 +140,10 @@ input.field::placeholder {color:rgb(var(--muted)/0.6)}
 .list-row[data-action] {cursor:pointer}
 .list-row[data-action]:hover {background:rgb(var(--raised))}
 .list-row:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
+
+/* Before the first calculation, the sheet's place is a quiet outlined
+   panel sized like the sheet it becomes, not bare text on the ground. */
+.formula-empty {border:1px dashed rgb(var(--line));border-radius:12px;color:rgb(var(--muted))}
+
+/* The name field and Save recipe wait until there is a formula to save. */
+.field:disabled, .btn-secondary:disabled {opacity:.5}
