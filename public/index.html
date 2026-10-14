@@ -144,7 +144,7 @@
     <button type="button" class="btn-primary" id="calculate"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Calculate recipe</button>
 
     <div class="section-label">Formula</div>
-    <div class="state-empty" id="formula-empty">Your formula appears here. Pick a bread and tap Calculate recipe.</div>
+    <div class="state-empty" id="formula-empty" style="border:1px dashed rgb(var(--line));border-radius:12px;padding:24px;color:rgb(var(--muted))"><svg viewBox="0 0 24 24" style="color:rgb(var(--muted))"><path d="M4 15c0-5 4-9 8-9s8 4 8 9v3H4z"/><path d="M9 10l1 2M14 10l1 2"/></svg>Your formula appears here. Pick a bread and tap Calculate recipe.</div>
     <div class="sheet" id="sheet" hidden>
     <div class="sh"><div class="h" id="sheet-title"></div><div class="small muted" id="sheet-sub"></div></div>
     <div class="cols"><span>Ingredient</span><span>Grams</span><span>Baker's %</span></div>
@@ -156,7 +156,7 @@
     </div>
     </div>
     <div class="small" id="stale" hidden style="margin-top:8px;color:rgb(var(--muted))">Settings changed, tap Calculate recipe</div>
-    <div style="display:flex;gap:8px;margin-top:12px"><input id="save-name" class="field" style="min-width:0" placeholder="e.g. Weekend rye" aria-label="Recipe name" maxlength="60"><button type="button" class="btn-secondary" id="save-btn"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
+    <div style="display:flex;gap:8px;margin-top:12px" id="save-row" hidden><input id="save-name" class="field" style="min-width:0" placeholder="e.g. Weekend rye" aria-label="Recipe name" maxlength="60"><button type="button" class="btn-secondary" id="save-btn"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save recipe</button></div>
     <div class="small" id="save-note" hidden style="margin-top:6px;color:rgb(var(--danger))"></div>
 
     <div class="section-label" id="saved-heading">Your saved recipes</div>
@@ -299,6 +299,7 @@
       els.timeSub.textContent = f.time.sub;
       els.formulaEmpty.hidden = true;
       els.sheet.hidden = false;
+      $('save-row').hidden = false;
       els.sheet.style.opacity = '1';
       els.stale.hidden = true;
     }
@@ -336,8 +337,8 @@
         row.className = 'list-row';
         row.innerHTML =
           '<div class="dot"><svg viewBox="0 0 24 24">' + ICONS[KIND[r.bread] || 'domed'] + '</svg></div>' +
-          '<div style="flex:1;min-width:0"><div style="font-weight:600">' + esc(r.name) + '</div>' +
-          '<div class="small muted">' + esc(labelOf(r.bread)) + ', ' + r.count + ' ' + unitOf(r.bread, r.count) + ', ' + r.hydration + '% hydration</div></div>' +
+          '<div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(r.name) + '</div>' +
+          '<div class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(labelOf(r.bread)) + ', ' + r.count + ' ' + unitOf(r.bread, r.count) + ', ' + r.hydration + '%</div></div>' +
           '<span class="small muted">' + esc(fmtDate(r.created_at)) + '</span>' +
           '<button type="button" class="del" aria-label="Delete ' + esc(r.name) + '"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button>';
         row.addEventListener('click', function (e) {
