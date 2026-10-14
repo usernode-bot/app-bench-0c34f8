@@ -10,6 +10,9 @@
   padding: 16px 16px 32px;
   min-height: 1400px;
   box-sizing: border-box;
+  /* One column on the desktop too, centred like the phone layout. */
+  max-width: 560px;
+  margin: 0 auto;
 }
 
 .s * {box-sizing:border-box}
@@ -40,13 +43,20 @@
 
 .dial svg {width:220px;height:180px}
 
-.dial .n {position:absolute;left:0;right:0;top:58px;text-align:center}
+/* Inside the arc's inner width (150 px wide, centred), so the description
+   never runs under the stroke; up under the percentage. */
+.dial .n {position:absolute;left:35px;right:35px;top:58px;text-align:center}
 
 .dial .v {font-size:56px;line-height:60px;font-weight:700;letter-spacing:-1px}
 
 .dial .v small {font-size:28px}
 
-.dial .w {font-size:14px;color:rgb(var(--muted))}
+.dial .w {font-size:14px;line-height:19px;color:rgb(var(--muted))}
+
+/* The dial's arc follows the tokens, so it is right in both looks. */
+.dial .track {stroke:rgb(var(--dough))}
+
+.dial .fill {stroke:rgb(var(--accent))}
 
 .rng {position:relative;height:44px;margin:0 4px 20px}
 
@@ -66,9 +76,11 @@
 
 .step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px}
 
-.step b {width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-weight:500;color:rgb(var(--accent));font-size:22px}
+/* Minus and plus: 44×44 px tap targets with a 22 px glyph, the count a fixed
+   36 px between them. */
+.step button {appearance:none;width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;padding:0;border:0;background:none;font:inherit;font-weight:500;color:rgb(var(--accent));font-size:22px;cursor:pointer}
 
-.step span {min-width:36px;text-align:center;font-weight:600}
+.step span {width:36px;flex:none;text-align:center;font-weight:600}
 
 .field {width:104px;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;padding:8px 12px;text-align:right;font-weight:600;background:rgb(var(--surface))}
 

@@ -9,16 +9,18 @@ import { BREADS, LIMITS, calculate, doughDescription } from '/recipes.js';
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => n.toLocaleString('en-US');
 
-// The drawn track (M40 150A90 90 0 1 1 180 150): centre, radius, start
-// angle and clockwise sweep of the gauge, which opens at the bottom.
-const ARC = { cx: 110, cy: 93.43, r: 90, start: 141.06, sweep: 257.87 };
+// The drawn track (M40 150A82 82 0 1 1 180 150): centre, radius, start
+// angle and clockwise sweep of the gauge, which opens at the bottom. The
+// radius is inset 8 px (half the stroke) from the 220×180 viewBox edge, so
+// the stroke never clips.
+const ARC = { cx: 110, cy: 107.3, r: 82, start: 148.62, sweep: 242.76 };
 
 function arcPath(fraction) {
   const angle = (ARC.start + ARC.sweep * fraction) * (Math.PI / 180);
   const x = ARC.cx + ARC.r * Math.cos(angle);
   const y = ARC.cy + ARC.r * Math.sin(angle);
   const large = ARC.sweep * fraction > 180 ? 1 : 0;
-  return `M40 150A90 90 0 ${large} 1 ${x.toFixed(1)} ${y.toFixed(1)}`;
+  return `M40 150A82 82 0 ${large} 1 ${x.toFixed(1)} ${y.toFixed(1)}`;
 }
 
 // Line icons for the step kinds, in the drawn style (stroke, 1.8, round).

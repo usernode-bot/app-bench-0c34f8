@@ -132,7 +132,11 @@
     </div>
     <p class="section-label">Hydration</p>
     <div class="dial"><div class="g">
-    <svg viewBox="0 0 220 180" fill="none" stroke-linecap="round"><path d="M40 150A90 90 0 1 1 180 150" stroke="rgb(240 222 186)" stroke-width="16"/><path id="dial-arc" d="M40 150A90 90 0 0 1 163 37" stroke="rgb(138 74 28)" stroke-width="16"/><g class="dial-ticks" stroke="rgb(105 88 72)" stroke-width="2"><path d="M26 160l8-7"/><path d="M14 72l10 4"/><path d="M110 4v10"/><path d="M206 72l-10 4"/><path d="M194 160l-8-7"/></g></svg>
+    <!-- Arc inset by half its 16 px stroke (r 90 → 82, centre down to
+         110 107.3), so the top curve and round caps are drawn whole. Track
+         and fill take the theme tokens (classes in screens.css), not fixed
+         RGB, so the dark look gets its own dough and crust colours. -->
+    <svg viewBox="0 0 220 180" fill="none" stroke-linecap="round"><path class="track" d="M40 150A82 82 0 1 1 180 150" stroke-width="16"/><path id="dial-arc" class="fill" d="M40 150A82 82 0 0 1 151.5 36.6" stroke-width="16"/><g class="dial-ticks" stroke-width="2"><path d="M26 160l8-7"/><path d="M14 72l10 4"/><path d="M110 4v10"/><path d="M206 72l-10 4"/><path d="M194 160l-8-7"/></g></svg>
     <div class="n"><div class="v r" id="dial-value">75<small>%</small></div><div class="w" id="dial-desc">Soft dough, open crumb</div></div>
     </div></div>
     <div class="rng"><div class="tr"></div><div class="fl" id="rng-fill"></div><div class="th" id="rng-thumb"></div><input id="hydration" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="range" min="50" max="90" step="1" value="75" aria-label="Hydration"></div>
