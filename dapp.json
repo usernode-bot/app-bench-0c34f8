@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Unread list",
+      "path": "/?demo=1",
+      "expectSelector": "[data-post-row]",
+      "id": "unread-list",
+      "visual": true,
+      "impact": ["public/**", "server.js"]
+    },
+    {
+      "name": "Demo label",
+      "path": "/?demo=1",
+      "expectText": "Staging demo"
+    },
+    {
+      "name": "Empty reader",
+      "path": "/",
+      "expectText": "No feeds yet"
+    }
+  ]
 }

@@ -95,22 +95,48 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A private RSS reader in the shape of Feedly: paste a feed or a website's
+address, and the unread posts of all your feeds appear in one scrolling
+list, newest first, grouped by day. Tapping a post opens a preview (the
+feed's own summary text, not the page) and marks it read; the preview's
+button opens the full article in the browser. Feeds are fetched when the
+list loads — no background refresh, no staging fetches for demo feeds.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** newsprint greys with RSS orange — page 246 245 241, surface
+  white, text 31 29 26, secondary 94 89 82, lines 226 223 216, orange
+  194 65 12. Dark look: page 22 21 19, surface 33 31 28, raised 45 42 38,
+  text 240 237 230, secondary 170 164 154, lines 64 60 54, orange 251 146 60
+  with dark text 41 20 5 on it. Six feed-dot colours (orange, blue, green,
+  purple, amber, teal — tokens `feed-1` to `feed-6`) tell sources apart.
+- **Signature element:** the thin orange unread rail on the left edge of
+  every unread post, and each feed's colour dot beside its name.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Post titles and preview text read in the system serif
+  (`fontFamily.serif`, ui-serif/Georgia); names, times and buttons in the
+  system sans. The drawn screens in `public/screens.css` fix this.
+- The kit's `.list-row.unread::before` rail (in `public/screens.css`) is
+  the drawn rail; `.post-unread` is not separately styled.
+
+## App-specific conventions
+
+- Both tables (`feeds`, `read_posts`, plus `demo_seeded` for the staging
+  demo) are **`staging:private`**: a person's feeds and read posts are
+  theirs alone, and staging copies get no rows.
+- Every route is scoped to `req.user.id`; guests get empty lists and the
+  middleware answers their writes with 401 `account_required`.
+- Without `?demo=1`, demo rows (`demo = true`) are left out of every
+  response, so staging's plain routes stay production-shaped. Demo feeds
+  are never fetched: their posts come from `demo-feeds.js`.
+- Outbound fetching goes through `feeds.js`'s `safeFetch` only (loopback
+  and private addresses refused at connect time, ≤3 rechecked redirects,
+  8 s timeout, 2 MB body). Never fetch a pasted address with plain `fetch`.
+- Post identity is `sha1(feedId + '|' + (guid or link))`, in both the
+  server and nowhere else — keep `postKey` and `post_key` in step.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

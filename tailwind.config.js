@@ -55,6 +55,15 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        'feed-1': token('feed-1'), // the six colours a feed's dot can take
+        'feed-2': token('feed-2'),
+        'feed-3': token('feed-3'),
+        'feed-4': token('feed-4'),
+        'feed-5': token('feed-5'),
+        'feed-6': token('feed-6'),
+      },
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

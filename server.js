@@ -1,7 +1,10 @@
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { safeFetch, parseFeed, discover, looksLikeHtml } = require('./feeds');
+const { DEMO_FEEDS, demoPostsFor } = require('./demo-feeds');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -154,6 +157,198 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── RSS Reader ──────────────────────────────────────────────────────────────
+// Feeds and read posts are private per person, so both tables are
+// staging:private: their schema is copied to staging, their rows never are.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feeds (
+      id serial PRIMARY KEY,
+      user_id text NOT NULL,
+      url text NOT NULL,
+      title text NOT NULL,
+      color smallint NOT NULL DEFAULT 1,
+      demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS feeds_user_url_key ON feeds (user_id, url);
+    CREATE TABLE IF NOT EXISTS read_posts (
+      user_id text NOT NULL,
+      post_key text NOT NULL,
+      read_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (user_id, post_key)
+    );
+    CREATE TABLE IF NOT EXISTS demo_seeded (
+      user_id text PRIMARY KEY,
+      seeded_at timestamptz NOT NULL DEFAULT now()
+    );
+    COMMENT ON TABLE feeds IS 'staging:private';
+    COMMENT ON TABLE read_posts IS 'staging:private';
+    COMMENT ON TABLE demo_seeded IS 'staging:private';
+  `);
+}
+
+const FEED_COLUMNS = 'id, url, title, color, demo';
+
+// A post's stable identity: the feed it came from plus the feed's own id for
+// the post. Read marks survive the list being reloaded.
+function postKey(feedId, guid, link) {
+  return crypto.createHash('sha1').update(feedId + '|' + (guid || link)).digest('hex');
+}
+
+// The staging demo (?demo=1, staging only): five made-up feeds written once
+// per account, recorded in demo_seeded so feeds the viewer removed stay
+// removed. Their posts are never fetched; they come from demo-feeds.js.
+async function ensureDemoFeeds(userId) {
+  const seeded = await pool.query(
+    'INSERT INTO demo_seeded (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING RETURNING user_id',
+    [userId]);
+  if (!seeded.rows.length) return;
+  for (const [i, demo] of DEMO_FEEDS.entries()) {
+    await pool.query(
+      'INSERT INTO feeds (user_id, url, title, color, demo) VALUES ($1, $2, $3, $4, true) ON CONFLICT (user_id, url) DO NOTHING',
+      [userId, demo.url, demo.title, i + 1]);
+  }
+}
+
+function wantDemo(req) {
+  return IS_STAGING && req.query.demo === '1';
+}
+
+// A person's feeds. Demo feeds only answer with ?demo=1, so the plain
+// routes stay production-shaped even on staging.
+async function listFeeds(userId, withDemo) {
+  const sql = withDemo
+    ? `SELECT ${FEED_COLUMNS} FROM feeds WHERE user_id = $1 ORDER BY created_at, id`
+    : `SELECT ${FEED_COLUMNS} FROM feeds WHERE user_id = $1 AND demo = false ORDER BY created_at, id`;
+  return (await pool.query(sql, [userId])).rows;
+}
+
+function parseErrorMessage(err) {
+  return err && err.safe ? err.message : 'That did not work. Try again in a moment.';
+}
+
+// Fetch one address, and if it is a website rather than a feed, look for the
+// site's feed link and fetch that instead.
+async function fetchAndParse(urlString) {
+  const fetched = await safeFetch(urlString);
+  const feedUrl = fetched.finalUrl;
+  try {
+    return { feedUrl, parsed: parseFeed(fetched.body) };
+  } catch (err) {
+    if (!looksLikeHtml(fetched.body)) throw err;
+    const found = discover(fetched.body, feedUrl);
+    if (!found) throw fetchNotFoundError();
+    const second = await safeFetch(found);
+    return { feedUrl: second.finalUrl, parsed: parseFeed(second.body) };
+  }
+}
+
+function fetchNotFoundError() {
+  return Object.assign(new Error('No feed found at that address. Paste the feed or the site’s address and try again.'), { safe: true });
+}
+
+app.get('/api/feeds', async (req, res) => {
+  if (!req.user) return res.json({ feeds: [] });
+  const withDemo = wantDemo(req);
+  if (withDemo) await ensureDemoFeeds(req.user.id);
+  res.json({ feeds: await listFeeds(req.user.id, withDemo) });
+});
+
+app.post('/api/feeds', async (req, res) => {
+  // Writes need an account; the auth middleware has already answered guests.
+  const raw = req.body && typeof req.body.url === 'string' ? req.body.url.trim() : '';
+  if (!raw) return res.status(400).json({ error: 'Enter the address of a feed or a website.' });
+  const target = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : 'https://' + raw;
+  let result;
+  try {
+    result = await fetchAndParse(target);
+  } catch (err) {
+    return res.status(400).json({ error: parseErrorMessage(err) });
+  }
+  const title = result.parsed.title || new URL(result.feedUrl).hostname;
+  const inserted = await pool.query(
+    `INSERT INTO feeds (user_id, url, title, color)
+     VALUES ($1, $2, $3, (SELECT (COALESCE(MAX(color), 0) % 6) + 1 FROM feeds WHERE user_id = $1))
+     ON CONFLICT (user_id, url) DO NOTHING
+     RETURNING ${FEED_COLUMNS}`,
+    [req.user.id, result.feedUrl, title]);
+  if (!inserted.rows.length) {
+    return res.status(409).json({ error: 'You already follow this feed.' });
+  }
+  res.status(201).json({ feed: inserted.rows[0] });
+});
+
+app.delete('/api/feeds/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'That feed does not exist.' });
+  const deleted = await pool.query('DELETE FROM feeds WHERE id = $1 AND user_id = $2 RETURNING id', [id, req.user.id]);
+  if (!deleted.rows.length) return res.status(404).json({ error: 'That feed is not yours to remove.' });
+  res.json({ ok: true });
+});
+
+// Every feed is fetched when the list is read (no background refresh); one
+// feed failing leaves the others standing, named in `failed`.
+app.get('/api/posts', async (req, res) => {
+  const withDemo = wantDemo(req);
+  if (!req.user) return res.json({ posts: [], feeds: [], failed: [], demo: false });
+  const userId = req.user.id;
+  if (withDemo) await ensureDemoFeeds(userId);
+  const feeds = await listFeeds(userId, withDemo);
+
+  const results = await Promise.allSettled(feeds.map(async (feed) => {
+    if (feed.demo) return demoPostsFor(feed, req.now);
+    const fetched = await safeFetch(feed.url);
+    const parsed = parseFeed(fetched.body);
+    return { posts: parsed.items };
+  }));
+
+  const failed = [];
+  const posts = [];
+  results.forEach((result, i) => {
+    const feed = feeds[i];
+    if (result.status !== 'fulfilled') {
+      failed.push({ id: feed.id, title: feed.title });
+      return;
+    }
+    for (const item of result.value.posts) {
+      posts.push({
+        key: postKey(feed.id, item.guid, item.link),
+        feedId: feed.id,
+        feedTitle: feed.title,
+        color: feed.color,
+        title: item.title,
+        link: item.link,
+        publishedAt: item.publishedAt,
+        summary: item.summary,
+      });
+    }
+  });
+
+  const readKeys = new Set((await pool.query(
+    'SELECT post_key FROM read_posts WHERE user_id = $1', [userId]
+  )).rows.map((row) => row.post_key));
+  const unread = posts.filter((post) => !readKeys.has(post.key));
+  const dated = unread.filter((post) => post.publishedAt)
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const undated = unread.filter((post) => !post.publishedAt);
+  res.json({
+    posts: dated.concat(undated),
+    feeds: feeds.map((feed) => ({ id: feed.id, title: feed.title, url: feed.url, color: feed.color, demo: feed.demo })),
+    failed,
+    demo: withDemo,
+  });
+});
+
+app.post('/api/posts/read', async (req, res) => {
+  const key = req.body && typeof req.body.key === 'string' ? req.body.key : '';
+  if (!key) return res.status(400).json({ error: 'That post does not exist.' });
+  await pool.query(
+    'INSERT INTO read_posts (user_id, post_key) VALUES ($1, $2) ON CONFLICT (user_id, post_key) DO NOTHING',
+    [req.user.id, key]);
+  res.json({ ok: true });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -192,9 +387,22 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop accepting, let open requests finish (at most about 3 s), close the
+  // pool, exit.
+  let closing = false;
+  function stop() {
+    if (closing) return;
+    closing = true;
+    server.close(() => { pool.end().finally(() => process.exit(0)); });
+    setTimeout(() => process.exit(0), 3000).unref();
+  }
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

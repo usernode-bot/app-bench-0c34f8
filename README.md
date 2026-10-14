@@ -1,27 +1,38 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+All the new posts from the RSS feeds you follow, in one list. You add a
+feed by pasting its address (or just the website's), the app finds the
+site's feed, and every unread post from all your feeds shows in one
+scrolling list, newest first, grouped by day. Tapping a post opens a
+preview of the article inside the app, marks it read, and offers a link
+to the full story in your browser.
 
-The scaffold is a small working demo that proves the plumbing works:
+Each person's feeds and read posts are their own: both tables are
+`staging:private`, and every route is scoped to the signed-in user.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+## How it works
 
-## Replacing the template
+- **Adding a feed** — the server fetches the address (http/https only,
+  internal addresses refused, redirects rechecked, an 8 s timeout and a
+  2 MB limit), follows a website's `<link rel="alternate">` to its feed
+  when you pasted the site, and parses RSS 2.0 or Atom. The feed's own
+  name is kept.
+- **The list** — every time the app opens, the server fetches all your
+  feeds in parallel and returns the posts you have not read yet. One
+  feed failing does not hide the others; a line names it with a Retry.
+- **Reading** — opening a post's preview marks it read for you alone;
+  it leaves the list the next time the app loads.
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+## Staging demo
 
-Once the real app exists, rewrite this README to describe it.
+On a staging preview opened with `?demo=1`, the app seeds five made-up
+feeds and about sixteen invented posts (no network fetches, fixed
+example.com addresses) so the populated screen can be seen. Feeds you
+remove or read marks you make there stay; without `?demo=1` the demo
+feeds are hidden.
+
+## Building
+
+`npm run build` compiles the design kit (`styles/tailwind-input.css`) to
+`public/tailwind.css`; the Dockerfile and Paketo both run it on every
+image build. Run locally with `node server.js` and a `DATABASE_URL`.
