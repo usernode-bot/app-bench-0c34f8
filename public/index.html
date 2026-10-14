@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,50 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="s">
+    <div class="hd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 13a9 6 0 0 1 18 0v4H3z"/><path d="M8 9l1.5 3M12 8l1.5 3M16 9l1.5 3"/></svg><h1 class="title r">Bread Bot</h1></div>
+    <p class="section-label">Bread</p>
+    <div class="types">
+    <div class="t on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 15a9 8 0 0 1 18 0c0 2-2 3-9 3s-9-1-9-3z"/><path d="M9 9c2 1 4 1 6 0"/></svg>Sourdough</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Bagels</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M17 5.5l-2 2.5"/></svg>Sourdough bagels</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><ellipse cx="12" cy="13" rx="9.5" ry="5.5"/><path d="M8 11.5h.01M12 10.5h.01M16 11.5h.01M10 14h.01M14 14h.01"/></svg>Rye</div>
+    <div class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 20V10a3 3 0 0 1-1-2.5C4 5 7 4 12 4s8 1 8 3.5A3 3 0 0 1 19 10v10z"/></svg>Sandwich loaf</div>
+    </div>
+    <p class="section-label">Hydration</p>
+    <div class="dial"><div class="g">
+    <svg viewBox="0 0 220 180" fill="none" stroke-linecap="round"><path d="M40 150A90 90 0 1 1 180 150" stroke="rgb(240 222 186)" stroke-width="16"/><path d="M40 150A90 90 0 0 1 163 37" stroke="rgb(138 74 28)" stroke-width="16"/><g stroke="rgb(105 88 72)" stroke-width="2"><path d="M26 160l8-7"/><path d="M14 72l10 4"/><path d="M110 4v10"/><path d="M206 72l-10 4"/><path d="M194 160l-8-7"/></g></svg>
+    <div class="n"><div class="v r">75<small>%</small></div><div class="w">Soft dough, open crumb</div></div>
+    </div></div>
+    <div class="rng"><div class="tr"></div><div class="fl"></div><div class="th"></div></div>
+    <p class="section-label">Batch</p>
+    <ul class="list">
+    <li class="list-row"><span class="grow">Loaves</span><div class="step"><b>&minus;</b><span>2</span><b>+</b></div></li>
+    <li class="list-row"><span class="grow">Dough per loaf</span><div class="field">900</div><span class="unit">g</span></li>
+    </ul>
+    <div class="btn-primary">Calculate recipe</div>
+    <h2 class="heading r">Sourdough, 2 loaves of 900 g</h2>
+    <p class="sub">Grams to weigh, with baker's percentages of total flour</p>
+    <ul class="list ing">
+    <li class="list-row"><span class="grow">Bread flour</span><span class="pct">90%</span><span class="gr r">915 <small>g</small></span></li>
+    <li class="list-row"><span class="grow">Water</span><span class="pct">65%</span><span class="gr r">661 <small>g</small></span></li>
+    <li class="list-row"><span class="grow">Starter, fed</span><span class="pct">20%</span><span class="gr r">203 <small>g</small></span></li>
+    <li class="list-row"><span class="grow">Salt</span><span class="pct">2%</span><span class="gr r">20 <small>g</small></span></li>
+    <li class="list-row tot"><span class="grow"><strong>Total dough</strong></span><span class="gr r">1,799 <small>g</small></span></li>
+    </ul>
+    <h2 class="heading r">Rise and bake</h2>
+    <ul class="list tl">
+    <li class="list-row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 18h16M6 18a6 5 0 0 1 12 0"/><path d="M12 4v4M9 6l3-2 3 2"/></svg></span><div class="grow"><div class="k">Bulk rise</div><div class="d">Room temperature, fold every 30 min</div></div><span class="q r">4 to 5 h</span></li>
+    <li class="list-row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 10h14M8 6.5h2"/></svg></span><div class="grow"><div class="k">Shape and proof</div><div class="d">In the fridge, covered</div></div><span class="q r">12 to 16 h</span></li>
+    <li class="list-row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v11"/><circle cx="12" cy="17" r="3.5"/><path d="M15 6h3M15 10h3"/></svg></span><div class="grow"><div class="k">Bake, lid on</div><div class="d">Preheated Dutch oven</div></div><span class="q r">250 &deg;C<br>20 min</span></li>
+    <li class="list-row"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v11"/><circle cx="12" cy="17" r="3.5"/><path d="M15 6h3M15 10h3"/></svg></span><div class="grow"><div class="k">Bake, lid off</div><div class="d">Until deep brown</div></div><span class="q r">230 &deg;C<br>25 min</span></li>
+    </ul>
+    </div></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

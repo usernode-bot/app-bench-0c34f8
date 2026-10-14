@@ -1,0 +1,99 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.5 system-ui,sans-serif;
+  padding: 16px 16px 32px;
+  min-height: 1400px;
+  box-sizing: border-box;
+}
+
+.s * {box-sizing:border-box}
+
+.r {font-family:ui-rounded,"SF Pro Rounded",system-ui,sans-serif}
+
+.hd {display:flex;align-items:center;gap:10px;margin:4px 0 20px}
+
+.hd svg {width:28px;height:28px;color:rgb(var(--accent))}
+
+.title {font-size:28px;line-height:36px;font-weight:700;margin:0}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.types {display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px}
+
+.t {display:flex;flex-direction:column;align-items:center;gap:4px;min-height:88px;padding:10px 2px 8px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));font-size:13px;line-height:16px;text-align:center;color:rgb(var(--muted))}
+
+.t svg {width:28px;height:28px}
+
+.t.on {background:rgb(var(--dough));border:2px solid rgb(var(--accent));color:rgb(var(--fg));font-weight:600}
+
+.t.on svg {color:rgb(var(--accent))}
+
+.dial {display:flex;flex-direction:column;align-items:center;margin-bottom:4px}
+
+.dial .g {position:relative;width:220px;height:180px}
+
+.dial svg {width:220px;height:180px}
+
+.dial .n {position:absolute;left:0;right:0;top:58px;text-align:center}
+
+.dial .v {font-size:56px;line-height:60px;font-weight:700;letter-spacing:-1px}
+
+.dial .v small {font-size:28px}
+
+.dial .w {font-size:14px;color:rgb(var(--muted))}
+
+.rng {position:relative;height:44px;margin:0 4px 20px}
+
+.rng .tr {position:absolute;left:0;right:0;top:20px;height:4px;border-radius:2px;background:rgb(var(--line))}
+
+.rng .fl {position:absolute;left:0;width:62.5%;top:20px;height:4px;border-radius:2px;background:rgb(var(--accent))}
+
+.rng .th {position:absolute;left:calc(62.5% - 14px);top:8px;width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;margin:0 0 20px;padding:0;list-style:none}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.grow {flex:1}
+
+.step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:8px}
+
+.step b {width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-weight:500;color:rgb(var(--accent));font-size:22px}
+
+.step span {min-width:36px;text-align:center;font-weight:600}
+
+.field {width:104px;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;padding:8px 12px;text-align:right;font-weight:600;background:rgb(var(--surface))}
+
+.unit {color:rgb(var(--muted));font-size:14px}
+
+.btn-primary {display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600;margin-bottom:28px}
+
+.heading {font-size:20px;line-height:28px;font-weight:600;margin:0 4px 4px}
+
+.sub {font-size:14px;color:rgb(var(--muted));margin:0 4px 12px}
+
+.ing .pct {font-size:14px;color:rgb(var(--muted));width:44px;text-align:right}
+
+.ing .gr {font-size:20px;font-weight:700;min-width:84px;text-align:right}
+
+.ing .gr small {font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.tot {background:rgb(var(--raised))}
+
+.tl .ic {width:32px;height:32px;border-radius:50%;background:rgb(var(--dough));color:rgb(var(--accent));display:flex;align-items:center;justify-content:center;flex:none}
+
+.tl .ic svg {width:20px;height:20px}
+
+.tl .k {font-weight:600}
+
+.tl .d {font-size:14px;color:rgb(var(--muted))}
+
+.tl .q {font-weight:700;text-align:right}
