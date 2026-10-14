@@ -1,0 +1,89 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+.s {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font: 16px/1.45 system-ui,-apple-system,sans-serif;
+  min-height: 1400px;
+  padding: 16px 16px 40px;
+  box-sizing: border-box;
+}
+
+.s * {box-sizing:border-box}
+
+.hd {display:flex;align-items:center;gap:10px;margin:4px 0 20px}
+
+.hd svg {color:rgb(var(--accent))}
+
+.title {font:600 26px/1.15 ui-serif,Charter,"Iowan Old Style",Georgia,serif;margin:0}
+
+.heading {font:600 20px/1.25 ui-serif,Charter,Georgia,serif;margin:0}
+
+.section-label {margin:0 0 8px;padding:0 4px;font-size:14px;font-weight:500;color:rgb(var(--muted))}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+
+.chip {min-height:44px;padding:0 14px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));font:500 15px system-ui;display:inline-flex;align-items:center;gap:6px}
+
+.chip[aria-pressed=true] {background:rgb(var(--raised));border-color:rgb(var(--accent));box-shadow:inset 0 0 0 1px rgb(var(--accent))}
+
+.dialwrap {display:flex;flex-direction:column;align-items:center;margin-bottom:8px}
+
+.dial {position:relative;width:188px;height:188px}
+
+.dial .v {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+.dial .n {font:600 34px/1 ui-serif,Charter,Georgia,serif;font-variant-numeric:tabular-nums}
+
+.dial .l {font-size:14px;color:rgb(var(--muted))}
+
+.slider {width:100%;height:44px;display:flex;align-items:center;position:relative}
+
+.track {height:6px;width:100%;border-radius:3px;background:rgb(var(--line))}
+
+.fill {position:absolute;left:0;height:6px;width:50%;border-radius:3px;background:rgb(var(--wheat))}
+
+.knob {position:absolute;left:calc(50% - 14px);width:28px;height:28px;border-radius:50%;background:rgb(var(--surface));border:2px solid rgb(var(--accent))}
+
+.ends {display:flex;justify-content:space-between;font-size:14px;color:rgb(var(--muted));padding:0 2px;margin-bottom:24px}
+
+.pair {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+
+.stepper {display:flex;align-items:center;justify-content:space-between;min-height:44px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface))}
+
+.stepper button {width:44px;height:44px;border:0;background:none;color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+
+.stepper b {font:600 17px system-ui;font-variant-numeric:tabular-nums}
+
+.field {display:flex;align-items:center;min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:0 12px;font-size:16px;font-variant-numeric:tabular-nums}
+
+.field span {margin-left:auto;color:rgb(var(--muted))}
+
+.btn-primary {display:flex;width:100%;min-height:48px;align-items:center;justify-content:center;border:0;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px system-ui;margin-bottom:28px}
+
+.rh {display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 12px}
+
+.rh small {font-size:14px;color:rgb(var(--muted))}
+
+.list {list-style:none;margin:0 0 20px;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:12px 16px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.ic {width:24px;height:24px;flex:none;color:rgb(var(--accent))}
+
+.tx {flex:1;min-width:0;display:flex;flex-direction:column}
+
+.t {font-weight:500}
+
+.sub {font-size:14px;color:rgb(var(--muted))}
+
+.g {font:600 20px ui-serif,Charter,Georgia,serif;font-variant-numeric:tabular-nums;text-align:right}
+
+.g small {font:400 14px system-ui;color:rgb(var(--muted))}
+
+.tot {font-weight:600}
