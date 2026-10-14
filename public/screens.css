@@ -1,0 +1,94 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.rss {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1040px;
+  width: 390px;
+  font-family: ui-serif,Georgia,serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+}
+
+.rss * {box-sizing:border-box}
+
+.rss .top {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 16px 12px}
+
+.rss h1 {font-size:28px;line-height:36px;font-weight:700;margin:0;letter-spacing:-.01em}
+
+.rss .sub {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0}
+
+.rss .acts {display:flex;gap:8px}
+
+.rss .btn-primary,.rss .btn-secondary {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif}
+
+.rss .btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0}
+
+.rss .btn-secondary {background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line));padding:0 12px}
+
+.rss svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.rss .section-label {font:500 14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));padding:0 17px;margin:0 0 8px}
+
+.rss .list {list-style:none;margin:0 16px;padding:0;display:flex;flex-direction:column;gap:10px}
+
+.rss .card {display:block;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-left:6px solid rgb(var(--c));border-radius:4px 12px 12px 4px;padding:12px 14px}
+
+.rss .meta {display:flex;justify-content:space-between;font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted))}
+
+.rss .meta b {color:rgb(var(--c));font-weight:600}
+
+.rss .t {font-size:16px;line-height:22px;font-weight:700;margin:4px 0}
+
+.rss .ex {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.rss .end {padding:16px;text-align:center;font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted))}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.rss {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 844px;
+  width: 390px;
+  font-family: ui-serif,Georgia,serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+}
+
+.rss .bar {display:flex;align-items:center;justify-content:space-between;padding:8px 8px 0}
+
+.rss .btn-primary,.rss .btn-secondary,.rss .ghost {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif}
+
+.rss .ghost {background:none;border:0;color:rgb(var(--fg));padding:0 10px}
+
+.rss .art {margin:8px 16px 0;padding:4px 0 0 16px;border-left:6px solid rgb(var(--c))}
+
+.rss .src {font:600 14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--c));margin:0}
+
+.rss h2 {font-size:28px;line-height:36px;font-weight:700;margin:6px 0 8px;letter-spacing:-.01em}
+
+.rss .when {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0}
+
+.rss .body {margin:20px 16px 0;font-size:17px;line-height:28px;max-width:62ch}
+
+.rss .body p {margin:0 0 16px}
+
+.rss .foot {margin:8px 16px 0;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+
+.rss .note {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));margin:0}

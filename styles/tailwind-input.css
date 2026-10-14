@@ -40,6 +40,12 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
+    --feed-1: 180 83 9; /* from the spec's screens */
+    --feed-2: 67 56 202; /* from the spec's screens */
+    --feed-3: 190 24 93; /* from the spec's screens */
+    --feed-4: 21 128 61; /* from the spec's screens */
+    --feed-5: 3 105 161; /* from the spec's screens */
+    --f2: 67 56 202; /* from the spec's screens */
   }
   .dark {
     --ground: 12 10 9;
