@@ -290,16 +290,30 @@
     }
 
     function headerHTML(openCount, hideNew) {
-      var sub = openCount + ' open ' + (openCount === 1 ? 'decision' : 'decisions') +
-        (state.memberCount != null ? ', ' + state.memberCount + ' members' : '');
+      var sub;
+      if (state.listFailed) {
+        sub = ''; // no count until the list has actually loaded
+      } else if (state.decisions === null) {
+        // Loading: a bar where the count lands, so nothing moves when it does.
+        sub = '<span class="skeleton" style="display:block;width:170px;height:14px"></span>';
+      } else {
+        sub = openCount + ' open ' + (openCount === 1 ? 'decision' : 'decisions') +
+          (state.memberCount != null ? ', ' + state.memberCount + ' members' : '');
+      }
       var demoNote = DEMO
-        ? '<p class="sub" data-usernode-demo-note>Staging demo: made-up club decisions</p>'
+        ? '<p class="sub" data-usernode-demo-note style="padding:0 4px">Staging demo: made-up club decisions</p>'
         : '';
-      var btn = state.viewer && !hideNew
-        ? '<button class="btn-primary" data-action="go-new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button>'
-        : '';
-      return '<div class="top"><div><div class="title">Club Votes</div>' +
-        '<div class="sub">' + sub + '</div>' + demoNote + '</div>' + btn + '</div>';
+      var plus = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+      var btn;
+      if (hideNew) btn = '';
+      else if (state.viewer) {
+        btn = '<button class="btn-primary" data-action="go-new">' + plus + 'New decision</button>';
+      } else {
+        // Loading or failed: a disabled stand-in keeps the header row steady.
+        btn = '<button class="btn-primary" disabled aria-hidden="true">' + plus + 'New decision</button>';
+      }
+      return '<div class="top"><div style="flex:1;min-width:0"><div class="title">Club Votes</div>' +
+        '<div class="sub">' + sub + '</div></div>' + btn + '</div>' + demoNote;
     }
 
     function listHTML() {
@@ -307,23 +321,25 @@
       var decided = (state.decisions || []).filter(function (d) { return d.closed_at; });
       var html = headerHTML(open.length);
 
+      if (state.listFailed) {
+        // The load failed: no skeletons and no count — the error block and
+        // Retry instead. Retry runs loadList, which clears this flag.
+        return headerHTML(0) +
+          '<div class="state-error" style="margin-top:48px">' +
+          '<p style="font-size:16px;line-height:24px">Couldn\'t load the club\'s decisions.</p>' +
+          '<button class="btn-secondary" data-action="retry">Retry</button></div>';
+      }
       if (state.decisions === null) {
         return html + '<div class="section-label">Open now</div>' +
           skeletonCard() + skeletonCard() + skeletonCard();
       }
-      if (state.listFailed) {
-        return html + '<div class="state-error">' +
-          '<p class="q" style="font-size:18px;margin:0">Couldn\'t load the club\'s decisions.</p>' +
-          '<p class="sub">Your votes and comments are safe. Check your connection and try again.</p>' +
-          '<button class="btn-secondary" data-action="retry">Retry</button></div>';
-      }
       if (!state.decisions.length) {
         return headerHTML(0, true) +
-          '<div class="state-empty">' +
+          '<div class="state-empty" style="margin-top:48px">' +
           '<p class="q" style="font-size:18px;margin:0">No decisions yet.</p>' +
           '<p class="sub">Post the first thing the club needs to decide.</p>' +
           (state.viewer
-            ? '<button class="btn-primary" data-action="go-new">Post the first decision</button>'
+            ? '<button class="btn-primary" data-action="go-new" style="margin-top:16px">Post the first decision</button>'
             : '<p class="sub">Make an account to post one.</p>') +
           '</div>';
       }
@@ -451,9 +467,10 @@
     }
 
     // ── new decision view ─────────────────────────────────────────────────
+    var CHOICE_EXAMPLES = ['e.g. Library courtyard', 'e.g. Fenwick Park', 'e.g. Cafe on Mill Street'];
     function choiceRowHTML(value, index) {
       return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' +
-        '<input class="field choice-input" style="flex:1;min-height:44px" value="' + esc(value) + '" placeholder="e.g. Library courtyard" maxlength="80" aria-label="Choice ' + (index + 1) + '">' +
+        '<input class="field choice-input" style="flex:1;min-height:44px" value="' + esc(value) + '" placeholder="' + CHOICE_EXAMPLES[index % CHOICE_EXAMPLES.length] + '" maxlength="80" aria-label="Choice ' + (index + 1) + '">' +
         '<button class="icon-btn" data-action="remove-choice" aria-label="Remove this choice" style="color:rgb(var(--muted))">' +
         '<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
     }
@@ -461,7 +478,7 @@
     function newHTML() {
       var rows = (state.formChoices || ['', '']).map(choiceRowHTML).join('');
       return '<div class="bar"><button class="icon-btn" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button></div>' +
-        '<div class="section-label" style="margin-top:0">New decision</div>' +
+        '<h1 class="q" style="margin:4px 0 0">New decision</h1>' +
         '<label class="lbl" for="new-question">Question</label>' +
         '<input class="field" id="new-question" style="min-height:44px" placeholder="e.g. Where do we meet on Saturday?" maxlength="200">' +
         '<div class="section-label">Choices</div>' +

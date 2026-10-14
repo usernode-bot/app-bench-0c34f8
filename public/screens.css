@@ -20,7 +20,11 @@
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
-  width: 390px;
+  /* The drawn phone width grows to the app's one centred column on a
+     wider window (issue: the column sat left of centre). */
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   box-sizing: border-box;
   padding: 0 16px 32px;
 }
@@ -38,7 +42,9 @@
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
-.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;font-size:16px;border:0;font-family:inherit}
+/* white-space and flex-shrink keep the header button one line with its icon,
+   however narrow the title column gets. */
+.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;font-size:16px;border:0;font-family:inherit;white-space:nowrap;flex-shrink:0}
 
 .btn-secondary {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line));font-size:16px;font-family:inherit}
 
@@ -97,7 +103,9 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
-  width: 390px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
   box-sizing: border-box;
   padding: 0 16px 32px;
 }
@@ -111,7 +119,7 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
 
 .icon-btn {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;border:0;background:none;color:rgb(var(--fg));font-family:inherit;font-size:16px;padding:0 4px}
 
-.btn-primary {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;font-size:16px;border:0;font-family:inherit}
+.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:500;font-size:16px;border:0;font-family:inherit;white-space:nowrap;flex-shrink:0}
 
 .section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:20px 0 8px;padding:0 4px}
 
