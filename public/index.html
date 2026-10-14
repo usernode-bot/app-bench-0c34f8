@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='6' cy='18' r='2.5' fill='%23c2410c'/><path d='M4 11a9 9 0 0 1 9 9' fill='none' stroke='%23c2410c' stroke-width='2.5' stroke-linecap='round'/><path d='M4 4a16 16 0 0 1 16 16' fill='none' stroke='%23c2410c' stroke-width='2.5' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -121,29 +121,34 @@
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div>
-    <main>
+    <main id="app">
+    <p class="kit-demo-label" id="demo-label" hidden>Staging demo: made-up feeds and posts.</p>
     <header class="top">
     <h1 class="text-title">Unread</h1>
-    <span class="count">23 new posts</span>
+    <span class="count"></span>
     </header>
     <form class="add">
-    <label>Feed or site address<input class="field" value="e.g. example.com/feed"></label>
-    <button class="btn-primary" type="button">Add feed</button>
+    <label>Feed or site address<input class="field" id="feed-url" type="text" inputmode="url" autocomplete="off" placeholder="e.g. example.com/feed"></label>
+    <button class="btn-primary" type="submit">Add feed</button>
     </form>
-    <div class="feeds"><span>Following 4 feeds</span><a href="#">Manage feeds</a></div>
+    <p class="add-error" id="add-error" hidden role="alert"></p>
+    <div class="feeds"><span id="following"></span><a href="#" id="manage">Manage feeds</a></div>
+    <div id="posts"></div>
     <section>
     <h2 class="section-label">Today</h2>
     <ul class="list">
-    <li class="list-row read-row">
-    <svg class="sig read" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>
-    <div class="txt">
-    <div class="meta"><b>Demo Garden Notes</b><span>9:40</span></div>
-    <div class="ttl">Five pretend tomatoes that grew in a made-up greenhouse</div>
-    <div class="prev">
-    <span class="date">Tuesday 14 October, 9:40</span>
-    <p>This is sample text for the staging preview. Our imaginary greenhouse had a good week: the cherry tomatoes ripened early, the basil finally stopped sulking, and the watering rota held up through the heat.</p>
-    <div class="acts"><a class="btn-secondary" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</a></div>
-    </div>
+    <li class="post-row">
+    <button class="list-row row-btn" type="button" aria-expanded="false">
+    <svg class="sig" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="2" fill="currentColor"/><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/></svg>
+    <span class="txt">
+    <span class="meta"><b></b><span></span></span>
+    <span class="ttl"></span>
+    </span>
+    </button>
+    <div class="prev" hidden>
+    <span class="date"></span>
+    <p></p>
+    <div class="acts"><a class="btn-secondary" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open in browser</a></div>
     </div>
     </li>
     <li class="list-row">
@@ -177,5 +182,6 @@
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

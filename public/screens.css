@@ -35,7 +35,9 @@ main {max-width:448px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dir
 
 .add label {flex:1;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
 
-.field {display:block;min-height:44px;width:100%;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--muted));opacity:.75}
+.field {display:block;min-height:44px;width:100%;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--fg))}
+
+.field::placeholder {color:rgb(var(--muted));opacity:.75}
 
 .feeds {display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 4px;font-size:14px;color:rgb(var(--muted));border-bottom:1px solid rgb(var(--line))}
 
@@ -72,3 +74,16 @@ main {max-width:448px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dir
 .acts {display:flex;gap:8px;align-items:center}
 
 .btn-secondary svg {width:18px;height:18px}
+
+/* Behaviour the screen needs on top of the drawn markup: the row is one
+   button (tap to open the preview) with the preview panel beside it, and the
+   two notices that sit above the list. */
+.row-btn {width:100%;background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+
+.row-btn:hover {background:rgb(var(--raised))}
+
+.post-row .prev {margin:0 16px 12px 50px}
+
+.add-error,.feed-fail {padding:0 4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.add-error {color:rgb(var(--danger))}

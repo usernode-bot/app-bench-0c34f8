@@ -95,22 +95,29 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A Feedly-like reader: the viewer pastes a feed or site address to follow it
+(feeds are per user), and every unread post from their feeds shows in one
+scrolling list, newest first, grouped by day. Tapping a post opens an inline
+preview and marks it read; "Open in browser" opens the full article. The
+server fetches feeds on page load with `lib/feeds.js` (guarded fetching plus
+hand-rolled RSS 2.0/Atom parsing, no new packages). Both tables, `feeds` and
+`posts`, are marked `staging:private`. Staging shows a made-up populated
+screen on `?demo=1`.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+Filled in by the first version; later changes follow it.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** orange accent (the RSS feed symbol's colour: light `194 65 12`,
+  dark `251 146 60`) on cool clean greys; a `--read` grey token for read posts.
+- **Signature element:** the feed symbol (a dot with two broadcast arcs) —
+  beside each post, orange when new and grey when read, and as the favicon.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  post titles and preview text are serif (`fontFamily.serif` = ui-serif,
+  Georgia, serif), everything else the system sans.
+- The screens the spec drew live in `public/index.html` with their styles in
+  `public/screens.css`; `public/app.js` fills them with real data through
+  `public/kit/fill.js` (rowsFrom/groupsFrom) rather than rebuilding them.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

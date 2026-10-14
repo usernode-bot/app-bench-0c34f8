@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "unread.demo-list",
+      "name": "Demo list renders",
+      "path": "/?demo=1",
+      "expectSelector": ".post-row",
+      "visual": true,
+      "impact": ["public/**", "server.js", "lib/**"]
+    },
+    {
+      "name": "Empty start shows the add-feed state",
+      "path": "/",
+      "expectText": "Add your first feed"
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
