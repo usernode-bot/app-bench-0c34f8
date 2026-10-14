@@ -147,6 +147,10 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Club Votes' own API (decisions, votes, comments and reports), mounted after
+// the sign-in middleware above and before static, per decisions.js.
+const decisions = require('./decisions').mount(app, pool);
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +196,23 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  // The schema (idempotent) is in place before the first request arrives.
+  await decisions.migrate();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop accepting, drain for about 3 s, close the pool, exit.
+  let closing = false;
+  const stop = () => {
+    if (closing) return;
+    closing = true;
+    console.log('Shutting down');
+    server.close(() => pool.end().then(() => process.exit(0)));
+    setTimeout(() => pool.end().finally(() => process.exit(0)), 3000).unref();
+  };
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

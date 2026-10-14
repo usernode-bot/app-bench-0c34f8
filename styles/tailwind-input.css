@@ -39,22 +39,24 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 67 56 202;      /* the keyboard focus ring, the accent itself */
     --decided: 21 128 61; /* from the spec's screens */
     --on-decided: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 15 15 24;       /* from the spec's Design */
+    --surface: 26 26 40;
+    --raised: 38 38 56;
+    --fg: 238 238 245;
+    --muted: 160 160 184;
+    --line: 56 56 78;
+    --accent: 165 160 255;    /* deep indigo, lightened for the dark look */
+    --on-accent: 20 16 70;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 165 160 255;     /* the keyboard focus ring, the accent itself */
+    --decided: 74 222 128;    /* a decided result, green */
+    --on-decided: 5 46 22;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -70,6 +72,13 @@
  * text-small (tailwind.config.js), nothing in between.
  */
 @layer components {
+  /* Headings use the rounded system face, body text system-ui: the type
+     the app's Design section names. */
+  .text-title,
+  .text-heading {
+    font-family: ui-rounded, system-ui, sans-serif;
+  }
+
   /* Buttons: one primary per screen, the rest secondary. At least 44 px
      each way, so they are easy to tap. */
   .btn-primary,
@@ -182,7 +191,8 @@
   .kit-votes-row { @apply grid auto-cols-fr grid-flow-col; }
   .kit-vote {
     @apply relative isolate flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-lg border border-line
-      bg-surface px-3 py-2 text-left text-body text-fg hover:border-muted;
+      bg-surface px-3 py-2 text-left text-body text-fg hover:border-muted
+      disabled:cursor-not-allowed disabled:opacity-50;
   }
   .kit-vote-fill { @apply absolute inset-y-0 left-0 -z-10 bg-raised motion-safe:transition-[width] motion-safe:duration-300; }
   .kit-vote-mark { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-transparent; }
@@ -197,7 +207,9 @@
   .kit-error { @apply text-small text-danger; }
 
   /* A comment thread, then the composer. */
-  .kit-comment { @apply flex-col items-start gap-1; }
+  .kit-comment { @apply relative flex-col items-start gap-1; }
+  .kit-comment-more { @apply absolute right-0 top-0; }
+  .kit-comment-body { @apply pr-11; }
   .kit-comment-meta { @apply flex flex-wrap items-baseline gap-x-2 text-small text-muted; }
   .kit-comment-author { @apply font-medium text-fg; }
   .kit-comment-body { @apply whitespace-pre-line break-words text-body text-fg; }

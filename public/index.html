@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234338ca' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 10h16v9H4z'/><path d='M4 10l2-6h12l2 6'/><path d='M9 14h6'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -126,7 +126,8 @@
       <h1 class="text-title">Club Votes</h1>
       <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button>
      </header>
-     <section>
+     <div id="decisions">
+     <section id="open-section">
       <h2 class="section-label">Open, 3 decisions</h2>
       <div class="stack">
        <article class="card">
@@ -168,7 +169,7 @@
        </article>
       </div>
      </section>
-     <section>
+     <section id="decided-section">
       <h2 class="section-label">Decided</h2>
       <div class="stack">
        <article class="card is-decided">
@@ -187,9 +188,11 @@
        </article>
       </div>
      </section>
+     </div>
     </main>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

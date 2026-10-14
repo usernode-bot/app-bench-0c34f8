@@ -95,22 +95,67 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for the club to decide things together. Anyone can post something the
+club needs to decide (a short question plus two to six options); everyone gets
+one vote per decision, changeable or taken back until the person who posted it
+marks it decided with a winning option. Each decision has its own comment
+thread. Decisions and comments can be reported to the club's moderators
+(reports are recorded, never shown), and their authors can delete them.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by the first version. Every later change follows it, and
+updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent is a deep indigo (67 56 202 light, 165 160 255 dark) for
+  the primary action and a person's own vote; a decided result is green
+  (`decided` token, 21 128 61 light, 74 222 128 dark). Neutrals are cool
+  grey-blues (ground, surface, raised, line, muted). No other colour on screen.
+- **Signature element:** the ballot bar: each option is a tappable row whose
+  background fills in proportion to its share of the votes (accent at 10%, 20%
+  for the viewer's own; a decided winner fills with decided green at 14% and
+  gets a green edge and check), so the leader can be read at a glance.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  title and heading use `ui-rounded` (a friendly club noticeboard), body and
+  small text use system-ui.
+- Both looks always: light and dark follow the viewer's Homeroom theme. There
+  is no fixed look.
+
+The kit is in `styles/tailwind-input.css`: colour tokens with a light and a
+dark value (named in `tailwind.config.js`), and a few components
+(`btn-primary`, `btn-secondary`, `field`, `list` and `list-row`, `card`,
+`section-label`, `skeleton`, `state-empty`, `state-error`). Re-theme by
+changing the token values there, keeping every text pair at 4.5:1 or more in
+both looks.
+
+- Colour comes only from the tokens (`bg-ground`, `bg-surface`, `text-fg`,
+  `text-muted`, `border-line`, `bg-accent` with `text-on-accent`,
+  `text-decided`, ...): never a raw hex value or a stock palette class.
+- Tap targets are at least 44 px; the buttons and fields already are.
+- A field's label says what it is; its placeholder, if any, is an example
+  that says so ("e.g. 5.0"), never a bare value that could pass for one
+  already entered.
+- Every screen that loads data has honest loading, empty and error states.
+  Never show the empty state while loading or after a failure; an error says
+  what failed, what still works, and offers Retry.
+- No cards in cards, no uppercase eyebrows, no emoji as icons.
+- A header that shows the app's own mark shows the project's icon there
+  (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
+  empty tile, and never `brand/icon.png`, which the app does not serve.
+
+## App-specific conventions
+
+- Words: "decision", "option", "vote", "comment", "Decided", "New decision",
+  "Post decision", "Mark decided", "Reopen voting", "Report", "Delete".
+- The `reports` table is `staging:private` and has no foreign key to the
+  public tables; no app code sets `hidden_at` (that is the platform's
+  moderation), and every read excludes rows where it is set.
+- A decision always has two to six options; a yes-or-no question lists
+  Yes and No.
+- The main screen is the drawn screen in `public/index.html`
+  (`data-spec-screen="1"`), filled in place from data by `public/app.js`
+  with the kit's `rowsFrom`/`fillIn`/`renderVotes`; do not rebuild its rows.
+- `kit/server.js` stays unmounted; the API is `decisions.js`, adapted from it.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

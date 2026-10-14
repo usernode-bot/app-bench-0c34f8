@@ -54,6 +54,8 @@ module.exports = {
         'on-accent': token('on-accent'), // text on the accent
         danger: token('danger'),
         'on-danger': token('on-danger'),
+        decided: token('decided'), // a decided result, green
+        'on-decided': token('on-decided'),
         focus: token('focus'), // the keyboard focus ring
       },
       // The type scale: four sizes, and nothing in between.

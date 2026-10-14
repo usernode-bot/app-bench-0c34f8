@@ -3,5 +3,9 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "List loads", "path": "/", "expectSelector": "#decisions" },
+    { "id": "demo", "name": "Populated demo", "path": "/?demo=1", "expectSelector": ".kit-vote", "expectText": "Staging demo", "visual": true, "impact": ["public/**", "server.js", "decisions.js", "styles/**"] },
+    { "name": "API answers", "path": "/api/decisions", "expectText": "decisions" }
+  ]
 }
