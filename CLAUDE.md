@@ -95,22 +95,34 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A club decides things together here. Anyone posts a decision (a
+question with two or more choices), every member votes with one tap and
+can change their vote until the decision's poster closes it, and the
+discussion lives in comments under each decision. Closed decisions
+keep their result: the winning choice marked (or **Tied** if level),
+under **Decided**. The poster is the only one who can close or delete
+their decision; reports on decisions and comments are recorded but
+never hide anything.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm neutrals (cream ground, white surface, warm grey
+  lines and text) with a brick red accent for voting and the primary
+  action, and a calm blue-green for a closed decision's result.
+- **Signature element:** the tally strip — one small mark per member in
+  struck fives, filling brick red as votes come in and turning calm
+  blue-green when the vote closes. When the member count is
+  unavailable the strip shows only filled marks and the card says
+  "N voted" with no total.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  in `ui-rounded` (system fallbacks); the drawn screens set their own
+  sizes in `public/screens.css`.
+- The screens live in `public/screens.css` (drawn by the spec, kept
+  verbatim); markup is rendered by the inline script in
+  `public/index.html` reusing those same class names.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

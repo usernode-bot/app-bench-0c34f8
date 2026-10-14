@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        calm: token('calm'), // decided: the closed result's calm blue-green
+        'calm-bg': token('calm-bg'),
+      },
+      // ui-rounded, with system fallbacks: the club-app look of the screens
+      // the spec drew.
+      fontFamily: {
+        rounded: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

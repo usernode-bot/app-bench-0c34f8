@@ -3,5 +3,24 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "decisions list renders",
+      "path": "/",
+      "expectSelector": "[data-decisions]"
+    },
+    {
+      "name": "demo decisions render",
+      "path": "/?demo=1",
+      "expectText": "Where do we meet on Saturday?",
+      "id": "demo-list",
+      "visual": true,
+      "impact": "public/**"
+    },
+    {
+      "name": "demo decision with comments opens",
+      "path": "/?demo=1#/d/900001",
+      "expectText": "Post comment"
+    }
+  ]
 }

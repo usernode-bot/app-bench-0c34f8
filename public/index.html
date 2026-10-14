@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,7 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+          if (typeof val === 'function') return String(val);
           if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23b23a1e'/><rect x='30' y='38' width='40' height='10' rx='4' fill='white'/><rect x='30' y='54' width='40' height='10' rx='4' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,93 +109,623 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
-    <div class="app">
-    <div class="top"><div><div class="title">Club Votes</div><div class="sub">3 open decisions, 14 members</div></div><button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></div>
+  <!-- The app's one centred column; every view renders inside it. -->
+  <div data-spec-screen="1"><div class="app" id="app"></div></div>
 
-    <div class="section-label">Open now</div>
+  <script>
+  // ── Club Votes ──────────────────────────────────────────────────────────
+  // One list of the club's decisions: anyone posts a question with
+  // choices, everyone votes with one tap and can change it until the
+  // poster closes the vote, and each decision has its own comments.
+  // Views: #/ the list, #/d/:id a decision with its comments, #/new post
+  // one. The iframe token rides on every API call as x-usernode-token.
+  (function () {
+    'use strict';
 
-    <div class="card">
-    <div class="meta"><span>Posted by Priya, today</span><span>Priya closes it</span></div>
-    <div class="q">Where do we meet on Saturday?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt me"><em style="width:50%"></em><b>Library courtyard</b><span>5, your vote</span></button>
-    <button class="opt"><em style="width:30%"></em><b>Fenwick Park</b><span>3</span></button>
-    <button class="opt"><em style="width:20%"></em><b>Cafe on Mill Street</b><span>2</span></button>
-    <div class="foot"><span>10 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>8 comments</a></div>
-    </div>
+    var params = new URLSearchParams(location.search);
+    var TOKEN = params.get('token') || '';
+    var DEMO = params.get('demo') === '1';
 
-    <div class="card">
-    <div class="meta"><span>Posted by you, yesterday</span><span>You close it</span></div>
-    <div class="q">What should we build next term?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt"><em style="width:50%"></em><b>Community garden bench</b><span>3</span></button>
-    <button class="opt"><em style="width:33%"></em><b>Zine and print table</b><span>2</span></button>
-    <button class="opt"><em style="width:17%"></em><b>Bike repair day</b><span>1</span></button>
-    <div class="foot"><span>6 of 14 voted, not you yet</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>3 comments</a></div>
-    <button class="btn-secondary" style="width:100%;margin-top:4px">Close vote</button>
-    </div>
+    function api(path, opts) {
+      opts = opts || {};
+      var headers = { 'Content-Type': 'application/json' };
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      var url = path;
+      if (DEMO) url += (url.indexOf('?') === -1 ? '?' : '&') + 'demo=1';
+      return fetch(url, {
+        method: opts.method || 'GET',
+        headers: headers,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      }).then(function (resp) {
+        return resp.json().catch(function () { return {}; }).then(function (data) {
+          if (!resp.ok) {
+            var err = new Error(data.error || 'request_failed');
+            err.status = resp.status;
+            err.code = data.error || 'request_failed';
+            throw err;
+          }
+          return data;
+        });
+      });
+    }
 
-    <div class="card">
-    <div class="meta"><span>Posted by Marcus, 2 days ago</span><span>Marcus closes it</span></div>
-    <div class="q">Move meetings to Thursday evenings?</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-    <button class="opt"><em style="width:73%"></em><b>Yes</b><span>8</span></button>
-    <button class="opt me"><em style="width:27%"></em><b>No, keep Tuesdays</b><span>3, your vote</span></button>
-    <div class="foot"><span>11 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>12 comments</a></div>
-    </div>
+    var app = document.getElementById('app');
 
-    <div class="section-label">Decided</div>
+    var state = {
+      decisions: null,      // null = loading
+      listFailed: false,
+      memberCount: null,    // null = member list unavailable
+      viewer: null,
+      detail: null,         // { decision, comments }
+      detailFailed: null,   // 'failed' | 'missing'
+      voteErrors: {},       // decision id -> true (an inline line, not a toast)
+      commentError: false,
+      commentReported: {},  // comment id -> true
+      decisionReported: false,
+      now: Date.now(),
+    };
 
-    <div class="card closed">
-    <div class="meta"><span>Closed by Dana, 9 Mar</span><span class="badge">Decided</span></div>
-    <div class="q">Club t-shirt colour</div>
-    <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i class="e"></i></span></div>
-    <div class="opt win"><b>Forest green</b><span>9 votes</span></div>
-    <div class="opt"><b>Navy</b><span>4</span></div>
-    <div class="foot"><span>13 of 14 voted</span><a><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>6 comments</a></div>
-    </div>
-    </div>
-  </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="bar"><button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button><button class="icon-btn" aria-label="Report">Report</button></div>
-      <div class="card">
-      <div class="meta"><span>Posted by Priya, today</span><span>Priya closes it</span></div>
-      <div class="q">Where do we meet on Saturday?</div>
-      <div class="tally"><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i></i><i></i><i></i><i></i><i class="x"></i></span><span class="g"><i class="e"></i><i class="e"></i><i class="e"></i><i class="e"></i></span></div>
-      <button class="opt me"><em style="width:50%"></em><b>Library courtyard</b><span>5, your vote</span></button>
-      <button class="opt"><em style="width:30%"></em><b>Fenwick Park</b><span>3</span></button>
-      <button class="opt"><em style="width:20%"></em><b>Cafe on Mill Street</b><span>2</span></button>
-      <p class="sub">10 of 14 voted. Tap another choice to change your vote.</p>
-      </div>
+    // ── small helpers ─────────────────────────────────────────────────────
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    function relTime(iso) {
+      var t = new Date(iso).getTime();
+      if (isNaN(t)) return '';
+      var min = Math.max(0, Math.round((state.now - t) / 60000));
+      if (min < 1) return 'just now';
+      if (min < 60) return min + ' min ago';
+      var h = Math.round(min / 60);
+      if (h < 24) return 'today';
+      var d = Math.round(min / 1440);
+      if (d === 1) return 'yesterday';
+      if (d < 7) return d + ' days ago';
+      var dt = new Date(t);
+      return dt.getDate() + ' ' + MONTHS[dt.getMonth()];
+    }
+    function shortDate(iso) {
+      var t = new Date(iso);
+      if (isNaN(t.getTime())) return '';
+      return t.getDate() + ' ' + MONTHS[t.getMonth()];
+    }
 
-      <div class="section-label">8 comments</div>
-      <div class="list">
-      <div class="list-row"><div class="who"><span><b>Marcus</b>, 2 h ago</span><button>Report</button></div><p>Courtyard has shade and the benches, works if it rains too since the porch is covered.</p></div>
-      <div class="list-row"><div class="who"><span><b>Dana</b>, 1 h ago</span><button>Report</button></div><p>Fenwick Park is closer for the folks coming by bus.</p></div>
-      <div class="list-row"><div class="who"><span><b>You</b>, 40 min ago</span><button>Delete</button></div><p>I can bring the folding table either way.</p></div>
-      <div class="list-row"><div class="who"><span><b>Sam</b>, 10 min ago</span><button>Report</button></div><p>Cafe is nice but it gets loud after 11.</p></div>
-      </div>
+    // The tally strip: one mark per member, struck fives. With the member
+    // count, the strip is the whole club and the marks nobody has cast yet
+    // sit empty; without it, only the filled marks show.
+    function tally(voters, total) {
+      var count = total == null ? voters : Math.max(total, voters);
+      var groups = [];
+      var left = count, filledLeft = voters;
+      while (left > 0) {
+        var n = Math.min(5, left);
+        var filled = Math.min(n, filledLeft);
+        filledLeft -= filled;
+        var html = '';
+        for (var i = 0; i < filled; i++) html += '<i></i>';
+        for (var e = 0; e < n - filled; e++) html += '<i class="e"></i>';
+        if (n === 5) html += '<i class="x"></i>';
+        groups.push('<span class="g">' + html + '</span>');
+        left -= n;
+      }
+      if (!groups.length) groups.push('<span class="g"></span>');
+      return groups.join('');
+    }
 
-      <label class="lbl">Your comment</label>
-      <div class="field">e.g. I can bring snacks</div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn-primary">Post comment</button></div>
-      </div>
-    </div>
-  </template>
-  <!-- /usernode-spec-screens@1 -->
+    // The votes count against the club when the member list came through;
+    // otherwise the card says only how many voted.
+    function votesText(d, viewer) {
+      if (d.voters === 0) return 'No votes yet';
+      if (state.memberCount == null) return d.voters + ' voted';
+      return d.voters + ' of ' + state.memberCount + ' voted';
+    }
+
+    // Tied when two or more choices share the lead.
+    function winners(d) {
+      var max = 0;
+      d.choices.forEach(function (c) { max = Math.max(max, c.votes); });
+      var tied = d.choices.filter(function (c) { return c.votes === max && max > 0; });
+      return { max: max, tied: tied.length > 1, ids: tied.map(function (c) { return c.id; }) };
+    }
+
+    // ── list view ─────────────────────────────────────────────────────────
+    function cardHTML(d) {
+      var viewer = state.viewer;
+      var mine = !!(viewer && d.mine);
+      var closed = !!d.closed_at;
+      var w = closed ? winners(d) : null;
+      var badge = closed ? '<span class="badge">' + (w.tied ? 'Tied' : 'Decided') + '</span>' : '';
+
+      var meta = '<div class="meta"><span>Posted by ' + (mine ? 'you' : esc(d.author_name)) +
+        ', ' + relTime(d.created_at) + '</span>' +
+        (closed ? badge : '<span>' + (mine ? 'You close it' : esc(d.author_name) + ' closes it') + '</span>') +
+        '</div>';
+
+      var opts = d.choices.map(function (c) {
+        var pct = d.voters ? Math.round((c.votes / d.voters) * 100) : 0;
+        var mineVote = viewer && d.my_choice_id === c.id;
+        var count = c.votes + (mineVote ? ', your vote' : '');
+        if (closed) {
+          var win = w.ids.indexOf(c.id) !== -1 ? ' win' : '';
+          return '<div class="opt' + win + '"><b>' + esc(c.label) + '</b><span>' +
+            c.votes + (c.votes === 1 ? ' vote' : ' votes') + '</span></div>';
+        }
+        var cls = 'opt' + (mineVote ? ' me' : '');
+        var action = viewer ? ' data-action="vote" data-decision="' + d.id + '" data-choice="' + c.id + '"' : '';
+        return '<button class="' + cls + '"' + action + (viewer ? '' : ' disabled') + '>' +
+          '<em style="width:' + pct + '%"></em><b>' + esc(c.label) + '</b><span>' + count + '</span></button>';
+      }).join('');
+
+      var voteError = state.voteErrors[d.id]
+        ? '<p class="sub" style="color:rgb(var(--danger))">Your vote didn\'t save. Try again.</p>'
+        : '';
+
+      var link = '<a href="#/d/' + d.id + '"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>' +
+        (d.comments_count === 0 ? 'No comments yet' : d.comments_count + (d.comments_count === 1 ? ' comment' : ' comments')) + '</a>';
+
+      var closeBtn = mine && !closed
+        ? '<button class="btn-secondary" style="width:100%;margin-top:4px" data-action="close" data-decision="' + d.id + '">Close vote</button>'
+        : '';
+
+      return '<div class="card' + (closed ? ' closed' : '') + '">' + meta +
+        '<div class="q">' + esc(d.question) + '</div>' +
+        '<div class="tally">' + tally(d.voters, closed || state.memberCount != null ? state.memberCount : null) + '</div>' +
+        opts + voteError +
+        '<div class="foot"><span>' + votesText(d, viewer) + '</span>' + link + '</div>' +
+        closeBtn + '</div>';
+    }
+
+    function skeletonCard() {
+      return '<div class="card">' +
+        '<div class="meta"><span class="skeleton" style="display:block;width:45%;height:14px"></span>' +
+        '<span class="skeleton" style="display:block;width:26%;height:14px"></span></div>' +
+        '<div class="skeleton" style="width:80%;height:22px;margin:6px 0 14px"></div>' +
+        '<div class="skeleton" style="width:55%;height:22px;margin-bottom:14px"></div>' +
+        '<div class="skeleton" style="height:44px;border-radius:8px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;border-radius:8px;margin-bottom:8px"></div>' +
+        '<div class="skeleton" style="height:44px;border-radius:8px"></div>' +
+        '</div>';
+    }
+
+    function headerHTML(openCount, hideNew) {
+      var sub = openCount + ' open ' + (openCount === 1 ? 'decision' : 'decisions') +
+        (state.memberCount != null ? ', ' + state.memberCount + ' members' : '');
+      var demoNote = DEMO
+        ? '<p class="sub" data-usernode-demo-note>Staging demo: made-up club decisions</p>'
+        : '';
+      var btn = state.viewer && !hideNew
+        ? '<button class="btn-primary" data-action="go-new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button>'
+        : '';
+      return '<div class="top"><div><div class="title">Club Votes</div>' +
+        '<div class="sub">' + sub + '</div>' + demoNote + '</div>' + btn + '</div>';
+    }
+
+    function listHTML() {
+      var open = (state.decisions || []).filter(function (d) { return !d.closed_at; });
+      var decided = (state.decisions || []).filter(function (d) { return d.closed_at; });
+      var html = headerHTML(open.length);
+
+      if (state.decisions === null) {
+        return html + '<div class="section-label">Open now</div>' +
+          skeletonCard() + skeletonCard() + skeletonCard();
+      }
+      if (state.listFailed) {
+        return html + '<div class="state-error">' +
+          '<p class="q" style="font-size:18px;margin:0">Couldn\'t load the club\'s decisions.</p>' +
+          '<p class="sub">Your votes and comments are safe. Check your connection and try again.</p>' +
+          '<button class="btn-secondary" data-action="retry">Retry</button></div>';
+      }
+      if (!state.decisions.length) {
+        return headerHTML(0, true) +
+          '<div class="state-empty">' +
+          '<p class="q" style="font-size:18px;margin:0">No decisions yet.</p>' +
+          '<p class="sub">Post the first thing the club needs to decide.</p>' +
+          (state.viewer
+            ? '<button class="btn-primary" data-action="go-new">Post the first decision</button>'
+            : '<p class="sub">Make an account to post one.</p>') +
+          '</div>';
+      }
+
+      html += '<div class="section-label">Open now</div>';
+      if (!open.length) {
+        html += '<p class="sub" style="padding:0 4px">Nothing open right now. The club\'s latest decisions are below.</p>';
+      }
+      html += open.map(cardHTML).join('');
+
+      if (decided.length) {
+        html += '<div class="section-label">Decided</div>' + decided.map(cardHTML).join('');
+      }
+      return html;
+    }
+
+    // ── detail view ───────────────────────────────────────────────────────
+    function commentRowHTML(c) {
+      var viewer = state.viewer;
+      var btn;
+      if (!viewer) btn = '';
+      else if (c.mine) btn = '<button data-action="delete-comment" data-comment="' + c.id + '">Delete</button>';
+      else if (state.commentReported[c.id]) btn = '<button disabled>Reported, thanks</button>';
+      else btn = '<button data-action="report-comment" data-comment="' + c.id + '">Report</button>';
+      return '<div class="list-row"><div class="who"><span><b>' +
+        (c.mine ? 'You' : esc(c.author_name)) + '</b>, ' + relTime(c.created_at) + '</span>' + btn +
+        '</div><p>' + esc(c.body) + '</p></div>';
+    }
+
+    function detailHTML() {
+      var d = state.detail && state.detail.decision;
+      if (state.detailFailed === 'missing') {
+        return '<div class="bar"><button class="icon-btn" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button></div>' +
+          '<div class="state-error"><p class="q" style="font-size:18px;margin:0">That decision isn\'t there anymore.</p>' +
+          '<p class="sub">It may have been deleted by whoever posted it.</p></div>';
+      }
+      if (state.detailFailed === 'failed' || !d) {
+        return '<div class="bar"><button class="icon-btn" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button></div>' +
+          '<div class="state-error"><p class="q" style="font-size:18px;margin:0">Couldn\'t load this decision.</p>' +
+          '<p class="sub">The club\'s other decisions are still there.</p>' +
+          '<button class="btn-secondary" data-action="retry-detail">Retry</button></div>';
+      }
+
+      var viewer = state.viewer;
+      var mine = !!(viewer && d.mine);
+      var closed = !!d.closed_at;
+      var w = closed ? winners(d) : null;
+      var badge = closed ? '<span class="badge">' + (w.tied ? 'Tied' : 'Decided') + '</span>' : '';
+
+      var meta = '<div class="meta"><span>Posted by ' + (mine ? 'you' : esc(d.author_name)) +
+        ', ' + relTime(d.created_at) + '</span>' +
+        (closed ? badge : '<span>' + (mine ? 'You close it' : esc(d.author_name) + ' closes it') + '</span>') +
+        '</div>';
+
+      var opts = d.choices.map(function (c) {
+        var pct = d.voters ? Math.round((c.votes / d.voters) * 100) : 0;
+        var mineVote = viewer && d.my_choice_id === c.id;
+        var count = c.votes + (mineVote ? ', your vote' : '');
+        if (closed) {
+          var win = w.ids.indexOf(c.id) !== -1 ? ' win' : '';
+          return '<div class="opt' + win + '"><b>' + esc(c.label) + '</b><span>' +
+            c.votes + (c.votes === 1 ? ' vote' : ' votes') + '</span></div>';
+        }
+        var cls = 'opt' + (mineVote ? ' me' : '');
+        var action = viewer ? ' data-action="vote-detail" data-decision="' + d.id + '" data-choice="' + c.id + '"' : '';
+        return '<button class="' + cls + '"' + action + (viewer ? '' : ' disabled') + '>' +
+          '<em style="width:' + pct + '%"></em><b>' + esc(c.label) + '</b><span>' + count + '</span></button>';
+      }).join('');
+
+      var sub;
+      if (closed) {
+        sub = votesText(d) + (w.tied ? '. It was tied.' : '');
+      } else if (!viewer) {
+        sub = votesText(d) + '.';
+      } else if (d.my_choice_id) {
+        sub = votesText(d) + '. Tap another choice to change your vote.';
+      } else {
+        sub = votesText(d) + '. Tap a choice to vote.';
+      }
+
+      var voteError = state.voteErrors['d' + d.id]
+        ? '<p class="sub" style="color:rgb(var(--danger))">Your vote didn\'t save. Try again.</p>'
+        : '';
+
+      var authorRow = '';
+      if (mine) {
+        var closeBtn = !closed
+          ? '<button class="btn-secondary" style="flex:1" data-action="close-detail" data-decision="' + d.id + '">Close vote</button>'
+          : '';
+        var delBtn = '<button class="btn-secondary" style="flex:1;color:rgb(var(--danger))" data-action="delete-decision" data-decision="' + d.id + '">Delete decision</button>';
+        authorRow = '<div style="display:flex;gap:8px;margin-top:12px">' + closeBtn + delBtn + '</div>';
+      }
+
+      var reportBtn = viewer
+        ? (state.decisionReported
+          ? '<button class="icon-btn" disabled>Reported, thanks</button>'
+          : '<button class="icon-btn" data-action="report-decision" data-decision="' + d.id + '" aria-label="Report this decision">Report</button>')
+        : '';
+
+      var comments = state.detail.comments;
+      var commentError = state.commentError
+        ? '<p class="sub" style="color:rgb(var(--danger))">Your comment didn\'t post. Try again.</p>'
+        : '';
+      var commentForm = viewer
+        ? '<label class="lbl" for="comment-body">Your comment</label>' +
+          '<textarea class="field" id="comment-body" placeholder="e.g. I can bring snacks"></textarea>' +
+          commentError +
+          '<div style="display:flex;justify-content:flex-end;margin-top:8px">' +
+          '<button class="btn-primary" data-action="post-comment" data-decision="' + d.id + '">Post comment</button></div>'
+        : '<p class="sub" style="margin-top:12px">Make an account to comment.</p>';
+
+      return '<div class="bar"><button class="icon-btn" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button>' +
+        reportBtn + '</div>' +
+        '<div class="card' + (closed ? ' closed' : '') + '">' + meta +
+        '<div class="q">' + esc(d.question) + '</div>' +
+        '<div class="tally">' + tally(d.voters, closed || state.memberCount != null ? state.memberCount : null) + '</div>' +
+        opts + '<p class="sub">' + esc(sub) + '</p>' + voteError + authorRow + '</div>' +
+        '<div class="section-label">' +
+        (comments.length === 0 ? 'No comments yet' : comments.length + (comments.length === 1 ? ' comment' : ' comments')) +
+        '</div>' +
+        (comments.length
+          ? '<div class="list">' + comments.map(commentRowHTML).join('') + '</div>'
+          : '') +
+        commentForm;
+    }
+
+    // ── new decision view ─────────────────────────────────────────────────
+    function choiceRowHTML(value, index) {
+      return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' +
+        '<input class="field choice-input" style="flex:1;min-height:44px" value="' + esc(value) + '" placeholder="e.g. Library courtyard" maxlength="80" aria-label="Choice ' + (index + 1) + '">' +
+        '<button class="icon-btn" data-action="remove-choice" aria-label="Remove this choice" style="color:rgb(var(--muted))">' +
+        '<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+    }
+
+    function newHTML() {
+      var rows = (state.formChoices || ['', '']).map(choiceRowHTML).join('');
+      return '<div class="bar"><button class="icon-btn" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button></div>' +
+        '<div class="section-label" style="margin-top:0">New decision</div>' +
+        '<label class="lbl" for="new-question">Question</label>' +
+        '<input class="field" id="new-question" style="min-height:44px" placeholder="e.g. Where do we meet on Saturday?" maxlength="200">' +
+        '<div class="section-label">Choices</div>' +
+        '<p class="sub" style="padding:0 4px;margin-bottom:8px">Two or more. Members tap one to vote.</p>' +
+        rows +
+        '<button class="btn-secondary" style="width:100%" data-action="add-choice"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a choice</button>' +
+        '<p class="sub" id="form-error" hidden style="color:rgb(var(--danger));margin-top:8px"></p>' +
+        '<div style="display:flex;gap:8px;margin-top:16px">' +
+        '<button class="btn-primary" style="flex:1" data-action="post-decision">Post decision</button></div>';
+    }
+
+    // ── render + events ───────────────────────────────────────────────────
+    function render() {
+      var hash = location.hash || '#/';
+      var m;
+      if ((m = hash.match(/^#\/d\/(\d+)$/))) {
+        app.innerHTML = detailHTML();
+      } else if (hash === '#/new') {
+        app.innerHTML = newHTML();
+        var q = document.getElementById('new-question');
+        if (q) q.value = state.formQuestion || '';
+        updatePostEnabled();
+      } else {
+        // The test hook and the wrapper for the one list view.
+        app.innerHTML = '<div data-decisions>' + listHTML() + '</div>';
+      }
+    }
+
+    function formError(msg) {
+      var el = document.getElementById('form-error');
+      if (el) { el.textContent = msg; el.hidden = !msg; }
+    }
+    function updatePostEnabled() {
+      var btn = app.querySelector('[data-action="post-decision"]');
+      if (!btn) return;
+      var question = (document.getElementById('new-question').value || '').trim();
+      var choices = Array.prototype.map.call(
+        app.querySelectorAll('.choice-input'),
+        function (el) { return el.value.trim(); }
+      ).filter(Boolean);
+      btn.disabled = !(question && choices.length >= 2);
+    }
+
+    function setVoteError(key, on) {
+      state.voteErrors[key] = on;
+      render();
+    }
+
+    function applyDecision(updated) {
+      if (state.decisions) {
+        state.decisions = state.decisions.map(function (d) {
+          return d.id === updated.id ? updated : d;
+        });
+      }
+      if (state.detail && state.detail.decision && state.detail.decision.id === updated.id) {
+        state.detail.decision = updated;
+      }
+    }
+
+    function loadList() {
+      state.decisions = null;
+      state.listFailed = false;
+      render();
+      return api('/api/decisions').then(function (data) {
+        state.decisions = data.decisions;
+        state.memberCount = data.member_count;
+        state.viewer = data.viewer;
+        state.now = Date.now();
+        render();
+      }).catch(function () {
+        state.listFailed = true;
+        render();
+      });
+    }
+
+    var currentDetailId = null;
+    function loadDetail(id) {
+      currentDetailId = id;
+      state.detail = null;
+      state.detailFailed = null;
+      state.decisionReported = false;
+      state.commentReported = {};
+      state.commentError = false;
+      render();
+      return api('/api/decisions/' + id).then(function (data) {
+        if (currentDetailId !== id) return;
+        state.detail = { decision: data.decision, comments: data.comments };
+        state.memberCount = data.member_count;
+        state.viewer = data.viewer;
+        state.now = Date.now();
+        render();
+      }).catch(function (err) {
+        if (currentDetailId !== id) return;
+        state.detailFailed = err.status === 404 ? 'missing' : 'failed';
+        render();
+      });
+    }
+
+    function vote(decisionId, choiceId, detail) {
+      var key = detail ? 'd' + decisionId : decisionId;
+      return api('/api/decisions/' + decisionId + '/vote', { method: 'POST', body: { choice_id: choiceId } })
+        .then(function (data) {
+          delete state.voteErrors[key];
+          applyDecision(data.decision);
+          render();
+        })
+        .catch(function (err) {
+          if (err.code === 'closed') { // someone closed it while you were here
+            setVoteError(key, false);
+            return refreshAfterClosed(decisionId);
+          }
+          setVoteError(key, true);
+        });
+    }
+    function refreshAfterClosed(decisionId) {
+      api('/api/decisions/' + decisionId).then(function (data) {
+        applyDecision(data.decision);
+        if (state.detail) state.detail.decision = data.decision;
+        render();
+      }).catch(function () { render(); });
+    }
+
+    app.addEventListener('click', function (ev) {
+      var el = ev.target.closest('[data-action]');
+      if (!el) return;
+      var action = el.getAttribute('data-action');
+
+      if (action === 'go-new') {
+        state.formChoices = ['', ''];
+        state.formQuestion = '';
+        location.hash = '#/new';
+      } else if (action === 'back') {
+        location.hash = '#/';
+      } else if (action === 'retry') {
+        loadList();
+      } else if (action === 'retry-detail') {
+        loadDetail(currentDetailId);
+      } else if (action === 'vote') {
+        vote(Number(el.getAttribute('data-decision')), Number(el.getAttribute('data-choice')), false);
+      } else if (action === 'vote-detail') {
+        vote(Number(el.getAttribute('data-decision')), Number(el.getAttribute('data-choice')), true);
+      } else if (action === 'close' || action === 'close-detail') {
+        var id = Number(el.getAttribute('data-decision'));
+        api('/api/decisions/' + id + '/close', { method: 'POST' }).then(function (data) {
+          applyDecision(data.decision);
+          render();
+        }).catch(function (err) {
+          if (err.status === 409) refreshAfterClosed(id); // already closed
+        });
+      } else if (action === 'delete-decision') {
+        var delId = Number(el.getAttribute('data-decision'));
+        if (!window.confirm('Delete this decision, its votes and its comments?')) return;
+        api('/api/decisions/' + delId, { method: 'DELETE' }).then(function () {
+          if (state.decisions) {
+            state.decisions = state.decisions.filter(function (d) { return d.id !== delId; });
+          }
+          location.hash = '#/';
+        }).catch(function () {});
+      } else if (action === 'delete-comment') {
+        var cid = Number(el.getAttribute('data-comment'));
+        api('/api/comments/' + cid, { method: 'DELETE' }).then(function () {
+          if (state.detail) {
+            state.detail.comments = state.detail.comments.filter(function (c) { return c.id !== cid; });
+          }
+          render();
+        }).catch(function () {});
+      } else if (action === 'report-decision') {
+        var rid = Number(el.getAttribute('data-decision'));
+        api('/api/reports', { method: 'POST', body: { kind: 'decision', id: rid } }).then(function () {
+          state.decisionReported = true;
+          render();
+        }).catch(function () {});
+      } else if (action === 'report-comment') {
+        var rcid = Number(el.getAttribute('data-comment'));
+        api('/api/reports', { method: 'POST', body: { kind: 'comment', id: rcid } }).then(function () {
+          state.commentReported[rcid] = true;
+          render();
+        }).catch(function () {});
+      } else if (action === 'add-choice') {
+        var inputs = app.querySelectorAll('.choice-input');
+        if (inputs.length >= 8) return;
+        state.formChoices = Array.prototype.map.call(inputs, function (i2) { return i2.value; });
+        state.formChoices.push('');
+        state.formQuestion = document.getElementById('new-question').value;
+        render();
+      } else if (action === 'remove-choice') {
+        var row = el.parentElement;
+        var all = app.querySelectorAll('.choice-input');
+        if (all.length <= 2) { // two choices are the minimum
+          formError('Keep at least two choices.');
+          return;
+        }
+        row.remove();
+        updatePostEnabled();
+        formError('');
+      } else if (action === 'post-decision') {
+        var question = (document.getElementById('new-question').value || '').trim();
+        var labels = [];
+        var seen = {};
+        Array.prototype.forEach.call(app.querySelectorAll('.choice-input'), function (i3) {
+          var v = i3.value.trim();
+          if (v && !seen[v.toLowerCase()]) { seen[v.toLowerCase()] = true; labels.push(v); }
+        });
+        if (!question) { formError('Write the question first.'); return; }
+        if (labels.length < 2) { formError('Add at least two different choices.'); return; }
+        el.disabled = true;
+        api('/api/decisions', { method: 'POST', body: { question: question, choices: labels } })
+          .then(function () {
+            state.formChoices = null;
+            state.formQuestion = '';
+            location.hash = '#/';
+            loadList();
+          })
+          .catch(function (err) {
+            el.disabled = false;
+            formError(err.code === 'choices_required'
+              ? 'Add at least two different choices.'
+              : 'The decision didn\'t save. Try again.');
+          });
+      } else if (action === 'post-comment') {
+        var field = document.getElementById('comment-body');
+        var body = (field.value || '').trim();
+        if (!body) return;
+        el.disabled = true;
+        api('/api/decisions/' + el.getAttribute('data-decision') + '/comments',
+          { method: 'POST', body: { body: body } })
+          .then(function (data) {
+            el.disabled = false;
+            state.commentError = false;
+            field.value = '';
+            if (state.detail) state.detail.comments.push(data.comment);
+            render();
+          })
+          .catch(function () {
+            el.disabled = false;
+            state.commentError = true; // the typed text stays in the field
+            render();
+          });
+      }
+    });
+
+    app.addEventListener('input', function (ev) {
+      if (ev.target.id === 'new-question') state.formQuestion = ev.target.value;
+      if (ev.target.classList.contains('choice-input') || ev.target.id === 'new-question') {
+        updatePostEnabled();
+      }
+    });
+
+    function route() {
+      var hash = location.hash || '#/';
+      var m = hash.match(/^#\/d\/(\d+)$/);
+      if (m) {
+        loadDetail(Number(m[1]));
+      } else if (hash === '#/new') {
+        if (!state.formChoices) state.formChoices = ['', ''];
+        render();
+      } else {
+        if (state.decisions === null || state.listFailed) loadList();
+        else render();
+      }
+    }
+    window.addEventListener('hashchange', route);
+    route();
+  })();
+  </script>
 </body>
 </html>
