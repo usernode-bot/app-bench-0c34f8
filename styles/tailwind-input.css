@@ -41,6 +41,7 @@
     --on-danger: 255 255 255;
     --focus: 67 56 202;      /* the keyboard focus ring, the accent itself */
     --decided: 21 128 61; /* from the spec's screens */
+    --decided-ink: 21 108 52; /* pill text: decided green darkened to hold 4.5:1 on its 12% tint */
     --on-decided: 255 255 255; /* from the spec's screens */
   }
   .dark {
@@ -56,6 +57,7 @@
     --on-danger: 69 10 10;
     --focus: 165 160 255;     /* the keyboard focus ring, the accent itself */
     --decided: 74 222 128;    /* a decided result, green */
+    --decided-ink: 74 222 128; /* pill text: already well past 4.5:1 in the dark look */
     --on-decided: 5 46 22;
   }
   /* el.hidden = true hides an element even when a class gives it a display

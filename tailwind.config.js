@@ -55,6 +55,7 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         decided: token('decided'), // a decided result, green
+        'decided-ink': token('decided-ink'), // the decided pill's text
         'on-decided': token('on-decided'),
         focus: token('focus'), // the keyboard focus ring
       },

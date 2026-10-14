@@ -28,6 +28,18 @@ let signedIn = true;
 
 const view = createStates(container, {
   rows: 4,
+  // Stand-ins shaped like the decision cards that will load: three separate
+  // cards with the card's padding and gap, a title bar, a meta bar and 44 px
+  // option bars — no dividers.
+  skeleton: () => h('div', { 'aria-busy': 'true' },
+    h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+    h('div', { class: 'stack', 'aria-hidden': 'true' },
+      Array.from({ length: 3 }, (_, i) => h('div', { class: 'card' },
+        h('span', { class: 'skeleton h-5 w-3/4' }),
+        h('span', { class: 'skeleton h-3 w-1/3' }),
+        h('span', { class: 'skeleton h-11 w-full' }),
+        h('span', { class: 'skeleton h-11 w-full' }),
+        i % 2 ? h('span', { class: 'skeleton h-11 w-2/3' }) : null)))),
   empty: {
     title: 'No decisions yet',
     text: 'Post the first thing the club needs to decide.',
@@ -58,12 +70,14 @@ async function loadTask(content) {
   if (open.length) {
     const g = section(`Open, ${plural(open.length, 'decision')}`);
     for (const d of open) g.list.append(openCard(d));
-    content.append(g.heading, g.list);
+    // A section apiece, as drawn: the label's own 8 px sits between it and
+    // its first card, not the content box's 24 px gap.
+    content.append(h('section', null, g.heading, g.list));
   }
   if (decided.length) {
     const g = section('Decided');
     for (const d of decided) g.list.append(decidedCard(d));
-    content.append(g.heading, g.list);
+    content.append(h('section', null, g.heading, g.list));
   }
 }
 
@@ -81,6 +95,9 @@ function openCard(d) {
   renderVotes(card.querySelector('.kit-votes'), {
     ...d.votes,
     label: `Vote on: ${d.title}`,
+    // The vote summary lives in the card's footer; only guests need a line
+    // under the bars, to be told they cannot vote.
+    summary: !signedIn,
     onVote: async (option) => (await api('POST', `/api/decisions/${d.id}/vote`, { option })).decision.votes,
   });
   if (!signedIn) {
@@ -126,11 +143,12 @@ function foot(card, d) {
   card.querySelector('.foot .icon').addEventListener('click', (e) => moreMenu(e.currentTarget, d));
 }
 
+// The footer's summary, the spec's form: "3 votes", "8 votes, tied".
 function sumWords(d) {
   const t = tally(d.votes);
   if (!t.total) return 'No votes yet';
   const n = plural(t.total, 'vote');
-  return t.tied ? `${n}, tied` : `${n}, ${t.options[t.leaders[0]].label} leads`;
+  return t.tied ? `${n}, tied` : n;
 }
 
 // ── The card's More menu ─────────────────────────────────────────────────────
