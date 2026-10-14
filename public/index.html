@@ -118,13 +118,17 @@
     <button class="btn-primary" id="btn-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
     <div class="sub sans" id="subtitle" hidden></div>
 
-    <!-- Loading: the list's own shape, skeleton bars where text goes. -->
+    <!-- Loading: the list's own shape, skeleton bars where text goes. The
+         dot is a grey placeholder circle (dot-ph), not teal: nothing is
+         unread yet. The first bar sits where the subtitle goes, so the list
+         does not jump when the real line appears. -->
     <div id="state-loading" hidden>
+      <div class="sub sans"><span class="skeleton skel w-2/3"></span></div>
       <div class="section-label sans">Today</div>
       <ul class="list">
-      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-24"></span><span class="skeleton skel w-14"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-3/4"></div></div></li>
-      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-20"></span><span class="skeleton skel w-10"></span></div><div class="skeleton skel w-5/6"></div><div class="skeleton skel w-2/3"></div></div></li>
-      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-28"></span><span class="skeleton skel w-12"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-1/2"></div></div></li>
+      <li class="list-row"><span class="dot dot-ph"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-24"></span><span class="skeleton skel w-14"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-3/4"></div></div></li>
+      <li class="list-row"><span class="dot dot-ph"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-20"></span><span class="skeleton skel w-10"></span></div><div class="skeleton skel w-5/6"></div><div class="skeleton skel w-2/3"></div></div></li>
+      <li class="list-row"><span class="dot dot-ph"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-28"></span><span class="skeleton skel w-12"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-1/2"></div></div></li>
       </ul>
     </div>
 
@@ -243,7 +247,10 @@
     // ── Time ──
     function startOfDay(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
     function fmtTime(iso) {
-      return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+      // A non-breaking space before am/pm, so "6:31 pm" never wraps leaving
+      // "pm" alone on the next line.
+      return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        .toLowerCase().replace(/ ([ap])m$/, ' $1m');
     }
     function dayLabel(iso) {
       var t = new Date(iso); if (isNaN(t)) return 'Earlier';

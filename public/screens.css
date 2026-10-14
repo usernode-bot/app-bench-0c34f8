@@ -18,6 +18,7 @@
   color: rgb(var(--fg));
   min-height: 100vh;
   width: 390px;
+  margin-inline: auto;
   font-family: ui-serif,Georgia,"Times New Roman",serif;
   font-size: 16px;
   line-height: 24px;
@@ -55,7 +56,14 @@
 
 .list-row:first-child {border-top:0}
 
-.dot {flex:none;width:10px;height:10px;border-radius:50%;background:rgb(var(--accent));margin-top:7px}
+/* align-self:start, so the kit's .list-row items-center (right for a Feeds
+   row) does not float the dot beside the summary: it marks the post's first
+   line, level with the feed name. */
+.dot {flex:none;align-self:flex-start;width:10px;height:10px;border-radius:50%;background:rgb(var(--accent));margin-top:7px}
+
+/* The loading rows' dot: a grey placeholder circle, not a teal one — before
+   the posts load, nothing is yet unread. */
+.dot-ph {background:rgb(var(--line))}
 
 .dot.read {background:transparent;border:1.5px solid rgb(var(--line))}
 
@@ -112,6 +120,13 @@
 /* The feeds sheet reuses the drawn .list, whose outer margins belong to
    the screen, not to a sheet that is already padded. */
 [data-spec-screen="2"] .list {margin:0 0 8px;overflow-y:auto}
+
+/* The Add feed form: the drawn .section-label's 24px padding belongs to the
+   screen's list margins, not to a sheet that is already padded 20px, so the
+   label sits on the same left edge as the field; and an even 12px gap
+   between the label, field, error line and button. */
+[data-spec-screen="2"] #add-form {display:flex;flex-direction:column;align-items:stretch;gap:12px}
+[data-spec-screen="2"] #add-form .section-label {padding:0;margin-bottom:0}
 
 /* The app's loading, empty and error states, on the design kit's
    components: .app's own reset strips the utilities' padding and margins,
