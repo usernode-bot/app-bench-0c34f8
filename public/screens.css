@@ -14,7 +14,9 @@
 
 .s * {box-sizing:border-box;margin:0}
 
-.wrap {padding:16px 16px 32px;display:flex;flex-direction:column;gap:24px}
+/* One column, max 28rem, centred — at desktop widths the column holds the
+   same 448px measure as the phone, with the page ground on either side. */
+.wrap {max-width:28rem;margin:0 auto;padding:16px 16px 32px;display:flex;flex-direction:column;gap:24px}
 
 .hd {display:flex;align-items:center;gap:10px}
 
@@ -56,7 +58,11 @@
 
 .g {font-variant-numeric:tabular-nums;font-weight:650;text-align:right}
 
-.meter {display:flex;align-items:center;gap:16px;padding:16px}
+/* Meter and slider read as one control: 16px more air below the meter, and
+   no divider line between them (the kit .list divides every child). */
+.meter {display:flex;align-items:center;gap:16px;padding:16px 16px 32px}
+
+.list > .meter ~ .range {border-top-width:0}
 
 .meter svg {width:120px;height:72px;flex:none}
 
@@ -94,7 +100,12 @@
 
 .seg .sel {background:rgb(var(--surface));box-shadow:0 0 0 1px rgb(var(--line));font-weight:600}
 
-.field {min-height:44px;width:112px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums}
+/* The weight field: the bordered box with a muted "g" inside, to the right
+   of the number (app.js's input holds bare digits). */
+.weight-field {display:flex;align-items:center;min-height:44px;width:112px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:0 12px}
+.weight-field input {flex:1;min-width:0;min-height:42px;border:0;padding:0;background:transparent;text-align:right;font:inherit;font-size:16px;line-height:24px;color:rgb(var(--fg));font-variant-numeric:tabular-nums;outline:none}
+.weight-field:focus-within {border-color:rgb(var(--focus));box-shadow:0 0 0 2px rgb(var(--focus))}
+.weight-field .unit {color:rgb(var(--muted));padding-left:6px;font-variant-numeric:tabular-nums}
 
 .rh {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:8px;padding:0 4px}
 
