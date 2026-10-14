@@ -182,10 +182,18 @@
 
   /* ── Loading ── */
 
+  // GET answers with a JSON body even when the server fails (500); the
+// failed load must reach the error state, never the empty one.
+async function getJson(path) {
+    const res = await api(path);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
   async function load() {
     showState('loading');
     try {
-      const data = await (await api('posts')).json();
+      const data = await getJson('posts');
       applyPosts(data);
       state.loaded = true;
       renderList();
@@ -196,7 +204,7 @@
     // The stored posts are on screen; now check the feeds for new ones.
     try {
       await api('refresh', { method: 'POST' });
-      const data = await (await api('posts')).json();
+      const data = await getJson('posts');
       state.refreshNote = false;
       applyPosts(data);
       renderList();

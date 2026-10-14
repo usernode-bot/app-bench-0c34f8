@@ -101,9 +101,10 @@
        filled from the API by public/app.js. -->
   <div data-spec-screen="1" id="view-list">
     <div class="rss">
-    <div class="top"><div><h1>Unread</h1><p class="sub" id="count-line"></p></div>
+    <div class="top"><div><h1>Unread</h1></div>
     <div class="acts"><button class="btn-secondary" id="feeds-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
     <button class="btn-primary" id="add-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>Add feed</button></div></div>
+    <p class="sub count-line" id="count-line"></p>
     <p class="refresh-note" id="refresh-note" hidden>Some feeds could not be checked just now. Your posts are still here.</p>
     <p class="section-label" id="newest-label">Newest first</p>
     <ul class="list" id="post-list"></ul>
@@ -116,7 +117,7 @@
     <div class="state-error" id="list-error" hidden>
       <p class="empty-title">Your posts couldn't be loaded</p>
       <p class="empty-sub">Your feeds are still saved. Check your connection and try again.</p>
-      <button class="btn-secondary" id="retry-button" type="button">Retry</button>
+      <button class="btn-primary" id="retry-button" type="button">Retry</button>
     </div>
     <!-- The row the list renders from; hidden, its values set from data. -->
     <li id="row-template" hidden><a class="card post-card" href="#"><div class="meta"><b></b><span></span></div><p class="t"></p><p class="ex"></p></a></li>

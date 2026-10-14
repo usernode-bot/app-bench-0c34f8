@@ -17,7 +17,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1040px;
-  width: 390px;
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
   font-family: ui-serif,Georgia,serif;
   font-size: 16px;
   line-height: 24px;
@@ -64,7 +66,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 844px;
-  width: 390px;
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
   font-family: ui-serif,Georgia,serif;
   font-size: 16px;
   line-height: 24px;
@@ -127,6 +131,17 @@
 #add-sheet {position:fixed;bottom:0;left:0;right:0;margin-inline:auto;max-width:42rem;z-index:41;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-bottom:0;border-radius:16px 16px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
 #add-sheet .sheet-head {display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px}
 #add-sheet .ghost {display:inline-flex;align-items:center;min-height:44px;min-width:44px;border:0;background:none;color:rgb(var(--muted));padding:0 10px;border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif}
-#add-sheet #sheet-title {font:600 16px/24px ui-serif,Georgia,serif;margin:0}
+#add-sheet #sheet-title {font:600 16px/24px ui-rounded,system-ui,sans-serif;margin:0}
 .sheet-label {display:block;font:500 14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--fg));margin:4px 0 6px}
 .sheet-error {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--danger));margin:8px 0 0}
+
+/* ── Review round 1 ── */
+
+/* Issue 2: the count line is its own full-width row under the top bar row
+   (which holds the heading and the buttons), so it never wraps. */
+.rss p.count-line {font:14px/20px ui-rounded,system-ui,sans-serif;color:rgb(var(--muted));padding:0 17px;margin:-4px 0 10px}
+
+/* Issue 4: the empty state sits about a third of the way down the screen,
+   with room between the explainer line and its button. */
+.rss .state-empty {margin-top:20vh}
+.rss .state-empty .btn-primary {margin-top:16px}
