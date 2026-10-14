@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,6 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +63,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%230f766e'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,56 +108,427 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+  <!-- The Unread screen, the spec's screen 1: the drawn markup, its rows
+       rendered from data. Values drawn there were sample data; they are
+       emptied here and set from /api/posts. -->
   <div data-spec-screen="1">
     <div class="app">
     <div class="top sans"><div class="title">Unread</div>
-    <button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
-    <button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
-    <div class="sub sans">14 new from 6 feeds, updated 8:12 am</div>
-    <div class="section-label sans">Today</div>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">42 min ago</span></div><div class="h">The quiet return of the dumbphone</div><div class="ex sans">Sales of basic handsets are up for a third year as people look for ways to switch off.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">2 h ago</span></div><div class="h">Why your focaccia needs more water than you think</div><div class="ex sans">A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">3 h ago</span></div><div class="h">Notes on a smaller, faster text editor</div><div class="ex sans">A week with an editor that opens instantly and does very little else, and why that was enough.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">5 h ago</span></div><div class="h">A map of every lighthouse still staffed</div><div class="ex sans">Fewer than twenty keepers remain worldwide. Their stories, and where to find them.</div></div></li>
-    </ul>
-    <div class="section-label sans">Yesterday</div>
-    <ul class="list">
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">Tue, 9:40 pm</span></div><div class="h">Handheld consoles are getting weirdly good</div><div class="ex sans">Battery life is the new spec race, and the newest models finally last a full flight.</div></div></li>
-    <li class="list-row rd"><span class="dot read"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Tue, 4:15 pm</span></div><div class="h">The best way to cook a weeknight rice</div><div class="ex sans">Rinse, rest, and trust the lid. A method that works every time.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">Tue, 11:02 am</span></div><div class="h">What a hundred-year-old seed vault teaches us</div><div class="ex sans">Inside the cold room where forgotten varieties wait for a second chance.</div></div></li>
-    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">Tue, 8:30 am</span></div><div class="h">On the slow death of the home screen widget</div><div class="ex sans">Why the most promising idea in phone design never quite found its audience.</div></div></li>
-    </ul>
+    <button class="btn-secondary" id="btn-feeds" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary" id="btn-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
+    <div class="sub sans" id="subtitle" hidden></div>
+
+    <!-- Loading: the list's own shape, skeleton bars where text goes. -->
+    <div id="state-loading" hidden>
+      <div class="section-label sans">Today</div>
+      <ul class="list">
+      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-24"></span><span class="skeleton skel w-14"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-3/4"></div></div></li>
+      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-20"></span><span class="skeleton skel w-10"></span></div><div class="skeleton skel w-5/6"></div><div class="skeleton skel w-2/3"></div></div></li>
+      <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="skeleton skel w-28"></span><span class="skeleton skel w-12"></span></div><div class="skeleton skel w-full"></div><div class="skeleton skel w-1/2"></div></div></li>
+      </ul>
+    </div>
+
+    <!-- No feeds yet: the one filled button here, not in the header. -->
+    <div id="state-empty" class="state-empty sans" hidden>
+      <p class="text-body font-semibold">No feeds yet.</p>
+      <p class="text-small text-muted">Add the address of a site's feed and its new posts show up here.</p>
+      <button class="btn-primary" id="btn-add-empty" type="button">Add feed</button>
+    </div>
+
+    <!-- All caught up: feeds exist, nothing unread. -->
+    <div id="state-caughtup" class="state-empty sans" hidden>
+      <p class="text-body font-semibold">You're all caught up.</p>
+      <p class="text-small text-muted" id="caughtup-line"></p>
+    </div>
+
+    <!-- Could not load. -->
+    <div id="state-error" class="state-error sans" hidden>
+      <p class="text-body font-semibold">Couldn't load your posts.</p>
+      <p class="text-small text-muted">Your feeds are still saved.</p>
+      <button class="btn-primary" id="btn-retry" type="button">Retry</button>
+    </div>
+
+    <!-- The unread posts, grouped by day, rendered from data. -->
+    <div id="groups"></div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="behind sans">Unread</div>
-      <div class="scrim"></div>
-      <div class="sheet">
-      <div class="grab"></div>
-      <div class="bar"><button class="btn-icon" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Today, 6:10 am</span></div>
-      <div class="h">Why your focaccia needs more water than you think</div>
-      <div class="summary"><p>A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</p><p>We baked twelve loaves at rising hydration, from a stiff 65 percent to a loose 85, and the wettest ones won every blind tasting. The trick is to stop kneading and start folding: four sets of folds, half an hour apart, and an oiled tin that does the shaping for you.</p></div>
-      <div class="note sans">This is the summary the feed shares. The full article is on the site.</div>
-      <button class="btn-primary sans"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
-      </div>
-      </div>
+
+  <!-- The post preview, the spec's screen 2, shown as a sheet over the list.
+       Its fields are emptied and filled from the tapped post. -->
+  <div data-spec-screen="2" id="preview" hidden>
+    <div class="scrim" data-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+    <div class="grab"></div>
+    <div class="bar"><button class="btn-icon" id="preview-close" type="button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="meta sans" id="preview-meta"></div>
+    <div class="h" id="preview-title"></div>
+    <div class="summary" id="preview-summary"></div>
+    <div class="note sans">This is the summary the feed shares. The full article is on the site.</div>
+    <button class="btn-primary sans" id="preview-open" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
     </div>
+  </div>
+
+  <!-- Add feed sheet, composed in the drawn sheet's language. -->
+  <div data-spec-screen="2" id="add-sheet" hidden>
+    <div class="scrim" data-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="add-title">
+    <div class="grab"></div>
+    <div class="bar"><button class="btn-icon" id="add-close" type="button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="h sans" id="add-title">Add feed</div>
+    <form id="add-form" novalidate>
+      <label class="section-label sans" for="feed-url">Feed address</label>
+      <input class="field sans" id="feed-url" name="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+      <p class="sans text-small text-danger" id="add-error" hidden></p>
+      <button class="btn-primary sans" id="add-submit" type="submit">Add feed</button>
+    </form>
+    </div>
+  </div>
+
+  <!-- Feeds sheet: your feeds, each with its address and Remove. -->
+  <div data-spec-screen="2" id="feeds-sheet" hidden>
+    <div class="scrim" data-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="feeds-title">
+    <div class="grab"></div>
+    <div class="bar"><button class="btn-icon" id="feeds-close" type="button" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="h sans" id="feeds-title">Feeds</div>
+    <ul class="list sans" id="feeds-list"></ul>
+    <p class="sans text-small text-muted" id="feeds-empty" hidden>No feeds yet. Your feeds and what you have read stay yours alone.</p>
+    </div>
+  </div>
+  <!-- The drawn row, kept as the one row every row is rendered from; and
+       the badge's RSS waves, cloned wherever a feed's name is shown. -->
+  <template id="row-tpl">
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">42 min ago</span></div><div class="h">The quiet return of the dumbphone</div><div class="ex sans">Sales of basic handsets are up for a third year as people look for ways to switch off.</div></div></li>
   </template>
-  <!-- /usernode-spec-screens@1 -->
+  <template id="icon-rss"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg></template>
+  <script>
+  (function () {
+    'use strict';
+    var params = new URLSearchParams(location.search);
+    var DEMO = params.get('demo') === '1';
+    var TOKEN = params.get('token') || '';
+
+    // Forward the token as the header the server reads; pass demo=1 on.
+    function api(path, opts) {
+      opts = opts || {};
+      var url = path + (DEMO ? (path.indexOf('?') >= 0 ? '&' : '?') + 'demo=1' : '');
+      var headers = opts.headers || {};
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      if (opts.body) headers['Content-Type'] = 'application/json';
+      return fetch(url, { method: opts.method || 'GET', headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (data) {
+            return { ok: r.ok, status: r.status, data: data };
+          });
+        });
+    }
+
+    function $(id) { return document.getElementById(id); }
+    var subtitle = $('subtitle'), groups = $('groups');
+    var states = { loading: $('state-loading'), empty: $('state-empty'), caughtup: $('state-caughtup'), error: $('state-error') };
+    var sheets = { preview: $('preview'), add: $('add-sheet'), feeds: $('feeds-sheet') };
+
+    var posts = [];
+    var feedCount = 0;
+    var unreadCount = 0;
+    var updatedAt = null;
+    var failedFeeds = [];
+    var isDemo = false;
+    var now = new Date();
+
+    function show(state) {
+      for (var k in states) states[k].hidden = state !== k ? true : false;
+    }
+
+    // ── Time ──
+    function startOfDay(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+    function fmtTime(iso) {
+      return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+    }
+    function dayLabel(iso) {
+      var t = new Date(iso); if (isNaN(t)) return 'Earlier';
+      var days = Math.round((startOfDay(now) - startOfDay(t)) / 86400000);
+      if (days <= 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      return t.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    }
+    function rowTime(iso) {
+      var t = new Date(iso); if (isNaN(t)) return '';
+      return startOfDay(t).getTime() === startOfDay(now).getTime()
+        ? ago(t) : t.toLocaleDateString('en-US', { weekday: 'short' }) + ', ' + fmtTime(iso);
+    }
+    function ago(t) {
+      var mins = Math.max(1, Math.round((now - t) / 60000));
+      if (mins < 60) return mins + ' min ago';
+      return Math.round(mins / 60) + ' h ago';
+    }
+    function previewTime(iso) {
+      var t = new Date(iso); if (isNaN(t)) return '';
+      var days = Math.round((startOfDay(now) - startOfDay(t)) / 86400000);
+      var day = days <= 0 ? 'Today' : days === 1 ? 'Yesterday'
+        : t.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      return day + ', ' + fmtTime(iso);
+    }
+
+    // ── Subtitle ──
+    function renderSubtitle() {
+      if (feedCount === 0) { subtitle.hidden = true; return; }
+      subtitle.hidden = false;
+      subtitle.textContent = (isDemo ? 'Staging demo, ' : '') + unreadCount
+        + ' new from ' + feedCount + (feedCount === 1 ? ' feed' : ' feeds')
+        + (updatedAt ? ', updated ' + fmtTime(updatedAt) : '');
+      if (failedFeeds.length) {
+        var line = document.createElement('div');
+        line.textContent = failedFeeds.join(', ') + ' could not be updated.';
+        subtitle.appendChild(line);
+      }
+    }
+
+    // ── Rows ──
+    var rowTpl = $('row-tpl');
+    function rowFor(p) {
+      var li = rowTpl.content.firstElementChild.cloneNode(true);
+      if (p.read_at) { li.classList.add('rd'); li.querySelector('.dot').classList.add('read'); }
+      var badge = li.querySelector('.badge');
+      var svg = rssIcon();
+      badge.textContent = '';
+      if (svg) badge.appendChild(svg);
+      badge.appendChild(document.createTextNode(p.feed_title || ''));
+      li.querySelector('.time').textContent = rowTime(p.published_at);
+      li.querySelector('.h').textContent = p.title || '(No title)';
+      li.querySelector('.ex').textContent = p.summary || '';
+      li.dataset.id = p.id;
+      li.setAttribute('role', 'button');
+      li.tabIndex = 0;
+      li.setAttribute('aria-label', (p.read_at ? 'Read post: ' : 'Unread post: ') + (p.title || ''));
+      li.addEventListener('click', function () { openPost(p, li); });
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPost(p, li); }
+      });
+      return li;
+    }
+
+    function render() {
+      groups.textContent = '';
+      if (feedCount === 0) {
+        $('btn-add').hidden = true;
+        show('empty');
+        subtitle.hidden = true;
+        return;
+      }
+      $('btn-add').hidden = false;
+      if (posts.length === 0) {
+        $('caughtup-line').textContent = 'Nothing new in your ' + feedCount
+          + (feedCount === 1 ? ' feed.' : ' feeds.');
+        show('caughtup');
+        renderSubtitle();
+        return;
+      }
+      show(null);
+      renderSubtitle();
+      var lastLabel = null, lastUl = null;
+      posts.forEach(function (p) {
+        var label = dayLabel(p.published_at);
+        if (label !== lastLabel) {
+          var lab = document.createElement('div');
+          lab.className = 'section-label sans';
+          lab.textContent = label;
+          lastUl = document.createElement('ul');
+          lastUl.className = 'list';
+          groups.appendChild(lab);
+          groups.appendChild(lastUl);
+          lastLabel = label;
+        }
+        lastUl.appendChild(rowFor(p));
+      });
+    }
+
+    function loadPosts() {
+      show('loading');
+      subtitle.hidden = true;
+      groups.textContent = '';
+      api('/api/posts').then(function (r) {
+        if (!r.ok) throw new Error('load failed');
+        posts = r.data.posts || [];
+        feedCount = r.data.feed_count || 0;
+        unreadCount = posts.length;
+        updatedAt = r.data.updated_at;
+        failedFeeds = r.data.failed_feeds || [];
+        isDemo = !!r.data.demo;
+        if (r.data.now) now = new Date(r.data.now);
+        render();
+      }).catch(function () {
+        show('error');
+        subtitle.hidden = true;
+      });
+    }
+
+    // ── Sheets ──
+    var openSheets = [];
+    function openSheet(el, focusEl) {
+      el.hidden = false;
+      openSheets.push(el);
+      (focusEl || el.querySelector('.btn-icon')).focus();
+    }
+    function closeSheet(el) {
+      el.hidden = true;
+      openSheets = openSheets.filter(function (s) { return s !== el; });
+      if (lastRow && el === sheets.preview) lastRow.focus();
+      else if (el === sheets.feeds) loadPosts(); // removals and the demo are already stored
+    }
+    document.querySelectorAll('.scrim[data-close]').forEach(function (scrim) {
+      scrim.addEventListener('click', function () { closeSheet(scrim.parentElement); });
+    });
+    document.querySelectorAll('.btn-icon[id]').forEach(function (btn) {
+      btn.addEventListener('click', function () { closeSheet(btn.closest('[data-spec-screen="2"]')); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && openSheets.length) closeSheet(openSheets[openSheets.length - 1]);
+    });
+
+    // ── Preview ──
+    var lastRow = null;
+    var previewPost = null;
+    var iconTpl = $('icon-rss');
+    function rssIcon() {
+      return iconTpl ? iconTpl.content.firstElementChild.cloneNode(true) : null;
+    }
+    function openPost(p, li) {
+      lastRow = li;
+      previewPost = p;
+      var meta = $('preview-meta');
+      meta.textContent = '';
+      var badge = document.createElement('span');
+      badge.className = 'badge';
+      var svg = rssIcon();
+      if (svg) badge.appendChild(svg);
+      badge.appendChild(document.createTextNode(p.feed_title || ''));
+      meta.appendChild(badge);
+      var time = document.createElement('span');
+      time.className = 'time';
+      time.textContent = previewTime(p.published_at);
+      meta.appendChild(time);
+      $('preview-title').textContent = p.title || '(No title)';
+      var sum = $('preview-summary');
+      sum.textContent = '';
+      sum.hidden = !p.summary;
+      if (p.summary) {
+        var par = document.createElement('p');
+        par.textContent = p.summary;
+        sum.appendChild(par);
+      }
+      $('preview-open').disabled = !p.link;
+      openSheet(sheets.preview);
+      if (!p.read_at) {
+        p.read_at = now.toISOString();
+        li.classList.add('rd');
+        li.querySelector('.dot').classList.add('read');
+        li.setAttribute('aria-label', 'Read post: ' + (p.title || ''));
+        unreadCount = Math.max(0, unreadCount - 1);
+        renderSubtitle();
+        api('/api/posts/' + p.id + '/read', { method: 'POST' });
+      }
+    }
+    $('preview-open').addEventListener('click', function () {
+      if (previewPost && previewPost.link) window.open(previewPost.link, '_blank', 'noopener');
+    });
+
+    // ── Add feed ──
+    var addError = $('add-error'), feedUrl = $('feed-url'), addSubmit = $('add-submit');
+    function openAdd() { addError.hidden = true; openSheet(sheets.add, feedUrl); }
+    $('btn-add').addEventListener('click', openAdd);
+    $('btn-add-empty').addEventListener('click', function () {
+      // The empty state's own button steps aside while its sheet is open.
+      $('state-empty').hidden = true;
+      openAdd();
+    });
+    feedUrl.addEventListener('input', function () { addError.hidden = true; });
+    $('add-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var url = feedUrl.value.trim();
+      if (!url) {
+        addError.textContent = 'Enter the feed\'s address.';
+        addError.hidden = false;
+        return;
+      }
+      addSubmit.disabled = true;
+      api('/api/feeds', { method: 'POST', body: { url: url } }).then(function (r) {
+        if (r.ok) {
+          feedUrl.value = '';
+          addError.hidden = true;
+          closeSheet(sheets.add);
+          loadPosts();
+        } else {
+          var msg = r.data && r.data.error ? r.data.error : 'Couldn\'t add that feed. Try again.';
+          if (msg === 'account_required') msg = 'Make an account to add feeds.';
+          addError.textContent = msg;
+          addError.hidden = false;
+        }
+      }).catch(function () {
+        addError.textContent = 'Couldn\'t add that feed. Try again.';
+        addError.hidden = false;
+      }).finally(function () { addSubmit.disabled = false; });
+    });
+
+    // ── Feeds ──
+    $('btn-feeds').addEventListener('click', function () {
+      var list = $('feeds-list');
+      list.textContent = '';
+      $('feeds-empty').hidden = true;
+      openSheet(sheets.feeds);
+      api('/api/feeds').then(function (r) {
+        var feeds = (r.data && r.data.feeds) || [];
+        if (!feeds.length) { $('feeds-empty').hidden = false; return; }
+        feeds.forEach(function (f) {
+          var li = document.createElement('li');
+          li.className = 'list-row';
+          var body = document.createElement('div');
+          body.className = 'body';
+          var name = document.createElement('div');
+          name.className = 'text-body font-medium';
+          name.textContent = f.title || 'Untitled feed';
+          var url = document.createElement('div');
+          url.className = 'text-small text-muted';
+          url.style.wordBreak = 'break-all';
+          url.textContent = f.url;
+          body.appendChild(name);
+          body.appendChild(url);
+          var remove = document.createElement('button');
+          remove.className = 'btn-secondary';
+          remove.type = 'button';
+          remove.textContent = 'Remove';
+          remove.addEventListener('click', function () {
+            if (remove.dataset.armed) {
+              remove.disabled = true;
+              api('/api/feeds/' + f.id, { method: 'DELETE' }).then(function (r) {
+                if (r.ok) {
+                  li.remove();
+                  if (!list.children.length) $('feeds-empty').hidden = false;
+                  feedCount = Math.max(0, feedCount - 1);
+                  posts = posts.filter(function (p) { return (p.feed_title || '') !== (f.title || ''); });
+                  unreadCount = posts.length;
+                  render();
+                } else {
+                  remove.disabled = false;
+                  delete remove.dataset.armed;
+                  remove.textContent = 'Remove';
+                }
+              });
+            } else {
+              remove.dataset.armed = '1';
+              remove.textContent = 'Confirm';
+            }
+          });
+          li.appendChild(body);
+          li.appendChild(remove);
+          list.appendChild(li);
+        });
+      });
+    });
+
+    $('btn-retry').addEventListener('click', loadPosts);
+    loadPosts();
+  })();
+  </script>
 </body>
 </html>

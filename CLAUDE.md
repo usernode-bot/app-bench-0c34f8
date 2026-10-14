@@ -95,22 +95,39 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal RSS reader, first version: each person adds their own RSS/Atom
+feeds and reads every unread post from them in one scrolling list, newest
+first, grouped by day. Tapping a post opens a preview sheet (the summary
+the feed shares) with an "Open full article" button. Feeds and read state
+are per member, private to them (`feeds` and `posts` are both
+`staging:private`). Read state: a post is read once tapped, stays in place
+until the viewer leaves, and is not listed next time. Feeds refresh when
+the app is opened; previews show the feed's summary, not the full page.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm paper greys — page `--ground` 250 249 247, lists and
+  sheets `--surface` 255 255 255, raised `--raised` 243 241 237 — with
+  near-black ink `--fg` 28 25 23, muted text `--muted` 87 83 78 and lines
+  `--line` 231 228 223. One action colour, a deep teal: `--accent`
+  15 118 110 (dark 45 212 191 with dark text 4 47 46 on it) for buttons and
+  unread dots. A muted "source" brown for feed names: `--source` 146 84 38
+  (dark 230 167 112).
+- **Signature element:** each post row starts with a teal unread dot, like
+  a marker on a folded newspaper, which turns into an empty ring once the
+  post is read (the row's title goes grey). Next to it a small feed badge:
+  the RSS waves icon and the feed's name in the source brown.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Post titles read in a serif stack (`font-serif`: ui-serif, Georgia);
+  dates, feed names and controls in a rounded sans (`font-rounded`:
+  ui-rounded, system-ui). The drawn screens set the same two stacks
+  directly in `public/screens.css`.
+- Both looks are kept: the palette's light values are in `:root`, the dark
+  ones in `.dark` of `styles/tailwind-input.css`, following the viewer's
+  Homeroom theme. Every text pair stays at 4.5:1 or more in both.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +157,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Both tables, `feeds` and `posts`, are `staging:private` (they hold one
+  person's own reading). Keep them that way.
+- Post summaries and titles are stored and rendered as plain text
+  (HTML stripped on the server; rendered with `textContent` only).
+- Addresses a person typed are fetched through the SSRF guard
+  (`guardedGet`/`guardedLookup` in `server.js`) — never with plain `fetch`.
+- Demo data only on staging with `?demo=1`: demo rows carry `is_demo =
+  true` and every non-demo response leaves them out, so the plain route
+  stays production-shaped and the "No feeds yet" check passes after the
+  demo check has seeded the same viewer.

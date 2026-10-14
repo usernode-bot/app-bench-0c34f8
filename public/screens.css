@@ -16,7 +16,7 @@
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 1080px;
+  min-height: 100vh;
   width: 390px;
   font-family: ui-serif,Georgia,"Times New Roman",serif;
   font-size: 16px;
@@ -75,45 +75,57 @@
 
 .list-row.rd .h {font-weight:500;color:rgb(var(--muted))}
 
-/* Screen 2: its rules the first screen has not got. */
-
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  height: 844px;
-  width: 390px;
-  font-family: ui-serif,Georgia,"Times New Roman",serif;
-  font-size: 16px;
-  line-height: 24px;
-  position: relative;
-  overflow: hidden;
+/* Screen 2: its rules, scoped to its own container so they do not restyle
+   screen 1. The drawn canvas was a 390 px phone; the real app shows the
+   same sheets fixed over the list, one centred column on a wider window.
+   The sheets scroll inside themselves and cover nothing at 360 to 390 px. */
+[data-spec-screen="2"] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
 }
 
-.behind {
-  padding: 56px 20px;
-  font-size: 28px;
-  line-height: 36px;
-  font-weight: 700;
+[data-spec-screen="2"] .scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
+
+[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;bottom:0;top:auto;max-height:calc(100% - 24px);max-width:390px;margin:0 auto;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 24px;display:flex;flex-direction:column;overflow:hidden}
+
+[data-spec-screen="2"] .grab {width:36px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 8px;flex:none}
+
+[data-spec-screen="2"] .bar {display:flex;justify-content:flex-end;flex:none}
+
+[data-spec-screen="2"] .btn-icon {width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:0;background:transparent;color:rgb(var(--muted))}
+
+[data-spec-screen="2"] .meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:8px;flex:none}
+
+[data-spec-screen="2"] .h {font-size:24px;line-height:30px;font-weight:700;margin-bottom:16px;flex:none}
+
+[data-spec-screen="2"] .summary {font-size:17px;line-height:28px;flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+[data-spec-screen="2"] .summary p {margin-bottom:14px}
+
+[data-spec-screen="2"] .note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:12px;flex:none}
+
+[data-spec-screen="2"] .btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:500;border:0;width:100%;flex:none}
+
+/* The feeds sheet reuses the drawn .list, whose outer margins belong to
+   the screen, not to a sheet that is already padded. */
+[data-spec-screen="2"] .list {margin:0 0 8px;overflow-y:auto}
+
+/* The app's loading, empty and error states, on the design kit's
+   components: .app's own reset strips the utilities' padding and margins,
+   so the states' spacing is set here. */
+.app .state-empty,
+.app .state-error {
+  padding: 40px 16px;
+  gap: 8px;
 }
+.app .state-empty .btn-primary,
+.app .state-error .btn-primary {margin-top: 12px}
 
-.scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
-
-.sheet {position:absolute;left:0;right:0;bottom:0;top:120px;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 32px;display:flex;flex-direction:column}
-
-.grab {width:36px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 8px}
-
-.bar {display:flex;justify-content:flex-end}
-
-.btn-icon {width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:0;background:transparent;color:rgb(var(--muted))}
-
-.meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;margin-bottom:8px}
-
-.h {font-size:24px;line-height:30px;font-weight:700;margin-bottom:16px}
-
-.summary {font-size:17px;line-height:28px;flex:1}
-
-.summary p {margin-bottom:14px}
-
-.note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:12px}
-
-.btn-primary {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-size:16px;font-weight:500;border:0;width:100%}
+/* Skeleton bars in the loading rows: heights and the gaps between them,
+   since .app's reset strips margin utilities. Widths stay tailwind's w-*. */
+.app .skel {display:block;height:14px;border-radius:6px}
+.app .meta .skel {height:12px}
+.app .body .skel + .skel {margin-top:6px}

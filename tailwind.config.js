@@ -55,6 +55,13 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        source: token('source'), // feed names, the brown ink
+      },
+      // The faces this app reads in: serif for post titles (a printed page),
+      // rounded sans for dates, feed names and controls.
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', '"Times New Roman"', 'serif'],
+        rounded: ['ui-rounded', 'system-ui', '-apple-system', '"Segoe UI"', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

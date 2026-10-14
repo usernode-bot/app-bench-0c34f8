@@ -3,5 +3,25 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Empty state on the plain route",
+      "path": "/",
+      "expectText": "No feeds yet"
+    },
+    {
+      "id": "demo-unread",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectSelector": ".list-row",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
