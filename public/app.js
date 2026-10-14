@@ -12,39 +12,42 @@
       name: 'Sourdough', nounOne: 'sourdough loaf', nounMany: 'sourdough loaves',
       hydration: 72, size: 750,
       items: [['Bread flour', 100], ['Water', 'h'], ['Salt', 2], ['Starter', 20]],
-      rise: '4 to 6 hr', riseNote: 'at 24°C, then 1 to 2 hr shaped',
-      bake: '230°C', bakeNote: '45 min, steam first 20',
+      rise: '4 to 6 hr', riseNote: 'at 24°C, then 1 to 2 hr shaped',
+      bake: '230°C', bakeNote: '45 min, steam first 20',
     },
     'bagels': {
       name: 'Bagels', nounOne: 'bagel', nounMany: 'bagels',
       hydration: 58, size: 110, countLabel: 'Bagels', sizeLabel: 'Size per bagel',
       items: [['Bread flour', 100], ['Water', 'h'], ['Salt', 2], ['Instant yeast', 1], ['Malt syrup', 3]],
-      rise: '1 hr', riseNote: 'at 24°C, then 20 min shaped',
-      bake: '220°C', bakeNote: '20 min, boil 1 min a side first',
+      rise: '1 hr', riseNote: 'at 24°C, then 20 min shaped',
+      bake: '220°C', bakeNote: '20 min, boil 1 min a side first',
     },
     'sourdough-bagels': {
       name: 'Sourdough bagels', nounOne: 'sourdough bagel', nounMany: 'sourdough bagels',
       hydration: 58, size: 110, countLabel: 'Bagels', sizeLabel: 'Size per bagel',
       items: [['Bread flour', 100], ['Water', 'h'], ['Salt', 2], ['Starter', 20], ['Malt syrup', 3]],
-      rise: '4 to 5 hr', riseNote: 'at 24°C, then overnight in the fridge',
+      rise: '4 to 5 hr', riseNote: 'at 24°C, then overnight in the fridge',
       bake: '220°C', bakeNote: '20 min, boil 1 min a side first',
     },
     'rye': {
       name: 'Rye', nounOne: 'rye loaf', nounMany: 'rye loaves',
       hydration: 75, size: 750,
       items: [['Rye flour', 50], ['Bread flour', 50], ['Water', 'h'], ['Salt', 2], ['Starter', 20]],
-      rise: '3 to 4 hr', riseNote: 'at 24°C, then 1 hr shaped',
-      bake: '230°C', bakeNote: '50 min, steam first 15',
+      rise: '3 to 4 hr', riseNote: 'at 24°C, then 1 hr shaped',
+      bake: '230°C', bakeNote: '50 min, steam first 15',
     },
     'sandwich-loaf': {
       name: 'Sandwich loaf', nounOne: 'sandwich loaf', nounMany: 'sandwich loaves',
       hydration: 65, size: 900,
       items: [['Bread flour', 100], ['Water', 'h'], ['Salt', 2], ['Instant yeast', 1.5], ['Sugar', 5], ['Butter', 8]],
-      rise: '1 to 1½ hr', riseNote: 'at 24°C, then 1 hr in the pan',
-      bake: '190°C', bakeNote: '35 min',
+      rise: '1 to 1½ hr', riseNote: 'at 24°C, then 1 hr in the pan',
+      bake: '190°C', bakeNote: '35 min',
     },
   };
 
+  //   keeps a number and its unit on one line: the rise and bake cards
+  // are narrow, and '1 to 2 / hr shaped' breaks an orphaned 'hr' onto its
+  // own line.
   var COUNT_MIN = 1, COUNT_MAX = 24;
   var SIZE_MIN = 50, SIZE_MAX = 2000, SIZE_SMALL = 200, SIZE_SMALL_STEP = 10, SIZE_BIG_STEP = 50;
   var DIAL_CIRCUMFERENCE = 239; // r = 38

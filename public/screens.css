@@ -9,12 +9,14 @@
    design, such as a map. */
 [data-spec-screen] {
   width: 100%;
-  max-width: 42rem;
+  max-width: 420px;
   margin-inline: auto;
 }
 
 .bb {
-  width: 390px;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font-family: ui-rounded,system-ui,sans-serif;
@@ -43,6 +45,10 @@
 .card {border-radius:12px;border:1px solid rgb(var(--line));background:rgb(var(--surface));padding:16px}
 
 .dialrow {display:flex;align-items:center;gap:16px}
+
+/* The dial keeps its drawn 96×96: without this the long words beside it
+   shrink it as a flex item, and the ring and its number scale down with it. */
+.dialrow svg {flex:none}
 
 .dialrow p {margin:0;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
