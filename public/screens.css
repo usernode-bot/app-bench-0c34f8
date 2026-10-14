@@ -4,6 +4,8 @@
    tokens, rgb(var(--accent)), so they follow the light and the dark look. */
 
 .bb {
+  max-width: 640px;
+  margin: 0 auto;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font: 16px/1.5 system-ui,-apple-system,sans-serif;
@@ -70,7 +72,10 @@
 
 .bar .w {background:rgb(var(--accent));width:43%;opacity:.55}
 
-.list {list-style:none;margin:16px 0 0;padding:0;border-top:1px solid rgb(var(--line))}
+/* The formula card's ingredient list is a plain divided list, as the spec
+   draws it: a top rule and the rows' bottom rules, no box of its own
+   (the kit's .list rounds and borders; this screen's card already is the box). */
+.list {list-style:none;margin:16px 0 0;padding:0;border:0;border-top:1px solid rgb(var(--line));border-radius:0;overflow:visible;background:none}
 
 .list-row {display:flex;align-items:center;gap:12px;min-height:44px;padding:10px 0;border-bottom:1px solid rgb(var(--line))}
 
