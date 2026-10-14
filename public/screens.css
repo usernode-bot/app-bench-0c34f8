@@ -96,7 +96,9 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;strok
   padding: 12px 0;
 }
 
-[data-spec-screen="2"] .ghost {min-height:44px;padding:0 8px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:rgb(var(--muted));background:none;border:0;cursor:pointer}
+/* The ghost link (back to the list, report, delete): used by screen 2's nav
+   and by the new-decision screen's back link, so it is not scoped to "2". */
+[data-spec-screen] .ghost {min-height:44px;padding:0 8px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:rgb(var(--muted));background:none;border:0;cursor:pointer}
 
 [data-spec-screen="2"] .card {padding:20px 16px 16px;clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,0 100%)}
 

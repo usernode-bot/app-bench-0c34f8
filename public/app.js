@@ -148,7 +148,9 @@
       '<div class="seg">' + chips + '</div>' +
       body +
       '<div class="label">Decided by simple majority of votes cast. Abstain counts as taking part, not as a vote.</div>' +
-      (emptyOpen ? '' : '<button class="btn-primary fab" data-action="new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Post a decision</button>') +
+      // Hidden in the error state too, so Retry is the only filled button
+      // while nothing has loaded.
+      ((listError || emptyOpen) ? '' : '<button class="btn-primary fab" data-action="new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Post a decision</button>') +
       '</div></div>';
   }
 
@@ -322,7 +324,7 @@
   function renderNew() {
     $app.innerHTML =
       '<div data-spec-screen><main class="page-column" style="padding:28px 16px 40px;max-width:390px;margin-inline:auto">' +
-      '<button class="btn-secondary" data-action="back">Decisions</button>' +
+      '<button class="ghost" style="color:rgb(var(--fg));font-size:16px" data-action="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Decisions</button>' +
       '<div class="top" style="padding-left:0;padding-right:0"><div class="title">New decision</div>' +
       '<div class="small">One question for the club to vote on.</div></div>' +
       (message ? '<div class="small" role="status" style="padding:0 0 8px;color:rgb(var(--danger))">' + esc(message) + '</div>' : '') +

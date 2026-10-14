@@ -218,15 +218,15 @@ const CARD_COLUMNS = `
   d.id, d.author_id, d.author_name, d.question, d.details, d.status, d.result,
   d.created_at, d.closed_at,
   CASE WHEN d.status = 'open'
-    THEN (SELECT count(*) FROM votes v WHERE v.decision_id = d.id AND v.choice = 'yes')
+    THEN (SELECT count(*)::int FROM votes v WHERE v.decision_id = d.id AND v.choice = 'yes')
     ELSE d.yes_count END AS yes,
   CASE WHEN d.status = 'open'
-    THEN (SELECT count(*) FROM votes v WHERE v.decision_id = d.id AND v.choice = 'no')
+    THEN (SELECT count(*)::int FROM votes v WHERE v.decision_id = d.id AND v.choice = 'no')
     ELSE d.no_count END AS no,
   CASE WHEN d.status = 'open'
-    THEN (SELECT count(*) FROM votes v WHERE v.decision_id = d.id AND v.choice = 'abstain')
+    THEN (SELECT count(*)::int FROM votes v WHERE v.decision_id = d.id AND v.choice = 'abstain')
     ELSE d.abstain_count END AS abstain,
-  (SELECT count(*) FROM comments c WHERE c.decision_id = d.id) AS comment_count,
+  (SELECT count(*)::int FROM comments c WHERE c.decision_id = d.id) AS comment_count,
   (SELECT v2.choice FROM votes v2 WHERE v2.decision_id = d.id AND v2.voter_id = $2) AS my_vote,
   ($2::text IS NOT NULL AND d.author_id = $2::text) AS is_mine`;
 
