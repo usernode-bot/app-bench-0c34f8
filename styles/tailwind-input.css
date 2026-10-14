@@ -39,22 +39,24 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 170 40 30;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 146 98 12;      /* the keyboard focus ring: the wheat gold */
     --crust: 122 72 38; /* from the spec's screens */
     --on-crust: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 19 15;      /* the spec's dark look */
+    --surface: 36 29 23;
+    --raised: 48 39 31;
+    --fg: 245 238 228;
+    --muted: 184 170 154;
+    --line: 72 60 49;
+    --accent: 222 170 72;    /* wheat gold */
+    --on-accent: 41 26 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 222 170 72;     /* the wheat gold, as the ring */
+    --crust: 196 132 86;     /* crust brown, from the spec's screens */
+    --on-crust: 30 17 8;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -114,6 +116,17 @@
      screens need none. Never put a card inside a card or a .list. */
   .card {
     @apply rounded-xl border border-line bg-surface p-4;
+  }
+
+  /* A choice pill (the bread picker). Selected takes .on and the crust
+     colour. public/screens.css styles the drawn ones; this keeps the kit
+     naming the same component. */
+  .chip {
+    @apply inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-body text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .chip.on {
+    @apply border-crust bg-crust font-medium text-on-crust;
   }
 
   /* The label above a section: sentence case, never uppercase or tracked. */

@@ -95,22 +95,37 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal bread recipe calculator. The one screen turns a few settings —
+bread type, hydration, loaf count, flour per loaf — into a baker's formula
+sheet: grams and baker's percentages for every ingredient, rise time and
+temperature, oven temperature and bake time. Recipes can be saved, reopened
+and deleted; they are private to the person who saved them. The calculation
+runs in the page (`public/formulas.js`, pure functions), so it works for
+guests and offline; only the saved-recipe list touches the server.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by the first version's spec. Every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour white ground, white surfaces, a pale oat tone for the
+  formula sheet's header and flour row, warm brown text. The action colour
+  is deep wheat gold; crust brown marks the selected bread and outlines the
+  formula sheet. All as the kit's tokens in `styles/tailwind-input.css`
+  (`ground`, `surface`, `raised`, `fg`, `muted`, `line`, `accent`,
+  `on-accent`, `crust`, `on-crust`), each with a light and a dark value.
+- **Signature element:** the formula sheet, laid out like a baker's
+  formula: serif heading, a Grams column and a Baker's % column, flour
+  highlighted at 100% on top, then a three-part footer for Rise, Bake and
+  Time. Each saved recipe carries a small drawn line icon for its kind of
+  bread (a domed loaf for sourdough and rye, a ring for bagels, a tin loaf
+  for sandwich loaf).
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  The page title and the sheet heading use a serif face (`ui-serif`),
+  everything else a rounded sans (`ui-rounded`).
+- The screens the spec drew live in `public/index.html` (markup) and
+  `public/screens.css` (styles); keep them, and build new screens from the
+  same kit components and words.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

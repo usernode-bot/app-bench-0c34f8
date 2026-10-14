@@ -147,6 +147,129 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── Saved recipes ─────────────────────────────────────────────────────────
+// Recipes are private to the signed-in user. The formula itself is never
+// stored: a saved row keeps only the settings, and the page recomputes the
+// formula from them when the recipe is opened.
+
+const BREAD_KEYS = {
+  sourdough: { min: 200, max: 1500 },
+  bagels: { min: 50, max: 200 },
+  'sourdough-bagels': { min: 50, max: 200 },
+  rye: { min: 200, max: 1500 },
+  sandwich: { min: 200, max: 1500 },
+};
+
+async function migrate() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS saved_recipes (
+    id serial PRIMARY KEY,
+    user_id text NOT NULL,
+    name text NOT NULL,
+    bread text NOT NULL,
+    hydration int NOT NULL,
+    count int NOT NULL,
+    flour_per_piece int NOT NULL,
+    is_demo boolean NOT NULL DEFAULT false,
+    demo_key text,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`);
+  await pool.query(
+    'CREATE UNIQUE INDEX IF NOT EXISTS saved_recipes_user_demo_key_idx ON saved_recipes (user_id, demo_key)');
+  await pool.query(
+    'CREATE INDEX IF NOT EXISTS saved_recipes_user_created_idx ON saved_recipes (user_id, created_at)');
+}
+
+// The staging demo's six recipes, shown only with ?demo=1 on staging.
+// Fixed demo_key values and ON CONFLICT DO NOTHING keep reloads from
+// duplicating them, so a delete sticks.
+const DEMO_RECIPES = [
+  { demo_key: 'demo-1', name: 'Weekend rye', bread: 'rye', hydration: 78, count: 3, flour_per_piece: 500, daysAgo: 2 },
+  { demo_key: 'demo-2', name: 'Sunday bagels', bread: 'sourdough-bagels', hydration: 58, count: 12, flour_per_piece: 75, daysAgo: 5 },
+  { demo_key: 'demo-3', name: 'School lunch loaf', bread: 'sandwich', hydration: 65, count: 2, flour_per_piece: 500, daysAgo: 12 },
+  { demo_key: 'demo-4', name: 'Big batch sourdough', bread: 'sourdough', hydration: 74, count: 6, flour_per_piece: 1000, daysAgo: 19 },
+  { demo_key: 'demo-5', name: 'Overnight sourdough bagels', bread: 'sourdough-bagels', hydration: 60, count: 8, flour_per_piece: 75, daysAgo: 26 },
+  { demo_key: 'demo-6', name: 'Rye for the freezer', bread: 'rye', hydration: 80, count: 2, flour_per_piece: 1500, daysAgo: 33 },
+];
+
+app.get('/api/recipes', async (req, res) => {
+  if (!req.user) return res.json({ recipes: [] });
+  const demo = IS_STAGING && req.query.demo === '1';
+  try {
+    if (demo) {
+      const values = [];
+      const placeholders = DEMO_RECIPES.map((r, i) => {
+        values.push(
+          req.user.id, r.demo_key, r.name, r.bread, r.hydration, r.count,
+          r.flour_per_piece,
+          new Date(req.now.getTime() - r.daysAgo * 86400000));
+        const p = i * 8;
+        return `($${p + 1}, $${p + 2}, $${p + 3}, $${p + 4}, $${p + 5}, $${p + 6}, $${p + 7}, true, $${p + 8})`;
+      }).join(', ');
+      await pool.query(
+        `INSERT INTO saved_recipes (user_id, demo_key, name, bread, hydration, count, flour_per_piece, is_demo, created_at)
+         VALUES ${placeholders} ON CONFLICT (user_id, demo_key) DO NOTHING`,
+        values);
+    }
+    const { rows } = await pool.query(
+      `SELECT id, name, bread, hydration, count, flour_per_piece, created_at
+       FROM saved_recipes WHERE user_id = $1 AND ($2::boolean OR NOT is_demo)
+       ORDER BY created_at DESC, id DESC`,
+      [req.user.id, demo]);
+    res.json({ recipes: rows });
+  } catch (err) {
+    console.error('GET /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not load saved recipes' });
+  }
+});
+
+app.post('/api/recipes', async (req, res) => {
+  const b = req.body || {};
+  const range = BREAD_KEYS[b.bread];
+  const isInt = v => typeof v === 'number' && Number.isInteger(v);
+  if (!range || !isInt(b.hydration) || b.hydration < 50 || b.hydration > 85 ||
+      !isInt(b.count) || b.count < 1 || b.count > 24 ||
+      !isInt(b.flour_per_piece) || b.flour_per_piece < range.min ||
+      b.flour_per_piece > range.max) {
+    return res.status(400).json({ error: 'Invalid recipe settings' });
+  }
+  // A blank name becomes "Sourdough, 2 loaves"-style; a real one is capped.
+  let name = typeof b.name === 'string' ? b.name.trim() : '';
+  if (!name) {
+    const meta = { sourdough: 'Sourdough', bagels: 'Bagels', 'sourdough-bagels': 'Sourdough bagels', rye: 'Rye', sandwich: 'Sandwich loaf' }[b.bread];
+    const unit = b.bread === 'bagels' || b.bread === 'sourdough-bagels'
+      ? (b.count === 1 ? 'bagel' : 'bagels')
+      : (b.count === 1 ? 'loaf' : 'loaves');
+    name = `${meta}, ${b.count} ${unit}`;
+  }
+  if (name.length > 60) return res.status(400).json({ error: 'Name too long' });
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO saved_recipes (user_id, name, bread, hydration, count, flour_per_piece, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, bread, hydration, count, flour_per_piece, created_at`,
+      [req.user.id, name, b.bread, b.hydration, b.count, b.flour_per_piece, req.now]);
+    res.status(201).json({ recipe: rows[0] });
+  } catch (err) {
+    console.error('POST /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not save the recipe' });
+  }
+});
+
+app.delete('/api/recipes/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(404).json({ error: 'Not found' });
+  try {
+    const { rowCount } = await pool.query(
+      'DELETE FROM saved_recipes WHERE id = $1 AND user_id = $2', [id, req.user.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/recipes failed: ' + err.message);
+    res.status(500).json({ error: 'Could not delete the recipe' });
+  }
+});
+
+migrate().catch(err => { console.error(err); process.exit(1); });
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to

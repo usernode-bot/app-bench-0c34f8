@@ -3,5 +3,9 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "id": "bread-choices", "path": "/", "expectText": "Sourdough bagels" },
+    { "id": "saved-empty", "path": "/", "expectText": "No saved recipes yet" },
+    { "id": "main", "path": "/?demo=1", "expectText": "Staging demo", "visual": true, "impact": ["public/**"] }
+  ]
 }
