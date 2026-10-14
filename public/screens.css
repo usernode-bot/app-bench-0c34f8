@@ -54,9 +54,11 @@
 
 .chip .warn svg {width:16px;height:16px}
 
-.chip .x {width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;color:rgb(var(--muted));border-radius:18px;border:0;background:none;padding:0}
+.chip .x {width:36px;height:36px;position:relative;display:inline-flex;align-items:center;justify-content:center;color:rgb(var(--muted));border-radius:18px;border:0;background:none;padding:0}
 
-.chip .x svg {width:16px;height:16px}
+/* The 16px icon stays, but the tap target reaches the spec's 44px: the
+   pseudo-element is part of the button, so it is clickable too. */
+.chip .x::after {content:"";position:absolute;inset:-4px;border-radius:22px}
 
 .section-label {font-size:.875rem;line-height:1.25rem;font-weight:500;color:rgb(var(--muted));padding:0 4px;margin:0 0 8px}
 
@@ -124,6 +126,24 @@
 .post-row {cursor:pointer}
 
 .post-row:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+/* No feeds yet: the empty state's Add a feed is the screen's one filled
+   control, so Add stands down to an outlined button (the spec's empty
+   screen). app.js toggles the class as the feeds come and go. */
+.btn-primary.is-outline {background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line))}
+
+/* The kit spaces its content with one 24px gap; this screen's parts carry
+   their own margins instead (20px below the chips, 8px below the section
+   label), so the kit's gap is zeroed and the drawn rhythm stands. */
+#feeds-area .kit-content {gap:0}
+
+/* Loading shapes that stand in for this screen's own parts, inside the
+   kit's skeleton block: sizes here, colours and the pulse from .skeleton. */
+.sk-line {display:inline-block}
+
+.sk-dot {width:10px;height:10px;border-radius:5px;flex:none;margin-top:7px}
+
+.sk-bars {display:flex;flex-direction:column;gap:8px}
 
 /* Every post here is unread: the filled dot; a read one is the hollow ring
    (it keeps its place until the preview closes). */

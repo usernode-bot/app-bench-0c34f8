@@ -34,11 +34,35 @@ const states = createStates(document.getElementById('feeds-area'), {
 
 if (isDemo()) showDemoLabel(appEl.querySelector('.app'), 'Staging demo: these feeds and posts are made up.');
 
+// The kit's skeleton is two grey bars per row. This screen's loading state
+// also stands in for the chips and the section label, so nothing moves when
+// the data arrives: three placeholder chips with the chips' own spacing, the
+// reserved label line, and rows with a dot and three bars (meta, title,
+// summary) each.
+const skeletonEl = appEl.querySelector('#feeds-area > [aria-busy="true"]');
+skeletonEl.replaceChildren(
+  h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+  h('div', { class: 'chips', 'aria-hidden': 'true' }, ['8rem', '6.5rem', '5.5rem'].map((w) =>
+    h('span', { class: 'chip' }, h('span', { class: 'skeleton', style: `width:${w};height:1rem` })))),
+  h('p', { class: 'section-label', 'aria-hidden': 'true' },
+    h('span', { class: 'skeleton sk-line', style: 'width:6rem;height:0.75rem' })),
+  h('ul', { class: 'list', 'aria-hidden': 'true' }, Array.from({ length: 5 }, () =>
+    h('li', { class: 'list-row' },
+      h('span', { class: 'skeleton sk-dot' }),
+      h('div', { class: 'txt sk-bars' },
+        h('span', { class: 'skeleton', style: 'width:33%;height:0.75rem' }),
+        h('span', { class: 'skeleton', style: 'width:75%;height:1rem' }),
+        h('span', { class: 'skeleton', style: 'width:50%;height:0.75rem' })))))
+);
+
 let data = { feeds: [], posts: [] };
 
 // ── Rendering ─────────────────────────────────────────────────────────────
 
 function render() {
+  // With no feeds the empty state's Add a feed is the one filled control on
+  // the screen, so Add stands down to outlined (the spec's empty screen).
+  addBtn.classList.toggle('is-outline', !data.feeds.length);
   const content = states.content;
   content.replaceChildren();
 
@@ -104,8 +128,17 @@ function sync() {
 // it opens), then read the list. A refresh that itself fails is not a failed
 // load — the per-feed error lines say what happened once the list arrives.
 async function task() {
+  // The header line is a count of what arrived, so until it arrives the
+  // subtitle is a grey bar, not the drawn "14 posts from 4 feeds".
+  heading.replaceChildren(h('span', { class: 'skeleton sk-line', style: 'width:8.5rem;height:0.75rem' }));
   try { await refreshAll(); } catch { /* shown per feed below */ }
-  data = await api('GET', '/api/reader');
+  try {
+    data = await api('GET', '/api/reader');
+  } catch (err) {
+    // The list failed: no count is shown, just the muted word.
+    heading.textContent = 'Couldn’t load';
+    throw err;
+  }
   render();
   return data.feeds.length > 0;
 }
