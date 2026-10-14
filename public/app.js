@@ -42,6 +42,22 @@ const feedView = createStates(wrap, {
   error: { title: 'Decisions did not load', text: 'Nothing you posted is lost. Try again in a moment.' },
 });
 
+// The feed's skeleton, as the spec drew the loading state: three separate
+// card shapes (pill, heading, two bars), not one list. The states kit made a
+// single grouped list; swap its rows for the card shapes, keeping the hidden
+// "Loading" status line it reads out.
+const kitSkeleton = wrap.querySelector(':scope > [aria-busy="true"]');
+if (kitSkeleton) {
+  kitSkeleton.removeAttribute('aria-hidden');
+  kitSkeleton.replaceChildren(
+    h('p', { class: 'sr-only', role: 'status' }, 'Loading'),
+    ...Array.from({ length: 3 }, () => h('div', { class: 'skel-card', 'aria-hidden': 'true' },
+      h('span', { class: 'skeleton skel-pill' }),
+      h('span', { class: 'skeleton skel-heading' }),
+      h('span', { class: 'skeleton skel-bar' }),
+      h('span', { class: 'skeleton skel-bar' }))));
+}
+
 async function load() {
   return feedView.run(async (box) => {
     const [data, meta] = await Promise.all([
@@ -94,10 +110,13 @@ function feedCard(item, voters, state) {
     '.cc': item.commentCount ? plural(item.commentCount, 'comment') : 'No comments',
   });
   for (const opt of [...card.querySelectorAll('.opt')]) opt.remove();
+  // The footer (votes and comments) stays the card's last row, under the
+  // divider, as the screen drew it; options and the result line go above it.
+  const ft = card.querySelector('.ft');
   if (state) {
-    card.append(resultLine(state.chosen || { tied: true, labels: [], count: 0, total: 0 }));
+    ft.before(resultLine(state.chosen || { tied: true, labels: [], count: 0, total: 0 }));
   } else {
-    card.append(...item.votes.options.map((o) => optionRow(o, item, voters, false)));
+    for (const o of item.votes.options) ft.before(optionRow(o, item, voters, false));
   }
   card.append(moreButton('decision', item, state));
   card.querySelector('.meta').append(card.querySelector('[data-more]'));

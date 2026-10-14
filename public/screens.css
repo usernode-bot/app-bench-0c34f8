@@ -8,6 +8,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1300px;
+  /* One feed column, capped so the tally notches stay countable on desktop. */
+  max-width: 640px;
+  margin-inline: auto;
 }
 
 .s * {box-sizing:border-box;margin:0}
@@ -46,11 +49,15 @@
 
 .mine b {color:rgb(var(--accent))}
 
-.ck {width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.ck {display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:4px}
 
 .bar {margin-top:4px;height:10px;border-radius:3px;background:rgb(var(--raised));display:flex;gap:2px;overflow:hidden}
 
-.bar i {width:10%;background:rgb(var(--tally))}
+.bar i {position:relative;width:10%;background:rgb(var(--tally))}
+
+/* The 2 px between notches reads in the surface colour, on the pale and the
+   blue bars alike, so each notch stays one countable vote. */
+.bar i + i::before {content:"";position:absolute;top:0;bottom:0;left:-2px;width:2px;background:rgb(var(--surface))}
 
 .mine .bar i {background:rgb(var(--accent))}
 
@@ -67,3 +74,28 @@
 .res {margin-top:4px;font-size:.875rem}
 
 .res b {font-weight:600}
+
+/* Empty and error states: room at the top, the action clear of the text, and
+   a body line that never leaves a lone word on its own. */
+.state-empty,
+.state-error {padding:48px 16px 32px}
+
+.state-empty > p,
+.state-error > p {max-width:24rem;margin-inline:auto;text-wrap:balance}
+
+.state-empty > button,
+.state-error > button {margin-top:24px}
+
+/* The feed's loading state: three card shapes where the cards will be, each
+   a pill, a heading line and two bar lines. */
+.skel-cards {display:flex;flex-direction:column;gap:12px}
+
+.skel-card {display:flex;flex-direction:column;gap:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px}
+
+.skel-pill {height:12px;width:64px;border-radius:999px}
+
+.skel-heading {height:20px;width:70%}
+
+.skel-bar {height:10px;width:100%}
+
+.skel-card .skel-bar:last-child {width:55%}
