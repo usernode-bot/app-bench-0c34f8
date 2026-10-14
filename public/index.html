@@ -100,15 +100,13 @@
   <div data-spec-screen="1" id="view-list">
     <div class="app">
     <div class="top">
-    <div>
-      <h1 class="title">Unread</h1>
-      <p class="sub sans" id="count-line"></p>
-    </div>
+    <h1 class="title">Unread</h1>
     <div class="acts sans">
     <button class="btn-secondary" id="btn-feeds" aria-label="Your feeds"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
     <button class="btn-primary" id="btn-add"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button>
     </div>
     </div>
+    <p class="sub sans count-line" id="count-line"></p>
     <p class="sub sans demo-note" id="demo-note" hidden>Staging demo: made-up feeds and posts</p>
     <div class="section-label sans">Newest first</div>
     <ul class="list" id="post-list">
@@ -173,12 +171,13 @@
       <div class="sheet-head">
         <button type="button" class="sheet-cancel" id="sheet-add-cancel">Cancel</button>
         <h2 class="sheet-title" id="sheet-add-title">Add feed</h2>
-        <button type="submit" form="form-add" class="btn-primary sheet-go" id="btn-add-save">Add feed</button>
+        <span class="sheet-gap" aria-hidden="true"></span>
       </div>
       <form id="form-add" novalidate>
         <label class="sheet-label" for="feed-url">Feed address</label>
         <input class="field" id="feed-url" name="url" type="url" inputmode="url" autocomplete="off" placeholder="e.g. https://example.com/feed.xml">
-        <p class="sheet-error" id="add-error" hidden></p>
+        <p class="sheet-error" id="add-error" aria-live="polite"></p>
+        <button type="submit" class="btn-primary sheet-submit" id="btn-add-save">Add feed</button>
       </form>
     </div>
   </div>
@@ -361,7 +360,7 @@
     function openSheet(id) {
       $(id).hidden = false;
       if (id === 'sheet-add') {
-        $('add-error').hidden = true;
+        $('add-error').textContent = '';
         // While the form that adds the first item is open, the empty state's
         // own button hides.
         if (state.feedCount === 0) $('btn-add-empty').hidden = true;
@@ -392,9 +391,7 @@
     $('btn-retry').addEventListener('click', load);
 
     function showAddError(msg) {
-      var el = $('add-error');
-      el.textContent = msg;
-      el.hidden = false;
+      $('add-error').textContent = msg;
     }
 
     $('form-add').addEventListener('submit', function (e) {

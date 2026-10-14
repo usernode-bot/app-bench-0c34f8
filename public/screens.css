@@ -32,14 +32,14 @@
 .sans {font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 
 .top {
-  padding: 20px 20px 12px;
+  padding: 20px 20px 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.top > div:first-child {min-width: 0}
+.count-line {padding: 0 20px; margin: 6px 0 0}
 
 .acts .btn-primary, .acts .btn-secondary {white-space: nowrap; padding: 0 10px}
 
@@ -57,11 +57,11 @@
 
 .btn-secondary {background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line))}
 
-.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));padding:8px 24px}
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));padding:8px 20px}
 
 .list {margin:0 16px;padding:0;list-style:none;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
 
-.list-row {display:flex;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
+.list-row {display:flex;align-items:flex-start;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
 
 .list-row:first-child {border-top:0}
 
@@ -141,3 +141,18 @@
 [data-spec-screen="2"] .txt p {margin:0 0 16px;max-width:34em}
 
 [data-spec-screen="2"] .more {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:24px 0 12px}
+
+/* Empty, caught-up and error states: the headings read like the app's other
+   titles (serif), the copy sits inside the list's side gutters, and the
+   action keeps its space from the copy. */
+.state-empty h2, .state-error h2 {
+  font-family: ui-serif,Georgia,"Iowan Old Style",serif;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+.state-empty, .state-error {padding-left: 24px; padding-right: 24px}
+
+.state-empty .btn-primary, .state-empty .btn-secondary,
+.state-error .btn-primary, .state-error .btn-secondary {margin-top: 16px}

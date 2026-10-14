@@ -198,17 +198,20 @@
   .sheet-title {
     @apply text-body font-semibold text-fg;
   }
-  .sheet-go {
-    @apply justify-self-end text-small px-3;
-  }
   .sheet-gap {
     @apply justify-self-end;
   }
   .sheet-label {
     @apply mb-1 block text-small font-medium text-muted;
   }
+  /* Always one line tall, so the sheet keeps room for the error message
+     before it happens. */
   .sheet-error {
-    @apply mt-2 text-small text-danger;
+    @apply mt-2 min-h-5 text-small text-danger;
+  }
+  /* The sheet's own action: full width, under the field. */
+  .sheet-submit {
+    @apply mt-4 w-full;
   }
   .sheet-note {
     @apply text-small text-muted;
