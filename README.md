@@ -1,27 +1,32 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Your personal bread recipe calculator, on Homeroom. Pick a bread — sourdough,
+bagels, sourdough bagels, rye or sandwich loaf — set the hydration, how many
+loaves and how heavy each one is, and tap Calculate to get the grams of every
+ingredient, how long to let it rise, and the oven temperature and time.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- Everything is computed in the browser from standard baker's percentages per
+  bread type. There is no database table, no API route and no new dependency;
+  the server only serves the page and verifies the platform's identity token.
+- Hydration is water as a percentage of the total flour, counting the water and
+  flour inside the starter. A starter is fed 1:1, so its flour and water are
+  taken out of the flour and water lines. Every line is rounded to whole grams
+  and the remainder lands on water, so the lines add up to the dough total.
+- Rise times shift with hydration (wetter dough rises faster) and bake times
+  shift with loaf weight. They are a guide: each step's sub-line says what to
+  look for.
+- Nothing is saved. Each visit starts from the bread's defaults.
 
-## Replacing the template
+## Building it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+`npm run build` compiles `styles/tailwind-input.css` (the app's design kit) to
+`public/tailwind.css`; the Docker or Paketo image build runs it on every deploy.
+The screen's markup is in `public/index.html`, its script in `public/app.js`.
 
-Once the real app exists, rewrite this README to describe it.
+## Design
+
+See the "## Design" section of `CLAUDE.md`: flour-grey neutrals with a
+crust-brown accent, a loaf-slice hydration dial as the signature element, and a
+light and a dark look that follow the viewer's Homeroom theme.

@@ -39,22 +39,26 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --wheat: 214 160 62; /* from the spec's screens */
-    --crumb: 246 232 200; /* from the spec's screens */
+    --focus: 133 70 24;      /* the keyboard focus ring */
+    --wheat: 214 160 62; /* the hydration arc */
+    --crumb: 246 232 200; /* the loaf slice */
+    --hole: 229 210 170; /* the crumb's air holes */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 20 17;
+    --surface: 36 31 27;
+    --raised: 48 41 36;
+    --fg: 245 238 228;
+    --muted: 184 170 154;
+    --line: 70 61 53;
+    --accent: 222 160 92;
+    --on-accent: 40 22 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 222 160 92;
+    --wheat: 196 146 60;
+    --crumb: 96 78 56;
+    --hole: 78 62 43;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

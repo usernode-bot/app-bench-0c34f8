@@ -95,22 +95,37 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A personal bread recipe calculator. Pick one of five breads (sourdough,
+bagels, sourdough bagels, rye, sandwich loaf), set hydration, loaf count and
+loaf weight, and Calculate gives the grams of every ingredient, the rise times
+and the oven temperature and time. Recipes are computed in the browser from
+standard baker's percentages — nothing is saved, there is no database table
+and no API route.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. The first real version set it; every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** flour-grey neutrals (page `--ground`, surface, raised, text,
+  muted, lines — warm greys that read as flour in both looks); the action
+  colour is **crust brown** (`--accent`, white text on it in light, pale
+  wheat-brown with dark text in dark); two bread colours are subject colours,
+  not accents: **wheat** (`--wheat`, the dial's hydration arc) and **crumb**
+  (`--crumb`, the loaf slice, with `--hole` for its air holes). Every token
+  has a light and a dark value; keep text pairs at 4.5:1 or more.
+- **Signature element:** the hydration dial is a slice of round loaf — a crust
+  ring, a crumb and air holes that get bigger and more open as hydration
+  rises — with a wheat arc around it filling across the bread's range. Line
+  icons for every ingredient and step (wheat ear, water drop, starter jar,
+  salt packet, rising dough, proofing basket, oven) carry the same look
+  through the recipe lists.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Headings and gram figures use the system serif (`font-serif`:
+  ui-serif, Charter, Iowan Old Style, Georgia); everything else the system
+  sans. The drawn screen's `.title`, `.heading`, `.n` and `.g` set it
+  directly in `public/screens.css`.
+- One fixed look: none — the app follows the viewer's Homeroom theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

@@ -3,5 +3,21 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "All five breads are choosable",
+      "path": "/",
+      "expectSelector": "[data-bread=\"rye\"]"
+    },
+    {
+      "name": "Recipe area shows its empty state before the first Calculate",
+      "path": "/",
+      "expectSelector": "#recipe .state-empty"
+    },
+    {
+      "name": "The staging demo shows a calculated recipe",
+      "path": "/?demo=1",
+      "expectSelector": "#recipe .list-row"
+    }
+  ]
 }

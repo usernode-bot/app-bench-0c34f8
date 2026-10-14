@@ -191,10 +191,26 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop accepting connections, drain briefly, close the pool, then exit —
+// what the platform's shutdown signal expects (see "Graceful shutdown").
+function shutdown(signal) {
+  console.log(`${signal}: shutting down`);
+  if (!server) process.exit(0);
+  server.close(() => {
+    pool.end().then(() => process.exit(0)).catch(() => process.exit(0));
+  });
+  // Hard stop in case a connection keeps the drain from finishing.
+  setTimeout(() => process.exit(0), 3000).unref();
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });

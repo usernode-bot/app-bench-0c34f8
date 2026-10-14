@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // the dial's hydration arc
+        crumb: token('crumb'), // the dial's loaf slice
+        hole: token('hole'), // the crumb's air holes
+      },
+      fontFamily: {
+        serif: ['ui-serif', 'Charter', '"Iowan Old Style"', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
