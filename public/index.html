@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,7 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (val instanceof Error) return val.stack || val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232e7042' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 10h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z'/><path d='M8 10 10.5 4h3L16 10'/><path d='M9.5 14.5h5'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -76,7 +76,7 @@
        class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
        is invisible to the compiler. If you genuinely need runtime-generated
        classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+       <script src="/usernode-tailwind/v1/tailwind.js"><\/script> -->
   <link rel="stylesheet" href="/tailwind.css">
   <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
@@ -111,89 +111,696 @@
 <body class="min-h-screen bg-ground text-fg">
   <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
        that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
+       lists, cards and data states. The kit's tokens are set to the app's
+       palette; CLAUDE.md's "## Design" says how. -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div>
-    <div class="cv">
-    <div class="top"><h1>Club Votes</h1><p>3 open, 2 waiting on your vote</p></div>
-    <div class="tabs"><span class="tab on">Open</span><span class="tab">Closed</span><span class="tab">Posted by you</span></div>
+    <div class="cv" id="view-list">
+      <p id="demo-line" class="pt-3 text-small text-muted" hidden>Staging demo: made-up club decisions</p>
+      <div class="top"><h1>Club Votes</h1><p id="hdr-sub">Loading…</p></div>
+      <div class="tabs" id="tabs" role="tablist" aria-label="Decisions">
+        <button class="tab on" data-tab="open" role="tab" aria-selected="true" type="button">Open</button>
+        <button class="tab" data-tab="closed" role="tab" aria-selected="false" type="button">Closed</button>
+        <button class="tab" data-tab="mine" role="tab" aria-selected="false" type="button">Posted by you</button>
+      </div>
+      <div id="notice-list" class="mb-2 rounded-lg border border-line bg-surface px-4 py-2 text-small text-fg" hidden></div>
 
-    <div class="card">
-    <div class="meta"><span>Mina, 2 days ago</span><span>9 of 12 voted</span></div>
-    <div class="q">Move Thursday meetings to the library?</div>
-    <div class="bar"><i class="y" style="width:58%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>7</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
-    <div class="act"><span class="btn-secondary sel">Yes</span><span class="btn-secondary">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>7 comments, latest from Dev</div>
-    </div>
+      <!-- Loading: the content's own shape, with skeleton bars where the
+           text goes. -->
+      <div id="list-loading">
+        <div class="card">
+          <div class="meta"><span class="skeleton" style="width:34%;height:14px"></span><span class="skeleton" style="width:26%;height:14px"></span></div>
+          <div class="skeleton" style="width:72%;height:20px;margin:6px 0 12px"></div>
+          <div class="bar"><i class="e"></i></div>
+          <div class="leg"><span class="skeleton" style="width:20%;height:14px"></span><span class="skeleton" style="width:20%;height:14px"></span></div>
+          <div class="act"><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span></div>
+          <div class="cm"><span class="skeleton" style="width:45%;height:14px"></span></div>
+        </div>
+        <div class="card">
+          <div class="meta"><span class="skeleton" style="width:28%;height:14px"></span><span class="skeleton" style="width:22%;height:14px"></span></div>
+          <div class="skeleton" style="width:60%;height:20px;margin:6px 0 12px"></div>
+          <div class="bar"><i class="e"></i></div>
+          <div class="leg"><span class="skeleton" style="width:18%;height:14px"></span><span class="skeleton" style="width:18%;height:14px"></span></div>
+          <div class="act"><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span></div>
+          <div class="cm"><span class="skeleton" style="width:35%;height:14px"></span></div>
+        </div>
+        <div class="card">
+          <div class="meta"><span class="skeleton" style="width:30%;height:14px"></span><span class="skeleton" style="width:24%;height:14px"></span></div>
+          <div class="skeleton" style="width:66%;height:20px;margin:6px 0 12px"></div>
+          <div class="bar"><i class="e"></i></div>
+          <div class="leg"><span class="skeleton" style="width:22%;height:14px"></span><span class="skeleton" style="width:16%;height:14px"></span></div>
+          <div class="act"><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span><span class="skeleton" style="flex:1;height:44px;border-radius:8px"></span></div>
+          <div class="cm"><span class="skeleton" style="width:40%;height:14px"></span></div>
+        </div>
+      </div>
 
-    <div class="card">
-    <div class="meta"><span>You, yesterday</span><span>5 of 12 voted</span></div>
-    <div class="q">Run a spring tree planting in April?</div>
-    <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>5</b> yes</span><span><i class="dot n"></i><b>0</b> no</span></div>
-    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>3 comments</div>
-    </div>
+      <div id="list-error" class="state-error" hidden>
+        <p>The decisions could not be loaded. Nothing you posted is lost.</p>
+        <button class="btn-secondary" id="btn-retry" type="button">Retry</button>
+      </div>
 
-    <div class="card">
-    <div class="meta"><span>Tomas, 4 hours ago</span><span>3 of 12 voted</span></div>
-    <div class="q">Raise dues to $5 a month for supplies?</div>
-    <div class="bar"><i class="y" style="width:8%"></i><i class="n" style="width:17%"></i><i class="e"></i></div>
-    <div class="leg"><span><i class="dot y"></i><b>1</b> yes</span><span><i class="dot n"></i><b>2</b> no</span></div>
-    <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary seln">No</span></div>
-    <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg>1 comment</div>
-    </div>
+      <div id="list-empty" class="state-empty" hidden>
+        <p id="empty-title">Nothing to decide yet.</p>
+        <button class="btn-primary" id="btn-first" type="button">Post the first decision</button>
+      </div>
 
-    <div class="section-label">Recently closed</div>
-    <div class="list">
-    <div class="list-row"><div>Order pizza for the end-of-term party?<small>Closed by Priya, 11 votes</small></div><span class="res">Yes 9</span></div>
-    <div class="list-row"><div>Buy a second folding table?<small>Closed by you, 10 votes</small></div><span class="res no">No 6</span></div>
-    </div>
+      <div id="cards"></div>
+      <div id="closed-wrap" hidden>
+        <div class="section-label">Recently closed</div>
+        <div class="list" id="closed-list"></div>
+      </div>
 
-    <div class="fab"><span class="btn-primary"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</span></div>
+      <!-- The screen's one filled button, at the bottom with the 104px of
+           padding below the list keeping it off the cards. -->
+      <div class="fab"><button class="btn-primary" id="btn-new" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New decision</button></div>
     </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="cv">
-      <div class="nav"><span class="lnk"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Decisions</span></div>
-      <div class="meta">Posted by you, yesterday</div>
-      <h1>Run a spring tree planting in April?</h1>
-      <p class="det">The parks office has 40 saplings for groups. We would need about 8 people on a Saturday morning.</p>
 
-      <div class="card">
-      <div class="bar"><i class="y" style="width:42%"></i><i class="n" style="width:0"></i><i class="e"></i></div>
-      <div class="leg"><span><i class="dot y"></i><b>5</b> yes &nbsp; <i class="dot n"></i><b>0</b> no</span><span>5 of 12 voted</span></div>
-      <div class="act"><span class="btn-secondary">Yes</span><span class="btn-secondary">No</span></div>
-      <p class="hint">You have not voted. You can change your vote until it closes.</p>
-      <div class="own"><span class="btn-secondary"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Close decision</span><span class="btn-secondary danger">Delete</span></div>
+  <!-- Screen 2, moved out of its template: the opened decision. -->
+  <div data-spec-screen="2" id="view-detail" hidden>
+    <div>
+    <div class="cv">
+      <p id="demo-line-d" class="pt-3 text-small text-muted" hidden>Staging demo: made-up club decisions</p>
+      <div class="nav">
+        <button class="lnk" id="btn-back" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Decisions</button>
+        <button class="lnk m" id="btn-report" type="button" hidden>Report</button>
       </div>
+      <div id="notice-detail" class="mb-2 rounded-lg border border-line bg-surface px-4 py-2 text-small text-fg" hidden></div>
+      <div class="meta" id="d-meta"></div>
+      <h1 id="d-q">Loading…</h1>
+      <p class="det" id="d-det" hidden></p>
 
-      <div class="section-label">3 comments</div>
-      <div class="list">
-      <div class="list-row"><div class="who"><span><b>Mina</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>I can bring gloves and two spades.</p></div>
-      <div class="list-row"><div class="who"><span><b>Dev</b>yesterday<span class="vt">Yes</span></span><span class="lnk m">Report</span></div><p>Saturday the 12th works for me, the 19th does not.</p></div>
-      <div class="list-row"><div class="who"><span><b>Ana</b>3 hours ago</span><span class="lnk m">Report</span></div><p>Is there parking near the site?</p></div>
+      <div class="card" id="d-card" hidden>
+        <div class="bar"><i class="y" id="d-bar-y" style="width:0"></i><i class="n" id="d-bar-n" style="width:0"></i><i class="e"></i></div>
+        <div class="leg"><span><i class="dot y"></i><b id="d-yes">0</b> yes &nbsp; <i class="dot n"></i><b id="d-no">0</b> no</span><span id="d-voted"></span></div>
+        <div class="act" id="d-act"><button class="btn-secondary" id="d-vote-yes" type="button">Yes</button><button class="btn-secondary" id="d-vote-no" type="button">No</button></div>
+        <p class="hint" id="d-hint"></p>
+        <div class="own" id="d-own" hidden>
+          <button class="btn-secondary" id="btn-close" type="button"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Close decision</button>
+          <button class="btn-secondary danger" id="btn-del" type="button">Delete</button>
+        </div>
       </div>
+      <button class="btn-secondary" id="d-retry" type="button" hidden>Retry</button>
 
-      <label class="lbl">Your comment</label>
-      <div class="field">e.g. I can help on the 12th</div>
-      <div class="post"><span class="btn-primary">Post comment</span></div>
-      </div>
+      <div id="d-form" hidden>
+        <div class="section-label" id="d-cm-label">Comments</div>
+        <div class="list" id="d-comments"></div>
+        <label class="lbl" for="d-comment">Your comment</label>
+        <textarea class="field placeholder:text-muted/60" id="d-comment" rows="3" maxlength="2000" placeholder="e.g. I can help on the 12th" style="color:rgb(var(--fg))"></textarea>
+        <div class="post"><button class="btn-primary" id="btn-comment" type="button">Post comment</button></div>
       </div>
     </div>
+    </div>
+  </div>
+
+  <!-- New decision: a short form, question plus optional details. -->
+  <div id="view-new" hidden>
+    <div>
+    <div class="cv" style="min-height:0;padding-bottom:32px">
+      <div class="nav">
+        <button class="lnk" id="btn-cancel" type="button">Cancel</button>
+        <button class="btn-primary" id="btn-post" type="button">Post</button>
+      </div>
+      <div id="notice-new" class="mb-2 rounded-lg border border-line bg-surface px-4 py-2 text-small text-fg" hidden></div>
+      <h1>New decision</h1>
+      <label class="lbl" for="n-q">Question</label>
+      <textarea class="field placeholder:text-muted/60" id="n-q" rows="2" maxlength="200" placeholder="e.g. Move Thursday meetings to the library?" style="color:rgb(var(--fg))"></textarea>
+      <label class="lbl" for="n-det">Details (optional)</label>
+      <textarea class="field placeholder:text-muted/60" id="n-det" rows="4" maxlength="2000" placeholder="e.g. We would need about 8 people on a Saturday" style="color:rgb(var(--fg))"></textarea>
+      <div class="post"><button class="btn-primary" id="btn-post-bottom" type="button">Post</button></div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Rows to copy: the drawn card and comment row, kept as templates and
+       filled from data. -->
+  <template id="card-tmpl">
+    <div class="card">
+      <div class="meta"><span class="c-meta"></span><span class="c-voted"></span></div>
+      <div class="q c-q"></div>
+      <div class="bar"><i class="y c-bar-y" style="width:0"></i><i class="n c-bar-n" style="width:0"></i><i class="e"></i></div>
+      <div class="leg"><span><i class="dot y"></i><b class="c-yes">0</b> yes</span><span><i class="dot n"></i><b class="c-no">0</b> no</span></div>
+      <div class="act"><button class="btn-secondary c-vote-yes" type="button">Yes</button><button class="btn-secondary c-vote-no" type="button">No</button></div>
+      <div class="cm"><svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/></svg><span class="c-cm"></span></div>
+    </div>
   </template>
+  <template id="closed-tmpl">
+    <div class="list-row">
+      <div><span class="r-q"></span><small class="r-sub"></small></div>
+      <span class="res r-res"></span>
+    </div>
+  </template>
+  <template id="comment-tmpl">
+    <div class="list-row">
+      <div class="who">
+        <span><b class="w-name"></b><span class="w-when"></span><span class="vt w-vt" hidden></span></span>
+        <button class="lnk m w-report" type="button">Report</button>
+        <button class="lnk m w-del" type="button" hidden>Delete</button>
+      </div>
+      <p class="w-body"></p>
+    </div>
+  </template>
+
+  <script>
+  (function () {
+    'use strict';
+    var $ = function (id) { return document.getElementById(id); };
+    var demo = new URLSearchParams(location.search).get('demo') === '1';
+    var tab = 'open';
+    var listData = null;      // the last list response
+    var loadedOnce = false;
+    var currentDetail = null; // the last detail response
+    var noticeTimer = null;
+
+    // ── API ── demo=1 is passed on to every call, as the spec asks. The
+    // platform's token, minted into the iframe URL on load, is forwarded
+    // via x-usernode-token on every subsequent fetch. ──
+    var token = new URLSearchParams(location.search).get('token') || '';
+    function api(path, opts) {
+      opts = opts || {};
+      path = '/api' + path;
+      opts.headers = Object.assign(
+        token ? { 'x-usernode-token': token } : {},
+        opts.headers || {}
+      );
+      if (demo) path += (path.indexOf('?') === -1 ? '?' : '&') + 'demo=1';
+      opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+      return fetch(path, opts).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (!res.ok) {
+            var err = new Error((data && data.error) || ('HTTP ' + res.status));
+            err.status = res.status;
+            throw err;
+          }
+          return data;
+        });
+      });
+    }
+
+    function now() {
+      try {
+        if (window.usernode && typeof window.usernode.now === 'function') {
+          var n = window.usernode.now();
+          if (n && n.getTime) return n.getTime();
+        }
+      } catch (e) {}
+      return Date.now();
+    }
+
+    function rel(iso) {
+      var t = new Date(iso).getTime();
+      if (isNaN(t)) return '';
+      var s = Math.max(1, Math.round((now() - t) / 1000));
+      if (s < 60) return 'just now';
+      if (s < 3600) { return Math.floor(s / 60) + ' min ago'; }
+      if (s < 86400) { var h = Math.floor(s / 3600); return h === 1 ? 'an hour ago' : h + ' hours ago'; }
+      var d = Math.floor(s / 86400);
+      if (d === 1) return 'yesterday';
+      if (d < 30) return d + ' days ago';
+      var w = Math.floor(d / 7);
+      return w === 1 ? 'a week ago' : w + ' weeks ago';
+    }
+
+    function resultOf(d) {
+      if (d.yes_count > d.no_count) return 'Yes ' + d.yes_count;
+      if (d.no_count > d.yes_count) return 'No ' + d.no_count;
+      return 'Tied at ' + d.yes_count;
+    }
+
+    // "9 of 12 voted" against the club's member list; just "9 voted" when
+    // the list cannot be read.
+    function votedLine(d, memberCount) {
+      var n = d.yes_count + d.no_count;
+      if (!n) return 'No votes yet';
+      return memberCount ? n + ' of ' + memberCount + ' voted' : n + ' voted';
+    }
+
+    // The tally bar: green and red filling left to right against the light
+    // track of the members who have not voted yet.
+    function setBar(barY, barN, d, memberCount) {
+      var denom = memberCount || (d.yes_count + d.no_count) || 1;
+      barY.style.width = Math.round(100 * d.yes_count / denom) + '%';
+      barN.style.width = Math.round(100 * d.no_count / denom) + '%';
+    }
+
+    function notice(el, msg) {
+      if (!el) return;
+      el.textContent = msg;
+      el.hidden = false;
+      clearTimeout(noticeTimer);
+      noticeTimer = setTimeout(function () { el.hidden = true; }, 4000);
+    }
+
+    function showView(name) {
+      $('view-list').hidden = name !== 'list';
+      $('view-detail').hidden = name !== 'detail';
+      $('view-new').hidden = name !== 'new';
+      try { window.scrollTo(0, 0); } catch (e) {}
+    }
+
+    // ── The list ──
+    var listSeq = 0;
+    function loadList() {
+      var seq = ++listSeq;
+      $('list-loading').hidden = false;
+      $('list-error').hidden = true;
+      $('list-empty').hidden = true;
+      $('cards').textContent = '';
+      $('closed-wrap').hidden = true;
+      api('/decisions?tab=' + tab).then(function (data) {
+        if (seq !== listSeq) return;
+        loadedOnce = true;
+        renderList(data);
+      }).catch(function () {
+        if (seq !== listSeq) return;
+        $('list-loading').hidden = true;
+        $('cards').textContent = '';
+        $('closed-wrap').hidden = true;
+        $('list-error').hidden = false;
+      });
+    }
+
+    function renderList(data) {
+      listData = data;
+      $('list-loading').hidden = true;
+      $('list-error').hidden = true;
+      $('demo-line').hidden = !data.demo;
+      var parts = [data.open_count === 1 ? '1 open' : data.open_count + ' open'];
+      if (data.waiting_count > 0) {
+        parts.push(data.waiting_count === 1 ? '1 waiting on your vote' : data.waiting_count + ' waiting on your vote');
+      }
+      $('hdr-sub').textContent = parts.join(', ');
+
+      var ds = data.decisions || [];
+      if (!ds.length) {
+        $('cards').textContent = '';
+        $('empty-title').textContent =
+          tab === 'mine' ? 'You have not posted a decision yet.' :
+          tab === 'closed' ? 'Nothing has been closed yet.' :
+          'Nothing to decide yet.';
+        $('list-empty').hidden = false;
+        return;
+      }
+      $('list-empty').hidden = true;
+      renderCards(ds, data.member_count);
+      if (tab === 'open' && data.recent_closed && data.recent_closed.length) {
+        renderClosed(data.recent_closed);
+        $('closed-wrap').hidden = false;
+      } else {
+        $('closed-wrap').hidden = true;
+      }
+    }
+
+    function commentLine(d) {
+      if (!d.comment_count) return 'No comments yet';
+      var base = d.comment_count === 1 ? '1 comment' : d.comment_count + ' comments';
+      if (!d.latest_commenter) return base;
+      return base + ', latest from ' + (d.latest_is_mine ? 'you' : d.latest_commenter);
+    }
+
+    function renderCards(ds, memberCount) {
+      var wrap = $('cards');
+      wrap.textContent = '';
+      ds.forEach(function (d) {
+        var node = $('card-tmpl').content.firstElementChild.cloneNode(true);
+        node.querySelector('.c-meta').textContent = (d.is_mine ? 'You' : d.author_username) + ', ' + rel(d.created_at);
+        node.querySelector('.c-voted').textContent = votedLine(d, memberCount);
+        node.querySelector('.c-q').textContent = d.question;
+        setBar(node.querySelector('.c-bar-y'), node.querySelector('.c-bar-n'), d, memberCount);
+        node.querySelector('.c-yes').textContent = d.yes_count;
+        node.querySelector('.c-no').textContent = d.no_count;
+        var yes = node.querySelector('.c-vote-yes'), no = node.querySelector('.c-vote-no');
+        yes.classList.toggle('sel', d.my_vote === 'yes');
+        no.classList.toggle('seln', d.my_vote === 'no');
+        if (d.closed_at) {
+          var act = node.querySelector('.act');
+          act.textContent = '';
+          var res = document.createElement('span');
+          res.className = 'res';
+          res.textContent = resultOf(d);
+          act.appendChild(res);
+        } else {
+          yes.addEventListener('click', function (e) { e.stopPropagation(); cardVote(node, d, 'yes', memberCount); });
+          no.addEventListener('click', function (e) { e.stopPropagation(); cardVote(node, d, 'no', memberCount); });
+        }
+        node.querySelector('.c-cm').textContent = commentLine(d);
+        if (!d.is_mine) {
+          var rep = addReport(node.querySelector('.cm'), 'decision', d.id, function () {});
+          rep.style.marginLeft = 'auto';
+        }
+        node.addEventListener('click', function () { location.hash = '#/d/' + d.id; });
+        wrap.appendChild(node);
+      });
+    }
+
+    // Optimistic vote: the tally bar fills straight away, and a failed save
+    // puts the card back as it was and says so.
+    function cardVote(node, d, choice, memberCount) {
+      var target = choice === d.my_vote ? null : choice;
+      var prev = { y: d.yes_count, n: d.no_count, v: d.my_vote };
+      var ny = d.yes_count, nn = d.no_count;
+      if (target === 'yes') { if (d.my_vote === 'no') nn--; ny++; }
+      else if (target === 'no') { if (d.my_vote === 'yes') ny--; nn++; }
+      else { if (d.my_vote === 'yes') ny--; if (d.my_vote === 'no') nn--; }
+      applyCardVote(node, { my_vote: target, yes_count: ny, no_count: nn }, memberCount);
+      api('/decisions/' + d.id + '/vote', { method: 'PUT', body: JSON.stringify({ choice: target }) })
+        .then(function (counts) {
+          d.my_vote = counts.my_vote;
+          d.yes_count = counts.yes_count;
+          d.no_count = counts.no_count;
+          applyCardVote(node, d, memberCount);
+        })
+        .catch(function (err) {
+          d.my_vote = prev.v; d.yes_count = prev.y; d.no_count = prev.n;
+          applyCardVote(node, d, memberCount);
+          notice($('notice-list'), err.status === 401
+            ? 'Make an account to vote.' : 'Your vote could not be saved.');
+        });
+    }
+
+    function applyCardVote(node, d, memberCount) {
+      node.querySelector('.c-vote-yes').classList.toggle('sel', d.my_vote === 'yes');
+      node.querySelector('.c-vote-no').classList.toggle('seln', d.my_vote === 'no');
+      node.querySelector('.c-yes').textContent = d.yes_count;
+      node.querySelector('.c-no').textContent = d.no_count;
+      setBar(node.querySelector('.c-bar-y'), node.querySelector('.c-bar-n'), d, memberCount);
+      node.querySelector('.c-voted').textContent = votedLine(d, memberCount);
+    }
+
+    function renderClosed(rows) {
+      var wrap = $('closed-list');
+      wrap.textContent = '';
+      rows.forEach(function (d) {
+        var node = $('closed-tmpl').content.firstElementChild.cloneNode(true);
+        node.querySelector('.r-q').textContent = d.question;
+        node.querySelector('.r-sub').textContent = 'Closed by ' +
+          (d.is_mine ? 'you' : d.author_username) + ', ' + (d.yes_count + d.no_count) + ' votes';
+        var res = node.querySelector('.r-res');
+        res.textContent = resultOf(d);
+        if (d.no_count > d.yes_count) res.classList.add('no');
+        node.addEventListener('click', function () { location.hash = '#/d/' + d.id; });
+        wrap.appendChild(node);
+      });
+    }
+
+    // Report: records it for the club's admins and changes nothing on
+    // screen beyond "Reported, thanks".
+    function addReport(host, targetType, targetId, onDone) {
+      if (!host) return onDone();
+      var rep = document.createElement('button');
+      rep.type = 'button';
+      rep.className = 'lnk m';
+      rep.textContent = 'Report';
+      rep.addEventListener('click', function (e) {
+        e.stopPropagation();
+        rep.disabled = true;
+        rep.textContent = 'Reporting…';
+        api('/reports', { method: 'POST', body: JSON.stringify({ target_type: targetType, target_id: targetId }) })
+          .then(function () { rep.textContent = 'Reported, thanks'; onDone(); })
+          .catch(function (err) {
+            rep.disabled = false;
+            rep.textContent = 'Report';
+            if (err.status !== 401) notice($('notice-list'), 'The report could not be sent.');
+          });
+      });
+      host.appendChild(rep);
+      return rep;
+    }
+
+    // ── The opened decision ──
+    var detailSeq = 0;
+    function loadDetail(id) {
+      var seq = ++detailSeq;
+      $('d-q').textContent = 'Loading…';
+      $('d-meta').textContent = '';
+      $('d-det').hidden = true;
+      $('d-card').hidden = true;
+      $('d-retry').hidden = true;
+      $('d-form').hidden = true;
+      $('d-cm-label').textContent = 'Comments';
+      $('d-comments').textContent = '';
+      $('demo-line-d').hidden = true;
+      api('/decisions/' + id).then(function (data) {
+        if (seq !== detailSeq) return;
+        currentDetail = data;
+        renderDetail(data);
+      }).catch(function () {
+        if (seq !== detailSeq) return;
+        currentDetail = null;
+        $('d-q').textContent = 'The decision could not be loaded.';
+        $('d-retry').hidden = false;
+      });
+    }
+
+    function renderDetail(data) {
+      var d = data.decision;
+      var memberCount = data.member_count;
+      var closed = !!d.closed_at;
+      $('d-card').hidden = false;
+      $('d-form').hidden = false;
+      $('d-retry').hidden = true;
+      $('demo-line-d').hidden = !data.demo;
+      $('d-meta').textContent = 'Posted by ' + (d.is_mine ? 'you' : d.author_username) + ', ' + rel(d.created_at);
+      $('d-q').textContent = d.question;
+      $('d-det').hidden = !d.details;
+      $('d-det').textContent = d.details;
+      setBar($('d-bar-y'), $('d-bar-n'), d, memberCount);
+      $('d-yes').textContent = d.yes_count;
+      $('d-no').textContent = d.no_count;
+      $('d-voted').textContent = closed ? resultOf(d) : votedLine(d, memberCount);
+      $('d-vote-yes').classList.toggle('sel', d.my_vote === 'yes');
+      $('d-vote-no').classList.toggle('seln', d.my_vote === 'no');
+      $('d-act').hidden = closed;
+      $('d-hint').textContent = closed ? 'Voting is closed.' :
+        d.my_vote === 'yes' ? 'You voted Yes. You can change your vote until it closes.' :
+        d.my_vote === 'no' ? 'You voted No. You can change your vote until it closes.' :
+        'You have not voted. You can change your vote until it closes.';
+      $('d-own').hidden = !d.is_mine;
+      $('btn-close').hidden = closed;
+      $('btn-report').hidden = d.is_mine;
+      $('btn-report').disabled = false;
+      $('btn-report').textContent = 'Report';
+      renderComments(data);
+    }
+
+    function renderComments(data) {
+      var wrap = $('d-comments');
+      wrap.textContent = '';
+      data.comments.forEach(function (c) {
+        var node = $('comment-tmpl').content.firstElementChild.cloneNode(true);
+        node.dataset.id = c.id;
+        node.querySelector('.w-name').textContent = c.is_mine ? 'You' : c.author_username;
+        node.querySelector('.w-when').textContent = rel(c.created_at);
+        var vt = node.querySelector('.w-vt');
+        if (c.author_vote) {
+          vt.textContent = c.author_vote === 'yes' ? 'Yes' : 'No';
+          vt.hidden = false;
+        }
+        node.querySelector('.w-body').textContent = c.body;
+        var rep = node.querySelector('.w-report'), del = node.querySelector('.w-del');
+        if (c.is_mine) {
+          rep.hidden = true;
+          del.hidden = false;
+          del.addEventListener('click', function () {
+            del.disabled = true;
+            api('/comments/' + c.id, { method: 'DELETE' }).then(function () {
+              data.comments = data.comments.filter(function (x) { return x.id !== c.id; });
+              var d = data.decision;
+              d.comment_count = (d.comment_count || 0) - 1;
+              syncListDecision(d.id, { comment_count: d.comment_count });
+              renderComments(data);
+            }).catch(function () {
+              del.disabled = false;
+              notice($('notice-detail'), 'Your comment could not be deleted.');
+            });
+          });
+        } else {
+          rep.addEventListener('click', function (e) {
+            e.stopPropagation();
+            rep.disabled = true;
+            rep.textContent = 'Reporting…';
+            api('/reports', { method: 'POST', body: JSON.stringify({ target_type: 'comment', target_id: c.id }) })
+              .then(function () { rep.textContent = 'Reported, thanks'; })
+              .catch(function () { rep.disabled = false; rep.textContent = 'Report'; });
+          });
+        }
+        wrap.appendChild(node);
+      });
+      var n = data.comments.length;
+      $('d-cm-label').textContent = n === 1 ? '1 comment' : n + ' comments';
+    }
+
+    function syncListDecision(id, patch) {
+      if (!listData) return;
+      (listData.decisions || []).concat(listData.recent_closed || []).forEach(function (d) {
+        if (d.id === id) Object.assign(d, patch);
+      });
+    }
+
+    // The detail's own vote: same optimistic fill, same rollback.
+    function detailVote(choice) {
+      if (!currentDetail) return;
+      var d = currentDetail.decision;
+      var target = choice === d.my_vote ? null : choice;
+      var prev = { y: d.yes_count, n: d.no_count, v: d.my_vote };
+      var ny = d.yes_count, nn = d.no_count;
+      if (target === 'yes') { if (d.my_vote === 'no') nn--; ny++; }
+      else if (target === 'no') { if (d.my_vote === 'yes') ny--; nn++; }
+      else { if (d.my_vote === 'yes') ny--; if (d.my_vote === 'no') nn--; }
+      d.my_vote = target; d.yes_count = ny; d.no_count = nn;
+      renderDetail(currentDetail);
+      api('/decisions/' + d.id + '/vote', { method: 'PUT', body: JSON.stringify({ choice: target }) })
+        .then(function (counts) {
+          d.my_vote = counts.my_vote; d.yes_count = counts.yes_count; d.no_count = counts.no_count;
+          syncListDecision(d.id, { my_vote: counts.my_vote, yes_count: counts.yes_count, no_count: counts.no_count });
+          renderDetail(currentDetail);
+        })
+        .catch(function (err) {
+          d.my_vote = prev.v; d.yes_count = prev.y; d.no_count = prev.n;
+          renderDetail(currentDetail);
+          notice($('notice-detail'), err.status === 401
+            ? 'Make an account to vote.' : 'Your vote could not be saved.');
+        });
+    }
+
+    // ── Wiring ──
+    $('tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-tab]');
+      if (!b) return;
+      tab = b.dataset.tab;
+      Array.prototype.forEach.call($('tabs').children, function (t) {
+        t.classList.toggle('on', t === b);
+        t.setAttribute('aria-selected', t === b ? 'true' : 'false');
+      });
+      loadList();
+    });
+
+    $('btn-retry').addEventListener('click', loadList);
+    $('btn-first').addEventListener('click', function () { location.hash = '#/new'; });
+    $('btn-new').addEventListener('click', function () { location.hash = '#/new'; });
+    $('btn-cancel').addEventListener('click', function () { location.hash = '#/'; });
+    $('btn-back').addEventListener('click', function () { location.hash = '#/'; });
+    $('d-retry').addEventListener('click', function () { loadDetail(location.hash.slice(4)); });
+
+    function postDecision() {
+      var q = $('n-q').value.trim();
+      var det = $('n-det').value.trim();
+      if (!q) { notice($('notice-new'), 'Write a question first.'); return; }
+      $('btn-post').disabled = true;
+      $('btn-post-bottom').disabled = true;
+      api('/decisions', { method: 'POST', body: JSON.stringify({ question: q, details: det }) })
+        .then(function () {
+          $('n-q').value = '';
+          $('n-det').value = '';
+          $('btn-post').disabled = false;
+          $('btn-post-bottom').disabled = false;
+          tab = 'open';
+          Array.prototype.forEach.call($('tabs').children, function (t) {
+            t.classList.toggle('on', t.dataset.tab === 'open');
+            t.setAttribute('aria-selected', t.dataset.tab === 'open' ? 'true' : 'false');
+          });
+          if (location.hash === '#/new' || location.hash === '') location.hash = '#/';
+          loadList();
+        })
+        .catch(function () {
+          $('btn-post').disabled = false;
+          $('btn-post-bottom').disabled = false;
+          notice($('notice-new'), 'The decision could not be posted.');
+        });
+    }
+    $('btn-post').addEventListener('click', postDecision);
+    $('btn-post-bottom').addEventListener('click', postDecision);
+
+    $('d-vote-yes').addEventListener('click', function () { detailVote('yes'); });
+    $('d-vote-no').addEventListener('click', function () { detailVote('no'); });
+
+    $('btn-close').addEventListener('click', function () {
+      if (!currentDetail) return;
+      var d = currentDetail.decision;
+      api('/decisions/' + d.id + '/close', { method: 'POST' })
+        .then(function () {
+          d.closed_at = new Date(now()).toISOString();
+          syncListDecision(d.id, { closed_at: d.closed_at });
+          renderDetail(currentDetail);
+          loadList(); // it has moved to Closed
+        })
+        .catch(function () { notice($('notice-detail'), 'The decision could not be closed.'); });
+    });
+
+    $('btn-del').addEventListener('click', function () {
+      if (!currentDetail) return;
+      var d = currentDetail.decision;
+      if (!window.confirm('Delete this decision with its votes and comments?')) return;
+      api('/decisions/' + d.id, { method: 'DELETE' })
+        .then(function () {
+          currentDetail = null;
+          location.hash = '#/';
+          loadList();
+        })
+        .catch(function () { notice($('notice-detail'), 'The decision could not be deleted.'); });
+    });
+
+    $('btn-report').addEventListener('click', function () {
+      if (!currentDetail) return;
+      var b = $('btn-report');
+      b.disabled = true;
+      b.textContent = 'Reporting…';
+      api('/reports', { method: 'POST', body: JSON.stringify({ target_type: 'decision', target_id: currentDetail.decision.id }) })
+        .then(function () { b.textContent = 'Reported, thanks'; })
+        .catch(function () { b.disabled = false; b.textContent = 'Report'; });
+    });
+
+    $('btn-comment').addEventListener('click', function () {
+      if (!currentDetail) return;
+      var field = $('d-comment');
+      var body = field.value.trim();
+      if (!body) { notice($('notice-detail'), 'Write a comment first.'); return; }
+      $('btn-comment').disabled = true;
+      api('/decisions/' + currentDetail.decision.id + '/comments', { method: 'POST', body: JSON.stringify({ body: body }) })
+        .then(function (r) {
+          field.value = '';
+          $('btn-comment').disabled = false;
+          currentDetail.comments.push({
+            id: r.id,
+            author_username: '',
+            is_mine: true,
+            body: body,
+            created_at: new Date(now()).toISOString(),
+            author_vote: currentDetail.decision.my_vote,
+          });
+          currentDetail.decision.comment_count = (currentDetail.decision.comment_count || 0) + 1;
+          syncListDecision(currentDetail.decision.id, { comment_count: currentDetail.decision.comment_count });
+          renderComments(currentDetail);
+        })
+        .catch(function (err) {
+          $('btn-comment').disabled = false;
+          notice($('notice-detail'), err.status === 401
+            ? 'Make an account to comment.' : 'Your comment could not be saved.');
+        });
+    });
+
+    // ── Hash routing: #/ the list, #/d/<id> an opened decision, #/new ──
+    function route() {
+      var h = location.hash || '#/';
+      var m = h.match(/^#\/d\/(\d+)$/);
+      if (m) {
+        showView('detail');
+        loadDetail(m[1]);
+      } else if (h === '#/new') {
+        showView('new');
+      } else {
+        showView('list');
+        if (!loadedOnce) loadList();
+      }
+    }
+    window.addEventListener('hashchange', route);
+    route();
+  })();
+  </script>
   <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

@@ -3,5 +3,24 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "demo list shows decision cards with tally bars",
+      "path": "/?demo=1",
+      "expectSelector": ".card .bar",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "plain route shows the list or its empty state, never demo rows",
+      "path": "/",
+      "expectText": "Club Votes"
+    },
+    {
+      "name": "opened decision shows comments and the comment field",
+      "path": "/?demo=1#/d/9001",
+      "expectSelector": ".who",
+      "expectText": "Your comment"
+    }
+  ]
 }

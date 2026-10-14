@@ -58,32 +58,11 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The starter's placeholder screen was replaced by the app's first real
+version (see "About" below); the notes it carried about replacing the
+template are gone with it. The `usernode-dev-console@1` forwarder, the
+bridge `<script>` and the theme `<script>` in `public/index.html` are
+platform infrastructure: keep them through any rewrite.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +74,34 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for a club to decide things together. Anyone in the club posts
+something the club needs to decide, everyone votes **Yes** or **No**,
+people discuss it in flat comments under each one, and the person who
+posted a decision closes it when they are ready. The main screen's one
+job is to show what needs deciding and get your vote in: mostly reading
+and tapping Yes or No. Voting is deliberately simple — one yes-or-no
+choice per person per decision, changeable until it closes; no Maybe
+option, no deadlines, no reopening.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by the first version. Every later change follows it,
+and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** fern green (`--accent`) for Yes and the one main action,
+  brick red (`--no`) for No and the against colour, on warm green-grey
+  neutrals (`--ground`, `--surface`, `--raised`, `--fg`, `--muted`,
+  `--line`). Light values in `styles/tailwind-input.css`'s `:root`; dark
+  values in its `.dark` block.
+- **Signature element:** the tally bar — green for yes and red for no,
+  filling left to right against a light empty track, where the empty part
+  is the members who have not voted yet. The same bar, larger, heads an
+  opened decision.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  on a rounded system stack (`ui-rounded` with a system fallback, set in
+  `tailwind.config.js`) for the friendly club feel.
+- The app follows the viewer's Homeroom theme (light and dark); there is
+  no fixed look and no theme picker.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -121,18 +112,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 - Colour comes only from the tokens (`bg-ground`, `bg-surface`,
   `text-fg`, `text-muted`, `border-line`, `bg-accent` with
-  `text-on-accent`, ...): never a raw hex value or a stock palette class.
+  `text-on-accent`, `--no` for the against colour): never a raw hex value
+  or a stock palette class.
 - Tap targets are at least 44 px; the buttons and fields already are.
 - A field's label says what it is; its placeholder, if any, is an example
   that says so ("e.g. 5.0"), never a bare value that could pass for one
   already entered.
-- Each screen sits in `page-column`, one centred column on a wide window.
+- Each screen sits in one centred column on a wide window (the spec
+  screens' `[data-spec-screen]` rule does this; `page-column` elsewhere).
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry. Loading has the content's
   own shape (its rows, with `skeleton` bars for their text).
-- Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
 - A header that shows the app's own mark shows the project's icon there
   (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
@@ -140,6 +131,18 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **Words:** "decision", "vote", "Yes", "No", "comment", "Close decision",
+  "Closed", "New decision", "Report" — one word for one thing, everywhere.
+- **The `reports` table is `staging:private`** (it records who reported
+  what) and carries no foreign keys; the other tables are public.
+- **Demo rows.** Rows written by the `?demo=1` staging demo carry
+  `demo = true` and are left out of every API answer without `demo=1`.
+  A viewer's own demo rows are written once, on their first `?demo=1`
+  request, with fixed ids and `ON CONFLICT DO NOTHING`.
+- **Times** come from `req.now` (the platform convention), not `NOW()`.
+- **One vote per person per decision**, stored as the primary key
+  `(decision_id, user_id)`; choice is 'yes' or 'no' only.
+- **No new dependencies** without a reason; the app is Express, pg and
+  vanilla JS in the page.
+- Comments are flat (no replies), never edited, deleted only by their
+  writer; decisions are closed or deleted only by their poster.

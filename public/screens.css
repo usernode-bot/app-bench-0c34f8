@@ -100,9 +100,11 @@
 
 .res.no {color:rgb(var(--no))}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Rules that would
+   restyle screen 1 (which shares .cv, .meta, .card, .bar, .leg, .act,
+   .section-label and .list-row) are scoped to screen 2. */
 
-.cv {
+[data-spec-screen="2"] .cv {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1100px;
@@ -120,19 +122,19 @@
 
 .lnk.m {color:rgb(var(--muted));font-size:14px}
 
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 4px 0}
+[data-spec-screen="2"] .meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 4px 0}
 
-.cv h1 {font-size:28px;line-height:36px;font-weight:700;margin:4px 4px 8px;letter-spacing:-.01em}
+[data-spec-screen="2"] .cv h1 {font-size:28px;line-height:36px;font-weight:700;margin:4px 4px 8px;letter-spacing:-.01em}
 
 .det {margin:0 4px 16px;color:rgb(var(--fg))}
 
-.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
+[data-spec-screen="2"] .card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
 
-.bar {display:flex;gap:2px;height:18px}
+[data-spec-screen="2"] .bar {display:flex;gap:2px;height:18px}
 
-.leg {display:flex;justify-content:space-between;font-size:14px;line-height:20px;margin:8px 0 12px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .leg {display:flex;justify-content:space-between;font-size:14px;line-height:20px;margin:8px 0 12px;color:rgb(var(--muted))}
 
-.act {display:flex;gap:8px}
+[data-spec-screen="2"] .act {display:flex;gap:8px}
 
 .own {display:flex;gap:8px;margin-top:12px}
 
@@ -142,9 +144,9 @@
 
 .hint {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 0 0}
 
-.section-label {font-size:14px;font-weight:500;color:rgb(var(--muted));margin:24px 4px 8px}
+[data-spec-screen="2"] .section-label {font-size:14px;font-weight:500;color:rgb(var(--muted));margin:24px 4px 8px}
 
-.list-row {padding:12px 16px}
+[data-spec-screen="2"] .list-row {padding:12px 16px}
 
 .who {display:flex;align-items:center;justify-content:space-between;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 

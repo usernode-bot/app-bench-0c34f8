@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        no: token('no'), // the against colour of the tally bar
+      },
+      // The friendly club feel: rounded system type, with a fallback chain
+      // for platforms that have no rounded variant.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
