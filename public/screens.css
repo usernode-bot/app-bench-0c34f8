@@ -8,11 +8,19 @@
   color: rgb(var(--fg));
   font: 16px/1.45 system-ui,-apple-system,sans-serif;
   min-height: 1400px;
+  /* One centred column (the 16 px gutters stay inside it); on a phone the
+     viewport is narrower than the column, so nothing changes there. */
+  max-width: 560px;
+  margin-inline: auto;
   padding: 16px 16px 40px;
   box-sizing: border-box;
 }
 
 .s * {box-sizing:border-box}
+
+/* The demo line sits above the title; give it the same 20 px gap the other
+   sections get (the header adds its own 4 px). */
+#demo-label {margin:0 0 16px}
 
 .hd {display:flex;align-items:center;gap:10px;margin:4px 0 20px}
 
