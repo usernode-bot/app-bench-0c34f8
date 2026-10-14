@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,49 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="top sans"><div class="title">Unread</div>
+    <button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Feeds</button>
+    <button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div>
+    <div class="sub sans">14 new from 6 feeds, updated 8:12 am</div>
+    <div class="section-label sans">Today</div>
+    <ul class="list">
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">42 min ago</span></div><div class="h">The quiet return of the dumbphone</div><div class="ex sans">Sales of basic handsets are up for a third year as people look for ways to switch off.</div></div></li>
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">2 h ago</span></div><div class="h">Why your focaccia needs more water than you think</div><div class="ex sans">A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</div></div></li>
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">3 h ago</span></div><div class="h">Notes on a smaller, faster text editor</div><div class="ex sans">A week with an editor that opens instantly and does very little else, and why that was enough.</div></div></li>
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">5 h ago</span></div><div class="h">A map of every lighthouse still staffed</div><div class="ex sans">Fewer than twenty keepers remain worldwide. Their stories, and where to find them.</div></div></li>
+    </ul>
+    <div class="section-label sans">Yesterday</div>
+    <ul class="list">
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Pocket Tech</span><span class="time">Tue, 9:40 pm</span></div><div class="h">Handheld consoles are getting weirdly good</div><div class="ex sans">Battery life is the new spec race, and the newest models finally last a full flight.</div></div></li>
+    <li class="list-row rd"><span class="dot read"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Tue, 4:15 pm</span></div><div class="h">The best way to cook a weeknight rice</div><div class="ex sans">Rinse, rest, and trust the lid. A method that works every time.</div></div></li>
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Field Notes</span><span class="time">Tue, 11:02 am</span></div><div class="h">What a hundred-year-old seed vault teaches us</div><div class="ex sans">Inside the cold room where forgotten varieties wait for a second chance.</div></div></li>
+    <li class="list-row"><span class="dot"></span><div class="body"><div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Slow Software</span><span class="time">Tue, 8:30 am</span></div><div class="h">On the slow death of the home screen widget</div><div class="ex sans">Why the most promising idea in phone design never quite found its audience.</div></div></li>
+    </ul>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div class="app">
+      <div class="behind sans">Unread</div>
+      <div class="scrim"></div>
+      <div class="sheet">
+      <div class="grab"></div>
+      <div class="bar"><button class="btn-icon" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="meta sans"><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1.5"/></svg>Small Kitchen</span><span class="time">Today, 6:10 am</span></div>
+      <div class="h">Why your focaccia needs more water than you think</div>
+      <div class="summary"><p>A wetter dough gives the open, glossy crumb. Here is how to handle it without a mess.</p><p>We baked twelve loaves at rising hydration, from a stiff 65 percent to a loose 85, and the wettest ones won every blind tasting. The trick is to stop kneading and start folding: four sets of folds, half an hour apart, and an oiled tin that does the shaping for you.</p></div>
+      <div class="note sans">This is the summary the feed shares. The full article is on the site.</div>
+      <button class="btn-primary sans"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
