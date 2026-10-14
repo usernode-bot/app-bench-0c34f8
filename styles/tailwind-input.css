@@ -258,10 +258,11 @@
     bottom: calc(1rem + var(--un-safe-inset-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
-  /* Loading rows, the content holder, the one demo line. */
+  /* Loading rows, the content holder, the one demo line. The demo line is
+     one plain muted line — not a boxed placeholder. */
   .kit-skeleton-row { @apply flex flex-col gap-2 px-4 py-4; }
   .kit-content { @apply flex flex-col gap-6; }
-  .kit-demo-label { @apply rounded-lg border border-dashed border-line bg-raised px-3 py-2 text-small text-muted; }
+  .kit-demo-label { @apply text-small text-muted; }
 
   /* A report: a line per option or category, and its bar. */
   .kit-report { @apply flex flex-col gap-3; }

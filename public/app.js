@@ -72,7 +72,17 @@ function load() {
   });
   view.content.prepend(failLine);
   view.run(async (box) => {
-    const data = await api('GET', '/api/posts');
+    // The drawn sample count must not stand while nothing is loaded: a
+    // neutral word while the posts load, and nothing once the load fails.
+    barCount.hidden = false;
+    barCount.textContent = 'Loading…';
+    let data;
+    try {
+      data = await api('GET', '/api/posts');
+    } catch (err) {
+      barCount.hidden = true;
+      throw err;
+    }
     if (data.demo) showDemoLabel(main, 'Staging demo: these feeds and posts are made up.');
     feeds = data.feeds || [];
     showFailed(data.failed || []);

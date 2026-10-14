@@ -21,7 +21,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  /* At reading widths the content is capped and centred with the page; the
+     bar itself stays full width so its hairline does. */
+  padding: 12px max(16px, calc((100% - 680px) / 2));
   background: rgb(var(--ground)/.92);
   border-bottom: 1px solid rgb(var(--line));
 }
@@ -44,11 +46,14 @@ body {
 
 svg.i {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-main {padding:12px 16px 24px}
+main {padding:12px max(16px, calc((100% - 680px) / 2)) 24px}
 
 .list {list-style:none;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
 
-.list-row {position:relative;display:flex;flex-direction:column;gap:4px;padding:12px 16px 13px 18px;min-height:44px}
+/* Left-aligned despite the kit component's items-center: these drawn rows
+   are columns, and centring their children would float the meta line and
+   title in the middle of the row. */
+.list-row {position:relative;display:flex;flex-direction:column;gap:4px;align-items:stretch;text-align:left;padding:12px 16px 13px 18px;min-height:44px}
 
 .list-row+.list-row {border-top:1px solid rgb(var(--line))}
 
@@ -75,6 +80,11 @@ main {padding:12px 16px 24px}
 .post-title {font:500 17px/1.32 ui-serif,Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 .list-row.read .post-title {color:rgb(var(--muted));font-weight:400}
+
+/* The content box's flex gap is off here: the drawn screen spaces its groups
+   through the section labels themselves (18px above, 8px below), so the kit's
+   24px gap between a label and its list would read as a detached label. */
+main .kit-content {gap:0}
 
 .section-label {margin:18px 4px 8px;font-size:13px;font-weight:500;color:rgb(var(--muted))}
 
