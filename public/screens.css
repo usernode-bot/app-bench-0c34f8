@@ -16,7 +16,11 @@ body {
   line-height: 1.45;
 }
 
-main {padding:16px 16px 32px;display:flex;flex-direction:column;gap:20px}
+main {padding:16px 16px 32px;display:flex;flex-direction:column;gap:20px;max-width:640px;margin:0 auto}
+
+/* The recipe column: its title block and each section (label plus list)
+   keep the spec's 20 px rhythm, like main's own gap. */
+[data-recipe] {display:flex;flex-direction:column;gap:20px}
 
 .hdr {display:flex;align-items:center;gap:10px}
 
@@ -70,15 +74,19 @@ main {padding:16px 16px 32px;display:flex;flex-direction:column;gap:20px}
 
 .stepper svg {width:20px;height:20px}
 
-.seg {display:flex;background:rgb(var(--raised));border-radius:8px;padding:2px;height:44px}
+/* No track padding: each option is the full 44 px the tap-target rule
+   asks for, not 40 px inside a 2 px inset. */
+.seg {display:flex;background:rgb(var(--raised));border-radius:8px;height:44px}
 
-.seg span, .seg button {flex:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:15px;font-variant-numeric:tabular-nums}
+.seg span, .seg button {flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:6px;font-size:15px;font-variant-numeric:tabular-nums}
 
 .seg .on {background:rgb(var(--surface));font-weight:650;box-shadow:0 0 0 1px rgb(var(--line))}
 
 .btn-primary {display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600;font-size:16px}
 
-.section-label {font-size:13px;font-weight:600;color:rgb(var(--muted));padding:0 4px;margin-bottom:8px}
+/* No side padding: the labels' left edge lines up with the title at the
+   16 px gutter (the kit's px-1 would sit them 4 px in). */
+.section-label {font-size:13px;font-weight:600;color:rgb(var(--muted));padding:0;margin-bottom:8px}
 
 .list {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;list-style:none;padding:0;overflow:hidden}
 
