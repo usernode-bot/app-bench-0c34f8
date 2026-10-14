@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,54 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div><div class="bb">
+    <h1 class="title serif">Bread Bot</h1>
+    <p class="small muted" style="margin:2px 0 0">Pick a bread, set your dough, get the recipe.</p>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
+    <div class="grp"><p class="section-label">Bread</p>
+    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div></div>
+
+    <div class="grp"><div class="row"><p class="section-label" style="margin:0">Hydration</p><span class="small muted">Sourdough usually 70 to 80%</span></div>
+    <div class="row" style="gap:12px"><div class="slider" style="flex:1"><div class="track"></div><div class="fill"></div><div class="thumb"></div></div><b class="serif" style="font-size:20px;width:48px;text-align:right">75%</b></div></div>
+
+    <div class="grp row"><div><p class="section-label" style="margin:0">Loaves</p></div>
+    <div class="stepper"><span class="btn-secondary" aria-label="One fewer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><b>2</b><span class="btn-secondary" aria-label="One more"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></div>
+
+    <div class="grp"><p class="section-label">Loaf size</p>
+    <div class="seg"><span>Small<i>500 g</i></span><span class="on">Medium<i>900 g</i></span><span>Large<i>1200 g</i></span><span>Custom<i>grams</i></span></div></div>
+
+    <section class="card">
+    <p class="small muted" style="margin:0">Your formula</p>
+    <div class="hyd"><span class="big serif">75%</span><span class="muted" style="padding-bottom:8px">hydration</span></div>
+    <div class="bar"><span class="f"></span><span class="w"></span></div>
+    <p class="small muted" style="margin:0">1,017 g flour to 763 g water, counting what is in the starter</p>
+    <ul class="list">
+    <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 4h10l-1 3 3 4v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8l3-4z"/><path d="M8 7h8"/><path d="M12 12v5M10 15l2 2 2-2"/></svg><span class="n">Bread flour</span><span class="pct">90%</span><span class="g">915 g</span></li>
+    <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg><span class="n">Water</span><span class="pct">65%</span><span class="g">661 g</span></li>
+    <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 3h8v4H8z"/><path d="M7 7h10v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M7 12h10"/><circle cx="12" cy="16" r="1"/></svg><span class="n">Starter<br><span class="small muted">active, 100% hydration</span></span><span class="pct">20%</span><span class="g">203 g</span></li>
+    <li class="list-row"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 9h8l1 10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M9 9a3 3 0 0 1 6 0"/><circle cx="11" cy="5" r=".5"/><circle cx="13" cy="4" r=".5"/></svg><span class="n">Salt</span><span class="pct">2%</span><span class="g">20 g</span></li>
+    </ul>
+    <div class="tot"><span>Dough for 2 loaves of 900 g</span><b style="color:rgb(var(--fg))">1,800 g</b></div>
+
+    <div class="sub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg><h2 class="heading serif">Rise</h2></div>
+    <ol class="steps">
+    <li><span class="k">Bulk rise<br><span class="small muted">covered, at about 24°C / 75°F, with folds in the first 2 h</span></span><span class="v">4 to 6 h</span></li>
+    <li><span class="k">Shape, then final proof<br><span class="small muted">in the fridge, or 1 to 2 h on the counter</span></span><span class="v">8 to 14 h</span></li>
+    </ol>
+
+    <div class="sub"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z"/><path d="M12 11v6"/></svg><h2 class="heading serif">Bake</h2></div>
+    <ol class="steps">
+    <li><span class="k">Lid on<br><span class="small muted">in a preheated Dutch oven</span></span><span class="v">250°C / 480°F<small>20 min</small></span></li>
+    <li><span class="k">Lid off<br><span class="small muted">until deep brown, 96°C / 205°F inside</span></span><span class="v">230°C / 450°F<small>20 to 25 min</small></span></li>
+    </ol>
     </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <p class="small muted" style="text-align:center;margin:16px 0 0">Times are a guide: a warm kitchen rises faster.</p>
+    </div></div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
