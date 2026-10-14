@@ -95,22 +95,36 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator: pick a bread (sourdough, bagels, sourdough
+bagels, rye, sandwich loaf), set hydration, loaf count and loaf size, and
+it gives the grams of every ingredient, the rise and proof times, and the
+oven temperature and bake time. A pure client-side calculator: no
+accounts, no database tables, nothing saved. Grams come from baker's
+percentages per bread (`BREADS` in `public/app.js`), salt at 2% of flour;
+sourdoughs use a starter (100% hydration at 20% of the flour, so its flour
+and water sit inside the flour and hydration percentages) with a feeding
+note.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** a baker's bench — accent: deep crust brown (`--accent`,
+  light 122 62 24, dark a toasted crust 232 160 96); second: wheat gold
+  (`--wheat`, for what the loaf holds — meter fill and the starter note's
+  tint, never text); neutrals: oat white to warm brown greys (ground,
+  surface, raised). Type: system sans with tabular figures on the gram
+  column (`font-variant-numeric`), so grams line up down the right edge.
+- **Signature element:** the hydration meter — a loaf outline that fills
+  with wheat gold from the bottom as hydration rises, beside the big
+  percentage and a word for the crumb (Stiff, Soft, Open and airy, Wet and
+  very open). Bread rows and the rise-and-bake rows each carry a small
+  line icon in the same hand-drawn stroke.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (unchanged; `fontFamily.sans` is the system-ui stack).
+- **One fixed look:** none — both looks follow the viewer's Homeroom
+  theme, via the theme script and the kit's tokens.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

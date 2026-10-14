@@ -191,10 +191,33 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Graceful shutdown: stop accepting, drain in-flight requests under a hard
+// deadline, close the pool, exit. A repeat signal during the drain is a no-op.
+const DRAIN_MS = 3000;
+let shuttingDown = false;
+
+async function shutdown(signal, server) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  server.close(() => {});
+  server.closeIdleConnections?.();
+  const t = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+  t.unref?.();
+  try {
+    await pool.end();
+  } catch (e) {
+    console.error('[shutdown] pool.end failed', e.message);
+  }
+  process.exit(0);
+}
+
 async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  process.on('SIGTERM', () => shutdown('SIGTERM', server));
+  process.on('SIGINT', () => shutdown('SIGINT', server));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

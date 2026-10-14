@@ -3,5 +3,20 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator shows a recipe",
+      "path": "/",
+      "expectSelector": "#recipe",
+      "expectText": "Bread flour"
+    },
+    {
+      "id": "recipe.staging-demo",
+      "name": "Staging demo",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**"]
+    }
+  ]
 }

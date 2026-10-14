@@ -34,6 +34,12 @@
 
 .list-row+.list-row {border-top:1px solid rgb(var(--line))}
 
+/* Rows drawn as one button each (li > button.list-row): the divider moves
+   to the li, and the check shows only on the chosen row. */
+.list > li + li {border-top:1px solid rgb(var(--line))}
+.list-row .ck {visibility:hidden}
+.list-row.on .ck {visibility:visible}
+
 .ic {width:24px;height:24px;flex:none;color:rgb(var(--muted))}
 
 .tx {flex:1;min-width:0;display:flex;flex-direction:column}
@@ -58,6 +64,13 @@
 
 .range {padding:0 16px 16px}
 
+/* The slider is a real <input type=range>, invisible, laid over the drawn
+   track: taps, drags and arrow keys all move it, and it drives .fill and
+   .knob. Focus is shown on the track. */
+.range {position:relative}
+.range input[type=range] {position:absolute;left:16px;right:16px;top:-19px;width:auto;height:44px;margin:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+.range:has(input:focus-visible) .track {outline:2px solid rgb(var(--focus));outline-offset:3px}
+
 .track {position:relative;height:6px;border-radius:3px;background:rgb(var(--line))}
 
 .fill {position:absolute;left:0;top:0;bottom:0;width:62.5%;border-radius:3px;background:rgb(var(--accent))}
@@ -68,13 +81,16 @@
 
 .step {display:flex;align-items:center;border:1px solid rgb(var(--line));border-radius:10px;overflow:hidden}
 
-.step b {width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:20px;color:rgb(var(--accent))}
+.step button {width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:20px;color:rgb(var(--accent));background:transparent;border:0;font-family:inherit;cursor:pointer}
+.step button:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
+.step button:disabled {opacity:.4;cursor:default}
 
 .step span {width:40px;text-align:center;font-weight:650;font-variant-numeric:tabular-nums}
 
 .seg {display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:10px;background:rgb(var(--raised));margin:0 16px}
 
-.seg span {min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:14px;line-height:18px}
+.seg button {min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;border-radius:8px;font-family:inherit;font-size:14px;line-height:18px;color:inherit;cursor:pointer;padding:4px}
+.seg button:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
 
 .seg .sel {background:rgb(var(--surface));box-shadow:0 0 0 1px rgb(var(--line));font-weight:600}
 
@@ -89,3 +105,8 @@
 .tot {background:rgb(var(--raised))}
 
 .note {display:flex;gap:12px;padding:12px 16px;border-top:1px solid rgb(var(--line));background:rgb(var(--wheat)/.16)}
+
+/* The meter's wheat fill rises with hydration (set from app.js). */
+@media (prefers-reduced-motion: no-preference) {
+  #meter-fill {transition: y .2s ease, height .2s ease}
+}

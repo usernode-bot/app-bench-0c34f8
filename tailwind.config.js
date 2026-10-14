@@ -55,6 +55,10 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        wheat: token('wheat'), // what the loaf holds: meter fill, starter note
+      },
+      fontFamily: {
+        sans: ['system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
