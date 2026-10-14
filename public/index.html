@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,49 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="head"><h1>Bread Bot</h1><p class="sub">Grams, rise and bake for any loaf</p></div>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🍞</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Bread Bot</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <div class="section-label" style="margin-top:0">Bread</div>
+    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <div class="section-label">Dough</div>
+    <ul class="list">
+    <li class="list-row"><span class="grow">Hydration</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">75%</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
+    <li class="list-row"><span class="grow">Loaves</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">2</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
+    <li class="list-row"><span class="grow">Size of each loaf</span><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="num">800 g</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></li>
+    </ul>
+    <button class="btn-primary">Calculate</button>
+
+    <div class="section-label" style="margin-top:28px">Ingredients for 2 sourdough loaves, 1,600 g of dough</div>
+    <ul class="list">
+    <li class="list-row"><span class="grow">Bread flour</span><span class="val">833 g</span></li>
+    <li class="list-row"><span class="grow">Water</span><span class="val">625 g</span></li>
+    <li class="list-row"><span class="grow">Sourdough starter</span><span class="val">125 g</span></li>
+    <li class="list-row"><span class="grow">Salt</span><span class="val">17 g</span></li>
+    </ul>
+
+    <div class="section-label">Baker's percentages <span class="tag">flour = 100%</span></div>
+    <div class="notebook">
+    <div class="nrow"><b>Flour</b><div class="bar"><i style="width:100%"></i></div><span class="pct">100%</span></div>
+    <div class="nrow"><b>Water</b><div class="bar"><i style="width:75%"></i></div><span class="pct">75%</span></div>
+    <div class="nrow"><b>Starter</b><div class="bar"><i style="width:15%"></i></div><span class="pct">15%</span></div>
+    <div class="nrow"><b>Salt</b><div class="bar"><i style="width:2%"></i></div><span class="pct">2%</span></div>
+    </div>
+
+    <div class="section-label">Rise and bake</div>
+    <div class="tiles">
+    <div class="tile"><small>Bulk rise</small><strong>5 h</strong></div>
+    <div class="tile"><small>Bake at</small><strong>240 °C</strong></div>
+    <div class="tile"><small>Bake for</small><strong>45 min</strong></div>
+    </div>
+    <div class="card" style="margin-top:8px"><div style="font-weight:600">Timing</div><p class="sub" style="margin-top:4px">Bulk rise at 24 °C with folds every 45 minutes. Shape, then proof 12 hours in the fridge. Bake covered for 25 minutes, then uncovered for 20.</p></div>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
