@@ -95,22 +95,36 @@ tables you've marked private), etc.
 
 ## About Club Votes
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A place for the club to decide things together. Anyone can post something
+the club needs to decide (a question with two to six named options),
+everyone picks one option and can change or take back their vote until the
+decision closes, and the discussion happens in comments under each one.
+The person who posted a decision closes it and picks which option was
+decided; closed decisions stay readable with their result. Guests can read
+everything; voting, posting and commenting need an account.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** a civic ballot look — ballot-box blue accent (29 78 216 light,
+  125 162 255 dark), cool paper-grey neutrals (page 246 247 249, cards white,
+  raised 237 240 245, text 17 24 39, secondary 75 85 99, lines 223 227 234 in
+  the light look; page 11 15 25, cards 20 26 40, raised 31 39 56, text
+  241 244 249, secondary 156 166 184, lines 51 60 79 in the dark one). The
+  drawn screens' styles live in `public/screens.css`; the tokens are in
+  `styles/tailwind-input.css`.
+- **Signature element:** the tally bar on every decision card — one bar split
+  by option, the leader in solid blue and the others in lighter blues,
+  filling as the club votes; on a closed decision it turns to ink grey under
+  a "Decided: option" stamp.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Questions and titles are set in the serif stack (`fontFamily.serif`:
+  ui-serif, Charter, Georgia — `font-serif`), like a notice on a club board;
+  the rest is the system sans.
+- **Icons:** simple line drawings (plus, check, speech bubble, back arrow),
+  carried inline in the drawn screens' markup.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

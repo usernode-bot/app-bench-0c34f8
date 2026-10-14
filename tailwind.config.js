@@ -56,6 +56,11 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // Headings and questions are set in the serif stack (a notice on a
+      // club board); everything else is the system sans.
+      fontFamily: {
+        serif: ['ui-serif', 'Charter', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

@@ -154,6 +154,246 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Club Votes ─────────────────────────────────────────────────────────────
+// The kit resource owns decisions, their votes and their comments, and the
+// routes that read and write them (public/kit/README.md). Everything this
+// app adds sits beside it: closing a decision, reporting, and the staging
+// demo rows beyond what the kit seeds itself.
+const GONE = 'This was removed, or the link is wrong.';
+const DEMO_FIRST_ID = 900001; // demo ids from the kit: 900001 up, no real row collides
+const DAY = 24 * 60 * 60 * 1000;
+
+// Made-up staging demo (?demo=1, staging only), as public/kit/demo.js seeds
+// it from these lines; every decision names its own options. Ids 900003 and
+// 900007 are the two the demo closes under "Decided".
+const DEMO_TITLES = [
+  { title: 'Where should the club meet next month?', body: 'We outgrew the corner table at the café. Where suits most people from November?', options: ['Community hall', 'Library back room', 'The café'] },
+  { title: 'Spring outing: hike, museum or picnic?', body: 'Something we keep putting off. Pick one and we will sort the details after.', options: ['Hike', 'Museum', 'Picnic'] },
+  { title: 'What should our next fundraiser be?', body: 'The hall booking needs paying by the end of the month, so let us pick a fundraiser and get moving.', options: ['Bake sale', 'Raffle', 'Car wash', 'Quiz night'] },
+  { title: 'Which book should we read next month?', options: ['The Overstory', 'Project Hail Mary', 'Pachinko'] },
+  { title: 'Move the meeting night to Thursday?', options: ['Yes', 'No', 'Keep it flexible'] },
+  { title: 'Snacks for the next meeting?', options: ['Biscuits', 'Fruit', 'Crisps', 'Nothing'] },
+  { title: 'What colour should the club t-shirt be?', options: ['Blue', 'Green', 'Maroon'] },
+  { title: 'Should we start a club notice board?', options: ['Yes', 'No'] },
+  { title: 'Where should the summer picnic be?', options: ['The park', 'The beach', 'Riverside meadow'] },
+  { title: 'Which film for the club film night?', options: ['Documentary', 'Comedy', 'Classic'] },
+  { title: 'What time should meetings start?', options: ['6 pm', '7 pm', '8 pm'] },
+  { title: 'New club badge or keep the old one?', options: ['New badge', 'Keep the old one'] },
+];
+const DEMO_BODIES = [
+  'No deadline on this one, but sooner is better than never.',
+  'Raised at the last meeting. Comments stay open until we decide.',
+];
+const DEMO_COMMENTS = [
+  'The library room has the projector, which helps for the planning night.',
+  'Hall is bigger if more people come back after the summer.',
+  'Works for me either way, pick what suits most people.',
+  'Can we settle this at the next meeting?',
+  'I would rather keep it simple this year.',
+  'Thursdays are hard for me before seven.',
+  'I will ask around and report back.',
+  'Good idea, we keep putting this off.',
+];
+
+// A decision's closure: who closed it and which option was decided. A row
+// here means the decision is closed; the vote guard below reads it.
+async function migrateApp() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS decision_closures (
+    decision_id INTEGER PRIMARY KEY REFERENCES decisions(id) ON DELETE CASCADE,
+    choice INTEGER NOT NULL, closed_by_id INTEGER NOT NULL, closed_by_name TEXT NOT NULL,
+    closed_at TIMESTAMPTZ NOT NULL)`);
+  // Reports about user-posted content, for the club's admins. Private: they
+  // are moderation material, not something the app shows.
+  await pool.query(`CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY, kind TEXT NOT NULL, target_id INTEGER NOT NULL,
+    reporter_id INTEGER NOT NULL, reporter_name TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL,
+    UNIQUE (kind, target_id, reporter_id))`);
+  await pool.query(`COMMENT ON TABLE reports IS 'staging:private'`);
+}
+
+// Staging with ?demo=1, once per viewer (kit_demo_viewers, resource
+// 'decisions:own'): one decision authored by the viewer, with votes from the
+// kit's made-up people, two of their comments, the viewer's own vote and one
+// viewer comment — so Close decision, Delete, "You voted" and own-comment
+// Delete all have something real to act on.
+const DEMO_OWN_ID = 900021;
+async function seedOwnDemo(req) {
+  if (!(IS_STAGING && req.query.demo === '1' && req.user)) return false;
+  const first = await pool.query(
+    'INSERT INTO kit_demo_viewers (resource, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING user_id',
+    ['decisions:own', req.user.id]);
+  if (!first.rows.length) return true;
+  const at = (ms) => new Date(req.now.getTime() - ms).toISOString();
+  await pool.query(`INSERT INTO decisions (id, title, body, options, author_id, author_name, created_at)
+    VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7) ON CONFLICT (id) DO NOTHING`, [
+    DEMO_OWN_ID, 'Where should we meet in November?',
+    'The café is closing for renovations. Pick the place that works for most of us, I will book it once we decide.',
+    JSON.stringify(['Library back room', 'Community hall', "Someone's garden"]),
+    req.user.id, String(req.user.username || 'Someone'), at(2 * DAY)]);
+  // Six for the library room, three for the hall, two for the garden, then
+  // the viewer's own vote for the library room.
+  const picks = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [1, 0], [1, 0], [2, 0], [2, 0]];
+  await pool.query(`INSERT INTO decisions_votes (item_id, user_id, choice, created_at) VALUES ($1, $2, $3, $4)
+    ON CONFLICT (item_id, user_id) DO NOTHING`, [DEMO_OWN_ID, req.user.id, 0, at(5 * 60 * 60 * 1000)]);
+  for (const [k, [choice, offset]] of picks.entries()) {
+    await pool.query(`INSERT INTO decisions_votes (item_id, user_id, choice, created_at)
+      VALUES ($1, $2, $3, $4) ON CONFLICT (item_id, user_id) DO NOTHING`, [
+      DEMO_OWN_ID, -(k + 1), choice, at((2 * DAY) - ((k + 1) * 47 * 60 * 60 * 1000))]);
+  }
+  await pool.query(`INSERT INTO decisions_comments (item_id, author_id, author_name, body, created_at)
+    VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`, [DEMO_OWN_ID, -1, 'Ana',
+    'The library room has the projector, which helps for the planning night.', at(1 * DAY)]);
+  await pool.query(`INSERT INTO decisions_comments (item_id, author_id, author_name, body, created_at)
+    VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`, [DEMO_OWN_ID, -2, 'Ben',
+    'Hall is bigger if more people come back after the summer.', at(1 * DAY - 3 * 60 * 60 * 1000)]);
+  await pool.query(`INSERT INTO decisions_comments (item_id, author_id, author_name, body, created_at)
+    VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`, [DEMO_OWN_ID, req.user.id,
+    String(req.user.username || 'Someone'), 'I can ask the library about Tuesday slots too.', at(5 * 60 * 60 * 1000)]);
+  return true;
+}
+
+// Closes the two demo decisions under "Decided": the leading option of the
+// votes actually seeded, closed by each decision's own author. Only where
+// the kit's demo rows exist; nothing outside these demo responses reads them.
+async function seedDemoClosures(req) {
+  for (const id of [900003, 900007]) {
+    const { rows } = await pool.query(
+      'SELECT id, author_id, author_name FROM decisions WHERE id = $1 AND id >= $2', [id, DEMO_FIRST_ID]);
+    if (!rows.length) continue;
+    const lead = await pool.query(
+      `SELECT choice FROM decisions_votes WHERE item_id = $1 GROUP BY choice ORDER BY COUNT(*) DESC, choice LIMIT 1`, [id]);
+    if (!lead.rows.length) continue;
+    await pool.query(`INSERT INTO decision_closures (decision_id, choice, closed_by_id, closed_by_name, closed_at)
+      VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`, [
+      id, lead.rows[0].choice, rows[0].author_id, rows[0].author_name,
+      new Date(req.now.getTime() - 2 * DAY)]);
+  }
+}
+
+// Demo rows live only in the ?demo=1 answers: without the flag a read never
+// sees them (ids from DEMO_FIRST_ID), so a route checked without ?demo=1
+// shows the club's real (or empty) state, not the staging demo.
+app.use('/api/decisions', (req, res, next) => {
+  const demo = req.query.demo === '1';
+  const idMatch = /^\/(\d+)(?:\/|$)/.exec(req.path);
+  if (!demo && idMatch && Number(idMatch[1]) >= DEMO_FIRST_ID) {
+    return res.status(404).json({ error: GONE });
+  }
+  if (!demo && req.method === 'GET' && (req.path === '/' || req.path === '')) {
+    const json = res.json.bind(res);
+    res.json = (body) => json(body && Array.isArray(body.items)
+      ? { ...body, items: body.items.filter((it) => it.id < DEMO_FIRST_ID) } : body);
+  }
+  if (demo && req.method === 'GET' && req.user) {
+    seedOwnDemo(req).then(() => next(), (err) => { console.error(err); next(); });
+  } else {
+    next();
+  }
+});
+
+// Voting on a closed decision stops: the guard answers before the kit's
+// vote route runs, so a race with a close is refused, not stored.
+app.post('/api/decisions/:id/vote', (req, res, next) => {
+  pool.query('SELECT 1 FROM decision_closures WHERE decision_id = $1', [Number(req.params.id) || 0])
+    .then(({ rows }) => (rows.length
+      ? res.status(409).json({ error: 'This decision is closed.' })
+      : next()), next);
+});
+
+// Items with options to vote on and a comment thread (public/kit/README.md).
+const decisions = require('./kit/server').resource(app, pool, {
+  name: 'decisions',
+  demo: { titles: DEMO_TITLES, bodies: DEMO_BODIES, comments: DEMO_COMMENTS },
+});
+
+// Which decisions are closed, as the feed and the detail screen read them.
+// Staging with ?demo=1: also seeds this viewer's own demo decision and the
+// two closed demo decisions, idempotently.
+app.get('/api/closures', async (req, res) => {
+  try {
+    let demo = false;
+    if (IS_STAGING && req.query.demo === '1') {
+      demo = true;
+      await seedOwnDemo(req);
+      await seedDemoClosures(req);
+    }
+    const { rows } = await pool.query(`SELECT decision_id AS "decisionId", choice,
+      closed_by_name AS "closedBy", closed_at AS "closedAt" FROM decision_closures
+      ORDER BY closed_at DESC, decision_id DESC`);
+    res.json({ closures: rows, demo });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// The person who posted a decision closes it and picks the result.
+app.post('/api/decisions/:id/close', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const id = Number(req.params.id);
+    if (!(Number.isInteger(id) && id > 0)) return res.status(404).json({ error: GONE });
+    const { rows } = await pool.query('SELECT author_id, options FROM decisions WHERE id = $1', [id]);
+    if (!rows.length) return res.status(404).json({ error: GONE });
+    if (rows[0].author_id !== req.user.id) {
+      return res.status(403).json({ error: 'Only the person who posted this can close it.' });
+    }
+    const labels = Array.isArray(rows[0].options) ? rows[0].options : [];
+    const choice = Number((req.body || {}).choice);
+    if (!Number.isInteger(choice) || choice < 0 || choice >= labels.length) {
+      return res.status(400).json({ error: 'Pick one of the options.' });
+    }
+    const already = await pool.query('SELECT 1 FROM decision_closures WHERE decision_id = $1', [id]);
+    if (already.rows.length) return res.status(409).json({ error: 'This decision is already closed.' });
+    const { rows: closed } = await pool.query(`INSERT INTO decision_closures
+      (decision_id, choice, closed_by_id, closed_by_name, closed_at) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id, choice, req.user.id, String(req.user.username || 'Someone'), req.now]);
+    const c = closed[0];
+    return res.status(201).json({ closure: { decisionId: c.decision_id, choice: c.choice, closedBy: c.closed_by_name, closedAt: c.closed_at } });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// Only your own comment can be deleted by you.
+app.delete('/api/decisions/:id/comments/:commentId', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const { rows } = await pool.query(
+      'DELETE FROM decisions_comments WHERE id = $1 AND item_id = $2 AND author_id = $3 RETURNING id',
+      [Number(req.params.commentId) || 0, Number(req.params.id) || 0, req.user.id]);
+    if (!rows.length) return res.status(403).json({ error: 'Only your own comments can be deleted by you.' });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
+// A report about a decision or a comment, for the club's admins. Reporting
+// again changes nothing; nothing is hidden automatically.
+app.post('/api/reports', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required' });
+  try {
+    const kind = (req.body || {}).kind;
+    const id = Number((req.body || {}).id);
+    if (!['decision', 'comment'].includes(kind) || !(Number.isInteger(id) && id > 0)) {
+      return res.status(400).json({ error: 'Say what is being reported.' });
+    }
+    const table = kind === 'decision' ? 'decisions' : 'decisions_comments';
+    const { rows: target } = await pool.query(`SELECT 1 FROM ${table} WHERE id = $1`, [id]);
+    if (!target.length) return res.status(404).json({ error: GONE });
+    await pool.query(`INSERT INTO reports (kind, target_id, reporter_id, reporter_name, created_at)
+      VALUES ($1, $2, $3, $4, $5) ON CONFLICT (kind, target_id, reporter_id) DO NOTHING`,
+      [kind, id, req.user.id, String(req.user.username || 'Someone'), req.now]);
+    return res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Something went wrong on our side. Try again in a moment.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -192,9 +432,22 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await decisions.migrate();
+  await migrateApp();
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+  // Stop accepting, let the requests in flight drain for about 3 s, close
+  // the pool and exit.
+  let stopping = false;
+  const stop = () => {
+    if (stopping) return;
+    stopping = true;
+    server.close(() => { pool.end().catch(() => {}).finally(() => process.exit(0)); });
+    setTimeout(() => process.exit(0), 3000).unref();
+  };
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

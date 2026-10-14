@@ -57,13 +57,15 @@ body {
 
 .foot {display:flex;align-items:center;gap:16px;margin-top:10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
-.foot svg {width:18px;height:18px;vertical-align:-4px;margin-right:4px}
+.foot svg {display:inline;width:18px;height:18px;vertical-align:-4px;margin-right:4px}
 
 .mine {color:rgb(var(--accent));font-weight:500}
 
 .done .tally .s1 {background:rgb(var(--fg)/.75)}
 
 .done .tally .s2 {background:rgb(var(--fg)/.3)}
+
+.done .tally .s3 {background:rgb(var(--fg)/.3)}
 
 .stamp {display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgb(var(--raised));font-size:14px;line-height:20px;font-weight:500;margin-bottom:8px}
 
@@ -134,3 +136,11 @@ body {
 .field {display:block;width:100%;min-height:72px;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font:16px system-ui,sans-serif;color:rgb(var(--muted)/.6)}
 
 .kit-composer-actions {display:flex;justify-content:flex-end}
+
+/* The feed's loading state: the kit's skeleton rows drawn as the grey
+   placeholder cards that stand where the decision cards will be. */
+.states-cards .kit-group[aria-hidden="true"] {display:contents}
+
+.states-cards .kit-skeleton-row {display:flex;flex-direction:column;gap:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;padding:16px;margin:0 0 12px}
+
+.states-cards .kit-skeleton-row:last-child {margin-bottom:0}

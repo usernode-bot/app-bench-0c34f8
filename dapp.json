@@ -3,5 +3,24 @@
     "emoji": "🗳️"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "feed",
+      "name": "Feed shows demo decisions",
+      "path": "/?demo=1",
+      "expectSelector": "[data-decision]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Decided section shows closed decisions",
+      "path": "/?demo=1",
+      "expectText": "Decided"
+    },
+    {
+      "name": "Empty club offers a first decision",
+      "path": "/",
+      "expectText": "No decisions yet"
+    }
+  ]
 }

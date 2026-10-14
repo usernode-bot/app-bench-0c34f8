@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Club Votes</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 10h16v10H4z'/><path d='M9 10V7l3-3 3 3v3'/><path d='M9 7h6'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -124,9 +124,10 @@
     <div class="app">
      <header class="top">
       <h1>Club Votes</h1>
-      <button class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button>
+      <button id="new-decision" class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New decision</button>
      </header>
-     <section>
+     <main id="app" class="states-cards"></main>
+     <section id="open-section">
       <h2 class="section-label">Open decisions</h2>
       <div class="stack">
        <button class="card">
@@ -152,7 +153,7 @@
        </button>
       </div>
      </section>
-     <section>
+     <section id="decided-section">
       <h2 class="section-label">Decided</h2>
       <div class="stack">
        <button class="card done">
@@ -167,49 +168,29 @@
     </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="app">
-      <article class="kit-detail">
-       <header class="kit-detail-head">
-        <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button>
-        <h2 class="kit-detail-title">Where should we meet in November?</h2>
-        <p class="meta">Posted by you, 2 days ago</p>
-        <p class="kit-detail-body">The café is closing for renovations. Pick the place that works for most of us, I will book it once we decide.</p>
-       </header>
-       <section>
-        <h3 class="section-label">Your vote</h3>
-        <div class="kit-votes">
-         <button class="kit-vote" aria-pressed="true"><span class="kit-vote-fill" style="width:55%"></span><span class="kit-vote-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><span class="kit-vote-label">Library back room</span><span class="kit-vote-count">6</span></button>
-         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:27%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Community hall</span><span class="kit-vote-count">3</span></button>
-         <button class="kit-vote" aria-pressed="false"><span class="kit-vote-fill" style="width:18%"></span><span class="kit-vote-mark"></span><span class="kit-vote-label">Someone's garden</span><span class="kit-vote-count">2</span></button>
-        </div>
-        <p class="kit-vote-summary">11 votes, Library back room leads</p>
-        <div class="owner">
-         <button class="btn-secondary">Close decision</button>
-         <button class="btn-secondary">Delete</button>
-        </div>
-       </section>
-       <section>
-        <h3 class="section-label">Comments</h3>
-        <ul class="kit-group">
-         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ana</span><span>yesterday</span><button class="rep">Report</button></p><p>The library room has the projector, which helps for the planning night.</p></li>
-         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">Ben</span><span>yesterday</span><button class="rep">Report</button></p><p>Hall is bigger if more people come back after the summer.</p></li>
-         <li class="list-row"><p class="kit-comment-meta"><span class="kit-comment-author">You</span><span>5 hours ago</span><button class="rep">Delete</button></p><p>I can ask the library about Tuesday slots too.</p></li>
-        </ul>
-        <form class="kit-composer">
-         <label class="kit-label">Add a comment</label>
-         <div class="field">e.g. The hall has better parking</div>
-         <div class="kit-composer-actions"><button class="btn-secondary">Post comment</button></div>
-        </form>
-       </section>
-      </article>
-      </div>
-      </div>
-    </div>
+  <!-- Screen 2, the opened decision, moved from <template data-spec-screen="2">
+       to where the app renders it: one copy per opened decision, filled from
+       data by public/app.js. -->
+  <template id="tpl-detail">
+   <article class="kit-detail">
+    <header class="kit-detail-head">
+     <button class="btn-secondary" data-back><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>All decisions</button>
+     <h2 class="kit-detail-title"></h2>
+     <p class="meta"></p>
+     <p class="kit-detail-body"></p>
+    </header>
+    <section data-votes>
+     <h3 class="section-label">Your vote</h3>
+     <div class="kit-votes"></div>
+     <div class="owner"></div>
+    </section>
+    <section data-comments>
+     <h3 class="section-label">Comments</h3>
+     <div data-thread></div>
+    </section>
+   </article>
   </template>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
