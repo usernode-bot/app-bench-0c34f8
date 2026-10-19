@@ -84,3 +84,145 @@
 .quiet {display:flex;gap:16px;margin-top:8px}
 
 .quiet div {min-height:44px;display:flex;align-items:center;gap:6px;font-size:14px;color:rgb(var(--muted))}
+
+/* ── Behaviour added with the first version ──────────────────────────────
+   States, forms and drag feedback for the drawn screen. Same tokens, no new
+   colours. */
+
+button.picker,
+button.btn-primary,
+button.chip {
+  font-family: inherit;
+  color: inherit;
+}
+button.picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+button.btn-primary,
+button.btn-secondary,
+button.chip,
+button.listline,
+button.textbtn,
+.quiet button {
+  cursor: pointer;
+}
+button.btn-primary {border: 0;}
+
+/* 44 px targets for the two drawn controls that were under it. */
+.toggle div {min-height: 44px;cursor: pointer;}
+
+button.chip {text-align: left;touch-action: none;}
+button.chip[data-item-id] {cursor: grab;}
+.chip.dragging {opacity: .4;}
+.tier-ghost {position: fixed;z-index: 50;pointer-events: none;opacity: .92;box-shadow: 0 6px 18px rgb(var(--fg) / .18);}
+.items.drag-over,
+.tray.drag-over {outline: 2px dashed rgb(var(--accent));outline-offset: -5px;background: rgb(var(--raised));}
+
+.toggle div:focus-visible,
+.pick div:focus-visible,
+button:focus-visible,
+.listline:focus-visible {
+  outline: 2px solid rgb(var(--focus));
+  outline-offset: 2px;
+}
+
+/* A card-shaped placeholder while the board loads. */
+.skel-chip {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  flex: 1 1 96px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid rgb(var(--line));
+  border-radius: 8px;
+}
+
+/* The empty state's own action, not the full-width bar. */
+.state-empty .btn-primary {width: auto;margin-top: 8px;padding: 0 16px;}
+
+/* Forms: Cancel and the action stay at the top, clear of the keyboard. */
+.form-head {display: flex;align-items: center;justify-content: space-between;gap: 8px;}
+.form-head .ct {flex: 1;text-align: center;font-size: 16px;line-height: 24px;font-weight: 600;}
+.form-head .btn-primary {width: auto;margin-top: 0;min-height: 44px;padding: 0 14px;}
+.form-head .btn-secondary {min-height: 44px;}
+
+/* The demo's note sits inside the list's name, quieter than the name. */
+[data-usernode-demo-note] {font-size: 16px;line-height: 24px;font-weight: 500;color: rgb(var(--muted));}
+
+/* Picking a list. */
+.listline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid rgb(var(--line));
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+#listsBox .listline:first-child {border-top: 0;}
+.listline .on {color: rgb(var(--accent));font-weight: 600;}
+
+.textbtn {
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: rgb(var(--muted));
+  font: inherit;
+  font-size: 14px;
+}
+
+.quiet button {
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+/* One short message after an action, never over the controls. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: min(320px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgb(var(--fg));
+  color: rgb(var(--ground));
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgb(0 0 0 / .18);
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {transition: none;}
+}
+
+/* The drawn .app is a phone-width column; keep it centred inside the
+   screen's wider max-width on a desktop window. */
+.app {margin-inline: auto;}

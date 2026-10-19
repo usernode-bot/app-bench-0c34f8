@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Rank anything with friends. A list holds things to rank (Bay Area
+restaurants first); everyone drags each thing into their own tier, S to F,
+and the board shows your view next to the crowd average and every person's
+vote. Tiers are fixed, each placement is one person's vote (never a shared
+final ranking), and every list, thing and vote is public inside the app.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: the kit's teal (the one filled action and the ring on
+  an opened card); neutrals: the kit's warm greys (ground, surface, raised,
+  line, fg, muted). The tier bands are the app's subject colours, not a
+  second accent: S red, A burnt orange, B amber brown, C olive green,
+  D slate, F warm grey, with white letters on each in both looks.
+- **Signature element:** the tier board itself: six full-width bands with a
+  solid coloured label, and every card carrying its tier's colour on its
+  left edge, so a tier reads the same on the board, on the card and in a
+  vote badge.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  The drawn screen's board sets its own sizes in `public/screens.css`
+  (28 px for the list name and the tier letters), which is the app's voice:
+  rounded system sans, heavy tier letters.
+- **One fixed look:** none; light and dark follow the viewer's Homeroom
+  theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +150,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Every list, thing and vote is public inside the app; reports are only
+  recorded, nothing is hidden.
+- Tiers are fixed S, A, B, C, D, F. A placement is one person's vote; the
+  crowd average is computed in the page (S=0 to F=5, mean, ties to the
+  better tier), never stored.
+- Demo data lives only on staging with `?demo=1` and is written once per
+  viewer (`demo_seeded`), marked `is_demo`, and never appears without it.

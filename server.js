@@ -147,6 +147,432 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// ── Data ────────────────────────────────────────────────────────────────
+// All tables are public: a list, its things and everyone's votes are open to
+// everyone in the app, as the spec asks. Reports are only recorded.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+async function createSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS lists (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      noun TEXT NOT NULL DEFAULT 'item',
+      created_by_id TEXT,
+      created_by_name TEXT,
+      is_demo BOOLEAN NOT NULL DEFAULT FALSE,
+      demo_owner_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS items (
+      id SERIAL PRIMARY KEY,
+      list_id INTEGER NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      added_by_id TEXT,
+      added_by_name TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS votes (
+      item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL,
+      username TEXT NOT NULL,
+      tier TEXT NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );
+    CREATE TABLE IF NOT EXISTS reports (
+      id SERIAL PRIMARY KEY,
+      item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+      list_id INTEGER REFERENCES lists(id) ON DELETE CASCADE,
+      reporter_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS demo_seeded (
+      user_id TEXT PRIMARY KEY
+    );
+    CREATE INDEX IF NOT EXISTS items_list_id_idx ON items(list_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS lists_one_demo_per_owner
+      ON lists(demo_owner_id) WHERE is_demo;
+  `);
+}
+
+// The first list everyone sees. It starts empty: the populated board is the
+// staging demo below, on ?demo=1 only.
+async function seedFirstList() {
+  const { rowCount } = await pool.query(
+    'SELECT 1 FROM lists WHERE is_demo = FALSE LIMIT 1'
+  );
+  if (rowCount) return;
+  await pool.query(
+    `INSERT INTO lists (name, noun) VALUES ('Bay Area restaurants', 'restaurant')`
+  );
+}
+
+// ── The staging demo ─────────────────────────────────────────────────────
+// Only on staging with ?demo=1. Written once per viewer, so what they change
+// afterwards stays. The friends are obviously fake accounts.
+
+const DEMO_FRIENDS = {
+  maya: { id: 'staging-demo-maya', username: 'staging-demo-maya' },
+  dev: { id: 'staging-demo-dev', username: 'staging-demo-dev' },
+  jon: { id: 'staging-demo-jon', username: 'staging-demo-jon' },
+};
+
+const DEMO_RESTAURANTS = [
+  { name: 'Tartine Bakery', by: 'maya', votes: { owner: 'S', maya: 'S', dev: 'S' } },
+  { name: 'Nopalito', by: 'dev', votes: { owner: 'S', jon: 'S' } },
+  { name: 'Swan Oyster Depot', by: 'dev', votes: { owner: 'A', dev: 'A', maya: 'S', jon: 'B' } },
+  { name: 'Zuni Café', by: 'owner', votes: { owner: 'A' } },
+  { name: 'La Taqueria', by: 'maya', votes: { owner: 'A', maya: 'A' } },
+  { name: 'Burma Superstar', by: 'jon', votes: { owner: 'B', jon: 'B' } },
+  { name: 'Mission Chinese', by: 'owner', votes: { owner: 'B' } },
+  { name: 'Lers Ros', by: 'dev', votes: { owner: 'C', dev: 'C' } },
+  { name: 'Pier crab stand', by: 'owner', votes: { owner: 'D' } },
+  { name: 'Rich Table', by: 'jon', votes: {} },
+  { name: "Sam's Chowder House", by: 'maya', votes: {} },
+];
+
+function demoOwner(user) {
+  return { id: String(user.id), username: user.username || 'You' };
+}
+
+async function ensureDemoList(user) {
+  const uid = String(user.id);
+  const seeded = await pool.query('SELECT 1 FROM demo_seeded WHERE user_id = $1', [uid]);
+  if (seeded.rowCount) return;
+
+  const existing = await pool.query(
+    'SELECT 1 FROM lists WHERE is_demo = TRUE AND demo_owner_id = $1 LIMIT 1',
+    [uid]
+  );
+  if (existing.rowCount) {
+    await pool.query(
+      'INSERT INTO demo_seeded (user_id) VALUES ($1) ON CONFLICT DO NOTHING',
+      [uid]
+    );
+    return;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const list = await client.query(
+      `INSERT INTO lists (name, noun, created_by_id, created_by_name, is_demo, demo_owner_id)
+       VALUES ('Bay Area restaurants', 'restaurant', $1, $2, TRUE, $1)
+       RETURNING id`,
+      [uid, user.username || null]
+    );
+    const listId = list.rows[0].id;
+    const people = { owner: demoOwner(user), ...DEMO_FRIENDS };
+
+    for (const restaurant of DEMO_RESTAURANTS) {
+      const addedBy = people[restaurant.by];
+      const item = await client.query(
+        `INSERT INTO items (list_id, name, added_by_id, added_by_name)
+         VALUES ($1, $2, $3, $4) RETURNING id`,
+        [listId, restaurant.name, addedBy.id, addedBy.username]
+      );
+      for (const [who, tier] of Object.entries(restaurant.votes)) {
+        const voter = people[who];
+        await client.query(
+          `INSERT INTO votes (item_id, user_id, username, tier)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (item_id, user_id) DO UPDATE SET tier = EXCLUDED.tier`,
+          [item.rows[0].id, voter.id, voter.username, tier]
+        );
+      }
+    }
+
+    await client.query(
+      'INSERT INTO demo_seeded (user_id) VALUES ($1) ON CONFLICT DO NOTHING',
+      [uid]
+    );
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    // Two loads at once: the other one won the unique index. That is fine.
+    if (err.code !== '23505') throw err;
+  } finally {
+    client.release();
+  }
+}
+
+function wantsDemo(req) {
+  return IS_STAGING && String(req.query.demo) === '1';
+}
+
+function isDemoVisible(list, req) {
+  if (!list.is_demo) return true;
+  return Boolean(
+    req.user && wantsDemo(req) && String(list.demo_owner_id) === String(req.user.id)
+  );
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+
+function cleanName(value, max) {
+  if (typeof value !== 'string') return null;
+  const name = value.trim().replace(/\s+/g, ' ');
+  if (!name || name.length > max) return null;
+  return name;
+}
+
+function idParam(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+async function loadList(id) {
+  const result = await pool.query(
+    `SELECT id, name, noun, created_by_id, created_by_name, is_demo, demo_owner_id
+     FROM lists WHERE id = $1`,
+    [id]
+  );
+  return result.rows[0] || null;
+}
+
+function serializeList(list, itemCount) {
+  return {
+    id: list.id,
+    name: list.name,
+    noun: list.noun,
+    createdById: list.created_by_id,
+    createdByName: list.created_by_name,
+    isDemo: list.is_demo,
+    itemCount: itemCount === undefined ? undefined : itemCount,
+  };
+}
+
+// Writes are only allowed on a list the viewer can see: a demo list belongs
+// to the viewer it was made for.
+function canWriteList(list, req) {
+  return Boolean(req.user) && isDemoVisible(list, req);
+}
+
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// ── Routes ──────────────────────────────────────────────────────────────
+
+app.get('/api/lists', wrap(async (req, res) => {
+  if (wantsDemo(req) && req.user) await ensureDemoList(req.user);
+
+  const demo = wantsDemo(req) && req.user;
+  const result = demo
+    ? await pool.query(
+        `SELECT l.*, (SELECT count(*) FROM items i WHERE i.list_id = l.id)::int AS item_count
+         FROM lists l
+         WHERE l.is_demo = FALSE OR (l.is_demo = TRUE AND l.demo_owner_id = $1)
+         ORDER BY l.created_at, l.id`,
+        [String(req.user.id)]
+      )
+    : await pool.query(
+        `SELECT l.*, (SELECT count(*) FROM items i WHERE i.list_id = l.id)::int AS item_count
+         FROM lists l
+         WHERE l.is_demo = FALSE
+         ORDER BY l.created_at, l.id`
+      );
+
+  res.json({ lists: result.rows.map((l) => serializeList(l, l.item_count)) });
+}));
+
+app.post('/api/lists', wrap(async (req, res) => {
+  const body = req.body || {};
+  const name = cleanName(body.name, 80);
+  const noun = cleanName(body.noun, 40) || 'item';
+  if (!name) return res.status(400).json({ error: 'name_required' });
+
+  const result = await pool.query(
+    `INSERT INTO lists (name, noun, created_by_id, created_by_name)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, name, noun, created_by_id, created_by_name, is_demo, demo_owner_id`,
+    [name, noun, String(req.user.id), req.user.username || null]
+  );
+  res.status(201).json({ list: serializeList(result.rows[0], 0) });
+}));
+
+app.delete('/api/lists/:id', wrap(async (req, res) => {
+  const id = idParam(req.params.id);
+  const list = id && await loadList(id);
+  if (!list) return res.status(404).json({ error: 'not_found' });
+  if (!canWriteList(list, req)) return res.status(404).json({ error: 'not_found' });
+  if (String(list.created_by_id) !== String(req.user.id)) {
+    return res.status(403).json({ error: 'creator_only' });
+  }
+  await pool.query('DELETE FROM lists WHERE id = $1', [id]);
+  res.status(204).end();
+}));
+
+app.get('/api/lists/:id', wrap(async (req, res) => {
+  const id = idParam(req.params.id);
+  const list = id && await loadList(id);
+  if (!list || !isDemoVisible(list, req)) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  const result = await pool.query(
+    `SELECT i.id, i.name, i.added_by_id, i.added_by_name,
+            v.user_id AS voter_id, v.username AS voter_name, v.tier
+     FROM items i
+     LEFT JOIN votes v ON v.item_id = i.id
+     WHERE i.list_id = $1
+     ORDER BY i.created_at, i.id`,
+    [id]
+  );
+
+  const itemsById = new Map();
+  for (const row of result.rows) {
+    let item = itemsById.get(row.id);
+    if (!item) {
+      item = {
+        id: row.id,
+        name: row.name,
+        addedById: row.added_by_id,
+        addedByName: row.added_by_name,
+        votes: [],
+        myTier: null,
+      };
+      itemsById.set(row.id, item);
+    }
+    if (row.voter_id) {
+      item.votes.push({ userId: row.voter_id, username: row.voter_name, tier: row.tier });
+    }
+  }
+
+  const viewerId = req.user ? String(req.user.id) : null;
+  const items = [...itemsById.values()].map((item) => {
+    const mine = viewerId && item.votes.find((v) => String(v.userId) === viewerId);
+    return {
+      ...item,
+      myTier: mine ? mine.tier : null,
+      canRemove: Boolean(viewerId && String(item.addedById) === viewerId),
+    };
+  });
+
+  res.json({
+    list: serializeList(list, items.length),
+    items,
+    viewerId,
+    viewerName: req.user ? req.user.username || null : null,
+  });
+}));
+
+app.post('/api/lists/:id/items', wrap(async (req, res) => {
+  const id = idParam(req.params.id);
+  const list = id && await loadList(id);
+  if (!list || !canWriteList(list, req)) return res.status(404).json({ error: 'not_found' });
+
+  const name = cleanName((req.body || {}).name, 80);
+  if (!name) return res.status(400).json({ error: 'name_required' });
+
+  const duplicate = await pool.query(
+    'SELECT 1 FROM items WHERE list_id = $1 AND lower(name) = lower($2) LIMIT 1',
+    [id, name]
+  );
+  if (duplicate.rowCount) return res.status(409).json({ error: 'duplicate_name' });
+
+  const result = await pool.query(
+    `INSERT INTO items (list_id, name, added_by_id, added_by_name)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, name, added_by_id, added_by_name`,
+    [id, name, String(req.user.id), req.user.username || null]
+  );
+  res.status(201).json({
+    item: {
+      id: result.rows[0].id,
+      name: result.rows[0].name,
+      addedById: result.rows[0].added_by_id,
+      addedByName: result.rows[0].added_by_name,
+      votes: [],
+      myTier: null,
+      canRemove: true,
+    },
+  });
+}));
+
+async function loadItemForWrite(req, res) {
+  const id = idParam(req.params.id);
+  if (!id) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  const result = await pool.query(
+    `SELECT i.id, i.added_by_id, i.list_id, l.is_demo, l.demo_owner_id
+     FROM items i JOIN lists l ON l.id = i.list_id
+     WHERE i.id = $1`,
+    [id]
+  );
+  const item = result.rows[0];
+  if (!item || !isDemoVisible({ is_demo: item.is_demo, demo_owner_id: item.demo_owner_id }, req)) {
+    res.status(404).json({ error: 'not_found' });
+    return null;
+  }
+  return item;
+}
+
+app.delete('/api/items/:id', wrap(async (req, res) => {
+  const item = await loadItemForWrite(req, res);
+  if (!item) return;
+  if (String(item.added_by_id) !== String(req.user.id)) {
+    return res.status(403).json({ error: 'adder_only' });
+  }
+  await pool.query('DELETE FROM items WHERE id = $1', [item.id]);
+  res.status(204).end();
+}));
+
+app.put('/api/items/:id/vote', wrap(async (req, res) => {
+  const item = await loadItemForWrite(req, res);
+  if (!item) return;
+  const tier = (req.body || {}).tier;
+  if (!TIERS.includes(tier)) return res.status(400).json({ error: 'bad_tier' });
+
+  await pool.query(
+    `INSERT INTO votes (item_id, user_id, username, tier, updated_at)
+     VALUES ($1, $2, $3, $4, now())
+     ON CONFLICT (item_id, user_id)
+     DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username, updated_at = now()`,
+    [item.id, String(req.user.id), req.user.username || null, tier]
+  );
+  res.json({ ok: true, tier });
+}));
+
+app.delete('/api/items/:id/vote', wrap(async (req, res) => {
+  const item = await loadItemForWrite(req, res);
+  if (!item) return;
+  await pool.query('DELETE FROM votes WHERE item_id = $1 AND user_id = $2', [
+    item.id,
+    String(req.user.id),
+  ]);
+  res.status(204).end();
+}));
+
+app.post('/api/reports', wrap(async (req, res) => {
+  const body = req.body || {};
+  const itemId = body.itemId === undefined ? null : idParam(body.itemId);
+  const listId = body.listId === undefined ? null : idParam(body.listId);
+  if (!itemId && !listId) return res.status(400).json({ error: 'target_required' });
+
+  if (itemId) {
+    const found = await pool.query('SELECT 1 FROM items WHERE id = $1', [itemId]);
+    if (!found.rowCount) return res.status(404).json({ error: 'not_found' });
+  }
+  if (listId) {
+    const list = await loadList(listId);
+    if (!list || !isDemoVisible(list, req)) return res.status(404).json({ error: 'not_found' });
+  }
+
+  await pool.query(
+    'INSERT INTO reports (item_id, list_id, reporter_id) VALUES ($1, $2, $3)',
+    [itemId, listId, String(req.user.id)]
+  );
+  res.status(201).json({ ok: true });
+}));
+
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ error: 'server_error' });
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +618,32 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  try {
+    await createSchema();
+    await seedFirstList();
+  } catch (err) {
+    // A database hiccup at boot must not take the whole app down: the board
+    // shows its error state, /health still answers, and Retry recovers.
+    console.error('schema setup failed:', err.message);
+  }
+
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  let shuttingDown = false;
+  function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received: draining`);
+    const finish = () => pool.end().then(() => process.exit(0)).catch(() => process.exit(1));
+    // Stop accepting connections, give in-flight requests about 3 seconds,
+    // then close the pool and exit.
+    server.close(finish);
+    setTimeout(finish, 3000).unref();
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

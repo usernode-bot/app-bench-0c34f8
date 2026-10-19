@@ -60,6 +60,15 @@
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    /* The tier bands, same hues as the light look, lifted for the dark
+       ground. White letters stay readable on each. */
+    --tier-s: 200 44 44;
+    --tier-a: 194 65 12;
+    --tier-b: 146 84 9;
+    --tier-c: 77 124 15;
+    --tier-d: 85 99 120;
+    --tier-f: 105 100 95;
+    --on-tier: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

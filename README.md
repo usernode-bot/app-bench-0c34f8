@@ -1,27 +1,29 @@
 # Tier List
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A shared tier board for ranking things with friends, starting with Bay Area
+restaurants.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **My view** puts every thing in the tier row you gave it. Drag a card into
+  a row (or open it and tap S to F) to add or change your vote; things you
+  have not placed wait in a tray under the board.
+- **Crowd view** shows each thing in the row of the crowd average, with
+  everyone who voted on it.
+- Tap a card to see who added it, how each person voted, and the crowd
+  average. From there you can clear your vote, remove a thing you added, or
+  report one.
+- Anyone can add a thing to a list, start another list for a different kind
+  of thing, or report a list. The list's creator can remove it.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+The first list is Bay Area restaurants. On staging, open the preview with
+`?demo=1` to see the board filled with sample data for four made-up people.
 
-## Replacing the template
+## Running it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm ci --include=dev
+npm run build   # compiles styles/tailwind-input.css to public/tailwind.css
+npm start
+```
 
-Once the real app exists, rewrite this README to describe it.
+Sign-in, the database and the bridge come from the Homeroom platform (see
+`CLAUDE.md`).

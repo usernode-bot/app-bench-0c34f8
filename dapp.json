@@ -3,5 +3,23 @@
     "emoji": "🏆"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Tier board loads",
+      "path": "/",
+      "expectSelector": "[data-tier=\"S\"]"
+    },
+    {
+      "name": "Demo list shows the drawn restaurants",
+      "path": "/?demo=1",
+      "expectText": "Swan Oyster Depot",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
