@@ -116,7 +116,8 @@
     <div><div class="app">
     <div class="brand">Tier List</div>
     <button type="button" class="picker" id="listPickerBtn" aria-expanded="false" aria-controls="listPanel">
-      <span id="listName">Bay Area restaurants</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      <span class="picker-name"><span id="listName">Bay Area restaurants</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+      <span data-usernode-demo-note hidden></span>
     </button>
     <div class="sub" id="boardSub"></div>
 
@@ -156,13 +157,13 @@
     <div class="tray" id="tray" data-drop="tray"></div>
 
     <form id="addForm" class="card" hidden autocomplete="off">
-      <div class="form-head">
-        <button type="button" class="btn-secondary" id="addCancel">Cancel</button>
-        <div class="ct">Add a restaurant</div>
-        <button type="submit" class="btn-primary" id="addSubmit">Add</button>
-      </div>
+      <div class="ct">Add a restaurant</div>
       <label class="cs" for="addName">Name</label>
       <input class="field" id="addName" name="name" type="text" maxlength="80" placeholder="e.g. State Bird Provisions" required>
+      <div class="add-actions">
+        <button type="button" class="btn-secondary" id="addCancel">Cancel</button>
+        <button type="submit" class="btn-primary" id="addSubmit">Add</button>
+      </div>
     </form>
 
     <button type="button" class="btn-primary" id="addBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="addBtnLabel">Add a restaurant</span></button>

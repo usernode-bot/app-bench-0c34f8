@@ -90,16 +90,22 @@
    colours. */
 
 button.picker,
-button.btn-primary,
 button.chip {
   font-family: inherit;
   color: inherit;
 }
+button.btn-primary {
+  font-family: inherit;
+  /* The kit's label colour; `color: inherit` made it dark on teal. */
+  color: rgb(var(--on-accent));
+}
 button.picker {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  width: 100%;
+  gap: 2px 6px;
+  width: auto;
+  max-width: 100%;
   min-height: 44px;
   padding: 0;
   background: none;
@@ -107,6 +113,7 @@ button.picker {
   text-align: left;
   cursor: pointer;
 }
+.picker-name {display: inline-flex; align-items: center; gap: 6px; max-width: 100%;}
 button.btn-primary,
 button.btn-secondary,
 button.chip,
@@ -157,8 +164,20 @@ button:focus-visible,
 .form-head .btn-primary {width: auto;margin-top: 0;min-height: 44px;padding: 0 14px;}
 .form-head .btn-secondary {min-height: 44px;}
 
-/* The demo's note sits inside the list's name, quieter than the name. */
-[data-usernode-demo-note] {font-size: 16px;line-height: 24px;font-weight: 500;color: rgb(var(--muted));}
+/* The add form: title, field, then both actions across the bottom. */
+#addForm {margin-top: 16px;}
+#addForm .cs {display: block;margin-top: 12px;}
+.add-actions {display: flex;align-items: center;gap: 8px;margin-top: 16px;}
+.add-actions .btn-primary {flex: 1;width: auto;margin-top: 0;min-height: 44px;}
+.add-actions .btn-secondary {min-height: 44px;padding: 0 16px;background: none;border: 0;color: rgb(var(--muted));}
+
+/* The error's Retry sits clear of the message, at the kit's button height. */
+#boardState .state-error {width: 100%;margin-top: 16px;}
+#boardState .state-error .btn-secondary {min-height: 44px;margin-top: 16px;padding: 0 16px;}
+#boardState .state-empty {padding-left: 16px;padding-right: 16px;}
+
+/* The demo's note sits inside the list's name, one 14 px muted run. */
+[data-usernode-demo-note] {font-size: 14px;line-height: 20px;font-weight: 500;color: rgb(var(--muted));white-space: nowrap;}
 
 /* Picking a list. */
 .listline {

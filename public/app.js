@@ -14,6 +14,7 @@
 
   var el = {
     listName: document.getElementById('listName'),
+    demoNote: document.querySelector('#listPickerBtn [data-usernode-demo-note]'),
     pickerBtn: document.getElementById('listPickerBtn'),
     boardSub: document.getElementById('boardSub'),
     viewMine: document.getElementById('viewMine'),
@@ -225,10 +226,10 @@
 
   function renderHeader() {
     var list = currentList();
-    var name = list ? list.name : 'Tier List';
-    el.listName.innerHTML = esc(name) + (list && list.isDemo
-      ? ' (<span data-usernode-demo-note>Staging demo</span>)'
-      : '');
+    el.listName.textContent = list ? list.name : '';
+    el.demoNote.textContent = list && list.isDemo ? '(Staging demo)' : '';
+    el.demoNote.hidden = !(list && list.isDemo);
+    el.pickerBtn.setAttribute('aria-label', list ? list.name : 'Choose a list');
     el.pickerBtn.setAttribute('aria-expanded', String(state.panelOpen));
 
     if (state.status === 'loading') {
@@ -311,7 +312,7 @@
   function renderBoard() {
     var loading = state.status === 'loading';
     var failed = state.status === 'error';
-    var empty = !loading && !failed && state.data && state.data.items.length === 0;
+    var empty = !loading && !failed && (!state.data || state.data.items.length === 0);
 
     el.board.hidden = failed;
     el.trayLabel.hidden = failed || empty;
@@ -357,7 +358,7 @@
   function renderBoardState(loading, failed, empty) {
     if (failed) {
       el.boardState.innerHTML =
-        '<div class="state-error" role="alert">' +
+        '<div class="state-error card" role="alert">' +
         '<div class="ct">Could not load the board</div>' +
         '<div class="cs">The tier board did not load. Your lists and votes are still saved; check your connection and try again.</div>' +
         '<button type="button" class="btn-secondary" data-act="retry">Retry</button>' +
@@ -366,12 +367,16 @@
     }
     if (empty) {
       var word = noun();
+      var hasList = !!currentList();
       el.boardState.innerHTML =
         '<div class="state-empty">' +
         '<div class="ct">Nothing to rank yet</div>' +
-        '<div class="cs">Add the first ' + esc(word) + ' to this list, then drag it into a tier.</div>' +
-        (state.addOpen ? '' :
-          '<button type="button" class="btn-primary" data-act="open-add">Add a ' + esc(word) + '</button>') +
+        '<div class="cs">' + (hasList
+          ? 'Add the first ' + esc(word) + ' to this list, then drag it into a tier.'
+          : 'Start a list to rank things with friends.') + '</div>' +
+        (state.addOpen ? '' : hasList
+          ? '<button type="button" class="btn-primary" data-act="open-add">Add a ' + esc(word) + '</button>'
+          : '<button type="button" class="btn-primary" data-act="open-panel">Start a list</button>') +
         '</div>';
       return;
     }
@@ -461,7 +466,7 @@
       var isCurrent = l.id === state.listId;
       return '<button type="button" class="listline" data-act="switch-list" data-list-id="' + l.id + '">' +
         '<span class="' + (isCurrent ? 'on' : '') + '">' + esc(l.name) + (l.isDemo
-          ? ' (<span data-usernode-demo-note>Staging demo</span>)' : '') + '</span>' +
+          ? ' <span data-usernode-demo-note>(Staging demo)</span>' : '') + '</span>' +
         '<span class="cs">' + (l.itemCount || 0) + ' ' + plural(l.noun) + '</span>' +
         '</button>';
     }).join('');
@@ -697,6 +702,11 @@
 
     if (act === 'retry') return retry();
     if (act === 'open-add') return openAdd();
+    if (act === 'open-panel') {
+      state.panelOpen = true;
+      renderPanel();
+      return;
+    }
     if (!item) {
       if (act === 'switch-list') {
         var listId = Number(action.getAttribute('data-list-id'));
