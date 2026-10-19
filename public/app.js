@@ -24,6 +24,9 @@
     qNumber: 0,
     saveError: false,
     soundError: false,
+    playedOnce: false, // the current question's sound has played at least once
+    playing: false,    // a sound is sounding right now
+    playTimer: null,
     resetArmed: false,
     resetTimer: null,
   };
@@ -111,6 +114,7 @@
     });
     shuffle(opts);
     state.qNumber += 1;
+    state.playedOnce = false; // the new sound has not been heard yet
     state.question = { kind: state.kind, itemId: id, options: opts, picked: null, correct: null };
   }
 
@@ -195,19 +199,44 @@
     const t = ctx.currentTime + 0.05;
     // A different key each time, so the ear learns the shape, not the pitch.
     const root = 48 + Math.floor(Math.random() * 12);
+    let seconds;
     if (recipe.type === 'notes') {
+      seconds = 1.5;
       playTone(ctx, t, root, 0.7, 0.22);
       playTone(ctx, t + 0.75, root + recipe.semitones, 0.7, 0.22);
     } else if (recipe.type === 'chords') {
+      seconds = 0.95;
       const g = 0.17 / Math.sqrt(recipe.intervals.length / 3);
       recipe.intervals.forEach(function (s) { playTone(ctx, t, root + s, 0.9, g); });
     } else {
+      seconds = 0.05 + recipe.numerals.length * 0.9;
       recipe.numerals.forEach(function (num, i) {
         numeralChord(num).forEach(function (s) {
           playTone(ctx, t + i * 0.9, root + s, 0.9, 0.1);
         });
       });
     }
+    // Update only the play button and the hint in place: the options and the
+    // ladder must stay as they are while the same question sounds again.
+    if (!state.playedOnce) {
+      state.playedOnce = true;
+      const hint = app.querySelector('#hint-line');
+      if (hint) hint.textContent = hintText();
+    }
+    setPlaying(true);
+    clearTimeout(state.playTimer);
+    state.playTimer = setTimeout(function () { setPlaying(false); }, seconds * 1000);
+  }
+
+  // The play button's playing state: the bars stand in for the triangle and a
+  // soft pulse rings in the accent colour, back to the triangle when it ends.
+  function setPlaying(on) {
+    state.playing = on;
+    const btn = app.querySelector('#play-btn');
+    if (!btn) return;
+    btn.classList.toggle('playing', on);
+    btn.setAttribute('aria-label', on ? 'Playing' : playAriaLabel());
+    btn.innerHTML = on ? PLAYING_SVG : PLAY_SVG;
   }
 
   // ── API ────────────────────────────────────────────────────────────────
@@ -270,6 +299,8 @@
   // ── Markup ─────────────────────────────────────────────────────────────
 
   const PLAY_SVG = '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg>';
+  // Three bars, animated by .play.playing's CSS while the sound plays.
+  const PLAYING_SVG = '<svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><g class="eq"><rect x="4.5" y="8" width="3.5" height="8" rx="1.5" fill="currentColor"/><rect x="10.25" y="5" width="3.5" height="14" rx="1.5" fill="currentColor"/><rect x="16" y="9" width="3.5" height="6" rx="1.5" fill="currentColor"/></g></svg>';
   const NEXT_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
 
   function esc(s) {
@@ -290,6 +321,16 @@
     return 'Level ' + level + ': ' + name;
   }
 
+  // "Tap play to hear it. Which gap is it?" before the first play of this
+  // question, "…hear it again." once it has played.
+  function hintText() {
+    return 'Tap play to hear it' + (state.playedOnce ? ' again' : '') + '. ' + kindData(state.kind).ask;
+  }
+
+  function playAriaLabel() {
+    return state.playedOnce ? 'Play it again' : 'Play';
+  }
+
   function skeleton(width, height, radius) {
     return '<div class="skeleton" style="width:' + width + ';height:' + height + ';' +
       (radius ? 'border-radius:' + radius + ';' : '') + '"></div>';
@@ -306,7 +347,7 @@
       '<div class="tabs"><div class="tab on">Notes</div><div class="tab">Chords</div><div class="tab">Progressions</div></div>' +
       '<div class="card">' +
         '<div class="lesson"><div style="flex:1">' + skeleton('150px', '22px') + '<div style="margin-top:6px">' + skeleton('180px', '14px') + '</div></div>' + skeleton('88px', '44px', '8px') + '</div>' +
-        '<div class="stage">' + skeleton('96px', '96px', '50%') +
+        '<div class="stage">' + '<div class="skeleton" style="width:96px;height:96px;flex:none;border-radius:50%"></div>' +
           '<div style="flex:1">' + skeleton('110px', '22px') + '<div style="margin-top:6px">' + skeleton('230px', '14px') + '</div></div>' +
         '</div>' +
       '</div>' +
@@ -368,19 +409,23 @@
   function ladderHtml() {
     const set = levelSet(state.kind, state.level);
     const p = state.progress[state.kind] || {};
+    const asked = state.question ? state.question.itemId : null;
     const mastered = set.filter(function (id) { return p[id] && p[id].mastered; }).length;
-    // The ladder draws top-down in the DOM but .rung's column-reverse shows
-    // the first rung at the bottom, so the set's own order fills it from the
-    // bottom up. Amber is always the item being asked.
-    const rungs = set.map(function (id) {
-      let cls = '';
-      if (state.question && id === state.question.itemId) cls = ' n';
-      else if (p[id] && p[id].mastered) cls = ' f';
-      return '<div class="rung' + cls + '"></div>';
-    }).join('');
+    // .rung's column-reverse shows the first rung in the DOM at the bottom,
+    // so the order here is bottom to top: the mastered rungs fill from the
+    // bottom, then one amber rung for the item being asked, then the
+    // unmastered ones at the top — the same order on every render.
+    const rungs = [];
+    set.forEach(function (id) {
+      if (id !== asked && p[id] && p[id].mastered) rungs.push('<div class="rung f"></div>');
+    });
+    if (asked) rungs.push('<div class="rung n"></div>');
+    set.forEach(function (id) {
+      if (id !== asked && !(p[id] && p[id].mastered)) rungs.push('<div class="rung"></div>');
+    });
     return '<div class="section-label" id="ladder-label">Chord ladder, ' + mastered + ' of ' + set.length + ' mastered</div>' +
       '<div class="card" style="display:flex;gap:16px;align-items:center">' +
-        '<div class="ladder" style="height:' + (set.length * 16) + 'px">' + rungs + '</div>' +
+        '<div class="ladder" style="height:' + (set.length * 16) + 'px">' + rungs.join('') + '</div>' +
         '<div style="flex:1" class="small">A rung fills when you get that ' + kindData(state.kind).nounSingular +
         ' right three times in a row. Amber is the one you are on now.</div>' +
       '</div>';
@@ -420,9 +465,9 @@
           '<div class="small">' + k.tagline + '</div></div>' +
           '<button class="btn-secondary" id="change-btn">Change</button></div>' +
         '<div class="stage">' +
-          '<button class="play" id="play-btn" aria-label="Play it again">' + PLAY_SVG + '</button>' +
+          '<button class="play" id="play-btn" aria-label="' + playAriaLabel() + '">' + PLAY_SVG + '</button>' +
           '<div style="flex:1"><div class="heading">Question ' + state.qNumber + '</div>' +
-          '<div class="small">Tap play to hear it again. ' + k.ask + '</div></div>' +
+          '<div class="small" id="hint-line">' + esc(hintText()) + '</div></div>' +
         '</div>' +
       '</div>' +
       '<div class="section-label">Pick what you heard</div>' +

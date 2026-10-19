@@ -37,7 +37,7 @@
 
 .heading {font-size:20px;line-height:28px;font-weight:600;margin:0}
 
-.tabs {display:flex;gap:6px;background:rgb(var(--raised));padding:4px;border-radius:12px;margin-bottom:12px}
+.tabs {display:flex;gap:2px;background:rgb(var(--raised));padding:4px;border-radius:12px;margin-bottom:12px}
 
 .tab {flex:1;min-height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:500;color:rgb(var(--muted))}
 
@@ -50,6 +50,31 @@
 .stage {display:flex;gap:16px;align-items:center;margin-top:12px}
 
 .play {width:96px;height:96px;border-radius:50%;background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;display:flex;align-items:center;justify-content:center;flex:none}
+
+/* While the sound plays: an equalizer stands in for the triangle and a soft
+   ring pulses in the accent colour, until the sound ends. */
+.play.playing {animation:play-pulse 1.2s ease-out infinite}
+
+@keyframes play-pulse {
+  0% {box-shadow:0 0 0 0 rgb(var(--accent) / 0.45)}
+  100% {box-shadow:0 0 0 18px rgb(var(--accent) / 0)}
+}
+
+.play.playing .eq rect {transform-box:fill-box;transform-origin:center;animation:eq 0.9s ease-in-out infinite}
+
+.play.playing .eq rect:nth-child(2) {animation-delay:-0.3s}
+
+.play.playing .eq rect:nth-child(3) {animation-delay:-0.6s}
+
+@keyframes eq {
+  0%, 100% {transform:scaleY(0.55)}
+  50% {transform:scaleY(1)}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play.playing {animation:none;box-shadow:0 0 0 4px rgb(var(--accent) / 0.35)}
+  .play.playing .eq rect {animation:none}
+}
 
 .ladder {display:flex;flex-direction:column-reverse;gap:6px;width:120px;flex:none;border-left:2px solid rgb(var(--line));border-right:2px solid rgb(var(--line));padding:0 6px}
 
@@ -106,7 +131,12 @@
 
 /* The drawn divs became real controls: tabs, options and lesson rows are
    buttons and tappable rows now. */
-.tabs button.tab {border:0;background:none;padding:0;font:inherit;cursor:pointer}
+/* background:none only on the unselected tabs: .tab.on's white surface and
+   its 1 px line must win on the real buttons too, as it does in the loading
+   state's plain divs. */
+.tabs button.tab {border:0;padding:0 4px;font:inherit;cursor:pointer}
+
+.tabs button.tab:not(.on) {background:none}
 
 .opts button.opt {font:inherit;cursor:pointer;text-align:center;width:100%}
 
