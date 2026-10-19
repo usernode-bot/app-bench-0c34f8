@@ -40,6 +40,13 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
+    --tier-s: 185 28 28; /* from the spec's screens */
+    --tier-a: 194 65 12; /* from the spec's screens */
+    --tier-b: 146 84 9; /* from the spec's screens */
+    --tier-c: 77 124 15; /* from the spec's screens */
+    --tier-d: 71 85 105; /* from the spec's screens */
+    --tier-f: 87 83 78; /* from the spec's screens */
+    --on-tier: 255 255 255; /* from the spec's screens */
   }
   .dark {
     --ground: 12 10 9;
