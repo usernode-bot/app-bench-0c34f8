@@ -140,7 +140,7 @@
     <div class="state-error" id="state-error" hidden>
       <h2 class="text-heading">Couldn't load this list</h2>
       <p class="sub">Nothing you did was lost. Check your connection and try again.</p>
-      <button class="btn-secondary" id="retry">Retry</button>
+      <button class="btn-primary" id="retry">Retry</button>
     </div>
     </div>
   </div>
@@ -176,11 +176,12 @@
       <input class="field" id="new-list-name" name="name" maxlength="60" placeholder="e.g. Bay Area restaurants" required>
       </form>
 
-      <form class="sheet" data-sheet="add-item" id="add-item-form" hidden>
+      <form class="sheet sheet-compact" data-sheet="add-item" id="add-item-form" hidden>
       <div class="grab"></div>
-      <div class="hd form-hd"><button type="button" class="btn-secondary" data-close>Cancel</button><h2 class="h">Add item</h2><button type="submit" class="btn-primary">Add item</button></div>
+      <h2 class="h">Add item</h2>
       <label class="section-label" for="add-item-name">Name</label>
       <input class="field" id="add-item-name" name="name" maxlength="80" placeholder="e.g. Zuni Cafe" required>
+      <div class="foot sheet-foot"><button type="button" class="btn-text" data-close>Cancel</button><button type="submit" class="btn-primary">Add item</button></div>
       </form>
       </div>
   </div>

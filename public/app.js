@@ -129,9 +129,12 @@
     trayLabel.hidden = true;
     tray.hidden = true;
     hint.hidden = true;
-    $('view-toggle').hidden = true;
+    $('view-toggle').hidden = false;
+    setToggleDisabled(true);
     listName.textContent = '';
+    listName.appendChild(el('span', 'skeleton sk-name'));
     listStat.textContent = '';
+    listStat.appendChild(el('span', 'skeleton sk-stat'));
     pick.disabled = true;
     mainView.hidden = false;
     emptyState.hidden = true;
@@ -143,6 +146,7 @@
     if (!list) return;
     pick.disabled = false;
     $('view-toggle').hidden = false;
+    setToggleDisabled(false);
     trayLabel.hidden = false;
     tray.hidden = false;
     hint.hidden = false;
@@ -609,7 +613,14 @@
   });
 
   var toggle = $('view-toggle');
+  function setToggleDisabled(disabled) {
+    toggle.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    Array.prototype.forEach.call(toggle.children, function (span) {
+      span.tabIndex = disabled ? -1 : 0;
+    });
+  }
   function setView(view) {
+    if (toggle.getAttribute('aria-disabled') === 'true') return;
     state.view = view;
     if (state.list) render();
   }

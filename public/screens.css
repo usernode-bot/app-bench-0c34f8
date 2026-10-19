@@ -49,7 +49,13 @@
 
 .seg {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:12px 0 14px}
 
-.seg span {flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:rgb(var(--muted));border-radius:8px}
+.seg span {flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:rgb(var(--muted));border-radius:8px}
+.seg[aria-disabled="true"] {opacity:.6;pointer-events:none}
+
+/* Placeholders for the list name and its count while the lists load, so the
+   header keeps its height and nothing jumps when the data arrives. */
+.sk-name {display:inline-block;width:180px;height:20px;vertical-align:middle}
+.sk-stat {display:block;width:140px;height:14px}
 
 .seg .on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
 
@@ -102,6 +108,9 @@
 }
 
 [data-spec-screen="2"] .app {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   background: rgb(var(--fg) / .45);
   color: rgb(var(--fg));
   min-height: 844px;
@@ -126,6 +135,13 @@
 
 [data-spec-screen="2"] .form-hd {align-items:center}
 [data-spec-screen="2"] .form-hd .h {flex:1;text-align:center}
+
+/* A sheet with a single field sizes to its content instead of the height of
+   the screen, and keeps the title on one line. */
+[data-spec-screen="2"] .sheet-compact {min-height:0}
+[data-spec-screen="2"] .sheet-compact .h {white-space:nowrap;margin-bottom:4px}
+[data-spec-screen="2"] .sheet-foot {justify-content:flex-end;align-items:center;gap:12px}
+[data-spec-screen="2"] .btn-text {display:inline-flex;min-height:44px;min-width:44px;align-items:center;justify-content:center;padding:0 8px;background:none;border:0;font:inherit;font-size:16px;font-weight:500;color:rgb(var(--muted))}
 
 [data-spec-screen="2"] .grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 12px}
 
