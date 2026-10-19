@@ -11,7 +11,8 @@
   var DEMO = params.get('demo') === '1';
 
   function $(id) { return document.getElementById(id); }
-  var titleEl = $('unread-title'), addBtn = $('add-feed-btn'), chipsEl = $('chips'),
+  var titleEl = $('unread-title'), appNameEl = $('app-name'),
+      addBtn = $('add-feed-btn'), chipsEl = $('chips'),
       feedsChip = $('feeds-chip'), feedsCount = $('feeds-count'), refreshTime = $('refresh-time'),
       failedChip = $('failed-chip'), listLabel = $('list-label'), postList = $('post-list'),
       stateEl = $('state'), previewEl = $('preview');
@@ -186,6 +187,8 @@
   function render() {
     var s = state;
     titleEl.textContent = '';
+    appNameEl.hidden = false;
+    postList.hidden = false;
     refreshTime.textContent = '';
     failedChip.hidden = true;
     stateEl.textContent = '';
@@ -212,6 +215,11 @@
     titleEl.textContent = s.unread + ' unread';
 
     if (s.phase === 'error') {
+      // No data: the header is just the app's name, with no zero count and
+      // no empty list drawing a rule under it.
+      titleEl.textContent = 'RSS Reader';
+      appNameEl.hidden = true;
+      postList.hidden = true;
       chipsEl.style.display = 'none';
       listLabel.hidden = true;
       stateEl.appendChild(errorState());
@@ -221,7 +229,11 @@
 
     if (s.phase === 'empty') {
       // No feeds yet: the header's own add button is hidden, the filled
-      // Add feed button lives in the empty state.
+      // Add feed button lives in the empty state. Same header as the error
+      // state: the app's name, no zero count, no rule under it.
+      titleEl.textContent = 'RSS Reader';
+      appNameEl.hidden = true;
+      postList.hidden = true;
       chipsEl.style.display = 'none';
       addBtn.hidden = true;
       listLabel.hidden = true;
