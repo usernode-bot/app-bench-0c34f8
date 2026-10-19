@@ -1,27 +1,32 @@
 # Tier List
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A shared S to F tier list for a group of friends. Everyone in the group
+keeps the same lists, like Bay Area restaurants or movies to rewatch,
+adds things to rank, and drags each thing into a tier to score it.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Your view** puts each thing in the tier you voted it into, and shows
+  the crowd's tier beside it.
+- **Crowd view** puts each thing in the tier the group's votes average
+  to, with a small stacked bar of everyone's tiers. Things nobody has
+  voted on wait in a "No votes yet" tray.
+- Tap a thing to see the crowd's stacked bar, your vote, and how each
+  person voted. Whoever added a thing can remove it; anyone can report
+  one.
+- Whoever started a list can delete it.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+The staging preview opens the populated demo with `?demo=1`: the
+"Bay Area restaurants (Staging demo)" list and "Movies to rewatch", with
+votes from four made-up friends, and the viewer's own. Nothing is written
+in production.
 
-## Replacing the template
+## Running it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm ci --include=dev
+npm run build      # compiles public/tailwind.css from styles/tailwind-input.css
+npm start          # node server.js, needs DATABASE_URL
+```
 
-Once the real app exists, rewrite this README to describe it.
+On Homeroom the platform injects the database URL, the identity token's
+public key and the app id, and builds the stylesheet during image
+creation.

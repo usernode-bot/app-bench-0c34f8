@@ -55,6 +55,17 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The tiers' own colours, read the same way in both looks.
+        'tier-s': token('ts'),
+        'tier-a': token('ta'),
+        'tier-b': token('tb'),
+        'tier-c': token('tc'),
+        'tier-d': token('td'),
+        'tier-f': token('tf'),
+        'on-tier': token('on-tier'),
+      },
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

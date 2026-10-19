@@ -121,48 +121,70 @@
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
-    <button class="pick">Bay Area restaurants<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-    <p class="sub">15 things, ranked by 5 people</p>
-    <div class="seg"><span class="on">Your view</span><span>Crowd view</span></div>
-    <div class="ladder">
-    <div class="tier"><div class="lab s">S</div><div class="items"><div class="it">Zuni Cafe<i>Crowd: S</i></div><div class="it">Tartine Bakery<i>Crowd: A</i></div></div></div>
-    <div class="tier"><div class="lab a">A</div><div class="items"><div class="it">Swan Oyster Depot<i>Crowd: A</i></div><div class="it">La Taqueria<i>Crowd: S</i></div><div class="it">Nopa<i>Crowd: A</i></div><div class="it">Burma Superstar<i>Crowd: B</i></div></div></div>
-    <div class="tier"><div class="lab b">B</div><div class="items"><div class="it">Pizzeria Delfina<i>Crowd: B</i></div><div class="it">Yank Sing<i>Crowd: A</i></div><div class="it">Gott's Roadside<i>Crowd: C</i></div></div></div>
-    <div class="tier"><div class="lab c">C</div><div class="items"><div class="it">Mission Chinese<i>Crowd: B</i></div><div class="it">Anchor Oyster Bar<i>Crowd: C</i></div></div></div>
-    <div class="tier"><div class="lab d">D</div><div class="items"><div class="it">Fisherman's Wharf crab<i>Crowd: D</i></div></div></div>
-    <div class="tier"><div class="lab f">F</div><div class="items"><p class="empty">Drag an item here</p></div></div>
+    <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary" id="add-item-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
+    <p class="toast" id="toast" role="status" hidden></p>
+    <div id="main-view">
+    <button class="pick" id="list-pick"><span id="list-name"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <p class="sub" id="list-stat"></p>
+    <div class="seg" id="view-toggle"><span class="on" data-view="mine" role="button" tabindex="0">Your view</span><span data-view="crowd" role="button" tabindex="0">Crowd view</span></div>
+    <div class="ladder" id="ladder"></div>
+    <p class="sl" id="tray-label">Not ranked by you yet</p>
+    <div class="un" id="tray"></div>
+    <p class="sub hint" id="hint">Drag an item into a tier to vote. Drag again to change it. Tap an item to see how everyone voted.</p>
     </div>
-    <p class="sl">Not ranked by you yet</p>
-    <div class="un"><div class="it">Sushi Ran<i>Added by Maya</i></div><div class="it">Cheese Board Pizza<i>Added by Dev</i></div><div class="it">Brenda's French Soul Food<i>Added by Jo</i></div></div>
-    <p class="sub hint">Drag an item into a tier to vote. Drag again to change it. Tap an item to see how everyone voted.</p>
+    <div class="state-empty" id="state-empty" hidden>
+      <h2 class="text-heading">No lists yet</h2>
+      <p class="sub">Start a list, then everyone in the group can add things to rank.</p>
+      <button class="btn-primary" id="start-list">Start a list</button>
+    </div>
+    <div class="state-error" id="state-error" hidden>
+      <h2 class="text-heading">Couldn't load this list</h2>
+      <p class="sub">Nothing you did was lost. Check your connection and try again.</p>
+      <button class="btn-secondary" id="retry">Retry</button>
+    </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
+
+  <div data-spec-screen="2" id="overlay" hidden>
       <div class="app">
-      <div class="sheet">
+      <div class="sheet" data-sheet="item" hidden>
       <div class="grab"></div>
-      <div class="hd"><div><h2 class="h">Swan Oyster Depot</h2><p class="sub">Added by you</p></div><button class="x" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-      <p class="section-label">Crowd, 5 votes</p>
-      <div class="bar"><span class="s w1">S</span><span class="a w3">A</span><span class="b w1">B</span></div>
-      <p class="sub under">Crowd tier: A</p>
+      <div class="hd"><div><h2 class="h" id="item-title"></h2><p class="sub" id="item-by"></p></div><button class="x" data-close aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <p class="section-label" id="item-crowd-label"></p>
+      <div class="bar" id="item-bar"></div>
+      <p class="sub under" id="item-crowd-tier"></p>
       <p class="section-label">Your vote</p>
-      <div class="vote"><button>S</button><button class="on a">A</button><button>B</button><button>C</button><button>D</button><button>F</button></div>
+      <div class="vote" id="item-vote"></div>
       <p class="section-label">How everyone voted</p>
-      <div class="list">
-      <div class="list-row">You<span class="chip a">A</span></div>
-      <div class="list-row">Maya<span class="chip s">S</span></div>
-      <div class="list-row">Dev<span class="chip a">A</span></div>
-      <div class="list-row">Jo<span class="chip a">A</span></div>
-      <div class="list-row">Sam<span class="chip b">B</span></div>
+      <div class="list" id="item-voters"></div>
+      <div class="foot"><button class="btn-secondary del" id="item-remove" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove item</button><button class="btn-secondary" id="item-report"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report</button></div>
+      <p class="sub under" id="item-report-note" hidden>Thanks. The group's admins can see your report.</p>
       </div>
-      <div class="foot"><button class="btn-secondary del"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove item</button><button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report</button></div>
+
+      <div class="sheet" data-sheet="lists" hidden>
+      <div class="grab"></div>
+      <div class="hd"><div><h2 class="h">Lists</h2><p class="sub">Pick a list to rank</p></div><button class="x" data-close aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <p class="section-label">Your group's lists</p>
+      <div class="list" id="lists-rows"></div>
+      <div class="foot"><button class="btn-secondary" data-open="new-list">New list</button></div>
       </div>
+
+      <form class="sheet" data-sheet="new-list" id="new-list-form" hidden>
+      <div class="grab"></div>
+      <div class="hd form-hd"><button type="button" class="btn-secondary" data-close>Cancel</button><h2 class="h">New list</h2><button type="submit" class="btn-primary">Create</button></div>
+      <label class="section-label" for="new-list-name">Name</label>
+      <input class="field" id="new-list-name" name="name" maxlength="60" placeholder="e.g. Bay Area restaurants" required>
+      </form>
+
+      <form class="sheet" data-sheet="add-item" id="add-item-form" hidden>
+      <div class="grab"></div>
+      <div class="hd form-hd"><button type="button" class="btn-secondary" data-close>Cancel</button><h2 class="h">Add item</h2><button type="submit" class="btn-primary">Add item</button></div>
+      <label class="section-label" for="add-item-name">Name</label>
+      <input class="field" id="add-item-name" name="name" maxlength="80" placeholder="e.g. Zuni Cafe" required>
+      </form>
       </div>
-    </div>
-  </template>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>

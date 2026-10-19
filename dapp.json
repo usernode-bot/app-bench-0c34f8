@@ -3,5 +3,24 @@
     "emoji": "🏆"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Empty app offers a first list",
+      "path": "/",
+      "expectText": "Start a list"
+    },
+    {
+      "id": "demo-ladder",
+      "name": "Demo ladder",
+      "path": "/?demo=1",
+      "expectSelector": "[data-tier=\"S\"] [data-item]",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }

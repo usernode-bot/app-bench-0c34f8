@@ -49,17 +49,24 @@
     --on-tier: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 24 22 20;
+    --surface: 34 31 28;
+    --raised: 46 42 38;
+    --fg: 245 243 240;
+    --muted: 170 163 155;
+    --line: 66 61 56;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --ts: 210 40 40;
+    --ta: 194 65 12;
+    --tb: 161 98 7;
+    --tc: 21 128 61;
+    --td: 3 105 161;
+    --tf: 124 58 237;
+    --on-tier: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -135,6 +142,42 @@
      - error, only when the load FAILED: what failed, what still works,
        and a Retry button.
      Never show the empty state while loading or for a failure. */
+  /* Whole-screen and inline bits this app needs on the kit's tokens. */
+  .toast {
+    @apply mt-3 rounded-lg border border-line bg-raised px-3 py-2 text-small text-fg;
+  }
+  .minibar {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-right: 4px;
+    gap: 1px;
+    height: 6px;
+    width: 3.5rem;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .minibar span {
+    flex: 1;
+  }
+  .skit {
+    display: block;
+    width: 6.5rem;
+    height: 2.25rem;
+  }
+  .drag-ghost {
+    position: fixed;
+    z-index: 60;
+    pointer-events: none;
+    opacity: .9;
+    transform: translate(-50%, -50%);
+  }
+  .drop-over {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: -2px;
+  }
+  .it.dragging {
+    opacity: .4;
+  }
   .skeleton {
     @apply rounded-md bg-line motion-safe:animate-pulse;
   }

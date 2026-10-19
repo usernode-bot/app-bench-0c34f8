@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A group of friends keeps shared lists of things to rank (restaurants,
+movies) in six tiers from S (best) to F (worst). Anyone adds items, and
+everyone drags each item into the tier they think it belongs in. Each
+item shows the viewer's vote next to the crowd's tier, and tapping it
+shows how every person voted.
+
+Tiers are always S to F, best at the top. The crowd tier is the average
+of the votes with S counting 6 down to F counting 1, rounded to the
+nearest tier. Votes change by dragging again, and are taken back by
+dragging into the tray. The `reports` table is `staging:private`.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** accent: teal; second colour: the six tier colours people
+  already read in tier lists (S red, A deep orange, B amber, C green, D
+  blue, F violet); neutrals: warm greys. Tokens `--ts` to `--tf` and
+  `--on-tier` carry the tiers; the action colour stays apart from them so
+  a button never looks like a tier.
+- **Signature element:** the tier ladder: six labelled bands, S at the
+  top, each band growing taller as more items sit in it. The same tier
+  colours appear in the stacked bars, vote buttons and person chips.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  in the rounded system face (`ui-rounded`), with bold tier letters.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
