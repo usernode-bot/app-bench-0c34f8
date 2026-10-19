@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,45 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="top"><span class="brand">Ear Trainer</span><div class="pick"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Lessons</div></div>
+    <h1 class="title">Chords 2: Triads</h1>
+    <p class="sub">Major, minor, diminished and suspended: 4 of 6 chord types</p>
+    <div class="bar"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="m"></i><i></i><i></i><i></i></div>
+    <div class="meta"><span>Question 7 of 10</span><span>6 correct</span></div>
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🎼</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Ear Trainer</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <div class="card">
+    <div class="play"><button class="btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>Play</button><div><div class="q">What chord is this?</div><div class="hint">Played from C. Replay as needed.</div></div></div>
+    <div class="kb">
+    <div class="w on">C</div><div class="w">D</div><div class="w on">E</div><div class="w">F</div><div class="w on">G</div><div class="w">A</div><div class="w">B</div><div class="w">C</div>
+    <div class="b" style="left:30px"></div><div class="b" style="left:71px"></div><div class="b" style="left:152px"></div><div class="b" style="left:192px"></div><div class="b" style="left:233px"></div>
+    </div>
+    <p class="cap">Lit keys show the notes you just heard.</p>
+    </div>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+    <div class="section-label">Tap the answer you heard</div>
+    <div class="ans">
+    <div class="a no">Minor<small>C Eb G</small></div>
+    <div class="a ok">Major<small>C E G</small></div>
+    <div class="a">Diminished</div>
+    <div class="a">Suspended</div>
+    </div>
+    <div class="fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Major: a bright shape. Root, a third four steps up, then the fifth.</div>
+    <div class="row"><span class="hint">Streak: 4</span><button class="btn-secondary">Next sound</button></div>
+
+    <div class="section-label">Your progress</div>
+    <ul class="list">
+    <li class="list-row"><b>Notes 1: Octave and fifth</b><span>10 of 10</span></li>
+    <li class="list-row"><b>Notes 2: Add the thirds</b><span>8 of 10</span></li>
+    <li class="list-row"><b>Chords 2: Triads</b><span>6 so far</span></li>
+    <li class="list-row"><b>Progressions 1: Three-chord hymns</b><span>Not started</span></li>
+    </ul>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
