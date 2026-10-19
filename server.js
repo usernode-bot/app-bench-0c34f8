@@ -156,6 +156,256 @@ app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// three.js is an npm dependency, served as-is to the page's ES module.
+// three.module.js imports ./three.core.js, so the browser asks for that
+// one right after; both are served.
+app.get(/^\/vendor\/three\.(module|core)\.js$/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules', 'three', 'build', path.basename(req.path)));
+});
+
+// ── The shared world ─────────────────────────────────────────────────────
+// One world for the whole project: a 64 by 64 grass plain you can build on
+// up to 32 blocks high. y 0 is the plain itself; blocks live at y 1..32.
+const SIX_TYPES = new Set(['grass', 'stone', 'wood', 'glass', 'brick', 'sand']);
+const inBounds = (x, y, z) =>
+  Number.isInteger(x) && Number.isInteger(y) && Number.isInteger(z) &&
+  x >= -32 && x <= 31 && z >= -32 && z <= 31 && y >= 1 && y <= 32;
+
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS blocks (
+      x int NOT NULL,
+      y int NOT NULL,
+      z int NOT NULL,
+      type text NOT NULL,
+      placed_by text,
+      placed_at timestamptz,
+      is_demo boolean NOT NULL DEFAULT false,
+      PRIMARY KEY (x, y, z)
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS demo_seeded (
+      key text PRIMARY KEY
+    )`);
+}
+
+// ── Staging demo ─────────────────────────────────────────────────────────
+// Only on staging, only asked for by ?demo=1: a plain that already holds
+// about 300 blocks of builds by made-up builders, plus the viewer's own
+// half-finished brick wall. Idempotent, one transaction, marked is_demo so
+// every answer without ?demo=1 leaves them out.
+const DEMO_BUILDERS = ['Maya', 'Dev', 'Sam', 'Priya'];
+
+function demoWorldCells() {
+  const cells = [];
+  let bi = 0;
+  const next = () => DEMO_BUILDERS[bi++ % DEMO_BUILDERS.length];
+  const add = (x, y, z, type, by) => cells.push({ x, y, z, type, by: by || next() });
+
+  // Cottage: wood walls, glass windows, a wood roof and a brick chimney.
+  for (let y = 1; y <= 3; y++) {
+    for (let x = -12; x <= -7; x++) {
+      for (let z = -6; z <= -1; z++) {
+        const edge = x === -12 || x === -7 || z === -6 || z === -1;
+        if (!edge) continue;
+        if (z === -1 && x === -10 && y <= 2) continue; // the door
+        if (y === 2 && ((x === -12 && (z === -4 || z === -3)) || (x === -7 && (z === -4 || z === -3)))) {
+          add(x, y, z, 'glass');
+          continue;
+        }
+        add(x, y, z, 'wood');
+      }
+    }
+  }
+  for (let x = -12; x <= -7; x++) {
+    for (let z = -6; z <= -1; z++) {
+      if (x === -8 && z === -2) continue; // the chimney's foot
+      add(x, 4, z, 'wood', 'Maya');
+    }
+  }
+  for (let x = -11; x <= -8; x++) for (let z = -5; z <= -2; z++) add(x, 5, z, 'wood', 'Dev');
+  add(-8, 4, -2, 'brick', 'Dev'); add(-8, 5, -2, 'brick', 'Dev');
+  add(-8, 6, -2, 'brick', 'Maya'); add(-8, 7, -2, 'brick', 'Maya');
+
+  // Stone tower with a doorway.
+  for (let y = 1; y <= 8; y++) {
+    for (let x = 10; x <= 13; x++) {
+      for (let z = -14; z <= -11; z++) {
+        const edge = x === 10 || x === 13 || z === -14 || z === -11;
+        if (!edge) continue;
+        if (z === -11 && (x === 11 || x === 12) && y <= 2) continue;
+        add(x, y, z, 'stone', 'Sam');
+      }
+    }
+  }
+
+  // Sand path from where you start, with a leg towards the cottage.
+  for (let z = 8; z <= 21; z++) { add(1, 1, z, 'sand', 'Priya'); add(2, 1, z, 'sand', 'Priya'); }
+  for (let x = -6; x <= 1; x++) { add(x, 1, 1, 'sand', 'Priya'); add(x, 1, 2, 'sand', 'Priya'); }
+
+  // A stone hill with a grass top, and a wood tree on it.
+  for (let x = -21; x <= -15; x++) {
+    for (let z = 6; z <= 12; z++) {
+      const d = Math.max(Math.abs(x + 18), Math.abs(z - 9));
+      const h = d <= 1 ? 3 : d <= 2 ? 2 : d <= 3 ? 1 : 0;
+      for (let y = 1; y <= h; y++) add(x, y, z, y === h ? 'grass' : 'stone', 'Maya');
+    }
+  }
+  add(-18, 4, 9, 'wood', 'Maya'); add(-18, 5, 9, 'wood', 'Maya');
+  for (let x = -19; x <= -17; x++) for (let z = 8; z <= 10; z++) add(x, 6, z, 'grass', 'Maya');
+  add(-18, 7, 9, 'grass', 'Maya');
+
+  return cells;
+}
+
+function viewerWallCells(name) {
+  // The viewer's own small build, near where you start: half-finished.
+  const cells = [];
+  for (let x = 4; x <= 8; x++) cells.push({ x, y: 1, z: 20, type: 'brick', by: name });
+  for (let x = 4; x <= 6; x++) cells.push({ x, y: 2, z: 20, type: 'brick', by: name });
+  return cells;
+}
+
+const insertBlock = `
+  INSERT INTO blocks (x, y, z, type, placed_by, placed_at, is_demo)
+  VALUES ($1, $2, $3, $4, $5, now(), true)
+  ON CONFLICT DO NOTHING`;
+
+async function seedDemo(viewerName) {
+  if (!IS_STAGING) return;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const world = await client.query("SELECT 1 FROM demo_seeded WHERE key = 'world' FOR UPDATE");
+    if (world.rowCount === 0) {
+      for (const c of demoWorldCells()) {
+        await client.query(insertBlock, [c.x, c.y, c.z, c.type, c.by]);
+      }
+      await client.query("INSERT INTO demo_seeded (key) VALUES ('world') ON CONFLICT DO NOTHING");
+    }
+    if (viewerName) {
+      const vk = 'viewer:' + viewerName;
+      const wall = await client.query('SELECT 1 FROM demo_seeded WHERE key = $1 FOR UPDATE', [vk]);
+      if (wall.rowCount === 0) {
+        for (const c of viewerWallCells(viewerName)) {
+          await client.query(insertBlock, [c.x, c.y, c.z, c.type, c.by]);
+        }
+        await client.query('INSERT INTO demo_seeded (key) VALUES ($1) ON CONFLICT DO NOTHING', [vk]);
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+// ── Live hub (Server-Sent Events) ────────────────────────────────────────
+const streamClients = new Set(); // { res, name, demo }
+
+function hereNames(demo) {
+  const names = [];
+  if (demo) names.push(...DEMO_BUILDERS); // the fake builders are "here" in the demo
+  for (const c of streamClients) if (c.name && !names.includes(c.name)) names.push(c.name);
+  return names;
+}
+
+function sendPresence() {
+  for (const c of streamClients) {
+    try { c.res.write(`data: ${JSON.stringify({ kind: 'presence', here: hereNames(c.demo) })}\n\n`); } catch {}
+  }
+}
+
+function broadcast(obj) {
+  for (const c of streamClients) {
+    try { c.res.write(`data: ${JSON.stringify(obj)}\n\n`); } catch {}
+  }
+}
+
+app.get('/api/stream', (req, res) => {
+  res.set({
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.flushHeaders();
+  const client = {
+    res,
+    name: req.user ? req.user.username : null,
+    demo: req.query.demo === '1',
+  };
+  streamClients.add(client);
+  sendPresence();
+  // A heartbeat comment keeps the stream under the platform's 60s idle timeout.
+  const hb = setInterval(() => { try { res.write(':hb\n\n'); } catch {} }, 25_000);
+  req.on('close', () => {
+    clearInterval(hb);
+    streamClients.delete(client);
+    sendPresence();
+  });
+});
+
+// ── Routes ───────────────────────────────────────────────────────────────
+// Guests may read the world; only writes need an account (the middleware
+// above answers 401 account_required before these handlers run).
+
+app.get('/api/world', async (req, res) => {
+  try {
+    const showDemo = IS_STAGING && req.query.demo === '1';
+    if (showDemo) await seedDemo(req.user ? req.user.username : null);
+    const { rows } = await pool.query(
+      'SELECT x, y, z, type FROM blocks' + (showDemo ? '' : ' WHERE NOT is_demo')
+    );
+    res.json({
+      blocks: rows.map((r) => [r.x, r.y, r.z, r.type]),
+      here: hereNames(showDemo),
+      you: req.user ? req.user.username : null,
+    });
+  } catch (err) {
+    console.error('world failed: ' + err.message);
+    res.status(500).json({ error: 'world_failed' });
+  }
+});
+
+app.put('/api/blocks', async (req, res) => {
+  const { x, y, z, type } = req.body || {};
+  if (!SIX_TYPES.has(type)) return res.status(400).json({ error: 'bad_block' });
+  if (!inBounds(x, y, z)) return res.status(400).json({ error: 'out_of_bounds' });
+  try {
+    // An upsert: a cell that holds a hidden demo block can still be built on.
+    await pool.query(`
+      INSERT INTO blocks (x, y, z, type, placed_by, placed_at, is_demo)
+      VALUES ($1, $2, $3, $4, $5, now(), false)
+      ON CONFLICT (x, y, z) DO UPDATE
+        SET type = EXCLUDED.type, placed_by = EXCLUDED.placed_by,
+            placed_at = now(), is_demo = false`,
+      [x, y, z, type, req.user.username]);
+    broadcast({ kind: 'set', cell: [x, y, z, type], by: req.user.username });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('place failed: ' + err.message);
+    res.status(500).json({ error: 'save_failed' });
+  }
+});
+
+app.delete('/api/blocks', async (req, res) => {
+  const x = Number(req.query.x), y = Number(req.query.y), z = Number(req.query.z);
+  if (!inBounds(x, y, z)) return res.status(400).json({ error: 'out_of_bounds' });
+  try {
+    const { rowCount } = await pool.query(
+      'DELETE FROM blocks WHERE x = $1 AND y = $2 AND z = $3', [x, y, z]);
+    if (rowCount === 0) return res.status(404).json({ error: 'empty_cell' });
+    broadcast({ kind: 'clear', cell: [x, y, z], by: req.user.username });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('break failed: ' + err.message);
+    res.status(500).json({ error: 'break_failed' });
+  }
+});
+
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
 // are sent to the platform's chromeless view of this app, where the shell
@@ -170,7 +420,6 @@ app.get('*', (req, res) => {
     // path+query into the chromeless view so share links land on the
     // shared screen, not Home. The clean platform route stores `path`
     // as one encoded query value so an inner ?, &, or = survives. The
-    // shell decodes and validates it as relative-only before use. The
     // character test keeps the
     // value attribute-safe for the landing anchor below — anything
     // unusual falls back to the bare link.
@@ -191,10 +440,25 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Boot and shutdown ────────────────────────────────────────────────────
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+function shutdown() {
+  for (const c of streamClients) { try { c.res.end(); } catch {} }
+  streamClients.clear();
+  if (server) server.close(() => process.exit(0));
+  // Never hang the container: exit on our own after the drain window.
+  setTimeout(() => process.exit(0), 3000).unref();
+  pool.end().catch(() => {});
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });

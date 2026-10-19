@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,7 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
           if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Block World</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6l40 23v42L50 94 10 71V29z' fill='%23c2410c'/><path d='M50 6l40 23-40 23-40-23z' fill='%23fb923c'/><path d='M50 52v42L10 71V29z' fill='%239a3412'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,58 +109,46 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+       Wired here to the live world: the drawn view is the 3D canvas host, the
+       drawn values are sample data replaced from /api/world and the stream. -->
   <div data-spec-screen="1">
     <div>
     <div class="bw">
-    <div class="view"></div>
-    <svg class="ix" width="390" height="560" viewBox="0 0 390 560" fill="none" stroke-linejoin="round">
-    <g stroke="rgb(40 90 30)" stroke-width="1.5">
-    <path d="M120 400 L190 370 L260 400 L190 430Z" fill="rgb(100 170 76)"/>
-    <path d="M120 400 L190 430 L190 470 L120 440Z" fill="rgb(146 98 54)"/>
-    <path d="M260 400 L190 430 L190 470 L260 440Z" fill="rgb(120 80 44)"/>
-    <path d="M155 340 L190 325 L225 340 L190 355Z" fill="rgb(160 160 164)"/>
-    <path d="M155 340 L190 355 L190 400 L155 385Z" fill="rgb(130 130 134)"/>
-    <path d="M225 340 L190 355 L190 400 L225 385Z" fill="rgb(105 105 110)"/>
-    <path d="M155 300 L190 285 L225 300 L190 315Z" fill="rgb(200 232 244)"/>
-    <path d="M155 300 L190 315 L190 340 L155 325Z" fill="rgb(160 210 230)"/>
-    <path d="M225 300 L190 315 L190 340 L225 325Z" fill="rgb(130 190 215)"/>
-    <path d="M40 430 L75 415 L110 430 L75 445Z" fill="rgb(196 92 70)"/>
-    <path d="M40 430 L75 445 L75 480 L40 465Z" fill="rgb(166 70 52)"/>
-    <path d="M110 430 L75 445 L75 480 L110 465Z" fill="rgb(140 56 42)"/>
-    </g></svg>
-    <div class="top"><div class="pill">Block World</div><div class="pill"><span class="dot"></span>Maya, Dev and 2 more</div></div>
-    <div class="tag">Dev placed stone</div>
+    <div class="view" id="touch"><canvas id="world" aria-label="The shared block world"></canvas></div>
+    <div class="top"><div class="pill">Block World</div><div class="pill"><span class="dot"></span><span id="here">Just you</span></div></div>
+    <p class="top-note" data-usernode-demo-note hidden>Staging demo</p>
+    <div class="tag" id="builder-note" hidden></div>
+    <div class="top-note warn" id="reconnect-note" hidden>Reconnecting…</div>
+    <div class="center-note" id="loading">Loading the world</div>
+    <div class="center-note" id="empty" hidden>Nothing built yet. Tap the grass to place a block.</div>
+    <div class="center-note" id="edit-fail" hidden></div>
+    <div class="center-note" id="guest-note" hidden>Sign in to Homeroom to build</div>
+    <div class="center-note" id="state-error" hidden><span>Couldn't load the world. Check your connection.</span><button class="btn-primary" id="retry" type="button">Retry</button></div>
+    <div class="center-note" id="state-webgl" hidden>This device can't show the 3D world.</div>
     <div class="tools">
-    <div class="tb on" aria-label="Place"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 12v9M12 12L4 8M12 12l8-4"/></svg></div>
-    <div class="tb" aria-label="Break"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></div>
+    <button class="tb on" id="tool-place" type="button" aria-label="Place" aria-pressed="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 12v9M12 12L4 8M12 12l8-4"/></svg></button>
+    <button class="tb" id="tool-break" type="button" aria-label="Break" aria-pressed="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
     <div class="gap"></div>
-    <div class="tb" aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></div>
-    <div class="tb" aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+    <button class="tb" id="fly-up" type="button" aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
+    <button class="tb" id="fly-down" type="button" aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
     </div>
-    <div class="stick" aria-label="Move"><div class="knob"></div></div>
+    <div class="stick" id="stick" aria-label="Move"><div class="knob" id="knob"></div></div>
     <div class="pal">
-    <div class="ph"><b>Grass</b><span>Placing</span></div>
-    <div class="row">
-    <div class="sw sel"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(40 90 30)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(100 170 76)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(146 98 54)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 80 44)"/></svg>Grass</div>
-    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 60 64)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(160 160 164)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(130 130 134)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(105 105 110)"/></svg>Stone</div>
-    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(80 50 20)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(190 140 84)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(150 100 56)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 78 40)"/></svg>Wood</div>
-    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 120 150)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(200 232 244)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(160 210 230)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(130 190 215)"/></svg>Glass</div>
-    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(100 36 26)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(196 92 70)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(166 70 52)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(140 56 42)"/></svg>Brick</div>
-    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(140 110 50)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(236 214 150)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(216 190 120)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(192 166 98)"/></svg>Sand</div>
+    <div class="ph"><b id="pal-name">Grass</b><span id="pal-mode">Placing</span></div>
+    <div class="row" id="palette">
+    <button class="sw sel" type="button" data-type="grass"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(40 90 30)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(100 170 76)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(146 98 54)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 80 44)"/></svg>Grass</button>
+    <button class="sw" type="button" data-type="stone"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 60 64)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(160 160 164)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(130 130 134)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(105 105 110)"/></svg>Stone</button>
+    <button class="sw" type="button" data-type="wood"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(80 50 20)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(190 140 84)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(150 100 56)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 78 40)"/></svg>Wood</button>
+    <button class="sw" type="button" data-type="glass"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 120 150)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(200 232 244)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(160 210 230)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(130 190 215)"/></svg>Glass</button>
+    <button class="sw" type="button" data-type="brick"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(100 36 26)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(196 92 70)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(166 70 52)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(140 56 42)"/></svg>Brick</button>
+    <button class="sw" type="button" data-type="sand"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(140 110 50)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(236 214 150)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(216 190 120)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(192 166 98)"/></svg>Sand</button>
     </div></div>
     </div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/app.js"></script>
 </body>
 </html>

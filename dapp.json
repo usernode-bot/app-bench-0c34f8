@@ -3,5 +3,25 @@
     "emoji": "🧱"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "world-screen",
+      "visual": true,
+      "impact": ["public/**", "server.js", "styles/**"],
+      "name": "Block World screen",
+      "path": "/",
+      "expectSelector": "#world",
+      "expectText": "Placing"
+    },
+    {
+      "name": "World API answers with blocks",
+      "path": "/api/world",
+      "expectText": "blocks"
+    },
+    {
+      "name": "Staging demo note",
+      "path": "/?demo=1",
+      "expectSelector": "[data-usernode-demo-note]"
+    }
+  ]
 }

@@ -58,32 +58,17 @@ of this applies.
 
 ## Starter template
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
+The starter template was replaced by the real app in the first version:
+the template screen and its notice are gone, and `README.md` describes
+the app. The `usernode-dev-console@1` forwarder, the bridge `<script>`
+and the theme `<script>` in `public/index.html` are platform
+infrastructure — keep them through any later rewrite.
 
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+The world screen is the app's own scene: unlike a reading screen, it
+fills the window (`.bw` is full-height rather than a `page-column` —
+the one deliberate exception, because it is a 3D world). It still has a
+light and a dark look that follow the viewer's Homeroom theme; add no
+theme picker.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +80,37 @@ tables you've marked private), etc.
 
 ## About Block World
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared 3D voxel building space for the project, like a block game's
+creative mode: everyone flies around one flat grass plain, places and
+breaks blocks from a palette of six classic types, and sees everyone
+else's builds appear live. One world for the whole project; no gravity,
+no survival, no avatars.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a
+request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm stone-grey neutrals (`ground`, `surface`, `raised`,
+  `fg`, `muted`, `line`); one action colour, a brick orange — light
+  194 65 12, dark 251 146 60 with dark text 28 25 23 on it (`accent`,
+  `on-accent`), with a soft orange for the held palette swatch
+  (`accent-soft`, light 255 237 224, dark 67 30 10); sky tokens
+  (`sky-top`/`sky-bottom`, dusk in the dark look) and `grass` for the
+  plain behind the canvas. The six block materials are fixed colours,
+  never tokens: grass 84 150 62, stone 130 130 134, wood 150 100 56,
+  glass 160 210 230 (see-through), brick 166 70 52, sand 216 190 120 —
+  the same in both looks, so a cube in the palette looks like the block
+  it places. In the dark look the panels go dark grey and the sky turns
+  to dusk, with dimmer sunlight on the blocks.
+- **Signature element:** the palette of little 3D cubes, each drawn in
+  its own material, like picking a block up in your hand. The world
+  itself fills the screen; the quiet panels sit on top of it, and the
+  brick orange marks only the tool you are holding.
+- **Type scale:** `text-title` 20/28, `text-heading` 16/24 bold,
+  `text-body` 15/22, `text-small` 14/20, in the rounded system face
+  (`ui-rounded`), which suits the toy-block feel.
+- **One fixed look:** none — both looks, following the viewer's theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -121,18 +121,21 @@ Re-theme by changing the token values there, keeping every text pair at
 
 - Colour comes only from the tokens (`bg-ground`, `bg-surface`,
   `text-fg`, `text-muted`, `border-line`, `bg-accent` with
-  `text-on-accent`, ...): never a raw hex value or a stock palette class.
+  `text-on-accent`, ...) plus the six fixed block materials: never a raw
+  hex value or a stock palette class.
 - Tap targets are at least 44 px; the buttons and fields already are.
 - A field's label says what it is; its placeholder, if any, is an example
   that says so ("e.g. 5.0"), never a bare value that could pass for one
   already entered.
-- Each screen sits in `page-column`, one centred column on a wide window.
+- The world screen fills the window (see "Starter template" above); any
+  later, ordinary screen sits in `page-column`.
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry. Loading has the content's
   own shape (its rows, with `skeleton` bars for their text).
 - Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
+  ("Staging mock data" in the platform conventions). Block World's demo is
+  `?demo=1` only: builds by Maya, Dev, Sam and Priya, marked `is_demo`.
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
 - A header that shows the app's own mark shows the project's icon there
   (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
@@ -140,6 +143,19 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- One world, one `blocks` table (public): primary key `(x, y, z)`;
+  `type` is one of the six; `placed_by`, `placed_at`; `is_demo` rows are
+  hidden from every answer without `?demo=1` on staging. `demo_seeded`
+  keys (`'world'`, `'viewer:<username>'`) make the demo idempotent.
+- Bounds are checked on the server: x and z in -32..31, y in 1..32
+  (y 0 is the grass plain, which cannot be broken). A place is an upsert
+  that sets `is_demo=false`.
+- Writes need an account; guests may read and fly. Any signed-in person
+  can break any block, whoever placed it.
+- Live updates go through `/api/stream` (SSE: `set`, `clear`, `presence`),
+  heartbeat every 25s. Edits are optimistic in the client and rolled back
+  on failure.
+- three.js is the only runtime dependency beyond the platform's; it is
+  served from `node_modules` at `/vendor/three.module.js` (plus
+  `three.core.js`, which the module imports). Avoid adding new
+  dependencies.
