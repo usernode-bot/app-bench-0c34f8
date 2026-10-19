@@ -40,24 +40,29 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
-    --f1: 180 83 59; /* from the spec's screens */
-    --f2: 67 97 160; /* from the spec's screens */
-    --f3: 122 98 34; /* from the spec's screens */
-    --f4: 128 74 130; /* from the spec's screens */
-    --f5: 60 110 70; /* from the spec's screens */
+    --f1: 180 83 59; /* feed spine: brick */
+    --f2: 67 97 160; /* feed spine: blue */
+    --f3: 122 98 34; /* feed spine: ochre */
+    --f4: 128 74 130; /* feed spine: plum */
+    --f5: 60 110 70; /* feed spine: leaf */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 21 18;
+    --surface: 34 30 26;
+    --raised: 46 41 36;
+    --fg: 240 236 228;
+    --muted: 176 168 157;
+    --line: 64 58 51;
+    --accent: 45 190 175;
+    --on-accent: 6 40 37;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --f1: 226 128 102; /* feed spine: brick */
+    --f2: 128 156 214; /* feed spine: blue */
+    --f3: 196 166 92; /* feed spine: ochre */
+    --f4: 190 140 192; /* feed spine: plum */
+    --f5: 120 176 128; /* feed spine: leaf */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -106,6 +111,15 @@
 
   /* A grouped list: <ul class="list"> of <li class="list-row">. The usual
      way to show several things; prefer it to a stack of cards. */
+  /* The feed-coloured strip down a post row's left edge. Set the colour on
+     the row with `style="--c: var(--f2)"`. */
+  .spine {
+    flex: none;
+    width: 6px;
+    border-radius: 0 3px 3px 0;
+    background: rgb(var(--c));
+  }
+
   .list {
     @apply divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface;
   }

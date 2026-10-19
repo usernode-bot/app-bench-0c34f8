@@ -1,27 +1,33 @@
 # RSS Reader
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Follow RSS and Atom feeds and read everything new in one list. Each
+person adds their own feeds, and their feeds and what they have read are
+private to them.
 
-The scaffold is a small working demo that proves the plumbing works:
+- Add a feed by pasting its exact RSS or Atom address. The app checks
+  that the address really is a feed before saving it.
+- The reader shows one list of unread posts from all your feeds, newest
+  first, each with a coloured strip for its feed.
+- Tap a post to read a preview. Opening it marks the post read, and
+  "Open full article" opens the original page in the browser.
+- Tap the feed count to manage feeds, see which one failed to refresh,
+  and remove any you no longer follow.
+- Feeds refresh each time the app opens. Nothing is fetched in the
+  background.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+## Development
 
-## Replacing the template
+The app runs on Homeroom. `server.js` serves the page and the JSON API,
+and stores feeds and posts in the app's own Postgres database. The page
+is plain `public/index.html` with a Tailwind stylesheet compiled at
+image-build time from `styles/tailwind-input.css`.
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm ci
+npm run build   # compile public/tailwind.css
+node server.js
+```
 
-Once the real app exists, rewrite this README to describe it.
+Open `/?demo=1` on a staging build to see the reader filled with
+made-up feeds. Start with `CLAUDE.md` for the app's look and the platform
+rules.

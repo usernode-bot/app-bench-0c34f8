@@ -1,12 +1,11 @@
 /* The screens the spec drew, carried over by the platform before the first
-   version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+   version was built (screen 1 is public/index.html's main screen; screen 2
+   the preview). Colours are the design kit's tokens, rgb(var(--accent)),
+   so they follow the light and the dark look. */
 
 /* Each screen is one centred column: the phone width it was drawn at grows
    to a readable column on a wider window, never rows and buttons stretched
-   across the window. Remove this only for an app that fills the window by
-   design, such as a map. */
+   across the window. */
 [data-spec-screen] {
   width: 100%;
   max-width: 42rem;
@@ -16,8 +15,8 @@
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 1020px;
-  width: 390px;
+  min-height: 100vh;
+  width: 100%;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -31,8 +30,11 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 12px;
   padding: 28px 0 12px;
 }
+
+.hd-left {min-width: 0}
 
 .app-name {font-size:14px;line-height:20px;color:rgb(var(--muted));font-weight:500}
 
@@ -40,9 +42,11 @@
 
 .btn-secondary {display:inline-flex;min-height:44px;min-width:44px;align-items:center;justify-content:center;gap:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));border-radius:8px;padding:0 14px;font-size:16px;font-weight:500;font-family:inherit}
 
+.btn-secondary:hover {background:rgb(var(--raised))}
+
 .ico {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
-.chips {display:flex;align-items:center;gap:8px;padding:0 0 12px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+.chips {display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:0 0 12px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .chip {display:inline-flex;align-items:center;gap:4px;min-height:44px;background:none;border:0;padding:0 4px;color:rgb(var(--muted));font:inherit}
 
@@ -50,13 +54,21 @@
 
 .chip .ico {width:16px;height:16px}
 
+.chip-link {background:none;border:0;padding:0 4px;min-height:44px;font:inherit;font-size:14px;color:rgb(var(--accent));text-decoration:underline;text-underline-offset:2px}
+
 .section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:0 0 8px;padding:0 4px}
 
 .list {list-style:none;margin:0;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
 
-.list-row {display:flex;gap:12px;padding:12px 16px 12px 0;min-height:44px;border-bottom:1px solid rgb(var(--line))}
+.list-row {display:flex;align-items:stretch;gap:12px;padding:12px 16px 12px 0;min-height:44px;border-bottom:1px solid rgb(var(--line))}
 
 .list-row:last-child {border:0}
+
+.list-row[role="button"] {cursor:pointer}
+
+.list-row[role="button"]:hover {background:rgb(var(--raised))}
+
+.list-row[role="button"]:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
 
 .spine {width:6px;border-radius:0 3px 3px 0;flex:none;background:rgb(var(--c))}
 
@@ -66,32 +78,42 @@
 
 .dot {width:8px;height:8px;border-radius:50%;background:rgb(var(--accent));flex:none}
 
-.pt {font-weight:600;margin:2px 0;font-size:16px;line-height:22px}
+.pt {font-weight:600;margin:2px 0;font-size:16px;line-height:22px;overflow-wrap:break-word}
 
-.ex {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
 
 .read .pt {font-weight:500;color:rgb(var(--muted))}
 
 .read .spine {opacity:.4}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: the preview, over the list. */
 
-.app {
+[data-spec-screen="2"] {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+}
+
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  height: 844px;
-  width: 390px;
+  height: 100dvh;
+  width: 100%;
+  max-width: 42rem;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+  padding: 0;
 }
 
-.scrim {position:absolute;inset:0;background:rgb(33 29 25/.35)}
+[data-spec-screen="2"] .scrim {position:absolute;inset:0;background:rgb(33 29 25/.35)}
 
-.peek {
+[data-spec-screen="2"] .peek {
   padding: 28px 16px;
   font-family: ui-serif,Georgia,serif;
   font-size: 28px;
@@ -99,26 +121,108 @@
   font-weight: 700;
 }
 
-.sheet {position:absolute;left:0;right:0;top:120px;bottom:0;background:rgb(var(--surface));border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgb(33 29 25/.12);padding:12px 20px 24px;display:flex;flex-direction:column}
+[data-spec-screen="2"] .sheet {position:absolute;left:0;right:0;top:120px;bottom:0;background:rgb(var(--surface));border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgb(33 29 25/.12);padding:12px 20px 24px;display:flex;flex-direction:column;max-height:calc(100% - 96px)}
 
-.grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 4px}
+[data-spec-screen="2"] .grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 4px}
 
-.top {display:flex;align-items:center;justify-content:space-between}
+[data-spec-screen="2"] .top {display:flex;align-items:center;justify-content:space-between}
 
-.meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .meta {display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
-.tick {width:4px;height:16px;border-radius:2px;background:rgb(var(--f3))}
+[data-spec-screen="2"] .tick {width:4px;height:16px;border-radius:2px;background:rgb(var(--f3));flex:none}
+
+[data-spec-screen="2"] .icon-btn {display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border:0;background:none;color:rgb(var(--muted));border-radius:8px}
+
+[data-spec-screen="2"] .sh {font-size:24px;line-height:32px;font-weight:700;margin:4px 0 4px;font-family:ui-serif,Georgia,serif}
+
+[data-spec-screen="2"] .by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 16px}
+
+[data-spec-screen="2"] .prose {flex:1;overflow-y:auto;font-size:17px;line-height:27px;font-family:ui-serif,Georgia,serif}
+
+[data-spec-screen="2"] .prose p {margin:0 0 14px}
+
+[data-spec-screen="2"] .btn-primary {display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));border-radius:8px;border:0;padding:0 16px;font-size:16px;font-weight:500;font-family:inherit;width:100%;text-decoration:none;flex:none}
+
+[data-spec-screen="2"] .note {font-size:14px;line-height:20px;color:rgb(var(--muted));text-align:center;margin:8px 0 0}
+
+/* Sheets for adding a feed and managing feeds. */
+
+.sheet-overlay {position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;background:rgb(33 29 25/.35)}
+
+.panel {
+  width: 100%;
+  max-width: 42rem;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  background: rgb(var(--surface));
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 24px rgb(33 29 25/.12);
+  padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.panel-top {display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+
+.panel-heading {font-size:24px;line-height:32px;font-weight:700;margin:0;font-family:ui-serif,Georgia,serif}
+
+.panel-gap {width:44px;height:44px;flex:none}
 
 .icon-btn {display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border:0;background:none;color:rgb(var(--muted));border-radius:8px}
 
-.sh {font-size:24px;line-height:32px;font-weight:700;margin:4px 0 4px;font-family:ui-serif,Georgia,serif}
+.field-label {display:block;font-size:14px;line-height:20px;font-weight:500;margin:0 0 6px}
 
-.by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 16px}
+.field-error {font-size:14px;line-height:20px;color:rgb(var(--danger));margin:8px 0 0}
 
-.prose {flex:1;overflow:hidden;font-size:17px;line-height:27px;font-family:ui-serif,Georgia,serif}
+.panel-actions {display:flex;gap:8px;margin-top:16px}
 
-.prose p {margin:0 0 14px}
+.panel-actions .btn-primary,
+.panel-actions .btn-secondary {display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:0 16px;font-size:16px;font-weight:500;font-family:inherit}
 
-.btn-primary {display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));border-radius:8px;border:0;padding:0 16px;font-size:16px;font-weight:500;font-family:inherit;width:100%}
+.panel-actions .btn-primary {flex:1;background:rgb(var(--accent));color:rgb(var(--on-accent));border:0}
 
-.note {font-size:14px;line-height:20px;color:rgb(var(--muted));text-align:center;margin:8px 0 0}
+.panel-actions .btn-secondary {border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
+
+.feed-row {align-items:flex-start;padding:12px 16px 12px 0}
+
+.feed-row .spine {align-self:stretch}
+
+.feed-name {font-weight:600;margin:0;font-size:16px;line-height:22px;overflow-wrap:break-word}
+
+.feed-url {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:2px 0 0;overflow-wrap:anywhere}
+
+.feed-error {font-size:14px;line-height:20px;color:rgb(var(--danger));margin:4px 0 0}
+
+.feed-remove {flex:none;display:inline-flex;min-height:44px;align-items:center;justify-content:center;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit}
+
+.state-empty-msg {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 0 0}
+
+.state-title {font-size:20px;line-height:28px;font-weight:600;margin:0;font-family:ui-serif,Georgia,serif}
+
+.state-text {font-size:16px;line-height:24px;color:rgb(var(--muted));margin:0;max-width:26rem}
+
+.state-empty .btn-primary,
+.state-error .btn-primary {display:inline-flex;min-height:44px;align-items:center;justify-content:center;border:0;border-radius:8px;padding:0 16px;margin-top:8px;font-size:16px;font-weight:500;font-family:inherit;background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+/* Loading: the content's own shape. */
+
+.sk-title {display:inline-block;width:120px;height:24px;vertical-align:middle}
+
+.sk-chip {display:inline-block;width:64px;height:16px;vertical-align:middle}
+
+.sk-lines {display:flex;flex-direction:column;gap:8px;padding:4px 0}
+
+.sk-bar {display:block;height:12px}
+
+.sk-bar-meta {width:35%}
+
+.sk-bar-title {width:75%;height:16px}
+
+.sk-bar-ex {width:90%}
+
+.sk-row {min-height:76px}
+
+body.sheet-open {overflow:hidden}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {animation: none}
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,33 +64,11 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
-  <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
-       in-browser engine plus an inline tailwind.config here). The config
-       moved to tailwind.config.js in the repo root; npm run build compiles
-       it to public/tailwind.css with Docker or Paketo on every image build, so the
-       stylesheet is regenerated from THIS commit's markup every deploy and
-       can never drift behind the code. ~7 KB of CSS instead of a ~400 KB
-       engine, and no flash of unstyled content.
-       Writing class names as whole literals is what keeps this working — a
-       class assembled from fragments at runtime (e.g. "bg-" + tone + "-500")
-       is invisible to the compiler. If you genuinely need runtime-generated
-       classes, swap this link for the platform-hosted engine instead:
-       <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f766e'/><circle cx='9' cy='23' r='2.6' fill='%23ffffff'/><path d='M9 15a8 8 0 0 1 8 8M9 9a14 14 0 0 1 14 14' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round'/></svg>">
   <link rel="stylesheet" href="/tailwind.css">
   <link rel="stylesheet" href="/screens.css">
-  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
-       handler in server.js serves it under a plain "node server.js"; the
-       platform's edge answers it everywhere else). Never vendor it and never
-       write a hostname in front of it.
-       It is NOT conditional on this app calling a bridge API: it is also how
-       the app ANSWERS the shell, so a scaffold without it is invisible to
-       anything that asks the frame a question. Offline launch is one of those.
-       Another is the page's colour: the bridge reports this document's opaque
-       ground to the shell (#1581), which is what makes the platform bar above
-       the app take the app's tone instead of the viewer's theme (#1945).
-       The bridge is also where the app learns the viewer's light/dark theme:
-       the script below reads it. -->
+  <!-- The platform bridge, centrally hosted and loaded by RELATIVE path.
+       Never vendor it and never write a hostname in front of it. -->
   <script src="/usernode-bridge/v1/bridge.js"></script>
   <!-- Follow the viewer's Homeroom theme (the bridge reports it), with the
        OS preference as the fallback outside Homeroom. -->
@@ -109,55 +87,652 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
+    <main class="app">
+      <div class="hd">
+        <div class="hd-left">
+          <div class="app-name">RSS Reader</div>
+          <h1 class="title" id="unread-title"><span class="skeleton sk-title" aria-hidden="true"></span></h1>
+        </div>
+        <button class="btn-secondary" type="button" id="add-feed-button">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1"/></svg>Add feed
+        </button>
+      </div>
+      <div class="chips" id="status-row">
+        <button class="chip" type="button" id="feeds-button"><b id="feeds-count"><span class="skeleton sk-chip" aria-hidden="true"></span></b><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <span id="refreshed-at"><span class="skeleton sk-chip" aria-hidden="true"></span></span>
+        <button class="chip-link" type="button" id="failed-feeds" hidden></button>
+      </div>
+      <p class="section-label" id="list-label" hidden></p>
+      <div id="reader-state" hidden></div>
+      <ul class="list" id="post-list" aria-label="Unread posts">
+        <li class="list-row sk-row" style="--c:var(--line)"><div class="spine"></div><div class="body"><div class="sk-lines"><span class="skeleton sk-bar sk-bar-meta"></span><span class="skeleton sk-bar sk-bar-title"></span><span class="skeleton sk-bar sk-bar-ex"></span></div></div></li>
+        <li class="list-row sk-row" style="--c:var(--line)"><div class="spine"></div><div class="body"><div class="sk-lines"><span class="skeleton sk-bar sk-bar-meta"></span><span class="skeleton sk-bar sk-bar-title"></span><span class="skeleton sk-bar sk-bar-ex"></span></div></div></li>
+        <li class="list-row sk-row" style="--c:var(--line)"><div class="spine"></div><div class="body"><div class="sk-lines"><span class="skeleton sk-bar sk-bar-meta"></span><span class="skeleton sk-bar sk-bar-title"></span><span class="skeleton sk-bar sk-bar-ex"></span></div></div></li>
+        <li class="list-row sk-row" style="--c:var(--line)"><div class="spine"></div><div class="body"><div class="sk-lines"><span class="skeleton sk-bar sk-bar-meta"></span><span class="skeleton sk-bar sk-bar-title"></span><span class="skeleton sk-bar sk-bar-ex"></span></div></div></li>
+      </ul>
+    </main>
+  </div>
+
+  <!-- Screen 2 as the spec drew it: the preview, shown over the list. -->
+  <div data-spec-screen="2" id="preview-view" hidden>
     <div class="app">
-    <div class="hd"><div><div class="app-name">RSS Reader</div><h1 class="title">22 unread</h1></div>
-    <button class="btn-secondary"><svg class="ico" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1"/></svg>Add feed</button></div>
-    <div class="chips"><button class="chip"><b>5 feeds</b><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><span>Refreshed 8:42 am</span></div>
-    <p class="section-label">Newest first</p>
-    <ul class="list">
-    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, 12 min ago</div><p class="pt">Why your laminated dough keeps leaking butter</p><p class="ex">Temperature is usually the culprit, not technique. Here is a simple fridge schedule that fixed it.</p></div></li>
-    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, 1 hr ago</div><p class="pt">Scheduler changes landing in the next release</p><p class="ex">A walk through the patches that reduce latency on busy machines.</p></div></li>
-    <li class="list-row read" style="--c:var(--f3)"><div class="spine"></div><div class="body"><div class="meta">Field Guide Weekly, 2 hr ago</div><p class="pt">Ten quiet trails within an hour of the city</p><p class="ex">Fewer crowds, better views and parking that is actually free.</p></div></li>
-    <li class="list-row" style="--c:var(--f4)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Type &amp; Grid, 3 hr ago</div><p class="pt">Setting small text so it stays readable</p><p class="ex">Spacing, weight and size choices for captions and footnotes.</p></div></li>
-    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, Yesterday</div><p class="pt">An honest review of three home proofing boxes</p><p class="ex">We tested each overnight with the same sourdough batch.</p></div></li>
-    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Yesterday</div><p class="pt">Sowing lettuce in late spring heat</p><p class="ex">Shade cloth, deep watering and which varieties bolt last.</p></div></li>
-    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, Mon</div><p class="pt">Reading a flame graph without getting lost</p><p class="ex">Start at the widest bar and work outward.</p></div></li>
-    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Mon</div><p class="pt">Three herbs that like a windy balcony</p><p class="ex">Thyme, rosemary and chives shrug off gusts that flatten basil.</p></div></li>
-    </ul>
+      <div class="peek" id="preview-peek"></div>
+      <div class="scrim"></div>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+        <div class="grab"></div>
+        <div class="top"><div class="meta"><span class="tick" id="preview-tick"></span><span id="preview-meta"></span></div><button class="icon-btn" type="button" id="preview-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+        <h2 class="sh" id="preview-title"></h2>
+        <p class="by" id="preview-author" hidden></p>
+        <div class="prose" id="preview-body"></div>
+        <a class="btn-primary" id="preview-open" target="_blank" rel="noopener noreferrer">Open full article<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></a>
+        <p class="note" id="preview-site"></p>
+      </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="peek">22 unread</div>
-      <div class="scrim"></div>
-      <div class="sheet"><div class="grab"></div>
-      <div class="top"><div class="meta"><span class="tick"></span>Field Guide Weekly, 2 hr ago</div><button class="icon-btn" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
-      <h2 class="sh">Ten quiet trails within an hour of the city</h2>
-      <p class="by">By Rowan Example</p>
-      <div class="prose">
-      <p>Most guides send you to the same five summits. These routes trade fame for silence, with clear paths, shade and places to sit.</p>
-      <p>The first loop starts behind the old reservoir car park and climbs gently through beech woods for two kilometres before opening onto a long grassy ridge.</p>
-      <p>Start early and bring water: only three of the ten have a tap at the trailhead, and none of them sell anything once you are past the gate.</p>
+
+  <!-- The add-feed sheet (not in the drawn screens). -->
+  <div class="sheet-overlay" id="add-feed-view" hidden>
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="add-feed-heading">
+      <div class="panel-top">
+        <button class="icon-btn" type="button" id="add-feed-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
+        <h2 class="panel-heading" id="add-feed-heading">Add feed</h2>
+        <span class="panel-gap"></span>
       </div>
-      <button class="btn-primary">Open full article<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></button>
-      <p class="note">Opens on fieldguideweekly.example</p>
+      <form id="add-feed-form" novalidate>
+        <label class="field-label" for="feed-url">Feed address</label>
+        <input class="field" id="feed-url" name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+        <p class="field-error" id="feed-error" role="alert" hidden></p>
+        <div class="panel-actions">
+          <button class="btn-primary" type="submit" id="add-feed-submit">Add feed</button>
+          <button class="btn-secondary" type="button" id="add-feed-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- The feeds sheet. -->
+  <div class="sheet-overlay" id="feeds-view" hidden>
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="feeds-heading">
+      <div class="panel-top">
+        <button class="icon-btn" type="button" id="feeds-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
+        <h2 class="panel-heading" id="feeds-heading">Your feeds</h2>
+        <span class="panel-gap"></span>
       </div>
+      <ul class="list" id="feeds-list"></ul>
+      <div class="state-empty" id="feeds-loading">
+        <span class="skeleton sk-bar sk-bar-title"></span>
+        <span class="skeleton sk-bar sk-bar-ex"></span>
+      </div>
+      <p class="state-empty-msg" id="feeds-empty" hidden>You are not following any feeds yet.</p>
+      <p class="field-error" id="feeds-error" role="alert" hidden></p>
+      <div class="panel-actions">
+        <button class="btn-secondary" type="button" id="feeds-add">Add feed</button>
       </div>
     </div>
+  </div>
+
+  <!-- The row to copy when rendering the list. -->
+  <template id="row-template">
+    <li class="list-row" style="--c:var(--f1)" role="button" tabindex="0">
+      <div class="spine"></div>
+      <div class="body">
+        <div class="meta"><i class="dot"></i><span class="meta-text"></span></div>
+        <p class="pt"></p>
+        <p class="ex"></p>
+      </div>
+    </li>
   </template>
-  <!-- /usernode-spec-screens@1 -->
+
+  <!-- The feed row to copy in the feeds sheet. -->
+  <template id="feed-template">
+    <li class="list-row feed-row" style="--c:var(--f1)">
+      <div class="spine"></div>
+      <div class="body">
+        <p class="feed-name"></p>
+        <p class="feed-url"></p>
+        <p class="feed-error" hidden></p>
+      </div>
+      <button class="btn-secondary feed-remove" type="button">Remove</button>
+    </li>
+  </template>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var params = new URLSearchParams(window.location.search);
+    var DEMO = params.get('demo') === '1';
+    var pageToken = params.get('token') || '';
+
+    function now() {
+      try {
+        if (window.usernode && typeof window.usernode.now === 'function') {
+          return window.usernode.now();
+        }
+      } catch (e) {}
+      return new Date();
+    }
+
+    function api(path, options) {
+      options = options || {};
+      var headers = options.headers || {};
+      var token = pageToken || (window.usernode && window.usernode.token) || '';
+      if (token) headers['x-usernode-token'] = token;
+      try {
+        if (window.usernode && window.usernode.previewNow) {
+          headers['x-usernode-now'] = now().toISOString();
+        }
+      } catch (e) {}
+      var init = { method: options.method || 'GET', headers: headers };
+      if (options.body !== undefined) {
+        headers['content-type'] = 'application/json';
+        init.body = JSON.stringify(options.body);
+      }
+      var url = path + (path.indexOf('?') === -1 ? '?' : '&') + 'demo=' + (DEMO ? '1' : '0');
+      return fetch(url, init).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (!res.ok) {
+            var err = new Error(body.error || 'request_failed');
+            err.status = res.status;
+            err.code = body.error || 'request_failed';
+            throw err;
+          }
+          return body;
+        });
+      });
+    }
+
+    function $(id) { return document.getElementById(id); }
+
+    var title = $('unread-title');
+    var statusRow = $('status-row');
+    var feedsButton = $('feeds-button');
+    var feedsCount = $('feeds-count');
+    var refreshedAt = $('refreshed-at');
+    var failedFeeds = $('failed-feeds');
+    var listLabel = $('list-label');
+    var readerState = $('reader-state');
+    var postList = $('post-list');
+    var addFeedButton = $('add-feed-button');
+    var previewView = $('preview-view');
+    var addFeedView = $('add-feed-view');
+    var feedsView = $('feeds-view');
+
+    var state = {
+      posts: [],
+      feedCount: 0,
+      unreadCount: 0,
+      failedFeeds: 0,
+      loaded: false,
+    };
+
+    function plural(n, one, many) {
+      return n + ' ' + (n === 1 ? one : many);
+    }
+
+    function clockText(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var h = d.getHours();
+      var m = String(d.getMinutes());
+      if (m.length < 2) m = '0' + m;
+      var ap = h >= 12 ? 'pm' : 'am';
+      h = h % 12 || 12;
+      return h + ':' + m + ' ' + ap;
+    }
+
+    function relTime(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var current = now();
+      var secs = Math.floor((current.getTime() - d.getTime()) / 1000);
+      if (secs < 60) return 'Just now';
+      if (secs < 3600) return Math.floor(secs / 60) + ' min ago';
+      if (secs < 86400) {
+        var h = Math.floor(secs / 3600);
+        return h + ' hr ago';
+      }
+      var a = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      var b = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+      var days = Math.round((b.getTime() - a.getTime()) / 86400000);
+      if (days <= 1) return 'Yesterday';
+      if (days < 7) {
+        return d.toLocaleDateString(undefined, { weekday: 'short' });
+      }
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function colorVar(n) {
+      var i = Number(n);
+      if (!(i >= 1 && i <= 5)) i = 1;
+      return 'var(--f' + i + ')';
+    }
+
+    function setBodyLocked(locked) {
+      document.body.classList.toggle('sheet-open', locked);
+    }
+
+    function anyOverlayOpen() {
+      return !previewView.hidden || !addFeedView.hidden || !feedsView.hidden;
+    }
+
+    // ── Loading, empty and error states ───────────────────────────────────
+
+    function showLoading() {
+      title.innerHTML = '<span class="skeleton sk-title" aria-hidden="true"></span>';
+      feedsCount.innerHTML = '<span class="skeleton sk-chip" aria-hidden="true"></span>';
+      refreshedAt.innerHTML = '<span class="skeleton sk-chip" aria-hidden="true"></span>';
+      statusRow.hidden = false;
+      failedFeeds.hidden = true;
+      listLabel.hidden = true;
+      readerState.hidden = true;
+      readerState.innerHTML = '';
+      postList.hidden = false;
+      postList.innerHTML = '';
+      for (var i = 0; i < 4; i++) {
+        var li = document.createElement('li');
+        li.className = 'list-row sk-row';
+        li.style.setProperty('--c', 'var(--line)');
+        var spine = document.createElement('div');
+        spine.className = 'spine';
+        var body = document.createElement('div');
+        body.className = 'body';
+        var lines = document.createElement('div');
+        lines.className = 'sk-lines';
+        var bars = ['sk-bar-meta', 'sk-bar-title', 'sk-bar-ex'];
+        for (var j = 0; j < bars.length; j++) {
+          var bar = document.createElement('span');
+          bar.className = 'skeleton sk-bar ' + bars[j];
+          lines.appendChild(bar);
+        }
+        body.appendChild(lines);
+        li.appendChild(spine);
+        li.appendChild(body);
+        postList.appendChild(li);
+      }
+    }
+
+    function showEmpty(kind) {
+      postList.hidden = true;
+      readerState.hidden = false;
+      readerState.innerHTML = '';
+      var box = document.createElement('div');
+      box.className = kind === 'error' ? 'state-error' : 'state-empty';
+      var h = document.createElement('h2');
+      h.className = 'state-title';
+      var p = document.createElement('p');
+      p.className = 'state-text';
+      if (kind === 'no-feeds') {
+        h.textContent = 'Add your first feed';
+        p.textContent = 'Paste the address of any RSS or Atom feed and its new posts show up here.';
+        var add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'btn-primary';
+        add.textContent = 'Add feed';
+        add.addEventListener('click', openAddFeed);
+        box.appendChild(h);
+        box.appendChild(p);
+        box.appendChild(add);
+      } else if (kind === 'caught-up') {
+        h.textContent = 'All caught up';
+        p.textContent = 'No unread posts in ' + plural(state.feedCount, 'feed', 'feeds') + '.';
+        box.appendChild(h);
+        box.appendChild(p);
+      } else {
+        h.textContent = "Couldn't load your posts.";
+        p.textContent = 'Your feeds are saved. Try again in a moment.';
+        var retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'btn-primary';
+        retry.textContent = 'Retry';
+        retry.addEventListener('click', load);
+        box.appendChild(h);
+        box.appendChild(p);
+        box.appendChild(retry);
+      }
+      readerState.appendChild(box);
+    }
+
+    // ── The list ──────────────────────────────────────────────────────────
+
+    function renderRow(post) {
+      var template = $('row-template');
+      var row = template.content.firstElementChild.cloneNode(true);
+      var read = !!post.readAt;
+      row.dataset.id = String(post.id);
+      row.style.setProperty('--c', colorVar(post.feedColor));
+      if (read) row.classList.add('read');
+      var metaText = row.querySelector('.meta-text');
+      metaText.textContent = post.feedTitle + ', ' + relTime(post.publishedAt);
+      var dot = row.querySelector('.dot');
+      if (read) dot.hidden = true;
+      row.querySelector('.pt').textContent = post.title || 'Untitled post';
+      row.querySelector('.ex').textContent = post.excerpt || '';
+      row.setAttribute('aria-label', (read ? 'Read: ' : 'Unread: ') + (post.title || 'Untitled post'));
+      row.addEventListener('click', function () { openPreview(post); });
+      row.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openPreview(post);
+        }
+      });
+      return row;
+    }
+
+    function renderList() {
+      readerState.hidden = true;
+      readerState.innerHTML = '';
+      postList.hidden = false;
+      postList.innerHTML = '';
+      state.posts.forEach(function (post) {
+        if (post._read && !post.readAt) post.readAt = new Date().toISOString();
+        postList.appendChild(renderRow(post));
+      });
+    }
+
+    function renderHeader(demo) {
+      title.textContent = plural(state.unreadCount, 'unread', 'unread');
+      feedsCount.textContent = plural(state.feedCount, 'feed', 'feeds');
+      statusRow.hidden = state.feedCount === 0;
+      refreshedAt.textContent = state.refreshedAt
+        ? 'Refreshed ' + clockText(state.refreshedAt) : '';
+      if (state.failedFeeds > 0) {
+        failedFeeds.hidden = false;
+        failedFeeds.textContent = plural(state.failedFeeds, "feed couldn't", "feeds couldn't") + ' refresh';
+        failedFeeds.onclick = openFeeds;
+      } else {
+        failedFeeds.hidden = true;
+      }
+      addFeedButton.hidden = state.feedCount === 0;
+      if (demo) {
+        listLabel.innerHTML = '<span data-usernode-demo-note>Staging demo</span>, newest first';
+      } else {
+        listLabel.textContent = 'Newest first';
+      }
+    }
+
+    function render(data) {
+      state.posts = data.posts || [];
+      state.feedCount = data.feedCount || 0;
+      state.unreadCount = typeof data.unreadCount === 'number' ? data.unreadCount : state.posts.length;
+      state.refreshedAt = data.refreshedAt || null;
+      state.failedFeeds = data.failedFeeds || 0;
+      state.loaded = true;
+      renderHeader(!!data.demo);
+      if (state.feedCount === 0) {
+        listLabel.hidden = true;
+        showEmpty('no-feeds');
+      } else if (state.posts.length === 0) {
+        listLabel.hidden = false;
+        showEmpty('caught-up');
+      } else {
+        listLabel.hidden = false;
+        renderList();
+      }
+    }
+
+    function renderError() {
+      state.loaded = false;
+      title.textContent = '';
+      statusRow.hidden = true;
+      listLabel.hidden = true;
+      addFeedButton.hidden = false;
+      showEmpty('error');
+    }
+
+    function load() {
+      showLoading();
+      addFeedButton.hidden = false;
+      var refresh;
+      try {
+        refresh = api('/api/refresh', { method: 'POST' }).catch(function () { return null; });
+      } catch (e) {
+        refresh = Promise.resolve(null);
+      }
+      refresh.then(function () {
+        return api('/api/posts');
+      }).then(function (data) {
+        render(data);
+      }).catch(function () {
+        renderError();
+      });
+    }
+
+    // ── The preview ───────────────────────────────────────────────────────
+
+    var currentPost = null;
+
+    function openPreview(post) {
+      currentPost = post;
+      var tick = $('preview-tick');
+      tick.style.background = 'rgb(' + colorVar(post.feedColor) + ')';
+      $('preview-meta').textContent = post.feedTitle + ', ' + relTime(post.publishedAt);
+      $('preview-title').textContent = post.title || 'Untitled post';
+      var author = $('preview-author');
+      if (post.author) {
+        author.hidden = false;
+        author.textContent = 'By ' + post.author;
+      } else {
+        author.hidden = true;
+        author.textContent = '';
+      }
+      var bodyEl = $('preview-body');
+      bodyEl.innerHTML = '';
+      var text = String(post.body || post.excerpt || '');
+      var paras = text.split(/\n{2,}/).filter(function (p) { return p.trim(); });
+      if (!paras.length) paras = ['No text in this post.'];
+      paras.forEach(function (p) {
+        var el = document.createElement('p');
+        el.textContent = p.trim();
+        bodyEl.appendChild(el);
+        });
+      var open = $('preview-open');
+      var note = $('preview-site');
+      var link = '';
+      try {
+        var u = new URL(post.link || '');
+        if (u.protocol === 'http:' || u.protocol === 'https:') link = u.href;
+      } catch (e) {}
+      if (link) {
+        open.hidden = false;
+        open.href = link;
+        note.hidden = false;
+        try {
+          note.textContent = 'Opens on ' + new URL(link).hostname;
+        } catch (e) {
+          note.textContent = '';
+        }
+      } else {
+        open.hidden = true;
+        open.removeAttribute('href');
+        note.hidden = true;
+        note.textContent = '';
+      }
+      previewView.hidden = false;
+      setBodyLocked(true);
+      $('preview-close').focus();
+      markRead(post);
+      $('preview-peek').textContent = state.unreadCount + ' unread';
+    }
+
+    function markRead(post) {
+      if (post.readAt || post._read) return;
+      post._read = true;
+      post.readAt = new Date().toISOString();
+      state.unreadCount = Math.max(0, state.unreadCount - 1);
+      title.textContent = plural(state.unreadCount, 'unread', 'unread');
+      var row = postList.querySelector('.list-row[data-id="' + post.id + '"]');
+      if (row) {
+        row.classList.add('read');
+        row.setAttribute('aria-label', 'Read: ' + (post.title || 'Untitled post'));
+        var dot = row.querySelector('.dot');
+        if (dot) dot.hidden = true;
+      }
+      api('/api/posts/' + post.id + '/read', { method: 'POST' }).catch(function () {});
+    }
+
+    function closePreview() {
+      previewView.hidden = true;
+      currentPost = null;
+      setBodyLocked(anyOverlayOpen());
+    }
+
+    // ── Add feed ──────────────────────────────────────────────────────────
+
+    var ADD_ERRORS = {
+      exists: 'You already follow that feed.',
+      bad_address: 'Enter a full web address starting with http:// or https://.',
+      unreachable: "The site didn't answer. Check the address and try again.",
+      not_a_feed: "That address isn't an RSS or Atom feed.",
+    };
+
+    function openAddFeed() {
+      $('feed-error').hidden = true;
+      $('feed-error').textContent = '';
+      $('add-feed-submit').disabled = false;
+      addFeedView.hidden = false;
+      setBodyLocked(true);
+      setTimeout(function () { $('feed-url').focus(); }, 30);
+    }
+
+    function closeAddFeed() {
+      addFeedView.hidden = true;
+      setBodyLocked(anyOverlayOpen());
+    }
+
+    function submitFeed(e) {
+      e.preventDefault();
+      var input = $('feed-url');
+      var errorEl = $('feed-error');
+      var url = input.value.trim();
+      if (!url) {
+        errorEl.textContent = 'Enter the feed address.';
+        errorEl.hidden = false;
+        input.focus();
+        return;
+      }
+      errorEl.hidden = true;
+      var submit = $('add-feed-submit');
+      submit.disabled = true;
+      submit.textContent = 'Adding...';
+      api('/api/feeds', { method: 'POST', body: { url: url } }).then(function () {
+        submit.disabled = false;
+        submit.textContent = 'Add feed';
+        input.value = '';
+        closeAddFeed();
+        load();
+      }).catch(function (err) {
+        submit.disabled = false;
+        submit.textContent = 'Add feed';
+        if (err.status === 401) {
+          closeAddFeed();
+          try {
+            if (window.usernode && typeof window.usernode.askForAccount === 'function') {
+              window.usernode.askForAccount({ action: 'add a feed' });
+            }
+          } catch (e2) {}
+          return;
+        }
+        errorEl.textContent = ADD_ERRORS[err.code] || "Couldn't add that feed. Try again in a moment.";
+        errorEl.hidden = false;
+        input.focus();
+      });
+    }
+
+    // ── Feeds sheet ───────────────────────────────────────────────────────
+
+    function openFeeds() {
+      feedsView.hidden = false;
+      setBodyLocked(true);
+      $('feeds-list').innerHTML = '';
+      $('feeds-list').hidden = true;
+      $('feeds-loading').hidden = false;
+      $('feeds-empty').hidden = true;
+      $('feeds-error').hidden = true;
+      $('feeds-close').focus();
+      api('/api/feeds').then(function (data) {
+        renderFeeds(data.feeds || []);
+      }).catch(function () {
+        $('feeds-loading').hidden = true;
+        $('feeds-error').textContent = "Couldn't load your feeds. Try again in a moment.";
+        $('feeds-error').hidden = false;
+      });
+    }
+
+    function renderFeeds(feeds) {
+      var list = $('feeds-list');
+      list.innerHTML = '';
+      $('feeds-loading').hidden = true;
+      if (!feeds.length) {
+        list.hidden = true;
+        $('feeds-empty').hidden = false;
+        return;
+      }
+      $('feeds-empty').hidden = true;
+      list.hidden = false;
+      feeds.forEach(function (feed) {
+        var template = $('feed-template');
+        var row = template.content.firstElementChild.cloneNode(true);
+        row.style.setProperty('--c', colorVar(feed.color));
+        row.querySelector('.feed-name').textContent = feed.title || feed.url;
+        row.querySelector('.feed-url').textContent = feed.url;
+        if (feed.lastError) {
+          var err = row.querySelector('.feed-error');
+          err.hidden = false;
+          err.textContent = feed.lastError;
+        }
+        var remove = row.querySelector('.feed-remove');
+        remove.addEventListener('click', function () {
+          remove.disabled = true;
+          remove.textContent = 'Removing...';
+          api('/api/feeds/' + feed.id, { method: 'DELETE' }).then(function () {
+            return api('/api/feeds');
+          }).then(function (data) {
+            renderFeeds(data.feeds || []);
+            load();
+          }).catch(function () {
+            remove.disabled = false;
+            remove.textContent = 'Remove';
+            $('feeds-error').textContent = "Couldn't remove that feed. Try again in a moment.";
+            $('feeds-error').hidden = false;
+          });
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function closeFeeds() {
+      feedsView.hidden = true;
+      setBodyLocked(anyOverlayOpen());
+    }
+
+    // ── Wiring ────────────────────────────────────────────────────────────
+
+    addFeedButton.addEventListener('click', openAddFeed);
+    $('add-feed-form').addEventListener('submit', submitFeed);
+    $('add-feed-close').addEventListener('click', closeAddFeed);
+    $('add-feed-cancel').addEventListener('click', closeAddFeed);
+    feedsButton.addEventListener('click', openFeeds);
+    $('feeds-close').addEventListener('click', closeFeeds);
+    $('feeds-add').addEventListener('click', function () {
+      closeFeeds();
+      openAddFeed();
+    });
+    $('preview-close').addEventListener('click', closePreview);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!previewView.hidden) closePreview();
+      else if (!addFeedView.hidden) closeAddFeed();
+      else if (!feedsView.hidden) closeFeeds();
+    });
+
+    load();
+  })();
+  </script>
 </body>
 </html>

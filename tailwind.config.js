@@ -55,6 +55,15 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        f1: token('f1'), // feed spine colours, given out in turn
+        f2: token('f2'),
+        f3: token('f3'),
+        f4: token('f4'),
+        f5: token('f5'),
+      },
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
+        display: ['ui-serif', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
