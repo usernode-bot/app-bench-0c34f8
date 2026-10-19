@@ -154,6 +154,8 @@
 
   function renderError() {
     el['add-btn'].className = 'btn-secondary';
+    el.status.textContent = 'Couldn\'t load your posts';
+    el.status.hidden = false;
     el.content.innerHTML = '<div class="state-error" data-state="error">' +
       '<div class="t">Couldn\'t load your posts</div>' +
       '<div class="meta">Your feeds are safe. Check your connection and try again.</div>' +
@@ -404,8 +406,10 @@
     state.failed = false;
     restoreAddButton();
     el.content.innerHTML = skeletonHtml();
-    el.status.textContent = '';
-    el.status.hidden = true;
+    // The subtitle line stays in every state so the header's height never
+    // changes and the tabs don't jump when content arrives.
+    el.status.textContent = 'Updating…';
+    el.status.hidden = false;
     renderDemoNote();
     return Promise.all([loadFeeds(), loadPosts(state.view)]).then(function () {
       renderList();
@@ -426,6 +430,7 @@
     }).catch(function (err) {
       if (err && err.status === 401) {
         // Not signed in with an account: the empty screen is the honest one.
+        el.status.hidden = true;
         state.feeds = [];
         state.posts = [];
         renderList();

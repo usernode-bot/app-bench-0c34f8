@@ -51,9 +51,14 @@
 
 .count {font-size:14px;font-weight:600}
 
-.chips {display:flex;gap:16px;overflow:hidden;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+/* The chips scroll sideways inside their own strip, under a soft fade at
+   the right edge, so no feed name is ever cut off mid-word and every feed
+   stays reachable. */
+.chips {display:flex;gap:16px;overflow-x:auto;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted));scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 24px),rgba(0,0,0,0));mask-image:linear-gradient(to right,#000 calc(100% - 24px),rgba(0,0,0,0))}
 
-.chips span {display:flex;align-items:center;gap:6px;white-space:nowrap}
+.chips::-webkit-scrollbar {display:none}
+
+.chips span {display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none}
 
 .dot {width:10px;height:10px;border-radius:50%;flex:none}
 
@@ -112,3 +117,15 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
 button.tab {cursor:pointer;font-family:inherit}
 .app {margin-inline:auto}
 .list-row.is-read .t {font-weight:400;color:rgb(var(--muted))}
+
+/* The empty state reads as a centred message: the block sits lower than
+   the kit's default and the action button gets room of its own below the
+   description. */
+.state-empty {padding-top:80px}
+.state-empty .btn-primary,.state-empty .btn-secondary {margin-top:8px}
+
+/* The add sheet: breathing room below the address field (plus the safe
+   area), and the label lines up with the field's own text inset (the
+   field's px-3). */
+#add-sheet {padding-bottom:calc(52px + env(safe-area-inset-bottom,0px))}
+#add-sheet .section-label {padding-left:12px}
