@@ -3,5 +3,9 @@
     "emoji": "🎼"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    { "name": "Lesson screen loads", "path": "/", "expectSelector": "[data-lesson-list]" },
+    { "name": "New learner starts unstarted", "path": "/", "expectText": "Not started" },
+    { "id": "demo-progressions", "name": "Populated demo", "path": "/?demo=1", "expectText": "4 of 6", "visual": true, "impact": ["public/**", "server.js", "styles/**"] }
+  ]
 }

@@ -56,7 +56,11 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
-      // The type scale: four sizes, and nothing in between.
+      // The type scale: four sizes, and nothing in between. The face is the
+      // system rounded one, with a plain system fallback.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
+      },
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],

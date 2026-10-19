@@ -1,27 +1,30 @@
 # Ear Trainer
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+An app to learn relative notes, chords and basic chord progressions by ear.
+One screen plays a sound — a two-note gap, a chord, or a progression from a
+well known song or hymn — and you tap what you heard. Each lesson type has
+five levels that start with a few very different sounds and add closer ones
+until you are quizzed on the full set. An item is mastered at three right
+answers in a row, and the chord ladder fills one rung per mastered item.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- `public/catalogue.js` holds the three lesson types, their 12 items each,
+  sound recipes and the level sizes. Item ids are **permanent**: they key the
+  progress table, so never rename or reuse one.
+- `public/app.js` renders the screen, picks questions and plays sounds with a
+  small Web Audio synth (no recordings; progressions are played in a random
+  key as plain chords).
+- `server.js` stores progress in the `progress` table (**staging:private**,
+  one row per user, lesson type and item) behind `GET /api/progress`,
+  `POST /api/answers` and `POST /api/progress/reset`. Guests can play but
+  their answers are not saved.
+- On staging, `?demo=1` seeds and shows a made-up set of progress for the
+  signed-in viewer ("Staging demo: made-up progress for you"). Every control
+  works on it.
 
-## Replacing the template
+## Design
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+See the "## Design" section of `CLAUDE.md` for the app's look: warm grey
+neutrals, a deep teal action colour, soft amber for a right answer, the
+system rounded typeface, and the chord ladder as the signature element.

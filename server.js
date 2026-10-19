@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+// The same catalogue the browser loads; it validates kinds and item ids.
+const { CATALOGUE } = require('./public/catalogue.js');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -154,6 +156,122 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Ear Trainer's progress store ─────────────────────────────────────────
+// One row per (user, lesson type, item): right answers in a row, whether the
+// item is mastered (three in a row), last answer. Demo rows (?demo=1 on
+// staging) live behind the same key with demo = true, so plain routes never
+// see them.
+
+const usernameOf = (user) => (user && (user.username || user.id)) || 'user';
+const useDemoFlag = (req) => IS_STAGING && req.query.demo === '1';
+
+async function initSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS progress (
+      username text NOT NULL,
+      demo boolean NOT NULL DEFAULT false,
+      kind text NOT NULL,
+      item_id text NOT NULL,
+      streak int NOT NULL DEFAULT 0,
+      mastered boolean NOT NULL DEFAULT false,
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (username, demo, kind, item_id)
+    )`);
+  // Progress is per-person, not for the group to browse.
+  await pool.query(`COMMENT ON TABLE progress IS 'staging:private'`);
+}
+
+// The first version's populated demo (?demo=1 on staging): one fixed set of
+// made-up rows for the signed-in viewer, written once, clearly fake.
+const DEMO_ROWS = [
+  // [kind, item_id, streak, mastered, hours ago] — progressions get the
+  // latest times, so the screen opens there. Amazing Grace is mastered but
+  // currently on 2 in a row, as the drawn screen shows.
+  ['notes', 'octave', 3, true, 220], ['notes', 'perfect-fifth', 3, true, 219],
+  ['notes', 'major-third', 3, true, 190], ['notes', 'perfect-fourth', 3, true, 189],
+  ['notes', 'minor-third', 1, false, 150],
+  ['chords', 'major', 3, true, 160], ['chords', 'minor', 3, true, 159],
+  ['chords', 'diminished', 2, false, 140],
+  ['progressions', 'amen', 3, true, 6], ['progressions', 'hit-the-road-jack', 3, true, 5],
+  ['progressions', 'let-it-be', 3, true, 4], ['progressions', 'zombie', 1, false, 3],
+  ['progressions', 'amazing-grace', 2, true, 2],
+];
+
+async function seedDemoRows(req) {
+  // "Once": if the viewer already has demo rows (a reset made some of them
+  // disappear included), leave what is there alone.
+  const existing = await pool.query(
+    'SELECT 1 FROM progress WHERE username = $1 AND demo = true LIMIT 1',
+    [usernameOf(req.user)]);
+  if (existing.rowCount > 0) return;
+  const now = req.now;
+  for (const [kind, itemId, streak, mastered, hoursAgo] of DEMO_ROWS) {
+    if (!CATALOGUE[kind] || !CATALOGUE[kind].items.some((it) => it.id === itemId)) continue;
+    await pool.query(
+      `INSERT INTO progress (username, demo, kind, item_id, streak, mastered, updated_at)
+       VALUES ($1, true, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+      [usernameOf(req.user), kind, itemId, streak, mastered,
+       new Date(now.getTime() - hoursAgo * 3600 * 1000)]);
+  }
+}
+
+app.get('/api/progress', async (req, res) => {
+  try {
+    if (!req.user) return res.json({ guest: true, rows: [] });
+    const demo = useDemoFlag(req);
+    if (demo) await seedDemoRows(req);
+    const { rows } = await pool.query(
+      `SELECT kind, item_id, streak, mastered, updated_at
+       FROM progress WHERE username = $1 AND demo = $2`,
+      [usernameOf(req.user), demo]);
+    res.json({ guest: false, rows });
+  } catch (err) {
+    console.error('GET /api/progress failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
+
+app.post('/api/answers', async (req, res) => {
+  try {
+    const { kind, itemId, correct } = req.body || {};
+    const kindCat = CATALOGUE[kind];
+    if (!kindCat || !kindCat.items.some((it) => it.id === itemId) ||
+        typeof correct !== 'boolean') {
+      return res.status(400).json({ error: 'bad_request' });
+    }
+    const demo = useDemoFlag(req);
+    // Right adds 1 to the streak and masters at 3; wrong starts the streak
+    // again but never unmasters.
+    const { rows } = await pool.query(
+      `INSERT INTO progress (username, demo, kind, item_id, streak, mastered, updated_at)
+       VALUES ($1, $2, $3, $4, CASE WHEN $5::boolean THEN 1 ELSE 0 END, false, now())
+       ON CONFLICT (username, demo, kind, item_id) DO UPDATE SET
+         streak = CASE WHEN $5::boolean THEN progress.streak + 1 ELSE 0 END,
+         mastered = progress.mastered OR (CASE WHEN $5::boolean THEN progress.streak + 1 ELSE 0 END) >= 3,
+         updated_at = now()
+       RETURNING kind, item_id, streak, mastered, updated_at`,
+      [usernameOf(req.user), demo, kind, itemId, correct]);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('POST /api/answers failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
+
+app.post('/api/progress/reset', async (req, res) => {
+  try {
+    const { kind } = req.body || {};
+    if (!CATALOGUE[kind]) return res.status(400).json({ error: 'bad_request' });
+    await pool.query(
+      'DELETE FROM progress WHERE username = $1 AND demo = $2 AND kind = $3',
+      [usernameOf(req.user), useDemoFlag(req), kind]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/progress/reset failed: ' + err.message);
+    res.status(500).json({ error: 'storage_failed' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +309,35 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  try {
+    await initSchema();
+  } catch (err) {
+    console.error('schema init failed: ' + err.message);
+  }
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop accepting connections, drain for about 3 s, close the pool, exit.
+let shuttingDown = false;
+async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  const force = setTimeout(() => process.exit(0), 3000);
+  try {
+    if (server) await new Promise((resolve) => server.close(resolve));
+    await pool.end();
+  } catch (err) {
+    console.error('shutdown error: ' + err.message);
+  }
+  clearTimeout(force);
+  process.exit(0);
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });

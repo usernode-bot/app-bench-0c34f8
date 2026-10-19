@@ -95,22 +95,38 @@ tables you've marked private), etc.
 
 ## About Ear Trainer
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+An ear-training app: it plays a sound (a two-note gap, a chord, or a chord
+progression from a well known song or hymn) and you tap what you heard. Three
+lesson types — Notes, Chords, Progressions — each with five levels that start
+with a few very different sounds and add closer-sounding ones until level 5
+is the full set of 12. An item is mastered at three right answers in a row;
+mastery is per item and shared by every level that includes it. Progress is
+kept per user in the `progress` table (`staging:private`); guests can play
+but nothing is saved. On staging `?demo=1` shows the first version's
+populated demo: made-up progress for the signed-in viewer. Catalogue item ids
+in `public/catalogue.js` are permanent — they key the progress table.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a request
+changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm grey neutrals; **deep teal** for the action, mastered
+  ladder rungs and progress bars (light `15 110 103`, dark `45 190 175`);
+  **soft amber** for a right answer and the item being asked (light
+  `252 228 168` on `120 66 4` text, dark `92 62 12` with `253 222 150` text).
+  Everything else is quiet: outlined options, a secondary Next, grey lesson
+  rows.
+- **Signature element:** the **chord ladder** — one rung per item in the
+  level, filling from the bottom as items are mastered (teal), amber for the
+  item being asked, grey for the rest. The same teal fills lesson rows'
+  progress bars. Chord numbers are written the way musicians write them
+  (I IV V, vi, bVII).
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  in the system rounded face (`ui-rounded` with a system-ui fallback).
+- The screen's structure lives in `public/screens.css` (the spec's drawn
+  screen); the kit's components in `styles/tailwind-input.css` supply the
+  loading skeleton and the states.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +156,11 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Catalogue item ids (`public/catalogue.js`) are permanent: they key the
+  `progress` table. Add new items at the end of a list only, since a kind's
+  level sets are prefixes of its item list.
+- The `progress` table is `staging:private`; one row per (user, demo, kind,
+  item). Never return another user's rows. Demo rows carry `demo = true` and
+  every query filters on that flag.
+- All sound is synthesised in the browser with Web Audio, started inside the
+  tap handler. No audio files, no external services.

@@ -96,3 +96,20 @@
 .btn-secondary {min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif;flex:none;display:inline-flex;align-items:center;gap:6px}
 
 .fb .btn-secondary {border-color:rgb(var(--amber-fg));color:rgb(var(--amber-fg));background:rgb(var(--surface))}
+
+/* The feedback bar carries wrong answers and screen-wide notices too, quiet
+   in the neutral tones instead of amber (behaviour the drawn screen's right
+   answer alone did not need). */
+.fb.no {background:rgb(var(--raised));color:rgb(var(--fg));box-shadow:inset 0 0 0 1px rgb(var(--line))}
+
+.fb.no .btn-secondary {border-color:rgb(var(--line));color:rgb(var(--fg));background:rgb(var(--surface))}
+
+/* The drawn divs became real controls: tabs, options and lesson rows are
+   buttons and tappable rows now. */
+.tabs button.tab {border:0;background:none;padding:0;font:inherit;cursor:pointer}
+
+.opts button.opt {font:inherit;cursor:pointer;text-align:center;width:100%}
+
+.list-row.click {cursor:pointer}
+
+.app button:focus-visible,.list-row.click:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
