@@ -95,22 +95,32 @@ tables you've marked private), etc.
 
 ## About Block World
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Block World is a 3D voxel creative building game, like Minecraft creative
+mode: you fly around a small shared floating island and place or break
+blocks from a hotbar of eight block types. The world is shared, so everyone
+sees what everyone else builds, within a few seconds. One world, one screen;
+visitors without an account can fly and look, placing asks them to make one.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by its first version's spec. Every later change follows
+it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** action colour is grass green (light 21 128 61 with white
+  text, dark 74 222 128 with deep green text 5 46 22). Frame neutrals are
+  warm greys (see the tokens). The sky is a token (`--sky`: light 214 232
+  244, dark dusk blue 30 41 59). The eight block colours are the materials
+  themselves and stay the same in both looks: grass, dirt, stone, oak
+  (`--wood`), leaves, water, sand and brick.
+- **Signature element:** the floating island itself, hanging in open sky
+  with a stone underside tapering away, visible from every side.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  drawn on the system rounded face (`ui-rounded`) like toy blocks.
+- **One fixed look:** none. The world fills the window by design (full-bleed
+  canvas), but the frame follows the viewer's Homeroom theme.
+
+Blocks' sides are drawn a little darker than their tops (vertex-colour
+shading in `public/world.js`), so the shapes read without textures.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

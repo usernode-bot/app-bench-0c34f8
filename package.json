@@ -1,8 +1,8 @@
 {
-  "name": "usernode-app-template",
+  "name": "block-world",
   "version": "1.0.0",
   "private": true,
-  "description": "Homeroom app template",
+  "description": "Block World: a shared 3D voxel building game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,7 +12,8 @@
   "dependencies": {
     "express": "^4.21.0",
     "pg": "^8.13.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "tailwindcss": "3.4.17"

@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Block World</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 8 92 30v40L50 92 8 70V30z' fill='none' stroke='%2315811d' stroke-width='8' stroke-linejoin='round'/><path d='M50 8v42M50 50 8 30M50 50l42-20' fill='none' stroke='%2315811d' stroke-width='8' stroke-linejoin='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -119,59 +119,45 @@
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
-  <div data-spec-screen="1">
+  <div data-spec-screen="1" class="full">
     <div>
-    <div class="app">
-    <div class="sky"></div>
-    <svg class="scene" viewBox="0 0 390 520">
-    <polygon points="195,150 335,215 195,280 55,215" fill="#5ca040"/>
-    <polygon points="55,215 195,280 195,330 55,260" fill="#86603c"/>
-    <polygon points="335,215 195,280 195,330 335,260" fill="#6d4c2e"/>
-    <polygon points="55,260 195,330 195,380 120,345 90,320" fill="#8c8c8a"/>
-    <polygon points="335,260 195,330 195,380 260,350 300,320" fill="#767674"/>
-    <polygon points="150,200 190,218 150,236 110,218" fill="#468cc8"/>
-    <polygon points="110,218 150,236 150,250 110,232" fill="#3a74a8"/>
-    <polygon points="240,160 270,174 240,188 210,174" fill="#b08048"/>
-    <polygon points="210,174 240,188 240,218 210,204" fill="#8a6234"/>
-    <polygon points="270,174 240,188 240,218 270,204" fill="#755228"/>
-    <polygon points="240,120 270,134 240,148 210,134" fill="#3a7a30"/>
-    <polygon points="210,134 240,148 240,174 210,160" fill="#2f6626"/>
-    <polygon points="270,134 240,148 240,174 270,160" fill="#28561f"/>
-    <polygon points="285,225 305,235 285,245 265,235" fill="#e1cd8c"/>
-    <polygon points="265,235 285,245 285,260 265,250" fill="#b8a468"/>
-    <polygon points="305,235 285,245 285,260 305,250" fill="#9c8a56"/>
-    <polygon points="195,240 215,250 195,260 175,250" fill="none" stroke="#fff" stroke-width="2"/>
-    <rect x="60" y="60" width="50" height="12" rx="6" fill="#fff"/><rect x="290" y="90" width="64" height="12" rx="6" fill="#fff"/>
-    </svg>
+    <div class="app real" id="app">
+    <canvas id="world-canvas" class="scene3d" aria-label="The shared 3D block world"></canvas>
     <svg class="aim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/></svg>
     <div class="top">
-    <div class="pill"><div class="t">Block World</div><div class="s">Starter island, 6 builders</div></div>
-    <div class="pill s"><span class="dot" style="background:rgb(var(--accent))"></span>Live</div>
+    <div class="pill"><div class="t">Block World</div><div class="s" id="builders-line"></div></div>
+    <div class="pill s" id="live-pill"><span class="dot" style="background:rgb(var(--accent))"></span><span id="live-text">Live</span></div>
     </div>
+    <div class="pill s demo-line" id="demo-line" data-usernode-demo-note hidden>Staging demo</div>
+    <div class="near pill s" id="near-pill" hidden><span class="dot" style="background:rgb(var(--water))"></span><span id="near-text"></span></div>
     <div class="mode">
-    <button class="on" aria-label="Place"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 11v6M9 14h6"/></svg></button>
-    <button aria-label="Break"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M9 10l6 6M15 10l-6 6"/></svg></button>
+    <button id="mode-place" class="on" aria-label="Place"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 11v6M9 14h6"/></svg></button>
+    <button id="mode-break" aria-label="Break"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M9 10l6 6M15 10l-6 6"/></svg></button>
     <hr>
-    <button aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
-    <button aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    <button id="fly-up" aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+    <button id="fly-down" aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
     </div>
-    <div class="near pill s"><span class="dot" style="background:rgb(var(--water))"></span>Maya and Theo are building now</div>
     <div class="dock">
-    <div class="row"><div><div class="t">Oak planks</div><div class="s">You have placed 24 blocks</div></div><button class="btn-primary">Place block</button></div>
-    <div class="bar">
-    <button class="slot" aria-label="Grass"><div class="sw" style="background:rgb(var(--grass))"></div></button>
-    <button class="slot" aria-label="Dirt"><div class="sw" style="background:rgb(var(--dirt))"></div></button>
-    <button class="slot" aria-label="Stone"><div class="sw" style="background:rgb(var(--stone))"></div></button>
-    <button class="slot sel" aria-label="Oak planks"><div class="sw" style="background:rgb(var(--wood))"></div></button>
-    <button class="slot" aria-label="Leaves"><div class="sw" style="background:rgb(var(--leaves))"></div></button>
-    <button class="slot" aria-label="Water"><div class="sw" style="background:rgb(var(--water))"></div></button>
-    <button class="slot" aria-label="Sand"><div class="sw" style="background:rgb(var(--sand))"></div></button>
-    <button class="slot" aria-label="Brick"><div class="sw" style="background:rgb(var(--brick))"></div></button>
+    <div class="row"><div><div class="t" id="block-name"></div><div class="s" id="placed-line"></div></div><button class="btn-primary" id="action-btn">Place block</button></div>
+    <div class="bar" id="hotbar">
+    <button class="slot" data-i="0" aria-label="Grass"><div class="sw" style="background:rgb(var(--grass))"></div></button>
+    <button class="slot" data-i="1" aria-label="Dirt"><div class="sw" style="background:rgb(var(--dirt))"></div></button>
+    <button class="slot" data-i="2" aria-label="Stone"><div class="sw" style="background:rgb(var(--stone))"></div></button>
+    <button class="slot" data-i="3" aria-label="Oak planks"><div class="sw" style="background:rgb(var(--wood))"></div></button>
+    <button class="slot" data-i="4" aria-label="Leaves"><div class="sw" style="background:rgb(var(--leaves))"></div></button>
+    <button class="slot" data-i="5" aria-label="Water"><div class="sw" style="background:rgb(var(--water))"></div></button>
+    <button class="slot" data-i="6" aria-label="Sand"><div class="sw" style="background:rgb(var(--sand))"></div></button>
+    <button class="slot" data-i="7" aria-label="Brick"><div class="sw" style="background:rgb(var(--brick))"></div></button>
     </div>
     </div>
+    <div class="overlay" id="loading"><div class="s loading-note">Loading the island</div></div>
+    <div class="overlay" id="error" hidden><div class="t">Could not load the world.</div><div class="s">Check your connection and try again.</div><button class="btn-primary" id="retry-btn">Retry</button></div>
+    <div class="overlay" id="empty" hidden><div class="t">The island is empty</div><button class="btn-primary" id="empty-place">Place a block here</button></div>
+    <div class="pill s" id="save-note" hidden>That block did not save. Try again.</div>
     </div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script type="module" src="/world.js"></script>
 </body>
 </html>

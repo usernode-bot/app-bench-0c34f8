@@ -64,3 +64,91 @@
 .row {display:flex;justify-content:space-between;align-items:center}
 
 .btn-primary {min-height:44px;padding:0 16px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px ui-rounded,system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px}
+
+/* ── The live screen ────────────────────────────────────────────────────────
+   The drawn screen became the real one: the world is a full-bleed 3D canvas,
+   by design, so the drawn fixed 390x844 frame and the mock's absolute spots
+   give way to the window. The drawn pills, switch and dock keep their look;
+   only their positions adapt here. */
+[data-spec-screen].full { max-width: none; }
+
+.app.real {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+}
+
+.scene3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.aim {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.top { padding-top: calc(12px + env(safe-area-inset-top)); z-index: 3; }
+.mode { top: 50%; transform: translateY(-50%); z-index: 3; }
+.near { bottom: calc(168px + env(safe-area-inset-bottom)); z-index: 3; }
+.dock { z-index: 3; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+
+.demo-line {
+  position: absolute;
+  left: 16px;
+  top: calc(88px + env(safe-area-inset-top));
+  z-index: 3;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+#loading, #error { background: rgb(var(--sky)); }
+#empty { background: transparent; }
+.loading-note { color: rgb(var(--muted)); }
+
+#save-note {
+  position: absolute;
+  left: 50%;
+  bottom: calc(176px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 4;
+  white-space: nowrap;
+}
+
+/* Loading shows the frame with the hotbar's eight slots as grey skeleton
+   squares; the drawn values stay empty until data arrives. */
+.app.is-loading .sw {
+  background: rgb(var(--line));
+  border-color: transparent;
+  animation: sw-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sw-pulse { 50% { opacity: 0.5; } }
+.app.is-loading .dock .row { visibility: hidden; }
+
+/* On the empty and error states the screen's own primary button gives way to
+   the state's own action. */
+.app.is-empty .dock .btn-primary { display: none; }
+.app.is-error .dock, .app.is-error .mode, .app.is-error .near { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app.is-loading .sw { animation: none; }
+}

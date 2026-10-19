@@ -1,27 +1,31 @@
 # Block World
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A shared 3D voxel building game, like Minecraft creative mode. Fly around a
+small floating island in the sky, place and break blocks from a hotbar of
+eight block types, and see everyone else's builds appear within a few
+seconds. One shared world for the whole group; visitors can fly and look,
+placing asks them to make an account.
 
-The scaffold is a small working demo that proves the plumbing works:
+## How it works
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+- **Fly:** drag to look around; on a phone pinch to fly forward or back, on
+  a computer W A S D move and the mouse looks around. Space and Shift (or
+  the fly buttons) rise and sink. There is no gravity, walking or collision:
+  you always fly.
+- **Build:** pick Place or Break in the switch, then tap a block or aim the
+  crosshair and press the big button. Blocks save to the server right away;
+  a failed save reverts the block and says so.
+- **Live:** every client polls the change log every 3 seconds, so others'
+  blocks appear without reloading. The header shows who has built and who is
+  building now.
 
-## Replacing the template
+## Stack
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+- `server.js` — Express + Postgres: the `blocks` table is the world's truth,
+  `block_changes` is the follow-along log, `world_meta` holds one-time seed
+  flags. The starter island is generated in code on first boot.
+- `public/world.js` — a three.js scene (one `InstancedMesh` per block type),
+  fly camera, aiming and optimistic writes.
+- Styling is Tailwind, precompiled at build time from `styles/tailwind-input.css`
+  into `public/tailwind.css`, in a light and a dark look that follow the
+  viewer's Homeroom theme.
