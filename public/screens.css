@@ -43,9 +43,9 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 
 .nums label:not(.field) {font-size:14px;line-height:20px;color:rgb(var(--muted));display:block;margin-bottom:4px}
 
-.field {min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--fg));display:flex;align-items:center;justify-content:space-between}
+.field {position:relative;display:block;min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));font-size:16px;color:rgb(var(--fg))}
 
-.field small {font-size:14px;color:rgb(var(--muted))}
+.field small {position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:14px;color:rgb(var(--muted))}
 
 .card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px;border-top:4px solid rgb(var(--accent))}
 
@@ -82,16 +82,17 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 .row.head span:nth-child(3) {font-weight:400}
 
 /* Behaviour wiring for the drawn screen (not a redraw): the fields now hold
-   real number inputs. The field box is a <label> wrapping the input, so a
-   tap anywhere in it — the padding and the unit suffix included — focuses
-   the field, keeping the whole 44 px box as the tap target. The input takes
-   the value's place; the small unit suffix stays at the right. */
+   real number inputs. The input is the whole 44 px tap target — it fills the
+   field box and carries the padding itself — so a tap anywhere in the box,
+   on the unit suffix included, lands on the input and focuses it. The small
+   unit suffix sits over the input's right padding. */
 .field input {
-  flex: 1 1 0;
-  width: 0;
+  display: block;
+  width: 100%;
   min-width: 0;
+  min-height: 44px;
   border: 0;
-  padding: 0;
+  padding: 8px 40px 8px 12px;
   background: none;
   font: inherit;
   color: inherit;
