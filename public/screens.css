@@ -1,0 +1,110 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 900px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 16px 16px 32px;
+  position: relative;
+}
+
+.app * {box-sizing:border-box}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.brand {font-size:14px;line-height:20px;color:rgb(var(--muted));font-weight:500}
+
+.pick {display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:8px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--fg))}
+
+.title {font-size:28px;line-height:36px;font-weight:700;margin:4px 0 0}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 12px}
+
+.bar {display:flex;gap:4px;margin-bottom:6px}
+
+.bar i {flex:1;height:6px;border-radius:3px;background:rgb(var(--line))}
+
+.bar i.d {background:rgb(var(--accent))}
+
+.bar i.m {background:rgb(var(--amber))}
+
+.meta {display:flex;justify-content:space-between;font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:16px}
+
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
+
+.play {display:flex;align-items:center;gap:14px;margin-bottom:16px}
+
+.btn-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;min-width:56px;border-radius:28px;background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;font:500 16px ui-rounded,system-ui,sans-serif;padding:0 20px}
+
+.q {font-size:20px;line-height:28px;font-weight:600}
+
+.hint {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.kb {position:relative;height:96px;display:flex;border:1px solid rgb(var(--line));border-radius:8px;overflow:hidden;background:rgb(var(--surface))}
+
+.kb .w {flex:1;border-right:1px solid rgb(var(--line));display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-size:12px;color:rgb(var(--muted))}
+
+.kb .w:last-child {border:0}
+
+.kb .w.on {background:rgb(var(--amber));color:rgb(var(--amber-ink));font-weight:700}
+
+.kb .b {position:absolute;top:0;width:20px;height:58px;background:rgb(var(--key-black));border-radius:0 0 4px 4px}
+
+.kb .b.on {background:rgb(var(--accent))}
+
+.cap {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:8px 0 0}
+
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:20px 0 8px;padding:0 4px}
+
+.ans {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.a {min-height:52px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-weight:500}
+
+.a small {font-size:14px;color:rgb(var(--muted));font-weight:400}
+
+.a.ok {background:rgb(var(--amber));border-color:rgb(var(--amber-ink)/.4);color:rgb(var(--amber-ink))}
+
+.a.ok small {color:rgb(var(--amber-ink))}
+
+.a.no {background:rgb(var(--raised));color:rgb(var(--muted))}
+
+.fb {margin-top:12px;display:flex;gap:10px;align-items:center;background:rgb(var(--amber));color:rgb(var(--amber-ink));border-radius:8px;padding:10px 12px;font-size:14px;line-height:20px}
+
+.fb svg {flex:none}
+
+.row {display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+
+.btn-secondary {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font:500 16px ui-rounded,system-ui,sans-serif;color:rgb(var(--fg))}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden;padding:0;margin:0;list-style:none}
+
+.list-row {display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:12px 16px;gap:12px}
+
+.list-row+.list-row {border-top:1px solid rgb(var(--line))}
+
+.list-row b {font-weight:600}
+
+.list-row span {font-size:14px;line-height:20px;color:rgb(var(--muted));white-space:nowrap}
