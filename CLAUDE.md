@@ -95,22 +95,35 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot turns a bread choice and three numbers into a full recipe. You pick
+one of five breads (sourdough, bagels, sourdough bagels, rye, sandwich loaf),
+set the hydration, how many loaves and how big each one is, and a baker's
+formula card fills in live: grams for every ingredient, the rise time, the
+oven temperature and the bake time. One screen, for one person, remembers
+nothing.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look: warm, like flour and crust. Set by the first version's spec;
+every later change follows it, and updates it when a request changes the look
+on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** flour-and-crust warm neutrals (ground: flour white, surface
+  white, raised: warm oat, text: dark crust brown, lines: pale crust) with a
+  deep amber action colour (the chosen bread chip, the card's top rule). The
+  token values live in `styles/tailwind-input.css`; every text pair is at
+  4.5:1 or more in both looks.
+- **Signature element:** the baker's formula card, like a page from a baker's
+  notebook — an amber rule across the top, a serif title, dashed lines
+  between ingredients, a baker's % column, grams in bold tabular figures, a
+  solid line above the total, and three bake tiles (clock, thermometer, loaf)
+  under it.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (sizes unchanged). Headings and the card title are serif
+  (`ui-serif, Georgia, serif`, `font-serif` in `tailwind.config.js`); body
+  text stays in the system face.
+- The screen follows the viewer's Homeroom light or dark theme; there is no
+  theme picker and no fixed look.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +153,15 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The formulas (baker's percentages, default hydration and size, rise times,
+  oven and bake times) live in the `BREADS` table in `public/app.js`. They
+  are common baker's percentages as starting points, not tested recipes;
+  rise times assume a kitchen at about 24°C.
+- Hydration counts only the added water; the starter is a separate
+  100%-hydration ingredient. The card's total always equals loaves × size:
+  every non-flour ingredient is rounded to whole grams and the remainder goes
+  to the bread flour.
+- Bake time changes by 5 minutes for every 200 g above or below the bread's
+  usual size, never below 25 minutes; bagels always bake the same time.
+- Nothing is stored: no tables, no routes, no history. Reloading starts
+  again from the sourdough defaults.

@@ -39,20 +39,20 @@
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 146 74 8;      /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 28 22 17;
+    --surface: 40 32 25;
+    --raised: 54 44 35;
+    --fg: 245 238 228;
+    --muted: 190 176 160;
+    --line: 74 62 50;
+    --accent: 240 168 80;
+    --on-accent: 46 24 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 240 168 80;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -135,4 +135,46 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* ── Bread Bot's own components ────────────────────────────────────────
+     Carried over from the drawn screen (public/screens.css styles the
+     markup there with the same names and values). */
+
+  /* A bread chip. The chosen bread is the screen's one filled control. */
+  .chip {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid rgb(var(--line));
+    background: rgb(var(--surface));
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    color: rgb(var(--fg));
+  }
+  .chip.on,
+  .chip-on {
+    background: rgb(var(--accent));
+    border-color: rgb(var(--accent));
+    color: rgb(var(--on-accent));
+    font-weight: 600;
+  }
+
+  /* One ingredient line of the baker's formula card: a dashed rule above,
+     the baker's % column, and grams in bold tabular figures. */
+  .formula-row {
+    display: grid;
+    grid-template-columns: 1fr 64px 72px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-top: 1px dashed rgb(var(--line));
+  }
+  .formula-row span:nth-child(2) { text-align: right; color: rgb(var(--muted)); font-size: 14px; }
+  .formula-row span:nth-child(3) { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* A bake tile: the rise, the oven and the bake time, each with its icon. */
+  .bake-tile { background: rgb(var(--raised)); border-radius: 10px; padding: 10px; }
+  .bake-tile svg { display: block; color: rgb(var(--muted)); margin-bottom: 4px; }
+  .bake-tile b { display: block; font-size: 20px; line-height: 28px; }
+  .bake-tile span { font-size: 14px; line-height: 20px; color: rgb(var(--muted)); }
 }

@@ -3,5 +3,26 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator shows the sourdough formula",
+      "path": "/",
+      "selector": "[data-recipe-total]",
+      "text": "Sourdough formula"
+    },
+    {
+      "name": "Populated demo",
+      "id": "demo",
+      "path": "/?demo=1",
+      "selector": "[data-usernode-demo-note]",
+      "text": "1,600 g",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "text": "ok"
+    }
+  ]
 }

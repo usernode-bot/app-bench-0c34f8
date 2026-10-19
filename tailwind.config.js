@@ -56,6 +56,11 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      fontFamily: {
+        // Headings and the formula card's title; body text stays in the
+        // system face.
+        serif: ['ui-serif', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

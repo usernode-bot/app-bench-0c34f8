@@ -1,27 +1,26 @@
 # Bread Bot
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Your personal bread recipe calculator. Pick a bread (sourdough, bagels,
+sourdough bagels, rye or sandwich loaf), set the hydration, how many loaves
+and how big each one is, and a baker's formula card fills in at once: grams
+for every ingredient, the rise time, the oven temperature and the bake time.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **One screen, nothing to save.** The card updates as you set the numbers;
+  bigger or smaller loaves than the bread's usual size adjust the bake time.
+- **Baker's percentages.** Hydration counts only the added water; the starter
+  is a separate 100%-hydration ingredient. The total always equals the dough
+  you asked for.
+- **Starting points, not tested recipes.** The formulas are common baker's
+  percentages, and the rise times assume a kitchen at about 24°C.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+## How it is built
 
-## Replacing the template
+Everything runs in the browser: the formulas live in `public/app.js`, the
+screen in `public/index.html`. There are no tables, no routes and nothing is
+stored; reloading starts again from the sourdough defaults. The design kit
+(colour tokens, components) is in `styles/tailwind-input.css`, described in
+`CLAUDE.md` under "## Design".
 
 To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+Homeroom icon in the header, then **Suggest an improvement**. You can also
+run Claude Code against this repo directly; start with `CLAUDE.md`.

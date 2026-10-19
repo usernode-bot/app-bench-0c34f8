@@ -76,3 +76,36 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 .steps {margin:16px 0 0;padding:12px 0 0 20px;border-top:1px dashed rgb(var(--line));font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .steps li {margin-bottom:6px}
+
+/* Behaviour wiring for the drawn screen (not a redraw): the fields now hold
+   real number inputs. The input takes the value's place; the small unit
+   suffix stays at the right. */
+.field input {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+/* A number input's intrinsic width would stretch its grid column and push
+   the third field off the phone: let the three field cells shrink. */
+.nums > div { min-width: 0; }
+.field input::-webkit-outer-spin-button,
+.field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Keyboard focus: a visible ring on the wrapper, as the kit's fields do. */
+.field:focus-within { border-color: rgb(var(--focus)); box-shadow: 0 0 0 1px rgb(var(--focus)); }
+.chip:focus-visible { outline: 2px solid rgb(var(--focus)); outline-offset: 2px; }
+
+/* The fix-this line that replaces the grams when a number is out of range. */
+.fix { font-size: 14px; line-height: 20px; color: rgb(var(--danger)); margin: 12px 0 0; }
+
+/* The screen was drawn as a 390 px frame; on a wider window it stays one
+   centred column (page-column), not a left-aligned strip. */
+.app { margin-inline: auto; }
