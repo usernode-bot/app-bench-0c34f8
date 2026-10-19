@@ -124,8 +124,11 @@
     <div class="app">
     <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary" id="addItemBtn" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
     <button class="pick" id="listPick" hidden><span id="listName"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="load-pick" id="pickSk" hidden><span class="skeleton" style="width:148px;height:16px"></span></div>
     <p class="sub" id="listSub"></p>
+    <div class="load-sub" id="subSk" hidden><span class="skeleton" style="width:176px;height:14px"></span></div>
     <div class="seg" id="viewSeg" hidden><span class="on" data-view="you" role="button" tabindex="0">Your view</span><span data-view="crowd" role="button" tabindex="0">Crowd view</span></div>
+    <div class="load-seg" id="segSk" hidden><span class="skeleton"></span><span class="skeleton"></span></div>
     <div id="state"></div>
     <div class="ladder" id="ladder" hidden></div>
     <p class="sl" id="trayLabel" hidden>Not ranked by you yet</p>

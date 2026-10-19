@@ -103,26 +103,30 @@
   }
 
   function renderLoading() {
+    // The bands and the tray show one grey item-shaped bar each, at the
+    // height a real item card sits at, so the loaded ladder lands where
+    // the skeleton one is.
+    var widths = [150, 110, 170, 130, 95, 120];
     var ladder = $('ladder');
     ladder.textContent = '';
-    TIERS.forEach(function (t) {
+    TIERS.forEach(function (t, i) {
       var tier = el('div', 'tier');
       tier.dataset.tier = t;
       tier.appendChild(el('div', 'lab ' + t.toLowerCase(), t));
       var items = el('div', 'items');
       var sk = el('span', 'skeleton');
-      sk.style.cssText = 'display:block;width:' + (90 + t.length * 40) + 'px;height:34px';
+      sk.style.cssText = 'display:block;width:' + widths[i] + 'px;height:44px;border-radius:8px';
       items.appendChild(sk);
       tier.appendChild(items);
       ladder.appendChild(tier);
     });
     var tray = $('tray');
     tray.textContent = '';
-    for (var i = 0; i < 2; i++) {
+    [130, 170].forEach(function (w) {
       var sk2 = el('span', 'skeleton');
-      sk2.style.cssText = 'display:block;width:' + (110 + i * 60) + 'px;height:34px';
+      sk2.style.cssText = 'display:block;width:' + w + 'px;height:44px;border-radius:8px';
       tray.appendChild(sk2);
-    }
+    });
   }
 
   function renderState() {
@@ -158,12 +162,16 @@
     var ready = state.phase === 'ready';
     var loading = state.phase === 'loading';
     var hasItems = ready && state.items.length > 0;
-    show('addItemBtn', ready && hasItems);
+    show('addItemBtn', (ready && hasItems) || loading);
     show('listPick', ready);
+    show('pickSk', loading);
+    show('subSk', loading);
+    show('segSk', loading);
     show('viewSeg', ready);
     show('ladder', loading || ready);
-    show('trayLabel', ready && hasItems);
+    show('trayLabel', loading || (ready && hasItems));
     show('tray', loading || hasItems);
+    if (loading) $('trayLabel').textContent = state.view === 'you' ? 'Not ranked by you yet' : 'No votes yet';
     $('listSub').textContent = ready ? listSubText() : '';
     $('listName').textContent = '';
     if (ready) {
@@ -541,7 +549,7 @@
 
   // A small form sheet: Cancel, the title and the primary action stay at
   // the top, above the keyboard.
-  function formSheet(title, actionLabel, placeholder, submit) {
+  function formSheet(title, actionLabel, placeholder, submit, hint) {
     var sheet = sheetShell(true);
     var hd = el('div', 'hd');
     var cancel = el('button', 'x', 'Cancel');
@@ -559,6 +567,7 @@
     input.placeholder = placeholder;
     input.maxLength = title === 'Add item' ? 80 : 60;
     sheet.appendChild(input);
+    if (hint) sheet.appendChild(el('p', 'sub', hint));
     var problem = el('p', 'sub');
     problem.style.marginTop = '8px';
     sheet.appendChild(problem);
@@ -590,7 +599,7 @@
           state.items.push(d.item);
           renderMain();
         });
-    });
+    }, 'New items go to the “Not ranked by you yet” tray, for you and for everyone else.');
   }
 
   function openNewListSheet() {

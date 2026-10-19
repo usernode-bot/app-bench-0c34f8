@@ -47,7 +47,7 @@
 
 .seg {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:12px 0 14px}
 
-.seg span {flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:rgb(var(--muted));border-radius:8px}
+.seg span {flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:rgb(var(--muted));border-radius:8px}
 
 .seg .on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
 
@@ -83,6 +83,15 @@
 
 .un {display:flex;gap:6px;flex-wrap:wrap;border:1px dashed rgb(var(--line));border-radius:12px;padding:8px;background:rgb(var(--surface))}
 
+/* Loading keeps the header's shape: grey placeholder bars where the list
+   picker, the count line and the toggle sit, so nothing jumps when the
+   data arrives. The skeleton ladder and tray follow below, as usual. */
+.load-pick {display:flex;align-items:center;min-height:44px}
+.load-sub {min-height:20px}
+.load-sub .skeleton {display:block}
+.load-seg {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:12px 0 14px}
+.load-seg .skeleton {flex:1;min-height:44px;border-radius:8px}
+
 /* Screen 2: its rules the first screen has not got. Scoped to the item
    sheet, which the app renders as an overlay (screen 1 keeps the .app
    rules above). */
@@ -108,6 +117,12 @@
   line-height: 24px;
   box-sizing: border-box;
   padding-top: 96px;
+  /* Anchor sheets to the bottom of the screen: the drawn item sheet fills
+     the column either way, and the small form sheets (add item, new list,
+     picker) would otherwise float with their bottom edge mid-ladder. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 /* Small form sheets (add item, new list, list picker) are not drawn
