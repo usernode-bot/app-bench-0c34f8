@@ -1,27 +1,31 @@
 # Ear Trainer
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Learn to hear relative notes, chords and chord progressions.
 
-The scaffold is a small working demo that proves the plumbing works:
+Pick a lesson type (Notes, Chords or Progressions), then a level. Each
+level starts with a few very different sounds and adds closer-sounding
+ones until, at level 5, you are asked about the full set of twelve. Tap
+the round play button to hear the question, then tap the option you
+heard. An item is mastered after three right answers in a row, and the
+chord ladder fills a rung for each one.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Progressions come from a starter list of well known songs and hymns,
+each played in a random key as plain piano-like chords made in the
+browser. No recordings are used.
 
-## Replacing the template
+## Running it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+```sh
+npm install
+npm run build   # compiles public/tailwind.css from styles/tailwind-input.css
+npm start       # node server.js
+```
 
-Once the real app exists, rewrite this README to describe it.
+The app runs inside Homeroom: the platform injects the signed-in
+person's identity token (`?token=` on the iframe load, or the
+`x-usernode-token` header at the app's own address), and `server.js`
+verifies it. Guests can play; their progress is kept in the page only.
+
+Progress is stored in Postgres (`DATABASE_URL`) in the `progress` table,
+which is marked `staging:private`. The `?demo=1` staging preview shows
+the viewer's own made-up progress.

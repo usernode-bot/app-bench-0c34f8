@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        amber: token('amber'), // right answers and the item being asked
+        'amber-fg': token('amber-fg'), // text on amber
+      },
+      // The system rounded face: part of the app's look, set here once.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

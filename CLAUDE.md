@@ -95,22 +95,30 @@ tables you've marked private), etc.
 
 ## About Ear Trainer
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+An ear training app: hear two notes, a chord or a short progression, then
+tap what it was. Three lesson types, five cumulative levels each, with the
+full set of twelve items at level 5. Progressions are well known songs and
+hymns played as browser-synthesised chords in a random key. Progress is
+kept per item (three right answers in a row masters it) and shared by every
+level that includes the item.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every change follows it, and updates it when a request
+changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: deep teal (the play button, mastered rungs, progress
+  bars); second: soft amber (right answers and the item being asked);
+  neutrals: warm greys. Both looks follow the viewer's theme; dark is the
+  same hues on a near-black warm ground.
+- **Signature element:** the chord ladder. One rung per item in the level,
+  filling from the bottom: teal when mastered, amber for the item being
+  asked, grey for the rest; the lesson rows carry the same teal progress
+  bar. Chord numbers are written the way musicians write them (I IV V, vi,
+  bVII).
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  typeface `ui-rounded` with a `system-ui` fallback.
+- No fixed look: light and dark both.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +148,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The `progress` table is `staging:private`. It holds one row per
+  (username, demo, kind, item_id); every query filters on `demo`, so plain
+  requests never see the `?demo=1` rows.
+- Catalogue item ids (`public/catalogue.js`) are permanent: stored progress
+  references them. Add ids, never rename them.
+- Mastery is three right answers in a row, shared by every level that
+  includes the item; a wrong answer resets the streak but not mastery.
+- Sound is synthesised in the browser with Web Audio. Start or resume the
+  AudioContext inside the play button's tap handler, since phones refuse
+  sound started outside a gesture.

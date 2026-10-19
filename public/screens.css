@@ -17,7 +17,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1060px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -39,7 +41,7 @@
 
 .tabs {display:flex;gap:6px;background:rgb(var(--raised));padding:4px;border-radius:12px;margin-bottom:12px}
 
-.tab {flex:1;min-height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:500;color:rgb(var(--muted))}
+.tab {flex:1;min-height:44px;border-radius:9px;border:0;background:none;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:inherit;font-weight:500;color:rgb(var(--muted));cursor:pointer}
 
 .tab.on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
 
@@ -61,7 +63,7 @@
 
 .opts {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
 
-.opt {min-height:64px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600;padding:6px}
+.opt {min-height:64px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:inherit;font-size:inherit;font-weight:600;color:rgb(var(--fg));text-align:center;padding:6px;cursor:pointer}
 
 .opt span {font-weight:400;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
@@ -96,3 +98,30 @@
 .btn-secondary {min-height:44px;padding:0 16px;border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));border-radius:8px;font:500 16px ui-rounded,system-ui,sans-serif;flex:none;display:inline-flex;align-items:center;gap:6px}
 
 .fb .btn-secondary {border-color:rgb(var(--amber-fg));color:rgb(var(--amber-fg));background:rgb(var(--surface))}
+
+/* ── Behaviour hooks ──────────────────────────────────────────────────────
+   Only what the drawn screen needs to work as the real app: the drawn
+   controls became buttons, and the states the spec describes. */
+
+.tab:focus-visible,
+.opt:focus-visible,
+.row-btn:focus-visible,
+.play:focus-visible,
+.btn-secondary:focus-visible,
+.btn-primary:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+.opt:disabled {cursor:default}
+.opt.bad {box-shadow:inset 0 0 0 2px rgb(var(--fg))}
+.opt .you {color:rgb(var(--fg));font-weight:600}
+
+.row-btn {display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0;border:0;background:none;color:inherit;font-family:inherit;font-size:inherit;text-align:left;cursor:pointer}
+
+/* While progress cannot load, the lessons still play, but Retry is the
+   only filled button on the screen. */
+.play.is-quiet {background:rgb(var(--surface));color:rgb(var(--accent));border:2px solid rgb(var(--accent))}
+
+.fb-save {display:flex;align-items:center;gap:8px;margin-top:8px}
+.reset {margin-top:12px}
+.reset-confirm {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+.reset-confirm .small {flex:1 1 100%}
+.reset-danger {color:rgb(var(--danger))}

@@ -121,38 +121,48 @@
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="top"><h1 class="title">Ear Trainer</h1><div class="small">Hear it, then tap what it was</div></div>
-    <div class="tabs"><div class="tab">Notes</div><div class="tab">Chords</div><div class="tab on">Progressions</div></div>
-    <div class="card">
-    <div class="lesson"><div><div class="heading">Level 3: Six songs</div><div class="small">Popular songs and hymns</div></div><button class="btn-secondary">Change</button></div>
-    <div class="stage">
-    <button class="play" aria-label="Play progression again"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button>
-    <div style="flex:1"><div class="heading">Question 7</div><div class="small">Tap play to hear it again. Which progression is it?</div></div>
+    <div class="top">
+      <h1 class="title">Ear Trainer</h1>
+      <div class="small">Hear it, then tap what it was</div>
+      <div class="small" id="guest-note" hidden>Make an account to keep your progress</div>
+      <div class="small" id="demo-note" data-usernode-demo-note hidden>Staging demo: made-up progress for you</div>
     </div>
+    <div class="tabs" role="tablist" aria-label="Lesson type">
+      <button class="tab" type="button" role="tab" data-kind="notes" aria-selected="false">Notes</button>
+      <button class="tab" type="button" role="tab" data-kind="chords" aria-selected="false">Chords</button>
+      <button class="tab" type="button" role="tab" data-kind="progressions" aria-selected="false">Progressions</button>
+    </div>
+    <div class="card">
+    <div class="lesson"><div><div class="heading" id="lesson-title"></div><div class="small" id="lesson-sub"></div></div><button class="btn-secondary" type="button" id="change-level">Change</button></div>
+    <div class="stage">
+    <button class="play" type="button" id="play" aria-label="Play"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg></button>
+    <div style="flex:1"><div class="heading" id="question-title"></div><div class="small" id="question-hint"></div></div>
+    </div>
+    <div class="small" id="audio-note" hidden style="margin-top:8px">This browser cannot play sound.</div>
     </div>
     <div class="section-label">Pick what you heard</div>
-    <div class="opts">
-    <div class="opt">I V vi IV<span>Let It Be</span></div>
-    <div class="opt ok">I IV I V<span>Amazing Grace</span></div>
-    <div class="opt">vi IV I V<span>Zombie</span></div>
-    <div class="opt">I vi IV V<span>Stand By Me</span></div>
+    <div class="opts" id="options"></div>
+    <div class="fb" id="feedback" role="status" aria-live="polite" hidden><div id="feedback-text"></div><button class="btn-secondary" type="button" id="next">Next<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+    <div class="small fb-save" id="save-error" hidden><span>Could not save your answer.</span><button class="btn-secondary" type="button" id="retry-save">Retry</button></div>
+    <div class="section-label" id="ladder-label">Chord ladder</div>
+    <div class="card" id="ladder-card" style="display:flex;gap:16px;align-items:center">
+    <div class="ladder" id="ladder" style="height:96px"></div>
+    <div style="flex:1" class="small" id="ladder-note"></div>
     </div>
-    <div class="fb"><div>Right. I IV I V, the shape of Amazing Grace. 2 in a row.</div><button class="btn-secondary">Next<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
-    <div class="section-label">Chord ladder, 4 of 6 mastered</div>
-    <div class="card" style="display:flex;gap:16px;align-items:center">
-    <div class="ladder" style="height:96px"><div class="rung f"></div><div class="rung f"></div><div class="rung f"></div><div class="rung f"></div><div class="rung n"></div><div class="rung"></div></div>
-    <div style="flex:1" class="small">A rung fills when you get that progression right three times in a row. Amber is the one you are on now.</div>
+    <div class="section-label" id="lessons-label">Lessons</div>
+    <ul class="list" id="lesson-list" data-lesson-list></ul>
+    <div class="reset" id="reset-area" hidden>
+    <button class="btn-secondary" type="button" id="reset-btn"></button>
+    <div class="reset-confirm" id="reset-confirm" hidden>
+    <div class="small" id="reset-question"></div>
+    <button class="btn-secondary reset-danger" type="button" id="reset-do">Reset progress</button>
+    <button class="btn-secondary" type="button" id="reset-cancel">Cancel</button>
     </div>
-    <div class="section-label">Lessons in progressions</div>
-    <ul class="list">
-    <li class="list-row"><div class="g"><div style="font-weight:600">Level 1: Two songs</div><div class="bar"><i style="width:100%"></i></div></div><span class="pill">Done</span></li>
-    <li class="list-row"><div class="g"><div style="font-weight:600">Level 2: Four songs</div><div class="bar"><i style="width:100%"></i></div></div><span class="pill">Done</span></li>
-    <li class="list-row cur"><div class="g"><div style="font-weight:600">Level 3: Six songs</div><div class="bar"><i style="width:67%"></i></div></div><span class="pill">4 of 6</span></li>
-    <li class="list-row"><div class="g"><div style="font-weight:600">Level 4: Nine songs</div><div class="small">Adds closer sounding ones</div></div><span class="pill">Not started</span></li>
-    <li class="list-row"><div class="g"><div style="font-weight:600">Level 5: Full set</div><div class="small">All 12 songs and hymns</div></div><span class="pill">Not started</span></li>
-    </ul>
+    </div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/catalogue.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

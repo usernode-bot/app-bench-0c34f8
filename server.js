@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const catalogue = require('./public/catalogue.js');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -145,7 +146,133 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+let shuttingDown = false;
+app.get('/health', (_req, res) => res.status(shuttingDown ? 503 : 200).json({ status: shuttingDown ? 'draining' : 'ok' }));
+
+// ── Ear Trainer progress ─────────────────────────────────────────────────
+// One row per (person, lesson type, item). Streaks and mastery are kept per
+// item and shared by every level that includes it. Demo rows live in the same
+// table behind the `demo` column, so a plain request can never see them.
+
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS progress (
+      username text NOT NULL,
+      demo boolean NOT NULL DEFAULT false,
+      kind text NOT NULL,
+      item_id text NOT NULL,
+      streak integer NOT NULL DEFAULT 0,
+      mastered boolean NOT NULL DEFAULT false,
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (username, demo, kind, item_id)
+    )`);
+  // Progress belongs to one person: keep the rows out of staging copies.
+  await pool.query(`COMMENT ON TABLE progress IS 'staging:private'`);
+}
+
+// The viewer's own made-up progress on a staging `?demo=1` preview. It opens
+// on Progressions, level 3, as the spec's screen draws it. `minutesAgo`
+// decides which lesson type the screen opens on: progressions is the most
+// recent one.
+const DEMO_ROWS = [
+  { kind: 'notes', itemId: 'octave', streak: 3, mastered: true, minutesAgo: 3200 },
+  { kind: 'notes', itemId: 'perf-fifth', streak: 3, mastered: true, minutesAgo: 3190 },
+  { kind: 'notes', itemId: 'major-third', streak: 3, mastered: true, minutesAgo: 3180 },
+  { kind: 'notes', itemId: 'perf-fourth', streak: 3, mastered: true, minutesAgo: 3170 },
+  { kind: 'chords', itemId: 'major', streak: 3, mastered: true, minutesAgo: 1600 },
+  { kind: 'chords', itemId: 'minor', streak: 3, mastered: true, minutesAgo: 1590 },
+  { kind: 'progressions', itemId: 'amen', streak: 3, mastered: true, minutesAgo: 95 },
+  { kind: 'progressions', itemId: 'hit-the-road-jack', streak: 3, mastered: true, minutesAgo: 80 },
+  { kind: 'progressions', itemId: 'let-it-be', streak: 3, mastered: true, minutesAgo: 60 },
+  // Mastered earlier, then missed once and answered right twice: it is still
+  // mastered, and its current streak is 2.
+  { kind: 'progressions', itemId: 'amazing-grace', streak: 2, mastered: true, minutesAgo: 5 }
+];
+
+// Write the demo rows for this viewer once. Fixed item ids, never overwriting
+// a row the viewer has since changed; skipping entirely once any demo row
+// exists keeps a Reset on the demo from bringing the old rows back.
+async function seedDemoRows(username) {
+  const existing = await pool.query(
+    `SELECT 1 FROM progress WHERE username = $1 AND demo = true LIMIT 1`, [username]);
+  if (existing.rowCount) return;
+  for (const row of DEMO_ROWS) {
+    await pool.query(
+      `INSERT INTO progress (username, demo, kind, item_id, streak, mastered, updated_at)
+       VALUES ($1, true, $2, $3, $4, $5, now() - ($6::int * interval '1 minute'))
+       ON CONFLICT (username, demo, kind, item_id) DO NOTHING`,
+      [username, row.kind, row.itemId, row.streak, row.mastered, row.minutesAgo]
+    );
+  }
+}
+
+app.get('/api/progress', async (req, res) => {
+  if (!req.user) return res.json({ guest: true, demo: false, rows: [] });
+  const username = req.user.username || req.user.id;
+  const demo = IS_STAGING && req.query.demo === '1';
+  try {
+    if (demo) await seedDemoRows(username);
+    const { rows } = await pool.query(
+      `SELECT kind, item_id, streak, mastered, updated_at
+         FROM progress
+        WHERE username = $1 AND demo = $2
+        ORDER BY updated_at`,
+      [username, demo]
+    );
+    res.json({ guest: false, demo, rows });
+  } catch (err) {
+    console.error('progress load failed: ' + err.message);
+    res.status(500).json({ error: 'progress_unavailable' });
+  }
+});
+
+app.post('/api/answers', async (req, res) => {
+  const body = req.body || {};
+  const { kind, itemId, correct } = body;
+  if (!catalogue.hasItem(kind, itemId)) {
+    return res.status(400).json({ error: 'unknown_item' });
+  }
+  if (typeof correct !== 'boolean') {
+    return res.status(400).json({ error: 'invalid_answer' });
+  }
+  const username = req.user.username || req.user.id;
+  const demo = IS_STAGING && req.query.demo === '1';
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO progress (username, demo, kind, item_id, streak, mastered, updated_at)
+       VALUES ($1, $2, $3, $4, CASE WHEN $5::boolean THEN 1 ELSE 0 END, false, now())
+       ON CONFLICT (username, demo, kind, item_id) DO UPDATE SET
+         streak = CASE WHEN $5::boolean THEN progress.streak + 1 ELSE 0 END,
+         mastered = progress.mastered OR ($5::boolean AND progress.streak + 1 >= 3),
+         updated_at = now()
+       RETURNING kind, item_id, streak, mastered, updated_at`,
+      [username, demo, kind, itemId, correct]
+    );
+    res.json({ row: rows[0] });
+  } catch (err) {
+    console.error('answer save failed: ' + err.message);
+    res.status(500).json({ error: 'answer_not_saved' });
+  }
+});
+
+app.post('/api/progress/reset', async (req, res) => {
+  const kind = (req.body || {}).kind;
+  if (!catalogue.isKind(kind)) {
+    return res.status(400).json({ error: 'unknown_kind' });
+  }
+  const username = req.user.username || req.user.id;
+  const demo = IS_STAGING && req.query.demo === '1';
+  try {
+    await pool.query(
+      `DELETE FROM progress WHERE username = $1 AND demo = $2 AND kind = $3`,
+      [username, demo, kind]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('progress reset failed: ' + err.message);
+    res.status(500).json({ error: 'reset_not_saved' });
+  }
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -191,10 +318,36 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
+
+// Stop accepting connections, give in-flight requests a short drain, close
+// the pool and exit. A second signal during the drain is a no-op.
+const DRAIN_MS = 3000;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[shutdown] ${signal} received, draining`);
+  if (server) {
+    server.close(() => {});
+    server.closeIdleConnections?.();
+    const timer = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+    timer.unref?.();
+  }
+  try {
+    await pool.end();
+  } catch (err) {
+    console.error('[shutdown] pool.end failed', err.message);
+  }
+  process.exit(0);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

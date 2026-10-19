@@ -44,17 +44,19 @@
     --amber-fg: 120 66 4; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 20 18 16;
+    --surface: 32 29 27;
+    --raised: 44 40 37;
+    --fg: 245 243 240;
+    --muted: 170 164 158;
+    --line: 70 65 60;
+    --accent: 45 190 175;
+    --on-accent: 4 40 38;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --amber: 92 62 12;
+    --amber-fg: 253 222 150;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
