@@ -95,22 +95,39 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+An RSS reader that works like Feedly, made for one person at a time: you
+add the addresses of the RSS or Atom feeds you follow, and their unread
+posts appear in one scrolling list, newest first, grouped by day. Tapping
+a post opens a preview sheet (the excerpt the feed provides), with Open
+full article in the browser, Save for later, and Mark as unread. Feeds
+refresh when the list is opened, not in the background. Every query joins
+through `feeds.user_id`: each project member's feeds, read state and
+saved posts are theirs alone.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by its first version's spec. Every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm stone grey neutrals; deep teal (`--accent`) as the
+  single action colour; amber (`--unread`) for the unread dot. Each of a
+  user's feeds gets one colour from a fixed set of eight, given out in
+  the order feeds are added: teal, rose, indigo, amber brown, sky,
+  green, violet, slate (`--f1` to `--f8`, light and dark values in the
+  kit).
+- **Signature element:** the feed dot. One small coloured dot per feed,
+  shown in the chips row under the tabs, on every post row, in the
+  preview sheet and in the feeds list, so a post's source reads at a
+  glance. The broadcast-waves icon is the app's mark (feeds button and
+  favicon), never an empty tile.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  drawn with the rounded system face (`ui-rounded`). Unread titles are
+  semibold; read titles are regular and muted.
+- **Layout:** one 390px centred column (the drawn screen's frame). The
+  only filled button on the main screen is the small Add feed; the
+  preview sheet's only filled button is Open full article. Sheets open
+  from the bottom over a scrim; the add sheet keeps Cancel and Add at
+  its top, above the keyboard.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +157,17 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Both tables (`feeds`, `posts`) are `staging:private`; never expose
+  another user's rows. Demo rows carry `is_demo` and are left out of
+  every response without `?demo=1`, which is what keeps the plain `/`
+  route showing its empty state even after the demo has seeded.
+- Demo feed URLs are `example.invalid` and are never fetched; refresh
+  skips `is_demo` feeds.
+- Outbound feed fetching always goes through the guarded fetch in
+  `server.js` (http/https only, DNS resolved and loopback/private/
+  link-local/CGNAT/metadata ranges refused, redirects re-checked, 10 s
+  timeout, 2 MB cap). Never fetch a user-supplied URL around it.
+- Post excerpts are the feed's own text, HTML-stripped to about 300
+  characters; the app never fetches full article text.
+- Dates and "Today/Yesterday" come from `req.now` / `usernode.now()`,
+  never `new Date()` on the server or SQL `NOW()`.

@@ -77,27 +77,11 @@
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: the preview sheet's rules (the live sheets reuse them).
 
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  height: 844px;
-  width: 390px;
-  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  box-sizing: border-box;
-  padding: 0 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.top {display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px}
-
-.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
-
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+   The drawn screen-2 frame's own .app/.top/.list-row/.meta rules were
+   scoped to the drawn template and are gone with it: they restyled
+   screen 1, whose real page scrolls normally. */
 
 .scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
 
@@ -115,6 +99,16 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
 
 .row {display:flex;gap:8px}
 
-.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;flex:1}
+.row .btn-primary {flex:1}
 
 .ghost {border:0;background:none;color:rgb(var(--muted));min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-family:inherit}
+
+/* The live app, where behaviour needed more than the drawn phone frame:
+   the sheets overlay the viewport instead of the fixed 844px frame, a
+   read post's title goes regular and muted (the spec), tabs are buttons,
+   and the column stays centred on wide windows. */
+.scrim[data-live], .sheet[data-live] {position:fixed;z-index:40}
+.sheet[data-live] {z-index:50;max-height:85vh;overflow-y:auto}
+button.tab {cursor:pointer;font-family:inherit}
+.app {margin-inline:auto}
+.list-row.is-read .t {font-weight:400;color:rgb(var(--muted))}

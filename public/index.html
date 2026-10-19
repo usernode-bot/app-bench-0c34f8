@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,7 +26,7 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
           if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f766e'/><g fill='none' stroke='white' stroke-width='9' stroke-linecap='round'><path d='M27 61a23 23 0 0 1 23 23'/><path d='M27 39a45 45 0 0 1 45 45'/></g><circle cx='29' cy='82' r='7' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -111,65 +111,56 @@
 <body class="min-h-screen bg-ground text-fg">
   <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
        that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+       lists, cards and data states. CLAUDE.md's "## Design" says how. -->
+  <!-- usernode-spec-screens@1: the screens the spec drew, wired to real data
+       by public/app.js. The drawn rows were the populated demo; the same
+       markup is now rendered from the API, and ?demo=1 fills it the same
+       way. -->
   <div data-spec-screen="1">
     <div>
     <div class="app">
-    <div class="top"><div><h1>RSS Reader</h1><div class="sub">Updated just now</div></div>
-    <div class="acts"><button class="btn-secondary icon" aria-label="Your feeds"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1"/></svg></button>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div></div>
-    <div class="tabs"><span class="tab on">Unread <span class="count">12</span></span><span class="tab">Saved <span class="count">4</span></span><span class="tab">All</span></div>
-    <div class="chips"><span><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly</span><span><i class="dot" style="background:rgb(var(--f2))"></i>Kitchen Notes</span><span><i class="dot" style="background:rgb(var(--f3))"></i>Quiet Software</span><span><i class="dot" style="background:rgb(var(--f4))"></i>Space Desk</span></div>
-    <div class="section-label">Today</div>
-    <ul class="list">
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f1))"></i><div class="body"><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Telescope spots the earliest spiral galaxy yet</div><div class="meta">Space Desk, 4 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f5))"></i><div class="body"><div class="t">A field guide to city foxes after dark</div><div class="meta">Nature Notes, 5 hr ago</div></div></li>
-    </ul>
-    <div class="section-label" style="margin-top:20px">Yesterday</div>
-    <ul class="list">
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">On keeping a personal reading list</div><div class="meta">Quiet Software, yesterday 9:05 am</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">Weeknight dal, three ways</div><div class="meta">Kitchen Notes, yesterday 6:40 pm</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Crew completes suit fit checks for the next moon trip</div><div class="meta">Space Desk, yesterday 2:15 pm</div></div></li>
-    </ul>
+    <div class="top"><div><h1>RSS Reader</h1><div class="sub" id="status" hidden></div></div>
+    <div class="acts"><button class="btn-secondary icon" id="feeds-btn" aria-label="Your feeds"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1"/></svg></button>
+    <button class="btn-primary" id="add-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div></div>
+    <div class="sub" data-usernode-demo-note id="demo-note" hidden>Staging demo: sample feeds and posts</div>
+    <div class="tabs"><button class="tab on" data-view="unread" type="button">Unread <span class="count" id="count-unread"></span></button><button class="tab" data-view="saved" type="button">Saved <span class="count" id="count-saved"></span></button><button class="tab" data-view="all" type="button">All</button></div>
+    <div class="chips" id="feeds-chips" hidden></div>
+    <div id="content"></div>
+    </div>
+
+    <div class="scrim" id="add-scrim" data-live hidden></div>
+    <div class="sheet" id="add-sheet" data-live hidden>
+    <div class="grab"></div>
+    <div class="bar"><button class="ghost" id="add-cancel" type="button">Cancel</button>
+    <div class="t">Add feed</div>
+    <button class="btn-primary" id="add-submit" type="button">Add</button></div>
+    <div style="margin-top:16px"><label class="section-label" for="add-url">Feed address</label>
+    <input class="field" id="add-url" type="url" inputmode="url" placeholder="e.g. https://example.com/feed.xml">
+    <div class="note" id="add-error" hidden></div></div>
+    </div>
+
+    <div class="scrim" id="feeds-scrim" data-live hidden></div>
+    <div class="sheet" id="feeds-sheet" data-live hidden>
+    <div class="grab"></div>
+    <div class="bar"><div class="t">Your feeds</div>
+    <button class="ghost" id="feeds-close" aria-label="Close" type="button"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <ul class="list" id="feeds-list" style="margin-top:16px"></ul>
+    </div>
+
+    <div class="scrim" id="preview-scrim" data-live hidden></div>
+    <div class="sheet" id="preview-sheet" data-live hidden>
+    <div class="grab"></div>
+    <div class="bar"><div class="meta" style="display:flex;align-items:center;gap:6px"><i class="dot" id="pv-dot"></i><span id="pv-meta"></span></div>
+    <button class="ghost" id="pv-close" aria-label="Close" type="button"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <h2 id="pv-title"></h2>
+    <p id="pv-excerpt"></p>
+    <div class="note" id="pv-note" hidden>Marked as read</div>
+    <div class="row"><a class="btn-primary" id="pv-open" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a><button class="btn-secondary" id="pv-save" type="button"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg><span id="pv-save-label">Save</span></button></div>
+    <div style="display:flex;justify-content:center;margin-top:8px"><button class="ghost" id="pv-unread" type="button">Mark as unread</button></div>
     </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="app">
-      <div class="top"><h1>RSS Reader</h1></div>
-      <ul class="list">
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f1))"></i><div><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f2))"></i><div><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f3))"></i><div><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
-      </ul>
-      <div class="scrim"></div>
-      <div class="sheet">
-      <div class="grab"></div>
-      <div class="bar"><div class="meta" style="display:flex;align-items:center;gap:6px"><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly, 25 min ago</div>
-      <button class="ghost" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <h2>Why the new battery chemistry might finally reach phones</h2>
-      <p>Engineers say a silicon-rich anode could add a third more runtime without a bigger cell. The catch is how it behaves after a few hundred charges, and early tests are promising but small.</p>
-      <div class="note">Marked as read</div>
-      <div class="row"><button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Save</button></div>
-      <div style="display:flex;justify-content:center;margin-top:8px"><button class="ghost">Mark as unread</button></div>
-      </div>
-      </div>
-      </div>
-    </div>
-  </template>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>
