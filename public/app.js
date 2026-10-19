@@ -48,6 +48,8 @@ const el = {
   app: document.getElementById('app'),
   canvas: document.getElementById('world'),
   presence: document.getElementById('presence'),
+  presencePill: document.getElementById('presence-pill'),
+  tools: document.querySelector('.tools'),
   demoNote: document.getElementById('demo-note'),
   activity: document.getElementById('activity'),
   toolPlace: document.getElementById('tool-place'),
@@ -568,6 +570,11 @@ function showError() {
   el.emptyNote.hidden = true;
   el.errorPanel.hidden = false;
   el.conn.hidden = true;
+  // Nothing else is filled after a failed load.
+  el.tools.hidden = true;
+  el.stick.hidden = true;
+  el.palette.hidden = true;
+  el.presencePill.hidden = true;
   setPaletteEnabled(false);
 }
 
@@ -576,6 +583,9 @@ async function load() {
   el.errorPanel.hidden = true;
   el.emptyNote.hidden = true;
   el.loadNote.hidden = false;
+  el.tools.hidden = false;
+  el.stick.hidden = false;
+  el.palette.hidden = false;
   setPaletteEnabled(false);
   try {
     const res = await api(worldUrl());
@@ -586,6 +596,7 @@ async function load() {
     el.loadNote.hidden = true;
     updateEmptyNote();
     setPaletteEnabled(true);
+    if (el.presence.textContent) el.presencePill.hidden = false;
   } catch {
     showError();
   }
@@ -619,7 +630,10 @@ function connectStream() {
   stream.addEventListener('presence', (event) => {
     try {
       const data = JSON.parse(event.data);
-      if (Array.isArray(data.names)) el.presence.textContent = presenceText(data.names);
+      if (Array.isArray(data.names)) {
+        el.presence.textContent = presenceText(data.names);
+        el.presencePill.hidden = !loaded;
+      }
     } catch {}
   });
 
@@ -656,7 +670,10 @@ for (const swatch of swatches) {
     setTool('place');
   });
 }
-el.toolPlace.addEventListener('click', () => setTool('place'));
+el.toolPlace.addEventListener('click', () => {
+  setTool('place');
+  toast('Placing ' + NAMES[selected]);
+});
 el.toolBreak.addEventListener('click', () => setTool('break'));
 
 updatePaletteHeading();

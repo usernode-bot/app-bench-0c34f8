@@ -73,11 +73,17 @@
 
 .world {position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}
 
-/* The quiet controls stay in a readable column on a wide window. */
-.top {left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 32px),42rem)}
-.tools {right:max(16px,calc((100% - 42rem)/2 + 16px))}
-.stick {left:max(20px,calc((100% - 42rem)/2 + 20px));top:auto;bottom:calc(184px + env(safe-area-inset-bottom))}
+/* The world gets the whole window: the HUD is pinned to its edges, and only
+   the palette keeps to a centred column at the bottom. */
+.top {left:16px;right:16px;transform:none;width:auto}
+.tools {right:16px}
+.stick {left:20px;top:auto;bottom:calc(184px + env(safe-area-inset-bottom))}
 .pal {left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),24rem);bottom:calc(24px + env(safe-area-inset-bottom))}
+
+/* With a pointer and a keyboard the move pad is not needed. */
+@media (hover:hover) and (pointer:fine) {
+  .stick {display:none}
+}
 
 .tb,.sw {padding:0;font:inherit;cursor:pointer;color:inherit}
 .tb {color:rgb(var(--fg))}
@@ -93,6 +99,10 @@
 
 /* The states of the world while it loads, is empty or fails. */
 .center-note {position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);max-width:min(calc(100% - 32px),24rem);padding:10px 14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;line-height:20px;text-align:center;z-index:4}
+
+/* The empty note is a comfortable 280px, centred in the space left of the
+   tools so it never crowds them. */
+#empty-note {width:280px;max-width:calc(100% - 112px);left:calc((100% - 80px)/2)}
 
 .conn {position:absolute;left:50%;transform:translateX(-50%);top:100px;padding:6px 10px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;line-height:20px;z-index:4}
 .bw.demo .conn {top:128px}
