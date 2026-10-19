@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M14 60c0-19 16-32 36-32s36 13 36 32v16a8 8 0 0 1-8 8H22a8 8 0 0 1-8-8z' fill='%237a4a24'/><path d='M32 38c5 6 5 16 0 22M50 32c5 8 5 20 0 28M68 38c5 6 5 16 0 22' stroke='%23d29660' stroke-width='5' fill='none' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -121,37 +121,247 @@
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="sub">Bread Bot</div>
+    <div class="sub" id="demo-note" data-usernode-demo-note style="margin-bottom:4px" hidden>Staging demo</div>
     <h1>What are we baking?</h1>
     <div class="section-label">Kind of bread</div>
-    <div class="chips"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
+    <div class="chips" role="radiogroup" aria-label="Kind of bread">
+    <button type="button" class="chip on" role="radio" aria-checked="true" data-bread="sourdough">Sourdough</button><button type="button" class="chip" role="radio" aria-checked="false" data-bread="bagels">Bagels</button><button type="button" class="chip" role="radio" aria-checked="false" data-bread="sourdough-bagels">Sourdough bagels</button><button type="button" class="chip" role="radio" aria-checked="false" data-bread="rye">Rye</button><button type="button" class="chip" role="radio" aria-checked="false" data-bread="sandwich">Sandwich loaf</button>
+    </div>
     <div class="section-label">Batch</div>
     <div class="list">
-    <div class="list-row"><div class="l">Hydration</div><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="val">75%</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></div>
-    <div class="list-row"><div class="l">Loaves</div><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="val">2</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></div>
-    <div class="list-row"><div class="l">Size per loaf</div><div class="step"><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="val">800 g</span><span class="sb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></span></div></div>
+    <div class="list-row"><div class="l">Hydration</div><div class="step"><button type="button" class="sb" id="h-less" aria-label="Less hydration"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="val" id="val-h" aria-live="polite">75%</span><button type="button" class="sb" id="h-more" aria-label="More hydration"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
+    <div class="list-row"><div class="l" id="label-count">Loaves</div><div class="step"><button type="button" class="sb" id="c-less" aria-label="Fewer loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="val" id="val-count" aria-live="polite">2</span><button type="button" class="sb" id="c-more" aria-label="More loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
+    <div class="list-row"><div class="l" id="label-size">Size per loaf</div><div class="step"><button type="button" class="sb" id="s-less" aria-label="Smaller loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="val" id="val-size" aria-live="polite">800 g</span><button type="button" class="sb" id="s-more" aria-label="Bigger loaves"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button></div></div>
     </div>
-    <button class="btn-primary">Get recipe</button>
-    <div class="card">
-    <div class="head">
-    <svg class="dial" viewBox="0 0 96 96"><circle class="t" cx="48" cy="48" r="40" fill="none" stroke-width="10"/><circle class="f" cx="48" cy="48" r="40" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="188 251" transform="rotate(-90 48 48)"/><text x="48" y="55" text-anchor="middle" font-size="22" font-weight="700" font-family="ui-serif,Georgia,serif">75%</text></svg>
-    <div><div class="h">Sourdough</div><div class="sub">2 loaves of 800 g, 1,600 g dough in total</div></div>
-    </div>
-    <div style="margin-top:12px">
-    <div class="row"><span>Bread flour <span class="pct">100%</span></span><b>812 g</b></div>
-    <div class="row"><span>Water <span class="pct">75%</span></span><b>609 g</b></div>
-    <div class="row"><span>Starter <span class="pct">20%</span></span><b>162 g</b></div>
-    <div class="row"><span>Salt <span class="pct">2%</span></span><b>16 g</b></div>
-    </div>
-    <div class="two">
-    <div class="box"><span class="sub">Bulk rise</span><b>5 to 6 h</b><span class="sub">at 24 °C</span></div>
-    <div class="box"><span class="sub">Final proof</span><b>12 h</b><span class="sub">in the fridge</span></div>
-    <div class="box"><span class="sub">Bake at</span><b>245 °C</b><span class="sub">Dutch oven</span></div>
-    <div class="box"><span class="sub">Bake time</span><b>45 min</b><span class="sub">lid off after 20</span></div>
-    </div>
-    </div>
+    <button type="button" class="btn-primary" id="get-recipe">Get recipe</button>
+    <p class="sub" id="hint" style="margin:24px 0 0">Pick your bread and batch, then tap Get recipe.</p>
+    <div id="card-slot"></div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script>
+  // All recipe data lives in RECIPES: the five breads of the spec's table.
+  // Ingredients hold their baker's percentage; Water holds hydration:true,
+  // so its percentage follows the hydration stepper.
+  var RECIPES = {
+    sourdough: {
+      name: 'Sourdough', countLabel: 'Loaves', countNoun: 'loaves', one: 'loaf', sizeLabel: 'Size per loaf',
+      ingredients: [
+        { label: 'Bread flour', pct: 100 },
+        { label: 'Water', hydration: true },
+        { label: 'Starter', pct: 20 },
+        { label: 'Salt', pct: 2 }
+      ],
+      hydration: { def: 75, min: 65, max: 85 },
+      count: { def: 2, min: 1, max: 12 },
+      size: { def: 800, min: 100, max: 2000, step: 50 },
+      bulk: ['5 to 6 h', 'at 24 °C'],
+      proof: ['12 h', 'in the fridge'],
+      bakeAt: ['245 °C', 'Dutch oven'],
+      bakeTime: ['45 min', 'lid off after 20']
+    },
+    bagels: {
+      name: 'Bagels', countLabel: 'Bagels', countNoun: 'bagels', one: 'bagel', sizeLabel: 'Size per bagel',
+      ingredients: [
+        { label: 'Bread flour', pct: 100 },
+        { label: 'Water', hydration: true },
+        { label: 'Instant yeast', pct: 1 },
+        { label: 'Salt', pct: 2 },
+        { label: 'Malt syrup', pct: 4 }
+      ],
+      hydration: { def: 58, min: 50, max: 65 },
+      count: { def: 8, min: 1, max: 12 },
+      size: { def: 110, min: 60, max: 200, step: 10 },
+      bulk: ['1 h', 'at 24 °C'],
+      proof: ['12 h', 'in the fridge'],
+      bakeAt: ['220 °C', 'boil 1 min per side first'],
+      bakeTime: ['20 min', '']
+    },
+    'sourdough-bagels': {
+      name: 'Sourdough bagels', countLabel: 'Bagels', countNoun: 'bagels', one: 'bagel', sizeLabel: 'Size per bagel',
+      ingredients: [
+        { label: 'Bread flour', pct: 100 },
+        { label: 'Water', hydration: true },
+        { label: 'Starter', pct: 20 },
+        { label: 'Salt', pct: 2 },
+        { label: 'Malt syrup', pct: 4 }
+      ],
+      hydration: { def: 58, min: 50, max: 65 },
+      count: { def: 8, min: 1, max: 12 },
+      size: { def: 110, min: 60, max: 200, step: 10 },
+      bulk: ['4 to 5 h', 'at 24 °C'],
+      proof: ['12 h', 'in the fridge'],
+      bakeAt: ['220 °C', 'boil 1 min per side first'],
+      bakeTime: ['20 min', '']
+    },
+    rye: {
+      name: 'Rye', countLabel: 'Loaves', countNoun: 'loaves', one: 'loaf', sizeLabel: 'Size per loaf',
+      ingredients: [
+        { label: 'Rye flour', pct: 60 },
+        { label: 'Bread flour', pct: 40 },
+        { label: 'Water', hydration: true },
+        { label: 'Starter', pct: 20 },
+        { label: 'Salt', pct: 2 }
+      ],
+      hydration: { def: 78, min: 70, max: 90 },
+      count: { def: 1, min: 1, max: 12 },
+      size: { def: 900, min: 100, max: 2000, step: 50 },
+      bulk: ['3 h', 'at 26 °C'],
+      proof: ['1 to 1.5 h', 'in the tin'],
+      bakeAt: ['230 °C', 'in a loaf tin'],
+      bakeTime: ['50 min', '']
+    },
+    sandwich: {
+      name: 'Sandwich loaf', countLabel: 'Loaves', countNoun: 'loaves', one: 'loaf', sizeLabel: 'Size per loaf',
+      ingredients: [
+        { label: 'Bread flour', pct: 100 },
+        { label: 'Water', hydration: true },
+        { label: 'Instant yeast', pct: 1.5 },
+        { label: 'Salt', pct: 2 },
+        { label: 'Sugar', pct: 4 },
+        { label: 'Butter', pct: 6 }
+      ],
+      hydration: { def: 64, min: 58, max: 72 },
+      count: { def: 1, min: 1, max: 12 },
+      size: { def: 900, min: 100, max: 2000, step: 50 },
+      bulk: ['1.5 h', 'at 24 °C'],
+      proof: ['1 h', 'in the tin'],
+      bakeAt: ['190 °C', 'in a loaf tin'],
+      bakeTime: ['35 min', '']
+    }
+  };
+
+  var state = { bread: 'sourdough', h: 75, count: 2, size: 800, shown: false };
+
+  var chipEls = Array.prototype.slice.call(document.querySelectorAll('[data-bread]'));
+  var els = {
+    labelCount: document.getElementById('label-count'),
+    labelSize: document.getElementById('label-size'),
+    valH: document.getElementById('val-h'),
+    valCount: document.getElementById('val-count'),
+    valSize: document.getElementById('val-size'),
+    hint: document.getElementById('hint'),
+    slot: document.getElementById('card-slot'),
+    get: document.getElementById('get-recipe')
+  };
+
+  function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+
+  // Whole grams, and amounts under 10 g to one decimal (yeast 1% of 533 g
+  // is 5.3 g). Thousands get their comma: "1,600 g".
+  function grams(g) {
+    return (g < 10 ? g.toFixed(1) : Math.round(g).toLocaleString('en')) + ' g';
+  }
+
+  function box(label, value, note) {
+    return '<div class="box"><span class="sub">' + label + '</span><b>' + value + '</b>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function cardHtml() {
+    var r = RECIPES[state.bread];
+    var total = state.count * state.size;
+    var sum = 0;
+    r.ingredients.forEach(function (i) { sum += i.hydration ? state.h : i.pct; });
+    var flour = total / (sum / 100);
+    var rows = r.ingredients.map(function (i) {
+      var pct = i.hydration ? state.h : i.pct;
+      return '<div class="row"><span>' + i.label + ' <span class="pct">' + pct + '%</span></span><b>' +
+        grams(flour * pct / 100) + '</b></div>';
+    }).join('');
+    var dash = Math.round(state.h / 100 * 251);
+    var batch = state.count + ' ' + (state.count === 1 ? r.one : r.countNoun) + ' of ' +
+      state.size.toLocaleString('en') + ' g, ' + total.toLocaleString('en') + ' g dough in total';
+    return '<div class="card" data-recipe-card>' +
+      '<div class="head">' +
+      '<svg class="dial" viewBox="0 0 96 96" role="img" aria-label="Hydration ' + state.h + '%">' +
+      '<circle class="t" cx="48" cy="48" r="40" fill="none" stroke-width="10"/>' +
+      '<circle class="f" cx="48" cy="48" r="40" fill="none" stroke-width="10" stroke-linecap="round" ' +
+      'stroke-dasharray="' + dash + ' 251" transform="rotate(-90 48 48)"/>' +
+      '<text x="48" y="55" text-anchor="middle" font-size="22" font-weight="700" font-family="ui-serif,Georgia,serif">' +
+      state.h + '%</text></svg>' +
+      '<div><div class="h">' + r.name + '</div><div class="sub">' + batch + '</div></div>' +
+      '</div>' +
+      '<div style="margin-top:12px">' + rows + '</div>' +
+      '<div class="two">' +
+      box('Bulk rise', r.bulk[0], r.bulk[1]) +
+      box('Final proof', r.proof[0], r.proof[1]) +
+      box('Bake at', r.bakeAt[0], r.bakeAt[1]) +
+      box('Bake time', r.bakeTime[0], r.bakeTime[1]) +
+      '</div></div>';
+  }
+
+  function render() {
+    var r = RECIPES[state.bread];
+    chipEls.forEach(function (el) {
+      var on = el.getAttribute('data-bread') === state.bread;
+      el.classList.toggle('on', on);
+      el.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    els.labelCount.textContent = r.countLabel;
+    els.labelSize.textContent = r.sizeLabel;
+    els.valH.textContent = state.h + '%';
+    els.valCount.textContent = state.count;
+    els.valSize.textContent = state.size.toLocaleString('en') + ' g';
+    document.getElementById('h-less').disabled = state.h <= r.hydration.min;
+    document.getElementById('h-more').disabled = state.h >= r.hydration.max;
+    document.getElementById('c-less').disabled = state.count <= r.count.min;
+    document.getElementById('c-more').disabled = state.count >= r.count.max;
+    document.getElementById('s-less').disabled = state.size <= r.size.min;
+    document.getElementById('s-more').disabled = state.size >= r.size.max;
+    if (state.shown) {
+      els.slot.innerHTML = cardHtml();
+      els.hint.hidden = true;
+    } else {
+      els.slot.innerHTML = '';
+      els.hint.hidden = false;
+    }
+  }
+
+  chipEls.forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (state.bread === el.getAttribute('data-bread')) return;
+      state.bread = el.getAttribute('data-bread');
+      // Each bread starts from its own usual batch: a bagel and a loaf are
+      // very different sizes.
+      var r = RECIPES[state.bread];
+      state.h = r.hydration.def;
+      state.count = r.count.def;
+      state.size = r.size.def;
+      render();
+    });
+  });
+
+  function step(which, dir) {
+    var r = RECIPES[state.bread];
+    if (which === 'h') state.h = clamp(state.h + dir, r.hydration.min, r.hydration.max);
+    if (which === 'c') state.count = clamp(state.count + dir, r.count.min, r.count.max);
+    if (which === 's') state.size = clamp(state.size + dir * r.size.step, r.size.min, r.size.max);
+    render();
+  }
+
+  [['h-less', 'h', -1], ['h-more', 'h', 1], ['c-less', 'c', -1], ['c-more', 'c', 1],
+   ['s-less', 's', -1], ['s-more', 's', 1]].forEach(function (m) {
+    document.getElementById(m[0]).addEventListener('click', function () { step(m[1], m[2]); });
+  });
+
+  els.get.addEventListener('click', function () {
+    state.shown = true;
+    render();
+    els.slot.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+
+  // The staging demo (?demo=1 on a staging build): the recipe already worked
+  // out for 2 sourdough loaves of 800 g at 75%. Nothing is stored, so it is
+  // idempotent and touches nothing but the first render. In production the
+  // parameter does nothing.
+  if (document.documentElement.getAttribute('data-env') === 'staging' &&
+      new URLSearchParams(location.search).get('demo') === '1') {
+    state.shown = true;
+    document.getElementById('demo-note').hidden = false;
+  }
+
+  render();
+  </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 
@@ -154,7 +155,11 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
-app.use(express.static(path.join(__dirname, 'public')));
+// index:false: GET / goes to the HTML shell handler below, which sends
+// index.html with data-env="staging" on staging. Static assets are always
+// served; the HTML shell is gated so direct hits to the staging/prod
+// subdomain don't leak app data to the public internet.
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
 // visits (share links pasted into a browser — Sec-Fetch-Dest: document)
@@ -188,13 +193,46 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // On staging the shell carries data-env="staging" on <html>: the page
+  // reads it to decide whether ?demo=1 may start the demo. A string
+  // replace over a cached read, done once at boot, before sending.
+  if (IS_STAGING) {
+    res.send(INDEX_STAGING);
+  } else {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
 });
 
+// On staging the HTML shell carries data-env="staging" (the page reads it
+// to decide whether ?demo=1 may start the demo). Read once at boot and
+// replaced once, so every send is the same string.
+const INDEX_STAGING = fs
+  .readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8')
+  .replace('<html lang="en">', '<html lang="en" data-env="staging">');
+
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Kubernetes stops the container with SIGTERM: stop accepting, let
+// in-flight requests drain (~3 s, hard backstop below), close the pool,
+// exit. SIGINT gets the same for Ctrl-C.
+function shutdown(signal) {
+  console.log(`${signal}: shutting down`);
+  const exit = () => pool.end().finally(() => process.exit(0));
+  setTimeout(exit, 3_000).unref();
+  if (server) {
+    server.close(exit);
+    if (server.closeIdleConnections) server.closeIdleConnections();
+  } else {
+    exit();
+  }
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 start().catch(err => { console.error(err); process.exit(1); });

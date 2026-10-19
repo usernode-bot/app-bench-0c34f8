@@ -95,22 +95,51 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Bread Bot is a bread recipe calculator: pick one of five breads (sourdough,
+bagels, sourdough bagels, rye, sandwich loaf), set the hydration, loaf count
+and loaf size, and it works out the grams of every ingredient plus rise and
+bake settings for that batch. One screen, pure client-side — nothing loads
+from a server, nothing is saved.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look: the colours of flour, crust and wheat. Every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: wheat gold; second: crust brown (the picked bread
+  chip and the formula card's top edge); neutrals: flour white, warm
+  brown-greys. Light and dark values live in `styles/tailwind-input.css`
+  as the `ground`/`surface`/`raised`/`fg`/`muted`/`line`/`accent`/`crust`
+  tokens.
+- **Signature element:** the recipe card, styled as a baker's formula card —
+  crust-brown top edge, dashed rules between ingredient rows, each
+  ingredient's baker's percentage in small muted text beside its grams, and
+  the hydration as a round dial filled in wheat gold to that percentage.
+- **Type scale:** `text-title` (28/36), `text-heading`, `text-body`,
+  `text-small`. Headings and the dial's number use the `font-serif` stack
+  (ui-serif, Georgia); everything else `font-rounded` (ui-rounded,
+  system-ui) with tabular figures for grams.
+- The screen follows the viewer's Homeroom theme (light and dark); no
+  theme picker.
+
+## App-specific conventions
+
+- All recipe data lives in `RECIPES` in `public/index.html` — the five
+  breads with their baker's percentages, hydration ranges, default batch
+  and rise/bake texts. The calculator is the script below it.
+- The five recipes are built in and fixed (the creator's choice); only
+  hydration, count and size change. Starter and yeast count as a share of
+  the flour; the starter's own flour and water are not added to the
+  hydration.
+- Grams are shown as whole numbers, amounts under 10 g to one decimal,
+  with `toLocaleString('en')` commas ("1,600 g").
+- On staging, `/?demo=1` opens the screen with the demo recipe already
+  worked out (2 sourdough loaves of 800 g at 75%) and a "Staging demo"
+  line; it needs `data-env="staging"` on `<html>`, which server.js adds
+  when `USERNODE_ENV` is staging. Nothing is stored.
+- The main screen is the platform-drawn spec screen: its styles are in
+  `public/screens.css`, not the Tailwind kit — change them only where
+  behaviour needs it.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

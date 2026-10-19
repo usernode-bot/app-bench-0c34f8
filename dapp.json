@@ -3,5 +3,32 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator loads",
+      "path": "/",
+      "expect": {
+        "text": "What are we baking?",
+        "selector": "[data-bread=\"sourdough\"]"
+      }
+    },
+    {
+      "id": "demo-recipe",
+      "name": "Demo recipe is worked out",
+      "path": "/?demo=1",
+      "visual": true,
+      "impact": ["public/**", "styles/**"],
+      "expect": {
+        "selector": "[data-recipe-card]",
+        "text": "812 g"
+      }
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expect": {
+        "text": "ok"
+      }
+    }
+  ]
 }

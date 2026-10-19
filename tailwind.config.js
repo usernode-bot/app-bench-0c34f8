@@ -55,6 +55,12 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        crust: token('crust'), // the picked bread and the formula card's top edge
+        'on-crust': token('on-crust'), // text on the crust
+      },
+      fontFamily: {
+        serif: ['ui-serif', 'Georgia', 'serif'], // headings and the dial's number
+        rounded: ['ui-rounded', 'system-ui', 'sans-serif'], // everything else
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
