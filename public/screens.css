@@ -35,7 +35,10 @@
    name wraps. The whole row is the 44 px tap target. */
 .picker {min-height:44px;font-size:28px;line-height:36px;font-weight:700;cursor:pointer}
 
-.picker svg {vertical-align:middle;margin-left:2px}
+/* display:inline-block: Tailwind's preflight makes every svg block, and a
+   block svg breaks the line before it — the chevron would drop under the
+   name even where it fits beside it. */
+.picker svg {display:inline-block;vertical-align:middle;margin-left:2px}
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
 

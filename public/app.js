@@ -29,7 +29,7 @@
   var els = {};
   ['app', 'listPickerBtn', 'listName', 'listSub', 'pickerPanel', 'pickerList', 'newListBtn',
     'newListForm', 'newListName', 'newListNoun', 'newListCancel', 'viewToggle', 'viewMy',
-    'viewCrowd', 'board', 'trayLabel', 'tray', 'emptyState', 'emptyAddBtn', 'addForm',
+    'viewCrowd', 'board', 'trayLabel', 'tray', 'emptyState', 'emptyHint', 'emptyAddBtn', 'addForm',
     'addLabel', 'addInput', 'addCancel', 'addSubmit', 'addBtn', 'status', 'errorState', 'retryBtn',
     'detailWrap', 'detailLabel', 'detailTitle', 'detailMeta', 'detailPick', 'detailVotes',
     'detailQuiet'].forEach(function (id) { els[id] = $(id); });
@@ -146,6 +146,7 @@
     els.emptyAddBtn.textContent = 'Add ' + articleFor(noun) + ' ' + noun;
     els.addLabel.textContent = 'New ' + noun;
     els.addInput.placeholder = exampleFor(noun);
+    els.emptyHint.textContent = 'Add the first ' + noun + ', then drag it into a tier.';
     els.addSubmit.textContent = 'Add';
   }
 
