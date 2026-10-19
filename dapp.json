@@ -3,5 +3,26 @@
     "emoji": "🧱"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "World screen shows the 3D world and the palette",
+      "path": "/",
+      "expectSelector": "#world"
+    },
+    {
+      "name": "Block palette shows the six block types",
+      "path": "/",
+      "expectSelector": "#palette .sw[data-type=\"brick\"]"
+    },
+    {
+      "name": "World API answers with a blocks array",
+      "path": "/api/world",
+      "expectText": "\"blocks\""
+    },
+    {
+      "name": "Staging demo is labelled",
+      "path": "/?demo=1",
+      "expectSelector": "[data-usernode-demo-note]"
+    }
+  ]
 }

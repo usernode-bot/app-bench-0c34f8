@@ -95,22 +95,36 @@ tables you've marked private), etc.
 
 ## About Block World
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared 3D voxel world, like creative mode: one flat grass plain that
+everyone in the project flies around, placing and breaking blocks from a
+palette of six classic types. The world is the screen. Changes arrive live
+for everyone with it open.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+One job: building. The world fills the whole window and the quiet panels sit
+on top of it; on a wider window the controls stay in one centred column. The
+palette of little 3D cubes is the signature element, each cube drawn in the
+material of the block it places.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: brick orange (light `194 65 12`, dark `251 146 60`,
+  with dark text `28 25 23` on the dark accent); the held swatch is soft
+  orange (`--accent-soft`); neutrals: warm greys (`ground`, `surface`,
+  `raised`, `line`), dark in the dark look. The six block materials do not
+  change between looks: grass `84 150 62`, stone `130 130 134`, wood
+  `150 100 56`, glass `160 210 230` (see-through), brick `166 70 52`, sand
+  `216 190 120`. The sky is `--sky-top` to `--sky-bottom`: daylight on the
+  light look, dusk on the dark one, with dimmer sunlight on the blocks.
+- **Signature element:** the block palette as a row of little 3D cubes in
+  their own materials, like holding a block in your hand.
+- **Type scale:** `text-title` 20/28, `text-heading` 16/24 bold, `text-body`
+  15/22, `text-small` 14/20, in the rounded system face (`ui-rounded`).
+- **Screen shape:** this app is its own scene, so its screen fills the window
+  rather than sitting in a `page-column`; the floating controls keep to a
+  42rem column in the middle on a wide window.
+
+Both looks are kept: the viewer's Homeroom theme sets them, and the world's
+light and sky follow it.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +154,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- One shared world for the whole project. `blocks` holds one row per cell,
+  keyed `(x, y, z)`. The grass plain is y = 0 and is never stored or
+  breakable; builds run from y = 1 to y = 32, with x and z in -32..31.
+- `is_demo` rows are the staging demo's builds. They are only read back on
+  staging with `?demo=1`; placing on a cell turns it into a normal row
+  (`is_demo = false`). Never show `is_demo` rows on a plain route.
+- The six block types are a fixed set (`grass`, `stone`, `wood`, `glass`,
+  `brick`, `sand`); their colours live in `styles/tailwind-input.css` as
+  `--mat-*` tokens and are the same in both looks.
+- The world's live updates are Server-Sent Events on `/api/stream`. Every
+  edit is applied optimistically and rolled back if the save fails.

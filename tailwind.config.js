@@ -55,13 +55,28 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        'accent-soft': token('accent-soft'), // the held palette swatch
+        'sky-top': token('sky-top'), // the world's sky
+        'sky-bottom': token('sky-bottom'),
+        grass: token('grass'), // the plain and the here-dot
+        // The six block materials, used by the palette and the world.
+        'mat-grass': token('mat-grass'),
+        'mat-stone': token('mat-stone'),
+        'mat-wood': token('mat-wood'),
+        'mat-glass': token('mat-glass'),
+        'mat-brick': token('mat-brick'),
+        'mat-sand': token('mat-sand'),
+      },
+      // The rounded system face suits a world of toy blocks.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
-        body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        body: ['0.9375rem', { lineHeight: '1.375rem' }],
+        heading: ['1rem', { lineHeight: '1.5rem', fontWeight: '700' }],
+        title: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '700' }],
       },
     },
   },

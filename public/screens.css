@@ -62,3 +62,45 @@
 .sw {flex:1;min-height:72px;border-radius:12px;border:2px solid transparent;background:rgb(var(--raised));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;line-height:18px;color:rgb(var(--fg))}
 
 .sw.sel {border-color:rgb(var(--accent));background:rgb(var(--accent-soft))}
+
+/* ── Block World: the world fills the window ────────────────────────────
+   This app is its own scene (a full-screen 3D world), so the phone-width
+   frame grows to the viewport instead of a centred column. The controls
+   still sit in one centred column on a wider window, as every screen does. */
+[data-spec-screen] {max-width:none}
+
+.bw {width:100%;height:100vh;height:100dvh;min-height:0}
+
+.world {position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}
+
+/* The quiet controls stay in a readable column on a wide window. */
+.top {left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 32px),42rem)}
+.tools {right:max(16px,calc((100% - 42rem)/2 + 16px))}
+.stick {left:max(20px,calc((100% - 42rem)/2 + 20px));top:auto;bottom:calc(184px + env(safe-area-inset-bottom))}
+.pal {left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),24rem);bottom:calc(24px + env(safe-area-inset-bottom))}
+
+.tb,.sw {padding:0;font:inherit;cursor:pointer;color:inherit}
+.tb {color:rgb(var(--fg))}
+.tb.on {color:rgb(var(--on-accent))}
+.sw {padding:4px 2px}
+.tb:focus-visible,.sw:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+.tb:disabled,.sw:disabled {opacity:.55;cursor:default}
+
+/* Staging demo: one line of its own, under the top bar. */
+.demo-note {position:absolute;left:50%;transform:translateX(-50%);top:100px;width:min(calc(100% - 32px),42rem);font-size:14px;line-height:20px;color:rgb(var(--muted))}
+.bw.demo .tag {top:128px}
+.bw.demo .tag:not([hidden]) {top:160px}
+
+/* The states of the world while it loads, is empty or fails. */
+.center-note {position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);max-width:min(calc(100% - 32px),24rem);padding:10px 14px;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;line-height:20px;text-align:center;z-index:4}
+
+.conn {position:absolute;left:50%;transform:translateX(-50%);top:100px;padding:6px 10px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;line-height:20px;z-index:4}
+.bw.demo .conn {top:128px}
+
+.toast {position:absolute;left:50%;transform:translateX(-50%);bottom:calc(184px + env(safe-area-inset-bottom));max-width:min(calc(100% - 32px),24rem);padding:8px 12px;border:1px solid rgb(var(--line));border-radius:10px;background:rgb(var(--surface));color:rgb(var(--fg));font-size:14px;line-height:20px;text-align:center;z-index:4}
+
+.panel {position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:12px;width:min(calc(100% - 32px),24rem);text-align:center;background:rgb(var(--surface))}
+
+/* Long names in the presence pill shrink instead of pushing the bar. */
+.top>.pill:last-child {min-width:0}
+.top>.pill:last-child span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

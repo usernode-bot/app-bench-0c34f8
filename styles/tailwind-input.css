@@ -35,15 +35,23 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 194 65 12;     /* the one accent */
+    --accent: 194 65 12;     /* the one accent: brick orange */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --accent-soft: 255 237 224; /* from the spec's screens */
-    --sky-top: 186 222 240; /* from the spec's screens */
-    --sky-bottom: 226 241 247; /* from the spec's screens */
-    --grass: 84 150 62; /* from the spec's screens */
+    --focus: 194 65 12;       /* the keyboard focus ring */
+    --accent-soft: 255 237 224; /* the held palette swatch */
+    --sky-top: 186 222 240; /* the world's sky, light look */
+    --sky-bottom: 226 241 247; /* the sky at the horizon */
+    --grass: 84 150 62;       /* the grass plain and the here-dot */
+    /* The block materials: the same in both looks, so a cube in the palette
+       is exactly the block it places. */
+    --mat-grass: 84 150 62;
+    --mat-stone: 130 130 134;
+    --mat-wood: 150 100 56;
+    --mat-glass: 160 210 230;
+    --mat-brick: 166 70 52;
+    --mat-sand: 216 190 120;
   }
   .dark {
     --ground: 12 10 9;
@@ -52,11 +60,21 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 251 146 60;
+    --on-accent: 28 25 23;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 251 146 60;
+    --accent-soft: 67 30 10;
+    --sky-top: 30 41 59;      /* dusk */
+    --sky-bottom: 71 85 105;
+    --grass: 84 150 62;
+    --mat-grass: 84 150 62;
+    --mat-stone: 130 130 134;
+    --mat-wood: 150 100 56;
+    --mat-glass: 160 210 230;
+    --mat-brick: 166 70 52;
+    --mat-sand: 216 190 120;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

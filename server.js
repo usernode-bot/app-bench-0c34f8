@@ -145,6 +145,199 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Block world ──────────────────────────────────────────────────────────
+// One shared world for the whole project: a 64 by 64 grass plain (y = 0,
+// always there, never stored) that people build on up to 32 blocks high.
+const BLOCK_TYPES = new Set(['grass', 'stone', 'wood', 'glass', 'brick', 'sand']);
+const MIN_XZ = -32;
+const MAX_XZ = 31;
+const MIN_Y = 1;
+const MAX_Y = 32;
+
+const DEMO_NAMES = ['Maya', 'Dev', 'Sam', 'Priya'];
+
+function userName(req) {
+  return req.user && typeof req.user.username === 'string' && req.user.username
+    ? req.user.username
+    : null;
+}
+
+function isDemoRequest(req) {
+  return IS_STAGING && req.query.demo === '1';
+}
+
+// ── Live connections ─────────────────────────────────────────────────────
+// One Server-Sent Events stream per open world. Each carries its own name
+// (null for a guest, who may look but not build) and whether it was opened
+// as the staging demo, so demo streams see the made-up builders too.
+const streams = new Set();
+
+function sendTo(stream, event, data) {
+  try {
+    stream.res.write('event: ' + event + '\ndata: ' + JSON.stringify(data) + '\n\n');
+  } catch {}
+}
+
+function presenceNames(demo) {
+  // A demo stream is watching the made-up builders' world: show those four,
+  // as the spec's "Maya, Dev and 2 more" has it.
+  if (demo) return DEMO_NAMES.slice();
+  const names = [];
+  for (const stream of streams) {
+    if (stream.name && !names.includes(stream.name)) names.push(stream.name);
+  }
+  return names;
+}
+
+function broadcastPresence() {
+  for (const stream of streams) {
+    sendTo(stream, 'presence', { names: presenceNames(stream.demo) });
+  }
+}
+
+function broadcast(event, data) {
+  for (const stream of streams) sendTo(stream, event, data);
+}
+
+// ── Schema ───────────────────────────────────────────────────────────────
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS blocks (
+      x int NOT NULL,
+      y int NOT NULL,
+      z int NOT NULL,
+      type text NOT NULL,
+      placed_by text,
+      placed_at timestamptz NOT NULL DEFAULT now(),
+      is_demo boolean NOT NULL DEFAULT false,
+      PRIMARY KEY (x, y, z)
+    )`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS demo_seeded (
+      key text PRIMARY KEY,
+      seeded_at timestamptz NOT NULL DEFAULT now()
+    )`);
+}
+
+// ── Staging demo ─────────────────────────────────────────────────────────
+// Built on the first `?demo=1` read on staging only, once per key. The
+// builds are fixed, obviously made up, and stored as is_demo rows so a
+// plain (non-demo) read never sees them.
+function demoLayout() {
+  const cells = new Map(); // "x,y,z" -> { type, by }
+  const put = (x, y, z, type, by) => cells.set(x + ',' + y + ',' + z, { x, y, z, type, by });
+  const fill = (x0, x1, y0, y1, z0, z1, type, by) => {
+    for (let x = x0; x <= x1; x++) {
+      for (let y = y0; y <= y1; y++) {
+        for (let z = z0; z <= z1; z++) put(x, y, z, type, by);
+      }
+    }
+  };
+  const ring = (cx, cz, radius, y0, y1, type, by) => {
+    for (let x = cx - radius; x <= cx + radius; x++) {
+      for (let z = cz - radius; z <= cz + radius; z++) {
+        const d = Math.hypot(x - cx, z - cz);
+        if (d <= radius + 0.35 && d >= radius - 0.65) {
+          for (let y = y0; y <= y1; y++) put(x, y, z, type, by);
+        }
+      }
+    }
+  };
+
+  // Maya's wood and glass cottage, with a brick chimney.
+  for (let x = 4; x <= 9; x++) {
+    for (let z = 0; z <= 4; z++) {
+      if (x === 4 || x === 9 || z === 0 || z === 4) {
+        for (let y = 1; y <= 3; y++) put(x, y, z, 'wood', 'Maya');
+      }
+    }
+  }
+  fill(4, 9, 4, 4, 0, 4, 'wood', 'Maya');
+  fill(5, 8, 5, 5, 1, 3, 'wood', 'Maya');
+  for (const [x, z] of [[6, 4], [8, 4], [4, 2], [9, 2]]) put(x, 2, z, 'glass', 'Maya');
+  put(7, 1, 4, 'glass', 'Maya');
+  put(7, 2, 4, 'glass', 'Maya');
+  fill(8, 9, 5, 7, 0, 1, 'brick', 'Maya');
+
+  // Dev's stone tower.
+  ring(-13, -7, 2, 1, 7, 'stone', 'Dev');
+  ring(-13, -7, 2, 8, 8, 'stone', 'Dev');
+
+  // Sam's sand path from the start toward the cottage door.
+  fill(6, 7, 1, 1, 5, 21, 'sand', 'Sam');
+
+  // Sam's grass hill with Priya's wood tree on top.
+  for (let x = 10; x <= 18; x++) {
+    for (let z = -16; z <= -8; z++) {
+      const d = Math.hypot(x - 14, z + 12);
+      const height = Math.round(4 - d);
+      for (let y = 1; y <= height; y++) put(x, y, z, 'grass', 'Sam');
+    }
+  }
+  fill(14, 14, 5, 8, -12, -12, 'wood', 'Priya');
+  for (let x = 12; x <= 16; x++) {
+    for (let z = -14; z <= -10; z++) {
+      for (let y = 8; y <= 10; y++) {
+        const d = Math.hypot(x - 14, z + 12, (y - 9) * 1.2);
+        if (d <= 2.4) put(x, y, z, 'grass', 'Priya');
+      }
+    }
+  }
+  return [...cells.values()];
+}
+
+// The viewer's own half-finished brick wall, close to where they start.
+function viewerLayout(username) {
+  const cells = [];
+  const add = (x, y, z) => cells.push({ x, y, z, type: 'brick', by: username });
+  for (let x = -10; x <= -5; x++) add(x, 1, 12);
+  for (let x = -10; x <= -7; x++) add(x, 2, 12);
+  add(-10, 3, 12);
+  return cells;
+}
+
+async function seedDemo(username) {
+  await seedKey('world', demoLayout);
+  if (username) await seedKey('viewer:' + username, () => viewerLayout(username));
+}
+
+async function seedKey(key, make) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const claimed = await client.query(
+      'INSERT INTO demo_seeded (key) VALUES ($1) ON CONFLICT DO NOTHING RETURNING key',
+      [key]
+    );
+    if (claimed.rowCount) {
+      const cells = make();
+      // Chunked multi-row insert: one statement per 100 cells.
+      for (let i = 0; i < cells.length; i += 100) {
+        const chunk = cells.slice(i, i + 100);
+        const values = [];
+        const params = [];
+        chunk.forEach((c, n) => {
+          const base = n * 5;
+          values.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, true)`);
+          params.push(c.x, c.y, c.z, c.type, c.by);
+        });
+        await client.query(
+          'INSERT INTO blocks (x, y, z, type, placed_by, is_demo) VALUES ' +
+            values.join(', ') +
+            ' ON CONFLICT (x, y, z) DO NOTHING',
+          params
+        );
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch {}
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // The template ships no favicon file; index.html carries an inline SVG
@@ -153,6 +346,128 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// three.js is vendored with the app (npm dependency) and served from the
+// module the page imports. It is a static asset, like the stylesheet.
+// three.module.js imports three.core.js beside it, so both are served.
+const THREE_BUILD = path.join(__dirname, 'node_modules', 'three', 'build');
+app.get('/vendor/three.module.js', (_req, res) => {
+  res.type('text/javascript');
+  res.sendFile(path.join(THREE_BUILD, 'three.module.js'));
+});
+app.get('/vendor/three.core.js', (_req, res) => {
+  res.type('text/javascript');
+  res.sendFile(path.join(THREE_BUILD, 'three.core.js'));
+});
+
+app.get('/api/world', async (req, res) => {
+  try {
+    const demo = isDemoRequest(req);
+    if (demo) await seedDemo(userName(req));
+    const result = await pool.query(
+      'SELECT x, y, z, type FROM blocks' +
+        (demo ? '' : ' WHERE is_demo = false') +
+        ' ORDER BY y, x, z'
+    );
+    res.json({
+      blocks: result.rows.map((r) => [r.x, r.y, r.z, r.type]),
+      names: presenceNames(demo),
+      demo,
+      you: { name: userName(req), canBuild: Boolean(req.user) },
+    });
+  } catch (err) {
+    console.error('world read failed: ' + err.message);
+    res.status(500).json({ error: 'world_unavailable' });
+  }
+});
+
+app.put('/api/blocks', async (req, res) => {
+  const body = req.body || {};
+  const x = Number(body.x);
+  const y = Number(body.y);
+  const z = Number(body.z);
+  const type = body.type;
+  if (
+    !Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(z) ||
+    x < MIN_XZ || x > MAX_XZ || z < MIN_XZ || z > MAX_XZ ||
+    y < MIN_Y || y > MAX_Y ||
+    !BLOCK_TYPES.has(type)
+  ) {
+    return res.status(400).json({ error: 'invalid_block' });
+  }
+  const name = userName(req);
+  try {
+    await pool.query(
+      `INSERT INTO blocks (x, y, z, type, placed_by, is_demo)
+       VALUES ($1, $2, $3, $4, $5, false)
+       ON CONFLICT (x, y, z) DO UPDATE
+         SET type = EXCLUDED.type, placed_by = EXCLUDED.placed_by,
+             placed_at = now(), is_demo = false`,
+      [x, y, z, type, name]
+    );
+    broadcast('set', { x, y, z, type, by: name });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('place failed: ' + err.message);
+    res.status(500).json({ error: 'not_saved' });
+  }
+});
+
+app.delete('/api/blocks', async (req, res) => {
+  const x = Number(req.query.x);
+  const y = Number(req.query.y);
+  const z = Number(req.query.z);
+  if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(z)) {
+    return res.status(400).json({ error: 'invalid_block' });
+  }
+  const name = userName(req);
+  try {
+    const result = await pool.query(
+      'DELETE FROM blocks WHERE x = $1 AND y = $2 AND z = $3 RETURNING type',
+      [x, y, z]
+    );
+    if (!result.rowCount) return res.status(404).json({ error: 'empty' });
+    broadcast('clear', { x, y, z, type: result.rows[0].type, by: name });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('break failed: ' + err.message);
+    res.status(500).json({ error: 'not_saved' });
+  }
+});
+
+app.get('/api/stream', (req, res) => {
+  res.set({
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.flushHeaders();
+  res.write('retry: 3000\n\n');
+
+  const stream = {
+    res,
+    name: userName(req),
+    demo: isDemoRequest(req),
+    hb: null,
+  };
+  // A comment every 25 s keeps the connection under the 60 s idle timeout.
+  stream.hb = setInterval(() => {
+    try { res.write(': keep-alive\n\n'); } catch {}
+  }, 25_000);
+  if (stream.hb.unref) stream.hb.unref();
+
+  streams.add(stream);
+  sendTo(stream, 'presence', { names: presenceNames(stream.demo) });
+  broadcastPresence();
+
+  const drop = () => {
+    clearInterval(stream.hb);
+    if (streams.delete(stream)) broadcastPresence();
+  };
+  req.on('close', drop);
+  req.on('aborted', drop);
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,8 +506,37 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server = null;
+let shuttingDown = false;
+
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`Received ${signal}; shutting down`);
+  // Close the live streams first: they are long-lived and would otherwise
+  // hold the server open until their clients gave up.
+  for (const stream of streams) {
+    clearInterval(stream.hb);
+    try { stream.res.end(); } catch {}
+  }
+  streams.clear();
+  const finish = () => pool.end().then(() => process.exit(0)).catch(() => process.exit(0));
+  // Drain for about three seconds, then finish regardless.
+  setTimeout(finish, 3000).unref();
+  if (server) {
+    server.close(() => finish());
+    if (server.closeIdleConnections) server.closeIdleConnections();
+  } else {
+    finish();
+  }
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
