@@ -95,22 +95,40 @@ tables you've marked private), etc.
 
 ## About Ear Trainer
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+An app to learn relative notes, chords and basic chord progressions by
+ear. One practice screen: pick a lesson, hear a sound, tap what you heard.
+Each lesson type is a ladder that starts with two far-apart sounds and adds
+closer ones until the last lesson holds the full set. Progressions come
+from popular songs and hymns. A session is 10 questions; the best score per
+lesson is saved (`progress` table, staging:private) and the app opens on
+the lesson played last. Guests can practise; only signed-in scores are
+saved.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+- **Palette:** warm paper neutrals (ground, surface, raised) with one deep
+  teal accent (`bg-accent`/`text-on-accent`, used only for Play and the
+  progress marks) and soft amber (`amber`/`amber-ink`) meaning "correct"
+  and "lit key". `key-black` is the piano's black keys.
+- **Signature element:** the piano strip — one octave, C to the next C, in
+  every quiz. A lit white key turns amber, a lit black key turns teal.
+  Keys stay unlit until the question is answered; a replayed progression
+  lights each chord in turn.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`;
+  the screen's own face is `ui-rounded`.
+- **Words:** Lessons, Play, Next sound, Try again, Next lesson, Your
+  progress, Streak, "Not started", "10 of 10".
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+## App-specific conventions
+
+- Lesson data lives only in `public/lessons.js` (UMD: browser global
+  `EAR_LESSONS`, `module.exports` for server.js). Sessions are 10
+  questions; lesson ids are `notes-1`…`progressions-3`.
+- The practice screen is the platform's spec screen: keep
+  `public/screens.css`'s classes as the styling for it, don't redraw.
+- Progress is only saved when a session finishes; a session left partway
+  is not saved. Staging `?demo=1` writes `demo = true` rows and merges
+  fixed demo rows into GET /api/progress, never storing them.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

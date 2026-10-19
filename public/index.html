@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,6 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +63,7 @@
   })();
   </script>
   <title>Ear Trainer</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='38' cy='70' r='17' fill='%230f766e'/><rect x='50' y='16' width='6' height='54' rx='3' fill='%230f766e'/><path d='M50 16c10 2 18 8 18 18 0-6-8-9-18-9z' fill='%230f766e'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,52 +108,60 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+  <!-- The practice screen, from the spec's drawing. Every value drawn there
+       is sample data: app.js sets the lesson, the bar, the answers and the
+       progress rows from the catalogue and the person's scores. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="top"><span class="brand">Ear Trainer</span><div class="pick"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Lessons</div></div>
-    <h1 class="title">Chords 2: Triads</h1>
-    <p class="sub">Major, minor, diminished and suspended: 4 of 6 chord types</p>
-    <div class="bar"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="m"></i><i></i><i></i><i></i></div>
-    <div class="meta"><span>Question 7 of 10</span><span>6 correct</span></div>
+    <div class="top"><span class="brand">Ear Trainer</span><button id="lessons-btn" class="pick" type="button" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Lessons</button></div>
+    <h1 class="title" id="lesson-title"></h1>
+    <p class="sub" id="lesson-sub"></p>
+    <div class="bar" id="progress-bar" aria-hidden="true"></div>
+    <div class="meta"><span id="meta-question"></span><span id="meta-correct"></span></div>
 
     <div class="card">
-    <div class="play"><button class="btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>Play</button><div><div class="q">What chord is this?</div><div class="hint">Played from C. Replay as needed.</div></div></div>
-    <div class="kb">
-    <div class="w on">C</div><div class="w">D</div><div class="w on">E</div><div class="w">F</div><div class="w on">G</div><div class="w">A</div><div class="w">B</div><div class="w">C</div>
-    <div class="b" style="left:30px"></div><div class="b" style="left:71px"></div><div class="b" style="left:152px"></div><div class="b" style="left:192px"></div><div class="b" style="left:233px"></div>
-    </div>
+    <div class="play" id="play-row"><button id="play-btn" class="btn-primary" type="button" data-play><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>Play</button><div><div class="q" id="question-text"></div><div class="hint" id="question-hint"></div></div></div>
+    <div class="kb" id="keyboard"></div>
     <p class="cap">Lit keys show the notes you just heard.</p>
+
+    <div id="result" hidden>
+    <p class="q" id="result-score" style="margin-top:16px"></p>
+    <p class="hint" id="result-best" style="margin:4px 0 0"></p>
+    <div class="row"><button id="retry-btn" class="btn-secondary" type="button">Try again</button><button id="next-lesson-btn" class="btn-secondary" type="button">Next lesson</button></div>
+    <div class="row" id="save-fail" hidden><span class="hint">Your score was not saved.</span><button id="save-retry-btn" class="btn-secondary" type="button">Retry</button></div>
+    </div>
     </div>
 
+    <div id="answers-section">
     <div class="section-label">Tap the answer you heard</div>
-    <div class="ans">
-    <div class="a no">Minor<small>C Eb G</small></div>
-    <div class="a ok">Major<small>C E G</small></div>
-    <div class="a">Diminished</div>
-    <div class="a">Suspended</div>
+    <div class="ans" id="answers"></div>
+    <div class="fb" id="feedback" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg><span id="feedback-text"></span></div>
+    <div class="row"><span class="hint" id="streak"></span><button id="next-btn" class="btn-secondary" type="button" disabled>Next sound</button></div>
     </div>
-    <div class="fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Major: a bright shape. Root, a third four steps up, then the fifth.</div>
-    <div class="row"><span class="hint">Streak: 4</span><button class="btn-secondary">Next sound</button></div>
 
-    <div class="section-label">Your progress</div>
-    <ul class="list">
-    <li class="list-row"><b>Notes 1: Octave and fifth</b><span>10 of 10</span></li>
-    <li class="list-row"><b>Notes 2: Add the thirds</b><span>8 of 10</span></li>
-    <li class="list-row"><b>Chords 2: Triads</b><span>6 so far</span></li>
-    <li class="list-row"><b>Progressions 1: Three-chord hymns</b><span>Not started</span></li>
+    <div class="section-label">Your progress <span id="progress-demo-note" hidden><span data-usernode-demo-note>(Staging demo)</span></span></div>
+    <ul class="list" id="progress-loading" hidden>
+    <li class="list-row"><span class="skeleton block h-4 w-52"></span><span class="skeleton block h-4 w-12"></span></li>
+    <li class="list-row"><span class="skeleton block h-4 w-44"></span><span class="skeleton block h-4 w-14"></span></li>
+    <li class="list-row"><span class="skeleton block h-4 w-48"></span><span class="skeleton block h-4 w-10"></span></li>
     </ul>
+    <ul class="list" id="progress-list" hidden></ul>
+    <div class="state-empty" id="progress-empty" hidden><p class="text-body" style="margin:0">No scores yet. Finish a lesson to see it here.</p></div>
+    <div class="state-error" id="progress-error" hidden><p class="text-body" style="margin:0">We could not load your scores. Practice still works.</p><button id="progress-retry-btn" class="btn-secondary" type="button">Retry</button></div>
     </div>
   </div>
-  <!-- /usernode-spec-screens@1 -->
+
+  <!-- The Lessons list, a bottom sheet with three sections. -->
+  <div id="lessons-sheet" class="fixed inset-0 z-50" hidden>
+    <div id="sheet-backdrop" class="absolute inset-0 bg-fg/40"></div>
+    <div role="dialog" aria-label="Lessons" class="absolute inset-x-0 bottom-0 mx-auto max-w-2xl overflow-y-auto rounded-t-2xl border-t border-x border-line bg-surface p-4" style="max-height:80vh">
+    <div class="top"><span class="q">Lessons</span><button id="sheet-close-btn" class="btn-secondary" type="button">Close</button></div>
+    <p class="hint" style="margin:4px 0 0">Tap a lesson to start it.</p>
+    <div id="sheet-body"></div>
+    </div>
+  </div>
+
+  <script src="/lessons.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

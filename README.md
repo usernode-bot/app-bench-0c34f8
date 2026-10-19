@@ -1,27 +1,30 @@
 # Ear Trainer
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+An app to learn relative notes, chords and basic chord progressions by ear.
 
-The scaffold is a small working demo that proves the plumbing works:
+The whole app is one practice screen: pick a lesson, tap Play to hear a
+sound, then tap which of the lesson's sounds you heard. A piano strip
+lights up the notes once you answer, so every answer teaches the shape of
+what you heard. Each lesson type (Notes, Chords, Progressions) is a ladder:
+it starts with two sounds that are far apart and adds closer ones lesson by
+lesson, until the last lesson holds the full set. A session is 10
+questions; your best score per lesson is kept and the app opens on the
+lesson you played last.
 
-- **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+Progressions are labelled with the songs and hymns they are heard in
+(Amazing Grace, Let It Be, Stand By Me, Silent Night, Zombie, La Bamba).
+Sounds are synthesised in the browser with a soft piano tone; there are no
+recordings. Guests can practise, but only signed-in people's scores are
+saved.
 
-## Replacing the template
+## Running it
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
+- `npm ci --include=dev && npm run build` compiles `styles/tailwind-input.css`
+  to `public/tailwind.css` (the image build does this too).
+- `npm start` serves the app; it applies its database schema on boot.
+- `?demo=1` on staging opens a populated demo partway through Chords 2.
 
-Once the real app exists, rewrite this README to describe it.
+## Design
+
+The palette, signature element and rules for changing the look live in
+`CLAUDE.md` under "## Design".
