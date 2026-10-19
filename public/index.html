@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,48 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="hd"><div><div class="app-name">RSS Reader</div><h1 class="title">22 unread</h1></div>
+    <button class="btn-secondary"><svg class="ico" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1"/></svg>Add feed</button></div>
+    <div class="chips"><button class="chip"><b>5 feeds</b><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><span>Refreshed 8:42 am</span></div>
+    <p class="section-label">Newest first</p>
+    <ul class="list">
+    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, 12 min ago</div><p class="pt">Why your laminated dough keeps leaking butter</p><p class="ex">Temperature is usually the culprit, not technique. Here is a simple fridge schedule that fixed it.</p></div></li>
+    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, 1 hr ago</div><p class="pt">Scheduler changes landing in the next release</p><p class="ex">A walk through the patches that reduce latency on busy machines.</p></div></li>
+    <li class="list-row read" style="--c:var(--f3)"><div class="spine"></div><div class="body"><div class="meta">Field Guide Weekly, 2 hr ago</div><p class="pt">Ten quiet trails within an hour of the city</p><p class="ex">Fewer crowds, better views and parking that is actually free.</p></div></li>
+    <li class="list-row" style="--c:var(--f4)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Type &amp; Grid, 3 hr ago</div><p class="pt">Setting small text so it stays readable</p><p class="ex">Spacing, weight and size choices for captions and footnotes.</p></div></li>
+    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, Yesterday</div><p class="pt">An honest review of three home proofing boxes</p><p class="ex">We tested each overnight with the same sourdough batch.</p></div></li>
+    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Yesterday</div><p class="pt">Sowing lettuce in late spring heat</p><p class="ex">Shade cloth, deep watering and which varieties bolt last.</p></div></li>
+    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, Mon</div><p class="pt">Reading a flame graph without getting lost</p><p class="ex">Start at the widest bar and work outward.</p></div></li>
+    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Mon</div><p class="pt">Three herbs that like a windy balcony</p><p class="ex">Thyme, rosemary and chives shrug off gusts that flatten basil.</p></div></li>
+    </ul>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div class="app">
+      <div class="peek">22 unread</div>
+      <div class="scrim"></div>
+      <div class="sheet"><div class="grab"></div>
+      <div class="top"><div class="meta"><span class="tick"></span>Field Guide Weekly, 2 hr ago</div><button class="icon-btn" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+      <h2 class="sh">Ten quiet trails within an hour of the city</h2>
+      <p class="by">By Rowan Example</p>
+      <div class="prose">
+      <p>Most guides send you to the same five summits. These routes trade fame for silence, with clear paths, shade and places to sit.</p>
+      <p>The first loop starts behind the old reservoir car park and climbs gently through beech woods for two kilometres before opening onto a long grassy ridge.</p>
+      <p>Start early and bring water: only three of the ten have a tap at the trailhead, and none of them sell anything once you are past the gate.</p>
+      </div>
+      <button class="btn-primary">Open full article<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></button>
+      <p class="note">Opens on fieldguideweekly.example</p>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
