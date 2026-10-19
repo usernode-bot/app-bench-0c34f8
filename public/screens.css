@@ -1,0 +1,86 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1180px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 20px 16px 32px;
+}
+
+.app * {box-sizing:border-box}
+
+h1 {font-size:28px;line-height:36px;font-weight:700;margin:0;font-family:ui-serif,Georgia,serif}
+
+.sub {
+  font-size: 14px;
+  line-height: 20px;
+  color: rgb(var(--muted));
+}
+
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:20px 0 8px;padding:0 4px}
+
+.chips {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {min-height:44px;padding:0 14px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:inline-flex;align-items:center;font-size:14px;color:rgb(var(--fg))}
+
+.chip.on {background:rgb(var(--crust));border-color:rgb(var(--crust));color:rgb(var(--on-crust));font-weight:600}
+
+.list {border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:12px;overflow:hidden}
+
+.list-row {display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 16px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.list-row .l {flex:1}
+
+.step {display:flex;align-items:center;gap:10px}
+
+.sb {width:44px;height:44px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--raised));display:flex;align-items:center;justify-content:center}
+
+.val {min-width:64px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+
+.btn-primary {width:100%;min-height:52px;margin-top:20px;border:0;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font:600 16px ui-rounded,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+
+.card {margin-top:24px;border:1px solid rgb(var(--line));background:rgb(var(--surface));border-radius:16px;padding:16px;border-top:6px solid rgb(var(--crust))}
+
+.head {display:flex;gap:16px;align-items:center}
+
+.dial {width:96px;height:96px;flex:none}
+
+.dial .t {stroke:rgb(var(--line))}
+
+.dial .f {stroke:rgb(var(--accent))}
+
+.dial text {fill:rgb(var(--fg))}
+
+.h {font-size:20px;line-height:28px;font-weight:600;font-family:ui-serif,Georgia,serif}
+
+.row {display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px dashed rgb(var(--line))}
+
+.row b {font-size:20px;line-height:28px;font-variant-numeric:tabular-nums}
+
+.pct {font-size:14px;color:rgb(var(--muted))}
+
+.two {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+
+.box {background:rgb(var(--raised));border-radius:12px;padding:12px}
+
+.box b {display:block;font-size:20px;line-height:28px}
