@@ -48,7 +48,19 @@
    quiet and centred, never on top of the controls. */
 .world-state {position:absolute;left:0;right:0;top:130px;height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 32px;text-align:center;pointer-events:none}
 .world-state[hidden] {display:none}
+/* Keep the message inside a centred column that ends before the switch on
+   the right, so a long sentence never runs under it. */
+.world-state > * {max-width:250px}
 .world-state .btn-primary {pointer-events:auto}
+
+/* No crosshair while there is no world to aim at. */
+.app[data-state="loading"] .aim,
+.app[data-state="empty"] .aim,
+.app[data-state="error"] .aim {display:none}
+
+/* The mode switch and fly buttons do nothing until the world is usable. */
+.app[data-state="loading"] .mode button,
+.app[data-state="error"] .mode button {opacity:.45;cursor:default}
 
 /* "Staging demo", once, as a line of its own under the header. */
 .demo-note {position:absolute;left:16px;top:114px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:4px 10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}

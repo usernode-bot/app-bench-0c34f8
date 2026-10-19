@@ -133,7 +133,7 @@
     <svg class="aim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/></svg>
     <div class="top">
     <div class="pill"><div class="t">Block World</div><div class="s" id="builders-text">Starter island</div></div>
-    <div class="pill s"><span class="dot" id="live-dot" style="background:rgb(var(--accent))"></span><span id="live-label">Live</span></div>
+    <div class="pill s" id="live-pill" hidden><span class="dot" id="live-dot" style="background:rgb(var(--accent))"></span><span id="live-label">Live</span></div>
     </div>
     <div class="demo-note" id="demo-note" data-usernode-demo-note hidden>Staging demo</div>
     <div class="mode">
@@ -146,7 +146,7 @@
     <div class="near pill s" id="activity" hidden><span class="dot" style="background:rgb(var(--water))"></span><span id="activity-text"></span></div>
     <div class="save-note" id="save-note" role="status" hidden>That block did not save. Try again.</div>
     <div class="dock">
-    <div class="row"><div><div class="t" id="block-name"></div><div class="s" id="placed-count"></div></div><button class="btn-primary" id="action-btn" hidden>Place block</button></div>
+    <div class="row"><div id="block-info" hidden><div class="t" id="block-name"></div><div class="s" id="placed-count"></div></div><button class="btn-primary" id="action-btn" hidden>Place block</button></div>
     <div class="bar" id="hotbar"></div>
     </div>
     </div>

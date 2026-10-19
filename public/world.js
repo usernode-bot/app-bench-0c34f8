@@ -38,6 +38,8 @@ const activity = document.getElementById('activity');
 const activityText = document.getElementById('activity-text');
 const liveLabel = document.getElementById('live-label');
 const liveDot = document.getElementById('live-dot');
+const livePill = document.getElementById('live-pill');
+const blockInfo = document.getElementById('block-info');
 const demoNote = document.getElementById('demo-note');
 const stateEl = document.getElementById('world-state');
 const stateTitle = document.getElementById('state-title');
@@ -152,6 +154,23 @@ function setState(next, message) {
   if (next === 'empty') stateTitle.textContent = 'The island is empty';
   stateText.hidden = next === 'empty';
   stateText.textContent = next === 'loading' ? 'Loading the island' : (message || '');
+
+  // Until the world has loaded, nothing in the frame should claim it is
+  // usable: no block name or count over the skeleton hotbar, no green Live
+  // pill, and the mode switch and fly buttons are dimmed and inert.
+  const usable = next === 'ready' || next === 'empty';
+  blockInfo.hidden = next === 'loading' || next === 'error';
+  modePlace.disabled = !usable;
+  modeBreak.disabled = !usable;
+  flyUp.disabled = !usable;
+  flyDown.disabled = !usable;
+  if (next === 'loading') {
+    livePill.hidden = true;
+  } else if (next === 'error') {
+    livePill.hidden = false;
+    liveLabel.textContent = 'Reconnecting';
+    liveDot.classList.add('dot-warn');
+  }
 }
 
 function setPlaced(n) {
@@ -162,7 +181,7 @@ function setPlaced(n) {
 function setCounts(counts) {
   if (!counts) return;
   const n = counts.builders || 0;
-  buildersText.textContent = `Starter island, ${n} builder${n === 1 ? '' : 's'}`;
+  buildersText.textContent = n ? `Starter island, ${n} builder${n === 1 ? '' : 's'}` : 'Starter island';
   const names = (counts.active || []).filter(Boolean);
   activity.hidden = names.length === 0;
   activityText.textContent = names.length ? describeActive(names) : '';
@@ -176,8 +195,8 @@ function describeActive(names) {
 }
 
 function setLive(ok) {
-  if (ok === !pollFailed) return;
   pollFailed = !ok;
+  livePill.hidden = false;
   liveLabel.textContent = ok ? 'Live' : 'Reconnecting';
   liveDot.classList.toggle('dot-warn', !ok);
 }
@@ -226,7 +245,8 @@ async function loadWorld() {
     setLive(true);
   } catch (err) {
     console.error(err);
-    renderHotbar();
+    // Keep the skeleton hotbar: with no world loaded, real slots and a chosen
+    // material would claim the world is usable.
     setState('error', 'Could not load the world. Check your connection and try again.');
   }
 }
