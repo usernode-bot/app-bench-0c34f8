@@ -1,0 +1,64 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.bw {
+  position: relative;
+  width: 390px;
+  min-height: 844px;
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  font-family: ui-rounded,system-ui,sans-serif;
+  overflow: hidden;
+}
+
+.bw * {box-sizing:border-box;margin:0}
+
+.view {position:absolute;inset:0;background:linear-gradient(rgb(var(--sky-top)),rgb(var(--sky-bottom)) 45%,rgb(var(--grass)) 45%,rgb(70 130 52))}
+
+.top {position:absolute;top:44px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center}
+
+.pill {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;min-height:44px;padding:0 14px;display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;font-weight:600}
+
+.dot {width:8px;height:8px;border-radius:50%;background:rgb(var(--grass))}
+
+.ix {position:absolute;left:0;top:0}
+
+.tools {position:absolute;right:16px;top:300px;display:flex;flex-direction:column;gap:8px}
+
+.tools .gap {height:24px}
+
+.tb {width:48px;height:48px;border-radius:12px;background:rgb(var(--surface));border:1px solid rgb(var(--line));display:flex;align-items:center;justify-content:center;color:rgb(var(--fg))}
+
+.tb.on {background:rgb(var(--accent));color:rgb(var(--on-accent));border-color:rgb(var(--accent))}
+
+.tag {position:absolute;left:16px;top:100px;font-size:14px;line-height:20px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:10px;padding:6px 10px}
+
+.stick {position:absolute;left:20px;top:560px;width:112px;height:112px;border-radius:50%;background:rgb(var(--surface));border:1px solid rgb(var(--line));display:flex;align-items:center;justify-content:center;opacity:.92}
+
+.knob {width:48px;height:48px;border-radius:50%;background:rgb(var(--raised));border:2px solid rgb(var(--line))}
+
+.pal {position:absolute;left:12px;right:12px;bottom:24px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:20px;padding:12px 10px 12px}
+
+.ph {display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 8px}
+
+.ph b {font-size:16px;line-height:24px}
+
+.ph span {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.row {display:flex;gap:4px}
+
+.sw {flex:1;min-height:72px;border-radius:12px;border:2px solid transparent;background:rgb(var(--raised));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;line-height:18px;color:rgb(var(--fg))}
+
+.sw.sel {border-color:rgb(var(--accent));background:rgb(var(--accent-soft))}

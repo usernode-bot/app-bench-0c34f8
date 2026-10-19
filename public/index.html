@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,51 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🧱</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Block World</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="bw">
+    <div class="view"></div>
+    <svg class="ix" width="390" height="560" viewBox="0 0 390 560" fill="none" stroke-linejoin="round">
+    <g stroke="rgb(40 90 30)" stroke-width="1.5">
+    <path d="M120 400 L190 370 L260 400 L190 430Z" fill="rgb(100 170 76)"/>
+    <path d="M120 400 L190 430 L190 470 L120 440Z" fill="rgb(146 98 54)"/>
+    <path d="M260 400 L190 430 L190 470 L260 440Z" fill="rgb(120 80 44)"/>
+    <path d="M155 340 L190 325 L225 340 L190 355Z" fill="rgb(160 160 164)"/>
+    <path d="M155 340 L190 355 L190 400 L155 385Z" fill="rgb(130 130 134)"/>
+    <path d="M225 340 L190 355 L190 400 L225 385Z" fill="rgb(105 105 110)"/>
+    <path d="M155 300 L190 285 L225 300 L190 315Z" fill="rgb(200 232 244)"/>
+    <path d="M155 300 L190 315 L190 340 L155 325Z" fill="rgb(160 210 230)"/>
+    <path d="M225 300 L190 315 L190 340 L225 325Z" fill="rgb(130 190 215)"/>
+    <path d="M40 430 L75 415 L110 430 L75 445Z" fill="rgb(196 92 70)"/>
+    <path d="M40 430 L75 445 L75 480 L40 465Z" fill="rgb(166 70 52)"/>
+    <path d="M110 430 L75 445 L75 480 L110 465Z" fill="rgb(140 56 42)"/>
+    </g></svg>
+    <div class="top"><div class="pill">Block World</div><div class="pill"><span class="dot"></span>Maya, Dev and 2 more</div></div>
+    <div class="tag">Dev placed stone</div>
+    <div class="tools">
+    <div class="tb on" aria-label="Place"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 12v9M12 12L4 8M12 12l8-4"/></svg></div>
+    <div class="tb" aria-label="Break"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></div>
+    <div class="gap"></div>
+    <div class="tb" aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></div>
+    <div class="tb" aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+    </div>
+    <div class="stick" aria-label="Move"><div class="knob"></div></div>
+    <div class="pal">
+    <div class="ph"><b>Grass</b><span>Placing</span></div>
+    <div class="row">
+    <div class="sw sel"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(40 90 30)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(100 170 76)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(146 98 54)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 80 44)"/></svg>Grass</div>
+    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 60 64)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(160 160 164)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(130 130 134)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(105 105 110)"/></svg>Stone</div>
+    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(80 50 20)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(190 140 84)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(150 100 56)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(120 78 40)"/></svg>Wood</div>
+    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(60 120 150)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(200 232 244)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(160 210 230)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(130 190 215)"/></svg>Glass</div>
+    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(100 36 26)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(196 92 70)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(166 70 52)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(140 56 42)"/></svg>Brick</div>
+    <div class="sw"><svg width="30" height="30" viewBox="0 0 24 24" stroke="rgb(140 110 50)" stroke-width="1" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z" fill="rgb(236 214 150)"/><path d="M4 7l8 4v10l-8-4z" fill="rgb(216 190 120)"/><path d="M20 7l-8 4v10l8-4z" fill="rgb(192 166 98)"/></svg>Sand</div>
+    </div></div>
+    </div>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
