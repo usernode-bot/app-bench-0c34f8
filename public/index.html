@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,62 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🧱</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Block World</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="app">
+    <div class="sky"></div>
+    <svg class="scene" viewBox="0 0 390 520">
+    <polygon points="195,150 335,215 195,280 55,215" fill="#5ca040"/>
+    <polygon points="55,215 195,280 195,330 55,260" fill="#86603c"/>
+    <polygon points="335,215 195,280 195,330 335,260" fill="#6d4c2e"/>
+    <polygon points="55,260 195,330 195,380 120,345 90,320" fill="#8c8c8a"/>
+    <polygon points="335,260 195,330 195,380 260,350 300,320" fill="#767674"/>
+    <polygon points="150,200 190,218 150,236 110,218" fill="#468cc8"/>
+    <polygon points="110,218 150,236 150,250 110,232" fill="#3a74a8"/>
+    <polygon points="240,160 270,174 240,188 210,174" fill="#b08048"/>
+    <polygon points="210,174 240,188 240,218 210,204" fill="#8a6234"/>
+    <polygon points="270,174 240,188 240,218 270,204" fill="#755228"/>
+    <polygon points="240,120 270,134 240,148 210,134" fill="#3a7a30"/>
+    <polygon points="210,134 240,148 240,174 210,160" fill="#2f6626"/>
+    <polygon points="270,134 240,148 240,174 270,160" fill="#28561f"/>
+    <polygon points="285,225 305,235 285,245 265,235" fill="#e1cd8c"/>
+    <polygon points="265,235 285,245 285,260 265,250" fill="#b8a468"/>
+    <polygon points="305,235 285,245 285,260 305,250" fill="#9c8a56"/>
+    <polygon points="195,240 215,250 195,260 175,250" fill="none" stroke="#fff" stroke-width="2"/>
+    <rect x="60" y="60" width="50" height="12" rx="6" fill="#fff"/><rect x="290" y="90" width="64" height="12" rx="6" fill="#fff"/>
+    </svg>
+    <svg class="aim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/></svg>
+    <div class="top">
+    <div class="pill"><div class="t">Block World</div><div class="s">Starter island, 6 builders</div></div>
+    <div class="pill s"><span class="dot" style="background:rgb(var(--accent))"></span>Live</div>
+    </div>
+    <div class="mode">
+    <button class="on" aria-label="Place"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M12 11v6M9 14h6"/></svg></button>
+    <button aria-label="Break"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M9 10l6 6M15 10l-6 6"/></svg></button>
+    <hr>
+    <button aria-label="Fly up"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+    <button aria-label="Fly down"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+    <div class="near pill s"><span class="dot" style="background:rgb(var(--water))"></span>Maya and Theo are building now</div>
+    <div class="dock">
+    <div class="row"><div><div class="t">Oak planks</div><div class="s">You have placed 24 blocks</div></div><button class="btn-primary">Place block</button></div>
+    <div class="bar">
+    <button class="slot" aria-label="Grass"><div class="sw" style="background:rgb(var(--grass))"></div></button>
+    <button class="slot" aria-label="Dirt"><div class="sw" style="background:rgb(var(--dirt))"></div></button>
+    <button class="slot" aria-label="Stone"><div class="sw" style="background:rgb(var(--stone))"></div></button>
+    <button class="slot sel" aria-label="Oak planks"><div class="sw" style="background:rgb(var(--wood))"></div></button>
+    <button class="slot" aria-label="Leaves"><div class="sw" style="background:rgb(var(--leaves))"></div></button>
+    <button class="slot" aria-label="Water"><div class="sw" style="background:rgb(var(--water))"></div></button>
+    <button class="slot" aria-label="Sand"><div class="sw" style="background:rgb(var(--sand))"></div></button>
+    <button class="slot" aria-label="Brick"><div class="sw" style="background:rgb(var(--brick))"></div></button>
+    </div>
+    </div>
+    </div>
+    </div>
+  </div>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
