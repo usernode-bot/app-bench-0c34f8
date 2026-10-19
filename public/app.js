@@ -14,8 +14,9 @@
 
   var el = {
     listName: document.getElementById('listName'),
-    demoNote: document.querySelector('#listPickerBtn [data-usernode-demo-note]'),
     pickerBtn: document.getElementById('listPickerBtn'),
+    pickerName: document.getElementById('pickerName'),
+    titleSkeleton: document.getElementById('titleSkeleton'),
     boardSub: document.getElementById('boardSub'),
     viewMine: document.getElementById('viewMine'),
     viewCrowd: document.getElementById('viewCrowd'),
@@ -224,11 +225,30 @@
     renderPanel();
   }
 
+  // The subline under the list name; a demo list's note leads it, in the same
+  // 14 px muted run: "(Staging demo) · 4 people voting · 11 restaurants".
+  function setSubline(note, text) {
+    el.boardSub.textContent = '';
+    if (note) {
+      var span = document.createElement('span');
+      span.setAttribute('data-usernode-demo-note', '');
+      span.textContent = note;
+      el.boardSub.appendChild(span);
+      el.boardSub.appendChild(document.createTextNode(' · '));
+    }
+    el.boardSub.appendChild(document.createTextNode(text));
+  }
+
   function renderHeader() {
     var list = currentList();
+    var ready = state.status === 'ready';
     el.listName.textContent = list ? list.name : '';
-    el.demoNote.textContent = list && list.isDemo ? '(Staging demo)' : '';
-    el.demoNote.hidden = !(list && list.isDemo);
+    // A lone chevron with no list name reads as broken: show the picker only
+    // when there is a name, a placeholder bar while loading or after failure,
+    // and nothing at all when the load worked and there is no list.
+    el.pickerName.hidden = !(ready && list);
+    el.titleSkeleton.hidden = ready;
+    el.pickerBtn.hidden = ready && !list;
     el.pickerBtn.setAttribute('aria-label', list ? list.name : 'Choose a list');
     el.pickerBtn.setAttribute('aria-expanded', String(state.panelOpen));
 
@@ -245,10 +265,11 @@
         item.votes.forEach(function (v) { voters[String(v.userId)] = true; });
       });
       var count = Object.keys(voters).length;
-      el.boardSub.textContent = items.length
+      var sub = items.length
         ? count + ' ' + (count === 1 ? 'person' : 'people') + ' voting · ' +
           items.length + ' ' + plural(list.noun)
         : '0 ' + plural(list.noun);
+      setSubline(list.isDemo ? '(Staging demo)' : '', sub);
     }
 
     el.viewMine.classList.toggle('on', state.view === 'mine');
@@ -314,7 +335,8 @@
     var failed = state.status === 'error';
     var empty = !loading && !failed && (!state.data || state.data.items.length === 0);
 
-    el.board.hidden = failed;
+    // With no list at all, no board: the empty card alone offers "Start a list".
+    el.board.hidden = failed || (empty && !currentList());
     el.trayLabel.hidden = failed || empty;
     el.tray.hidden = failed || empty;
     el.detail.hidden = failed;

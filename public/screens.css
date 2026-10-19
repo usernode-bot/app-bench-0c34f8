@@ -156,7 +156,7 @@ button:focus-visible,
 }
 
 /* The empty state's own action, not the full-width bar. */
-.state-empty .btn-primary {width: auto;margin-top: 8px;padding: 0 16px;}
+.state-empty .btn-primary {width: 100%;margin-top: 8px;padding: 0 16px;}
 
 /* Forms: Cancel and the action stay at the top, clear of the keyboard. */
 .form-head {display: flex;align-items: center;justify-content: space-between;gap: 8px;}
