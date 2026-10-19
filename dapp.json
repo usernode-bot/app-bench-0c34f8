@@ -3,5 +3,24 @@
     "emoji": "🎼"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Practice screen renders",
+      "path": "/",
+      "expectSelector": "[data-play]"
+    },
+    {
+      "id": "practice",
+      "name": "Populated demo of the practice screen",
+      "path": "/?demo=1",
+      "expectText": "Notes 1: Octave and fifth",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Empty progress state",
+      "path": "/",
+      "expectText": "No scores yet"
+    }
+  ]
 }

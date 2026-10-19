@@ -55,6 +55,14 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        amber: token('amber'), // soft amber: correct answers, lit white keys
+        'amber-ink': token('amber-ink'), // text on amber
+        'key-black': token('key-black'), // black piano keys on the strip
+      },
+      // ui-rounded keeps the friendly, music-lesson feel the spec chose.
+      // System families only: no downloaded font.
+      fontFamily: {
+        sans: ['ui-rounded', 'system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

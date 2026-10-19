@@ -56,34 +56,21 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
+## The screen
 
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
+The app's first version is built: one practice screen (public/index.html,
+public/screens.css) with the Lessons bottom sheet, the result card and the
+progress list. Keep the `usernode-dev-console@1` forwarder `<script>` and the
+bridge `<script>`; both are platform infrastructure. The design kit is the
+app's look, filled in under "## Design" below.
 
 The screen has a light and a dark look and follows the viewer's Homeroom
 theme, switching live when they change it: the theme `<script>` right after
 the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
+everything both looks (the design kit's colour tokens carry both). Unless a
+request asks for one, add no theme picker: the viewer's Homeroom setting is
+the control. "The platform's light/dark theme inside the app frame" in the
+platform conventions has the details.
 
 If a rule below this line conflicts with the hosted conventions, the
 hosted conventions win. This file is **app-specific** — write down
@@ -95,22 +82,28 @@ tables you've marked private), etc.
 
 ## About Ear Trainer
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A one-screen ear trainer. Pick a built-in lesson, tap Play to hear a sound
+synthesised in the browser, then tap which interval, chord or chord
+progression you heard. Lessons are ladders: each one adds closer sounds until
+you are quizzed on the full set. Progressions are labelled with the songs and
+hymns they come from. Each session is 10 questions, and a finished session
+saves your best score per lesson. Signed-in people's scores are saved; guests
+can practise without saving.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: deep teal (`--accent`, Play and progress marks); second:
+  soft amber (`--amber` / `--amber-ink`, correct answers and lit white keys);
+  black keys are `--key-black`; neutrals are warm paper greys (`--ground`,
+  `--surface`, `--raised`, `--fg`, `--muted`, `--line`).
+- **Signature element:** the piano strip, one octave C to C. A lit white key
+  turns amber and a lit black key turns teal; a progression lights each chord
+  in turn as it plays, so every answer teaches the shape of what was heard.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  in `ui-rounded` with a system fallback (never a downloaded font).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +133,8 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Every session is 10 questions, so a saved score is always "N of 10".
+- Lessons are built in and live in `public/lessons.js`, shared by the browser
+  and `server.js`. Never change a lesson id: saved progress is keyed on it.
+- The `progress` table is private. Demo rows (`demo = true`) are left out of
+  every response that does not ask for `?demo=1`.

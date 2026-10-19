@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Ear Trainer</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230F766E'/><ellipse cx='38' cy='70' rx='14' ry='11' fill='%23FDFCE8'/><rect x='49' y='22' width='7' height='50' fill='%23FDFCE8'/><path d='M56 22c12 4 18 12 18 22-5-7-11-10-18-11z' fill='%23FDFCE8'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,52 +109,63 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+  <!-- usernode-spec-screens@1: the screen the spec drew, carried over by the
+       platform as this first version's starting point. Its styles are in
+       public/screens.css. Behaviour and states live in public/app.js. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="top"><span class="brand">Ear Trainer</span><div class="pick"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Lessons</div></div>
-    <h1 class="title">Chords 2: Triads</h1>
-    <p class="sub">Major, minor, diminished and suspended: 4 of 6 chord types</p>
-    <div class="bar"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="m"></i><i></i><i></i><i></i></div>
-    <div class="meta"><span>Question 7 of 10</span><span>6 correct</span></div>
+    <div class="top"><span class="brand">Ear Trainer</span><button class="pick" id="lessons-open" type="button" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Lessons</button></div>
+    <h1 class="title" id="lesson-title"></h1>
+    <p class="sub" id="lesson-sub"></p>
+    <div class="bar" id="progress-bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="meta"><span id="meta-question"></span><span id="meta-correct"></span></div>
 
-    <div class="card">
-    <div class="play"><button class="btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>Play</button><div><div class="q">What chord is this?</div><div class="hint">Played from C. Replay as needed.</div></div></div>
-    <div class="kb">
-    <div class="w on">C</div><div class="w">D</div><div class="w on">E</div><div class="w">F</div><div class="w on">G</div><div class="w">A</div><div class="w">B</div><div class="w">C</div>
-    <div class="b" style="left:30px"></div><div class="b" style="left:71px"></div><div class="b" style="left:152px"></div><div class="b" style="left:192px"></div><div class="b" style="left:233px"></div>
+    <div class="card" id="quiz">
+    <div id="question-view">
+    <div class="play"><button class="btn-primary" id="play" type="button" data-play><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>Play</button><div><div class="q" id="question">What chord is this?</div><div class="hint" id="question-hint">Played from C. Replay as needed.</div></div></div>
+    <div class="kb" id="keyboard">
+    <div class="w" data-midi="60">C</div><div class="w" data-midi="62">D</div><div class="w" data-midi="64">E</div><div class="w" data-midi="65">F</div><div class="w" data-midi="67">G</div><div class="w" data-midi="69">A</div><div class="w" data-midi="71">B</div><div class="w" data-midi="72">C</div>
+    <div class="b" data-midi="61" style="left:calc(12.5% - 10px)"></div><div class="b" data-midi="63" style="left:calc(25% - 10px)"></div><div class="b" data-midi="66" style="left:calc(50% - 10px)"></div><div class="b" data-midi="68" style="left:calc(62.5% - 10px)"></div><div class="b" data-midi="70" style="left:calc(75% - 10px)"></div>
     </div>
     <p class="cap">Lit keys show the notes you just heard.</p>
     </div>
 
-    <div class="section-label">Tap the answer you heard</div>
-    <div class="ans">
-    <div class="a no">Minor<small>C Eb G</small></div>
-    <div class="a ok">Major<small>C E G</small></div>
-    <div class="a">Diminished</div>
-    <div class="a">Suspended</div>
+    <div id="results" hidden>
+    <div class="q" id="result-score"></div>
+    <p class="hint" id="result-best"></p>
+    <p class="hint" id="save-status"></p>
+    <div class="row result-actions"><button class="btn-secondary" id="try-again" type="button">Try again</button><button class="btn-secondary" id="next-lesson" type="button">Next lesson</button><button class="btn-secondary" id="save-retry" type="button" hidden>Retry</button></div>
     </div>
-    <div class="fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Major: a bright shape. Root, a third four steps up, then the fifth.</div>
-    <div class="row"><span class="hint">Streak: 4</span><button class="btn-secondary">Next sound</button></div>
+    </div>
 
-    <div class="section-label">Your progress</div>
-    <ul class="list">
-    <li class="list-row"><b>Notes 1: Octave and fifth</b><span>10 of 10</span></li>
-    <li class="list-row"><b>Notes 2: Add the thirds</b><span>8 of 10</span></li>
-    <li class="list-row"><b>Chords 2: Triads</b><span>6 so far</span></li>
-    <li class="list-row"><b>Progressions 1: Three-chord hymns</b><span>Not started</span></li>
+    <div id="answers-wrap">
+    <div class="section-label">Tap the answer you heard</div>
+    <div class="ans" id="answers"></div>
+    <div class="fb" id="feedback" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span id="feedback-text"></span></div>
+    <div class="row" id="session-row"><span class="hint" id="streak"></span><button class="btn-secondary" id="next" type="button" hidden>Next sound</button></div>
+    </div>
+
+    <div class="section-label" id="progress-label">Your progress</div>
+    <ul class="list" id="progress-list" hidden></ul>
+    <ul class="list" id="progress-loading">
+    <li class="list-row"><span class="skeleton skel-name"></span><span class="skeleton skel-score"></span></li>
+    <li class="list-row"><span class="skeleton skel-name"></span><span class="skeleton skel-score"></span></li>
+    <li class="list-row"><span class="skeleton skel-name"></span><span class="skeleton skel-score"></span></li>
     </ul>
+    <div class="state-empty" id="progress-empty" hidden><p class="q">No scores yet</p><p class="hint">Finish a lesson to see it here.</p></div>
+    <div class="state-error" id="progress-error" hidden><p class="q">Could not load your scores</p><p class="hint">Practice still works. Retry to see your progress.</p><button class="btn-secondary" id="progress-retry" type="button">Retry</button></div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+
+  <div class="sheet-backdrop" id="sheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <div class="sheet-head"><h2 class="q" id="sheet-title">Lessons</h2><button class="btn-secondary" id="sheet-close" type="button">Close</button></div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
+
+  <script src="/lessons.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

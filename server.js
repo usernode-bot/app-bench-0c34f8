@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { getLesson } = require('./public/lessons.js');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -90,6 +91,33 @@ app.get(/^\/usernode-(?:bridge|native|tailwind)\//, async (req, res) => {
 // staging container reads either. See "Time-dependent features" in the
 // platform conventions.
 const IS_STAGING = process.env.USERNODE_ENV === 'staging';
+
+// One row per person and lesson: their best and last session. Demo rows are
+// kept apart from real ones so ?demo=1 never changes what the plain app shows.
+const SCHEMA = `
+  CREATE TABLE IF NOT EXISTS progress (
+    user_id text NOT NULL,
+    lesson_id text NOT NULL,
+    best_correct int NOT NULL DEFAULT 0,
+    last_correct int NOT NULL DEFAULT 0,
+    sessions int NOT NULL DEFAULT 0,
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    demo boolean NOT NULL DEFAULT false,
+    PRIMARY KEY (user_id, lesson_id, demo)
+  );
+  COMMENT ON TABLE progress IS 'staging:private';
+`;
+
+// Made-up scores for a first version's ?demo=1 preview. They are added to
+// the response and never stored.
+const DEMO_PROGRESS = [
+  { lessonId: 'notes-1', bestCorrect: 10 },
+  { lessonId: 'notes-2', bestCorrect: 8 },
+  { lessonId: 'notes-3', bestCorrect: 5 },
+  { lessonId: 'chords-1', bestCorrect: 9 },
+  { lessonId: 'progressions-1', bestCorrect: 7 },
+  { lessonId: 'progressions-2', bestCorrect: 4 },
+];
 const PREVIEW_NOW = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 function requestNow(req) {
   const raw = IS_STAGING ? (req.headers['x-usernode-now'] || req.query['un-now']) : null;
@@ -147,6 +175,77 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+function progressRow(row) {
+  return {
+    lessonId: row.lesson_id,
+    bestCorrect: row.best_correct,
+    lastCorrect: row.last_correct,
+    sessions: row.sessions,
+    updatedAt: row.updated_at,
+  };
+}
+
+// The signed-in person's scores, newest first. A guest has none. On staging,
+// ?demo=1 adds the fixed demo scores (never stored) and the viewer's own
+// demo rows.
+app.get('/api/progress', async (req, res) => {
+  const demo = IS_STAGING && req.query.demo === '1';
+  if (!req.user) return res.json([]);
+  try {
+    const result = await pool.query(
+      `SELECT lesson_id, best_correct, last_correct, sessions, updated_at
+         FROM progress
+        WHERE user_id = $1 AND demo = $2
+        ORDER BY updated_at DESC`,
+      [req.user.id, demo]
+    );
+    let rows = result.rows.map(progressRow);
+    if (demo) {
+      rows = DEMO_PROGRESS.map((d) => ({
+        lessonId: d.lessonId,
+        bestCorrect: d.bestCorrect,
+        lastCorrect: d.bestCorrect,
+        sessions: 1,
+        updatedAt: null,
+      })).concat(rows);
+    }
+    res.json(rows);
+  } catch (err) {
+    console.error('progress read failed: ' + err.message);
+    res.status(500).json({ error: 'progress_unavailable' });
+  }
+});
+
+// Record a finished session: best = max, last, one more session.
+app.post('/api/progress', async (req, res) => {
+  const body = req.body || {};
+  const lessonId = body.lessonId;
+  const correct = body.correct;
+  if (typeof lessonId !== 'string' || !getLesson(lessonId)) {
+    return res.status(400).json({ error: 'unknown_lesson' });
+  }
+  if (!Number.isInteger(correct) || correct < 0 || correct > 10) {
+    return res.status(400).json({ error: 'invalid_correct' });
+  }
+  const demo = IS_STAGING && req.query.demo === '1';
+  try {
+    await pool.query(
+      `INSERT INTO progress (user_id, lesson_id, best_correct, last_correct, sessions, updated_at, demo)
+       VALUES ($1, $2, $3, $3, 1, $4, $5)
+       ON CONFLICT (user_id, lesson_id, demo) DO UPDATE
+         SET best_correct = GREATEST(progress.best_correct, EXCLUDED.best_correct),
+             last_correct = EXCLUDED.last_correct,
+             sessions = progress.sessions + 1,
+             updated_at = EXCLUDED.updated_at`,
+      [req.user.id, lessonId, correct, req.now, demo]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('progress save failed: ' + err.message);
+    res.status(500).json({ error: 'progress_not_saved' });
+  }
+});
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -192,9 +291,24 @@ app.get('*', (req, res) => {
 });
 
 async function start() {
+  await pool.query(SCHEMA);
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop accepting connections, drain for about 3 seconds, close the pool.
+  let closing = false;
+  function shutdown(signal) {
+    if (closing) return;
+    closing = true;
+    console.log(`${signal} received, shutting down`);
+    setTimeout(() => process.exit(0), 3000);
+    server.close(() => {
+      pool.end().catch(() => {}).finally(() => process.exit(0));
+    });
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });

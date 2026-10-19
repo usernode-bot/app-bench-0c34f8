@@ -29,33 +29,36 @@
  */
 @layer base {
   :root {
-    --ground: 250 248 244;    /* the page */
+    --ground: 250 248 244;    /* the page: warm paper */
     --surface: 255 255 255;   /* lists, cards, fields */
     --raised: 243 240 234;    /* hovers, badges */
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 229 225 217;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --accent: 15 118 110;     /* deep teal: Play, progress */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
-    --amber: 253 230 163; /* from the spec's screens */
-    --amber-ink: 120 53 15; /* from the spec's screens */
-    --key-black: 28 25 23; /* from the spec's screens */
+    --amber: 253 230 163;     /* soft amber: correct, lit key */
+    --amber-ink: 120 53 15;   /* text on amber */
+    --key-black: 28 25 23;    /* black piano keys */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 22 20 18;
+    --surface: 34 31 28;
+    --raised: 46 42 38;
+    --fg: 245 242 237;
+    --muted: 170 164 156;
+    --line: 70 65 60;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --amber: 92 64 16;
+    --amber-ink: 253 230 163;
+    --key-black: 10 9 8;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
