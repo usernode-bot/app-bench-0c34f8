@@ -15,8 +15,10 @@
 
 .app {
   background: rgb(var(--ground));
-  min-height: 1040px;
-  width: 390px;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   box-sizing: border-box;
   padding: 20px 16px 32px;
   color: rgb(var(--fg));
@@ -38,14 +40,21 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 .chip {min-height:44px;padding:0 14px;border-radius:10px;border:1px solid rgb(var(--line));background:rgb(var(--surface));display:inline-flex;align-items:center;font-size:16px;color:rgb(var(--fg))}
 
 .chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600}
+.chip {cursor:pointer}
+.chip:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .nums {display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px}
+.nums > div {min-width:0}
 
 .nums label {font-size:14px;line-height:20px;color:rgb(var(--muted));display:block;margin-bottom:4px}
 
 .field {min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--fg));display:flex;align-items:center;justify-content:space-between}
 
 .field small {font-size:14px;color:rgb(var(--muted))}
+
+.field input {flex:1 1 0;width:100%;min-width:0;border:0;background:transparent;padding:0;font:inherit;color:inherit;outline:none;-moz-appearance:textfield;appearance:textfield}
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button {-webkit-appearance:none;margin:0}
+.field:focus-within {border-color:rgb(var(--focus));box-shadow:0 0 0 2px rgb(var(--focus))}
 
 .card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px;border-top:4px solid rgb(var(--accent))}
 

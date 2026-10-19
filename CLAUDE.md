@@ -95,22 +95,28 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread formula calculator for one person: pick a bread, set hydration, loaf
+count and loaf size, and get exact grams for every ingredient plus rise
+times, oven temperature and bake time. Nothing is saved; the recipe shown is
+always the current one. The percentage formulas are starting points in
+`public/app.js` (`BREADS`), not tested recipes, and rise times assume a
+kitchen at about 24°C.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
-
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: deep amber (the crust and the action); neutrals: warm
+  flour-and-crust browns, from a flour-white ground in the light look to a
+  dark rye-brown ground in the dark one. Danger and focus are warm red and
+  amber.
+- **Signature element:** the formula card, a page from a baker's notebook: an
+  amber rule across the top, a serif title, dashed lines between ingredients,
+  a baker's % column and bold tabular grams, a solid rule above the total,
+  then three bake tiles with small line icons (clock, thermometer, loaf).
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`.
+  Headings and the card title are serif (`ui-serif, Georgia, serif`); body
+  text is the system face and the numbers are tabular.
+- **One fixed look:** none. The screen follows the viewer's Homeroom light or
+  dark theme.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +146,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The bread formulas live in `public/app.js`'s `BREADS` table. Change a
+  percentage, rise time or bake setting there, not in the markup.
+- The recipe total is exact by construction: every non-flour ingredient is
+  rounded to whole grams and the remainder flour (bread flour for rye) takes
+  what is left, so grams always add up to loaves × size.
+- No data is stored: there are no tables and `?demo=1` only sets the sample
+  bake's inputs and shows the "Staging demo" line.

@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Bread Bot</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23924a08'/><path d='M22 56c0-14 12-24 28-24s28 10 28 24v10a8 8 0 0 1-8 8H30a8 8 0 0 1-8-8z' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/><path d='M40 34l-4-8M56 32l3-9' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -122,38 +122,42 @@
   <div data-spec-screen="1">
     <div>
     <div class="app">
+    <p class="sub" data-usernode-demo-note hidden>Staging demo: a sample bake to try</p>
     <h1>Bread Bot</h1>
     <p class="sub">Pick a bread, set the numbers, get the formula.</p>
-    <div class="section-label">Bread</div>
-    <div class="types"><span class="chip on">Sourdough</span><span class="chip">Bagels</span><span class="chip">Sourdough bagels</span><span class="chip">Rye</span><span class="chip">Sandwich loaf</span></div>
+    <div class="section-label" id="bread-label">Bread</div>
+    <div class="types" role="group" aria-labelledby="bread-label">
+    <button type="button" class="chip on" aria-pressed="true" data-bread="sourdough">Sourdough</button>
+    <button type="button" class="chip" aria-pressed="false" data-bread="bagels">Bagels</button>
+    <button type="button" class="chip" aria-pressed="false" data-bread="sourdough-bagels">Sourdough bagels</button>
+    <button type="button" class="chip" aria-pressed="false" data-bread="rye">Rye</button>
+    <button type="button" class="chip" aria-pressed="false" data-bread="sandwich">Sandwich loaf</button>
+    </div>
     <div class="nums">
-    <div><label>Hydration</label><div class="field">75<small>%</small></div></div>
-    <div><label>Loaves</label><div class="field">2<small>loaves</small></div></div>
-    <div><label>Loaf size</label><div class="field">800<small>g</small></div></div>
+    <div><label for="hydration">Hydration</label><div class="field"><input id="hydration" name="hydration" type="number" inputmode="decimal" step="any" autocomplete="off" value="75"><small>%</small></div></div>
+    <div><label for="count" data-count-label>Loaves</label><div class="field"><input id="count" name="count" type="number" inputmode="numeric" step="1" autocomplete="off" value="1"><small data-count-unit>loaves</small></div></div>
+    <div><label for="size" data-size-label>Loaf size</label><div class="field"><input id="size" name="size" type="number" inputmode="decimal" step="any" autocomplete="off" value="800"><small>g</small></div></div>
     </div>
-    <div class="card">
-    <h2>Sourdough formula</h2>
-    <p class="meta">2 loaves at 800 g, 1,600 g dough in total</p>
+    <div class="card" aria-live="polite" data-recipe-card>
+    <h2 data-recipe-title>Sourdough formula</h2>
+    <p class="meta" data-recipe-meta>1 loaf at 800 g, 800 g dough in total</p>
+    <div data-recipe-body>
     <div class="row head"><span>Ingredient</span><span>Baker's %</span><span style="text-align:right">Grams</span></div>
-    <div class="row"><span>Bread flour</span><span>100%</span><span>813 g</span></div>
-    <div class="row"><span>Water</span><span>75%</span><span>609 g</span></div>
-    <div class="row"><span>Salt</span><span>2%</span><span>16 g</span></div>
-    <div class="row"><span>Starter</span><span>20%</span><span>162 g</span></div>
-    <div class="row total"><span>Total</span><span>197%</span><span>1,600 g</span></div>
-    <div class="bake">
-    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>5 h</b><span>Bulk rise</span></div>
-    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9"/><circle cx="12" cy="17" r="3"/></svg><b>230°C</b><span>Oven</span></div>
-    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 13c0-4 4-7 8-7s8 3 8 7v1H4z"/><path d="M5 14v5h14v-5"/></svg><b>45 min</b><span>Bake time</span></div>
+    <div data-ingredients></div>
+    <div class="row total"><span>Total</span><span data-recipe-total-pct>197%</span><span data-recipe-total>800 g</span></div>
+    <div class="bake" data-bake>
+    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b data-rise>5 h</b><span data-rise-label>Bulk rise</span></div>
+    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14V5a2 2 0 0 1 4 0v9"/><circle cx="12" cy="17" r="3"/></svg><b data-oven>230°C</b><span>Oven</span></div>
+    <div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 13c0-4 4-7 8-7s8 3 8 7v1H4z"/><path d="M5 14v5h14v-5"/></svg><b data-bake-time>45 min</b><span>Bake time</span></div>
     </div>
-    <ol class="steps">
-    <li>Mix, then bulk rise 5 h at room temperature, folding every 30 min for the first 2 h.</li>
-    <li>Shape, then proof 12 h in the fridge.</li>
-    <li>Bake at 230°C, covered for 20 min, uncovered for 25 min.</li>
-    </ol>
+    <ol class="steps" data-steps></ol>
+    </div>
+    <div class="state-error" data-recipe-error hidden><p></p></div>
     </div>
     </div>
     </div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>

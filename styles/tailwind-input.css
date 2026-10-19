@@ -35,24 +35,24 @@
     --fg: 41 30 22;           /* text */
     --muted: 104 88 74;        /* secondary text */
     --line: 231 222 208;      /* borders, dividers, skeletons */
-    --accent: 146 74 8;     /* the one accent */
+    --accent: 146 74 8;     /* the one accent: deep amber, crust */
     --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    --danger: 165 40 20;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 120 60 0;        /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 28 22 17;
+    --surface: 40 32 25;
+    --raised: 54 44 35;
+    --fg: 245 238 228;
+    --muted: 190 176 160;
+    --line: 74 62 50;
+    --accent: 240 168 80;
+    --on-accent: 46 24 4;
+    --danger: 245 150 110;
+    --on-danger: 46 16 8;
+    --focus: 240 168 80;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

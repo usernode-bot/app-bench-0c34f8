@@ -3,5 +3,27 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "bootParams": ["demo"],
+  "tests": [
+    {
+      "name": "Calculator shows the sourdough formula",
+      "path": "/",
+      "expectSelector": "[data-recipe-total]",
+      "expectText": "Sourdough formula"
+    },
+    {
+      "id": "demo",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "expectSelector": "[data-usernode-demo-note]",
+      "expectText": "1,600 g",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }
