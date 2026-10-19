@@ -29,13 +29,13 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 247 241;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 243 236 224;    /* hovers, badges */
+    --fg: 41 30 22;           /* text */
+    --muted: 104 88 74;        /* secondary text */
+    --line: 231 222 208;      /* borders, dividers, skeletons */
+    --accent: 146 74 8;     /* the one accent */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
