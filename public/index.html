@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,53 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">🏆</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div class="app">
+    <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
+    <button class="pick">Bay Area restaurants<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <p class="sub">15 things, ranked by 5 people</p>
+    <div class="seg"><span class="on">Your view</span><span>Crowd view</span></div>
+    <div class="ladder">
+    <div class="tier"><div class="lab s">S</div><div class="items"><div class="it">Zuni Cafe<i>Crowd: S</i></div><div class="it">Tartine Bakery<i>Crowd: A</i></div></div></div>
+    <div class="tier"><div class="lab a">A</div><div class="items"><div class="it">Swan Oyster Depot<i>Crowd: A</i></div><div class="it">La Taqueria<i>Crowd: S</i></div><div class="it">Nopa<i>Crowd: A</i></div><div class="it">Burma Superstar<i>Crowd: B</i></div></div></div>
+    <div class="tier"><div class="lab b">B</div><div class="items"><div class="it">Pizzeria Delfina<i>Crowd: B</i></div><div class="it">Yank Sing<i>Crowd: A</i></div><div class="it">Gott's Roadside<i>Crowd: C</i></div></div></div>
+    <div class="tier"><div class="lab c">C</div><div class="items"><div class="it">Mission Chinese<i>Crowd: B</i></div><div class="it">Anchor Oyster Bar<i>Crowd: C</i></div></div></div>
+    <div class="tier"><div class="lab d">D</div><div class="items"><div class="it">Fisherman's Wharf crab<i>Crowd: D</i></div></div></div>
+    <div class="tier"><div class="lab f">F</div><div class="items"><p class="empty">Drag an item here</p></div></div>
+    </div>
+    <p class="sl">Not ranked by you yet</p>
+    <div class="un"><div class="it">Sushi Ran<i>Added by Maya</i></div><div class="it">Cheese Board Pizza<i>Added by Dev</i></div><div class="it">Brenda's French Soul Food<i>Added by Jo</i></div></div>
+    <p class="sub hint">Drag an item into a tier to vote. Drag again to change it. Tap an item to see how everyone voted.</p>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div class="app">
+      <div class="sheet">
+      <div class="grab"></div>
+      <div class="hd"><div><h2 class="h">Swan Oyster Depot</h2><p class="sub">Added by you</p></div><button class="x" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <p class="section-label">Crowd, 5 votes</p>
+      <div class="bar"><span class="s w1">S</span><span class="a w3">A</span><span class="b w1">B</span></div>
+      <p class="sub under">Crowd tier: A</p>
+      <p class="section-label">Your vote</p>
+      <div class="vote"><button>S</button><button class="on a">A</button><button>B</button><button>C</button><button>D</button><button>F</button></div>
+      <p class="section-label">How everyone voted</p>
+      <div class="list">
+      <div class="list-row">You<span class="chip a">A</span></div>
+      <div class="list-row">Maya<span class="chip s">S</span></div>
+      <div class="list-row">Dev<span class="chip a">A</span></div>
+      <div class="list-row">Jo<span class="chip a">A</span></div>
+      <div class="list-row">Sam<span class="chip b">B</span></div>
+      </div>
+      <div class="foot"><button class="btn-secondary del"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove item</button><button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report</button></div>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>
