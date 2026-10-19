@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +63,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f766e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14'/><circle cx='6' cy='18' r='1' fill='%230f766e' stroke='none'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,67 +108,106 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
     <div>
     <div class="app">
-    <div class="top"><div><h1>RSS Reader</h1><div class="sub">Updated just now</div></div>
-    <div class="acts"><button class="btn-secondary icon" aria-label="Your feeds"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1"/></svg></button>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div></div>
-    <div class="tabs"><span class="tab on">Unread <span class="count">12</span></span><span class="tab">Saved <span class="count">4</span></span><span class="tab">All</span></div>
-    <div class="chips"><span><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly</span><span><i class="dot" style="background:rgb(var(--f2))"></i>Kitchen Notes</span><span><i class="dot" style="background:rgb(var(--f3))"></i>Quiet Software</span><span><i class="dot" style="background:rgb(var(--f4))"></i>Space Desk</span></div>
-    <div class="section-label">Today</div>
-    <ul class="list">
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f1))"></i><div class="body"><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Telescope spots the earliest spiral galaxy yet</div><div class="meta">Space Desk, 4 hr ago</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f5))"></i><div class="body"><div class="t">A field guide to city foxes after dark</div><div class="meta">Nature Notes, 5 hr ago</div></div></li>
-    </ul>
-    <div class="section-label" style="margin-top:20px">Yesterday</div>
-    <ul class="list">
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">On keeping a personal reading list</div><div class="meta">Quiet Software, yesterday 9:05 am</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">Weeknight dal, three ways</div><div class="meta">Kitchen Notes, yesterday 6:40 pm</div></div></li>
-    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Crew completes suit fit checks for the next moon trip</div><div class="meta">Space Desk, yesterday 2:15 pm</div></div></li>
-    </ul>
+    <div class="top"><div><h1>RSS Reader</h1><div class="sub" id="status-line"></div></div>
+    <div class="acts"><button class="btn-secondary icon" id="feeds-btn" aria-label="Your feeds" title="Your feeds"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1"/></svg></button>
+    <button class="btn-primary" id="add-feed-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div></div>
+    <div class="sub" id="demo-note" data-usernode-demo-note hidden>Staging demo: sample feeds and posts</div>
+    <div class="tabs" role="tablist">
+      <button class="tab on" type="button" role="tab" aria-selected="true" data-tab="unread">Unread <span class="count" id="count-unread"></span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="saved">Saved <span class="count" id="count-saved"></span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="all">All</button>
+    </div>
+    <div class="chips" id="feed-chips"></div>
+    <div id="list-region">
+      <div id="loading-state" data-state="loading" hidden>
+        <div class="section-label"><span class="skeleton inline-block h-3 w-16 align-middle"></span></div>
+        <ul class="list">
+          <li class="list-row"><i class="skeleton inline-block h-2 w-2"></i><i class="skeleton inline-block h-2.5 w-2.5"></i><div class="body"><div class="skeleton h-4 w-5/6"></div><div class="skeleton mt-2 h-3 w-1/2"></div></div></li>
+          <li class="list-row"><i class="skeleton inline-block h-2 w-2"></i><i class="skeleton inline-block h-2.5 w-2.5"></i><div class="body"><div class="skeleton h-4 w-3/4"></div><div class="skeleton mt-2 h-3 w-2/5"></div></div></li>
+          <li class="list-row"><i class="skeleton inline-block h-2 w-2"></i><i class="skeleton inline-block h-2.5 w-2.5"></i><div class="body"><div class="skeleton h-4 w-5/6"></div><div class="skeleton mt-2 h-3 w-1/2"></div></div></li>
+          <li class="list-row"><i class="skeleton inline-block h-2 w-2"></i><i class="skeleton inline-block h-2.5 w-2.5"></i><div class="body"><div class="skeleton h-4 w-2/3"></div><div class="skeleton mt-2 h-3 w-2/5"></div></div></li>
+          <li class="list-row"><i class="skeleton inline-block h-2 w-2"></i><i class="skeleton inline-block h-2.5 w-2.5"></i><div class="body"><div class="skeleton h-4 w-3/4"></div><div class="skeleton mt-2 h-3 w-1/2"></div></div></li>
+        </ul>
+      </div>
+      <div id="post-list" hidden></div>
+      <div class="state-empty" data-state="empty-feeds" hidden>
+        <h2 class="text-heading">No feeds yet</h2>
+        <p class="text-small text-muted">Add the address of an RSS or Atom feed and its posts show up here.</p>
+        <button class="btn-primary mt-2" type="button" id="empty-add">Add your first feed</button>
+      </div>
+      <div class="state-empty" data-state="caught-up" hidden>
+        <h2 class="text-heading">All caught up</h2>
+        <p class="text-small text-muted">You have read every post in your feeds.</p>
+        <button class="btn-secondary mt-2" type="button" id="caught-up-all">Open All</button>
+      </div>
+      <div class="state-empty" data-state="nothing-saved" hidden>
+        <h2 class="text-heading">Nothing saved yet</h2>
+        <p class="text-small text-muted">Open a post and tap Save to keep it here.</p>
+      </div>
+      <div class="state-empty" data-state="no-posts" hidden>
+        <h2 class="text-heading">No posts yet</h2>
+        <p class="text-small text-muted">Your feeds have no posts in them right now.</p>
+      </div>
+      <div class="state-error" data-state="error" hidden>
+        <h2 class="text-heading">Couldn't load your posts. Your feeds are safe.</h2>
+        <p class="text-small text-muted">Check your connection and try again.</p>
+        <button class="btn-secondary mt-2" type="button" id="retry-btn">Retry</button>
+      </div>
+    </div>
     </div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div>
-      <div class="app">
-      <div class="top"><h1>RSS Reader</h1></div>
-      <ul class="list">
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f1))"></i><div><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f2))"></i><div><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
-      <li class="list-row"><i class="dot" style="background:rgb(var(--f3))"></i><div><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
-      </ul>
-      <div class="scrim"></div>
-      <div class="sheet">
+  <!-- Screen 2: the post preview, moved out of its template so it can open
+       over the list. -->
+  <div data-spec-screen="2">
+    <div class="scrim" id="scrim" hidden></div>
+    <div class="sheet" id="preview-sheet" role="dialog" aria-modal="true" aria-labelledby="preview-title" hidden>
       <div class="grab"></div>
-      <div class="bar"><div class="meta" style="display:flex;align-items:center;gap:6px"><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly, 25 min ago</div>
-      <button class="ghost" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <h2>Why the new battery chemistry might finally reach phones</h2>
-      <p>Engineers say a silicon-rich anode could add a third more runtime without a bigger cell. The catch is how it behaves after a few hundred charges, and early tests are promising but small.</p>
-      <div class="note">Marked as read</div>
-      <div class="row"><button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Save</button></div>
-      <div style="display:flex;justify-content:center;margin-top:8px"><button class="ghost">Mark as unread</button></div>
+      <div class="bar"><div class="meta" style="display:flex;align-items:center;gap:6px"><i class="dot" id="preview-dot"></i><span id="preview-meta"></span></div>
+      <button class="ghost" aria-label="Close" type="button" id="preview-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <h2 id="preview-title"></h2>
+      <p id="preview-excerpt"></p>
+      <div class="note" id="preview-note"></div>
+      <div class="row"><a class="btn-primary" id="preview-open" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</a><button class="btn-secondary" type="button" id="preview-save"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg><span id="preview-save-label">Save</span></button></div>
+      <div style="display:flex;justify-content:center;margin-top:8px"><button class="ghost" type="button" id="preview-unread">Mark as unread</button></div>
+    </div>
+
+    <form class="sheet" id="add-sheet" role="dialog" aria-modal="true" aria-labelledby="add-title" hidden>
+      <div class="grab"></div>
+      <div class="bar">
+        <button class="ghost" type="button" id="add-cancel">Cancel</button>
+        <h2 id="add-title">Add feed</h2>
+        <button class="btn-primary" type="submit" id="add-submit">Add</button>
       </div>
+      <label class="section-label" for="feed-url">Feed address</label>
+      <input class="field" id="feed-url" name="url" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml" required>
+      <p class="note" id="add-error" role="alert" hidden></p>
+      <p class="note">Paste the address of an RSS or Atom feed, not a website's home page.</p>
+    </form>
+
+    <div class="sheet" id="feeds-sheet" role="dialog" aria-modal="true" aria-labelledby="feeds-title" hidden>
+      <div class="grab"></div>
+      <div class="bar">
+        <h2 id="feeds-title">Your feeds</h2>
+        <button class="ghost" type="button" id="feeds-close">Done</button>
       </div>
+      <ul class="list" id="feeds-list"></ul>
+      <div class="state-empty" id="feeds-empty" hidden>
+        <p class="text-small text-muted">No feeds yet. Add one with Add feed.</p>
+      </div>
+      <div class="state-error" id="feeds-error" hidden>
+        <p class="text-small text-muted">Couldn't load your feeds.</p>
+        <button class="btn-secondary mt-2" type="button" id="feeds-retry">Retry</button>
       </div>
     </div>
-  </template>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js" defer></script>
 </body>
 </html>

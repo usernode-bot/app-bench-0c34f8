@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    },
+    {
+      "name": "Empty reader",
+      "path": "/",
+      "expectSelector": "[data-state=\"empty-feeds\"]"
+    },
+    {
+      "id": "demo-list",
+      "name": "Populated demo",
+      "path": "/?demo=1",
+      "visual": true,
+      "impact": ["public/**"],
+      "expectSelector": ".list-row[data-post-id]"
+    }
+  ]
 }

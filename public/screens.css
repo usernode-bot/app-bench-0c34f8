@@ -1,7 +1,7 @@
 /* The screens the spec drew, carried over by the platform before the first
-   version was built (screen 1 is public/index.html's main screen; screen 2,
-   if any, its <template data-spec-screen="2">). Colours are the design kit's
-   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+   version was built (screen 1 is public/index.html's main screen; screen 2
+   its preview sheet). Colours are the design kit's tokens, rgb(var(--accent)),
+   so they follow the light and the dark look. */
 
 /* Each screen is one centred column: the phone width it was drawn at grows
    to a readable column on a wider window, never rows and buttons stretched
@@ -17,7 +17,9 @@
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   min-height: 1000px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   font-family: ui-rounded,system-ui,-apple-system,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -45,13 +47,13 @@
 
 .tabs {display:flex;gap:8px;margin:4px 0 16px}
 
-.tab {min-height:44px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font-size:14px;color:rgb(var(--muted))}
+.tab {min-height:44px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font-size:14px;color:rgb(var(--muted));font-family:inherit;cursor:pointer}
 
 .tab.on {background:rgb(var(--fg));color:rgb(var(--ground));border-color:rgb(var(--fg))}
 
 .count {font-size:14px;font-weight:600}
 
-.chips {display:flex;gap:16px;overflow:hidden;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+.chips {display:flex;gap:16px;overflow-x:auto;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .chips span {display:flex;align-items:center;gap:6px;white-space:nowrap}
 
@@ -67,9 +69,15 @@
 
 .list-row .dot {margin-top:7px}
 
+.list-row[role="button"] {cursor:pointer}
+
+.list-row[role="button"]:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:-2px}
+
 .body {flex:1;min-width:0}
 
-.t {font-weight:600;font-size:16px;line-height:22px}
+.t {font-weight:600;font-size:16px;line-height:22px;overflow-wrap:anywhere}
+
+.list-row.read .t {font-weight:400;color:rgb(var(--muted))}
 
 .meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px}
 
@@ -77,44 +85,34 @@
 
 svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: the preview, add and feeds sheets. Its rules are scoped so the
+   sheet's layout rules do not reach screen 1. */
+[data-spec-screen="2"] .scrim {position:fixed;inset:0;background:rgb(var(--fg) / .4);z-index:10}
 
-.app {
-  background: rgb(var(--ground));
-  color: rgb(var(--fg));
-  height: 844px;
-  width: 390px;
-  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  box-sizing: border-box;
-  padding: 0 16px;
-  position: relative;
-  overflow: hidden;
-}
+[data-spec-screen="2"] .sheet {position:fixed;left:0;right:0;bottom:0;width:100%;max-width:390px;margin-inline:auto;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 28px;border-top:1px solid rgb(var(--line));z-index:11;max-height:90vh;overflow-y:auto}
 
-.top {display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px}
+[data-spec-screen="2"] .grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 12px}
 
-.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .bar {display:flex;align-items:center;justify-content:space-between;gap:8px}
 
-.meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+[data-spec-screen="2"] .sheet h2 {font-size:22px;line-height:30px;font-weight:700;margin:8px 0 12px}
 
-.scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
+[data-spec-screen="2"] .sheet p {color:rgb(var(--fg));margin-bottom:12px}
 
-.sheet {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 28px;border-top:1px solid rgb(var(--line))}
+[data-spec-screen="2"] .note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:20px}
 
-.grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 12px}
+[data-spec-screen="2"] .row {display:flex;gap:8px}
 
-.bar {display:flex;align-items:center;justify-content:space-between}
+[data-spec-screen="2"] .row .btn-primary {flex:1;text-decoration:none}
 
-.sheet h2 {font-size:22px;line-height:30px;font-weight:700;margin:8px 0 12px}
+[data-spec-screen="2"] .ghost {border:0;background:none;color:rgb(var(--muted));min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-family:inherit;border-radius:8px;cursor:pointer}
 
-.sheet p {color:rgb(var(--fg));margin-bottom:12px}
+[data-spec-screen="2"] .ghost:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
-.note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:20px}
+[data-spec-screen="2"] .sheet .field {margin-top:4px}
 
-.row {display:flex;gap:8px}
+[data-spec-screen="2"] .note.error {color:rgb(var(--danger))}
 
-.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;flex:1}
+[data-spec-screen="2"] .sheet .list {margin-bottom:16px}
 
-.ghost {border:0;background:none;color:rgb(var(--muted));min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-family:inherit}
+[data-spec-screen="2"] .feed-actions {display:flex;flex-direction:column;align-items:flex-end;flex:none}

@@ -40,12 +40,15 @@
     --danger: 185 28 28;
     --on-danger: 255 255 255;
     --focus: 13 148 136;      /* the keyboard focus ring */
-    --unread: 217 119 6; /* from the spec's screens */
-    --f1: 15 118 110; /* from the spec's screens */
-    --f2: 190 60 80; /* from the spec's screens */
-    --f3: 79 70 229; /* from the spec's screens */
-    --f4: 180 83 9; /* from the spec's screens */
-    --f5: 2 132 199; /* from the spec's screens */
+    --unread: 217 119 6; /* the unread dot */
+    --f1: 15 118 110; /* feed colours, given in the order feeds were added */
+    --f2: 190 60 80;
+    --f3: 79 70 229;
+    --f4: 180 83 9;
+    --f5: 2 132 199;
+    --f6: 21 128 61;
+    --f7: 124 58 237;
+    --f8: 71 85 105;
   }
   .dark {
     --ground: 12 10 9;
@@ -59,6 +62,15 @@
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --unread: 251 191 36;
+    --f1: 45 212 191;
+    --f2: 251 113 133;
+    --f3: 129 140 248;
+    --f4: 251 146 60;
+    --f5: 56 189 248;
+    --f6: 74 222 128;
+    --f7: 192 132 252;
+    --f8: 148 163 184;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

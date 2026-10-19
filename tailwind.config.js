@@ -55,6 +55,19 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        unread: token('unread'), // the unread dot
+        f1: token('f1'), // the eight feed colours, given in order
+        f2: token('f2'),
+        f3: token('f3'),
+        f4: token('f4'),
+        f5: token('f5'),
+        f6: token('f6'),
+        f7: token('f7'),
+        f8: token('f8'),
+      },
+      // The rounded system face, the one the reader uses throughout.
+      fontFamily: {
+        rounded: ['ui-rounded', 'system-ui', '-apple-system', 'sans-serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

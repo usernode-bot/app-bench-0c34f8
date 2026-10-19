@@ -95,22 +95,34 @@ tables you've marked private), etc.
 
 ## About RSS Reader
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A reader for the feeds one person follows: add RSS or Atom feeds by their
+own address, and their unread posts appear in one list, newest first, grouped
+by day. Tapping a post opens a preview sheet that marks it read and offers
+the full article in the browser, Save for later, or Mark as unread. Feeds,
+read state and saved posts are private to each person. Feeds are checked when
+the list opens, with no background refresh; a feed that fails keeps its posts
+and is marked "Couldn't update" in the feeds list.
+
+Both tables, `feeds` and `posts`, are `staging:private`. The `?demo=1` demo
+writes five made-up feeds and about 20 posts for whoever opens the staging
+preview, once, and every answer without `demo=1` leaves demo rows out.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: deep teal (light `15 118 110`, dark `45 212 191`);
+  unread: amber; neutrals: warm stone greys; eight feed colours, given out in
+  the order feeds are added (teal, rose, indigo, amber brown, sky, green,
+  violet, slate), each with its own dark value.
+- **Signature element:** the feed dot. Every feed has one colour, shown in
+  the feed row at the top, on every post row and in the preview, so a post's
+  source is readable at a glance. The broadcast-waves feed icon is the app's
+  mark, on the feeds button and the favicon.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small` in
+  the rounded system face (`ui-rounded`). Unread titles are semibold; read
+  titles regular and muted.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +152,11 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- Both tables (`feeds`, `posts`) are `staging:private`; every query joins
+  through `feeds.user_id` so one person's feeds never reach another's.
+- A feed is added by its own feed address; pasting a website's home page does
+  not look for its feed. Every typed or redirected address goes through the
+  fetch guard (http/https only, public addresses only, connection pinned to
+  the checked address, 10 s timeout, 2 MB body cap, XML only).
+- Feed colours are stored as `color` 1 to 8, assigned as the next colour in
+  the order feeds were added.
