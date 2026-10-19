@@ -209,7 +209,8 @@ function demoWorldCells() {
         const edge = x === -12 || x === -7 || z === -6 || z === -1;
         if (!edge) continue;
         if (z === -1 && x === -10 && y <= 2) continue; // the door
-        if (y === 2 && ((x === -12 && (z === -4 || z === -3)) || (x === -7 && (z === -4 || z === -3)))) {
+        if (y === 2 && ((x === -12 && (z === -4 || z === -3)) || (x === -7 && (z === -4 || z === -3)) ||
+            (z === -1 && (x === -11 || x === -9)))) {
           add(x, y, z, 'glass');
           continue;
         }

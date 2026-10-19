@@ -100,8 +100,8 @@ if (!gl) {
   camera = new THREE.PerspectiveCamera(70, 1, 0.1, 400);
   camera.rotation.order = 'YXZ';
 
-  hemi = new THREE.HemisphereLight(0xffffff, 0x9c8f80, 0.75);
-  sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  hemi = new THREE.HemisphereLight(0xffffff, 0x9c8f80, 1.5);
+  sun = new THREE.DirectionalLight(0xffffff, 2.4);
   sun.position.set(25, 50, 35); // from behind the camera, so faces you see are lit
   scene.add(hemi, sun);
 
@@ -114,10 +114,13 @@ if (!gl) {
   scene.add(ground);
 
   // The dark look dims the sunlight on the blocks; the sky itself is CSS.
+  // three.js r155+ uses physical light units: a Lambert face's brightness is
+  // intensity/π, so these are the old values ×π — enough that a lit block's
+  // colour matches its palette swatch.
   const applyLook = () => {
     const dark = document.documentElement.classList.contains('dark');
-    sun.intensity = dark ? 0.5 : 1.1;
-    hemi.intensity = dark ? 0.35 : 0.75;
+    sun.intensity = dark ? 1.1 : 2.4;
+    hemi.intensity = dark ? 0.7 : 1.5;
   };
   new MutationObserver(applyLook).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   applyLook();
@@ -159,8 +162,8 @@ function rebuild() {
 }
 
 // ── Look and move ────────────────────────────────────────────────────────
-const pos = new THREE.Vector3(0.5, 3, 24.5); // spawn on the path, facing the builds
-let yaw = 0, pitch = -0.12;
+const pos = new THREE.Vector3(2, 8, 44); // back and above the path, the builds in view, the viewer's wall in the foreground
+let yaw = 0, pitch = -0.22;
 
 let lookLast = null, dragged = false;
 el.touch.addEventListener('pointerdown', (e) => {
@@ -185,6 +188,13 @@ const endLook = (e) => {
 };
 el.touch.addEventListener('pointerup', endLook);
 el.touch.addEventListener('pointercancel', () => { lookLast = null; });
+
+// On a pointer device with a keyboard (a computer) WASD moves you, so the
+// pad would only cover the world: hide it. A touch screen keeps the pad.
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+const applyPad = () => { el.stick.hidden = finePointer.matches; };
+applyPad();
+if (finePointer.addEventListener) finePointer.addEventListener('change', applyPad);
 
 // Move pad: a small joystick, drag the knob.
 let moveVec = { x: 0, y: 0 };
