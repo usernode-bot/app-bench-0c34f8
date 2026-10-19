@@ -1,0 +1,86 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  min-height: 1320px;
+  width: 390px;
+  color: rgb(var(--fg));
+  font-family: ui-rounded,system-ui,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 16px 16px 32px;
+}
+
+.app * {box-sizing:border-box}
+
+.brand {font-size:14px;line-height:20px;color:rgb(var(--muted));font-weight:500}
+
+.picker {display:flex;align-items:center;gap:6px;min-height:44px;font-size:28px;line-height:36px;font-weight:700}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.toggle {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:14px 0 16px}
+
+.toggle div {flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:8px;color:rgb(var(--muted))}
+
+.toggle .on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
+
+.board {border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden;background:rgb(var(--surface))}
+
+.row {display:flex;min-height:84px;border-bottom:1px solid rgb(var(--line))}
+
+.row:last-child {border:0}
+
+.lab {width:52px;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:rgb(var(--on-tier))}
+
+.items {flex:1;display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-content:center}
+
+.chip {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-left-width:4px;border-radius:8px;padding:5px 8px;font-size:14px;line-height:20px;font-weight:500;min-height:44px}
+
+.chip small {display:block;font-size:14px;color:rgb(var(--muted));line-height:16px;font-weight:400}
+
+.chip.sel {box-shadow:0 0 0 2px rgb(var(--accent))}
+
+.hint {font-size:14px;color:rgb(var(--muted));align-self:center}
+
+.section-label {margin:20px 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+
+.tray {display:flex;gap:8px;flex-wrap:wrap;background:rgb(var(--raised));border:1px dashed rgb(var(--muted));border-radius:12px;padding:10px}
+
+.btn-primary {margin-top:16px;width:100%;min-height:48px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500}
+
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:16px}
+
+.ct {font-size:20px;line-height:28px;font-weight:600}
+
+.cs {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.pick {display:flex;gap:6px;margin:12px 0 4px}
+
+.pick div {flex:1;min-height:44px;border-radius:8px;border:1px solid rgb(var(--line));display:flex;align-items:center;justify-content:center;font-weight:700}
+
+.pick .on {background:rgb(var(--tier-a));color:rgb(var(--on-tier));border-color:transparent}
+
+.vote {display:flex;justify-content:space-between;align-items:center;font-size:14px;line-height:20px;min-height:32px}
+
+.badge {display:inline-block;width:24px;text-align:center;color:rgb(var(--on-tier));border-radius:5px;font-weight:700;font-size:14px}
+
+.tot {border-top:1px solid rgb(var(--line));margin-top:6px;padding-top:8px;font-weight:600}
+
+.quiet {display:flex;gap:16px;margin-top:8px}
+
+.quiet div {min-height:44px;display:flex;align-items:center;gap:6px;font-size:14px;color:rgb(var(--muted))}
