@@ -29,11 +29,20 @@
 
 .app * {box-sizing:border-box;margin:0}
 
+/* A phone fills this width; a wide window keeps one centred reading column,
+   about 640–720 px, so titles are not wrapped early. */
+@media (min-width: 720px) {
+  .app {max-width:100%}
+}
+
 .top {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:20px 0 12px}
 
 .top h1 {font-size:28px;line-height:36px;font-weight:700}
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+/* The demo line keeps the same gap to the tabs as the header has below it. */
+#demo-note {margin-bottom:8px}
 
 .acts {display:flex;gap:8px}
 
@@ -53,7 +62,8 @@
 
 .count {font-size:14px;font-weight:600}
 
-.chips {display:flex;gap:16px;overflow-x:auto;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+/* Chips wrap rather than scroll, so every feed name shows whole. */
+.chips {display:flex;flex-wrap:wrap;column-gap:16px;row-gap:8px;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .chips span {display:flex;align-items:center;gap:6px;white-space:nowrap}
 
@@ -110,6 +120,11 @@ svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-
 [data-spec-screen="2"] .ghost:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 [data-spec-screen="2"] .sheet .field {margin-top:4px}
+
+/* The label, field and help text share one left edge inside the sheet. */
+[data-spec-screen="2"] .sheet .section-label {padding-left:0;padding-right:0}
+
+[data-spec-screen="2"] .add-help {margin-top:8px}
 
 [data-spec-screen="2"] .note.error {color:rgb(var(--danger))}
 
