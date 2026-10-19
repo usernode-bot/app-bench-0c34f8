@@ -175,7 +175,6 @@
     chips: Array.prototype.slice.call(document.querySelectorAll('[data-bread]')),
     demoNote: document.querySelector('[data-usernode-demo-note]'),
     countLabel: document.querySelector('[data-count-label]'),
-    countUnit: document.querySelector('[data-count-unit]'),
     sizeLabel: document.querySelector('[data-size-label]'),
     title: document.querySelector('[data-recipe-title]'),
     meta: document.querySelector('[data-recipe-meta]'),
@@ -327,7 +326,6 @@
     fields.hydration.value = String(bread.hydration);
     fields.size.value = String(bread.size);
     el.countLabel.textContent = bread.countLabel;
-    el.countUnit.textContent = bread.countNoun;
     el.sizeLabel.textContent = bread.sizeLabel;
     render();
   }

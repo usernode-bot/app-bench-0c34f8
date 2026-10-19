@@ -33,7 +33,7 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 16px}
 
-.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:0 0 8px;padding:0 4px}
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:0 0 8px;padding:0}
 
 .types {display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 
@@ -48,11 +48,13 @@ h1 {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weig
 
 .nums label {font-size:14px;line-height:20px;color:rgb(var(--muted));display:block;margin-bottom:4px}
 
-.field {min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:8px 12px;font-size:16px;color:rgb(var(--fg));display:flex;align-items:center;justify-content:space-between}
+.field {position:relative;min-height:44px;width:100%;border:1px solid rgb(var(--line));border-radius:8px;background:rgb(var(--surface));padding:0;font-size:16px;color:rgb(var(--fg));display:flex;align-items:center}
 
-.field small {font-size:14px;color:rgb(var(--muted))}
+.field small {position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;color:rgb(var(--muted));pointer-events:none}
 
-.field input {flex:1 1 0;width:100%;min-width:0;border:0;background:transparent;padding:0;font:inherit;color:inherit;outline:none;-moz-appearance:textfield;appearance:textfield}
+.field input {flex:1 1 0;width:100%;min-width:0;height:44px;border:0;background:transparent;padding:0 12px;font:inherit;color:inherit;outline:none;-moz-appearance:textfield;appearance:textfield}
+
+.field:has(small) input {padding-right:36px}
 .field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button {-webkit-appearance:none;margin:0}
 .field:focus-within {border-color:rgb(var(--focus));box-shadow:0 0 0 2px rgb(var(--focus))}
 
