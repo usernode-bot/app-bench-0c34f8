@@ -3,5 +3,26 @@
     "emoji": "🍞"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "Calculator loads",
+      "path": "/",
+      "expectText": "What are we baking?",
+      "expectSelector": "[data-bread=\"sourdough\"]"
+    },
+    {
+      "id": "demo-recipe",
+      "name": "Demo recipe is worked out",
+      "path": "/?demo=1",
+      "expectSelector": "[data-recipe-card]",
+      "expectText": "812 g",
+      "visual": true,
+      "impact": ["public/**", "styles/**"]
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }

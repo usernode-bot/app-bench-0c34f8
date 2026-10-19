@@ -16,8 +16,9 @@
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 1180px;
-  width: 390px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
   font-family: ui-rounded,system-ui,sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -84,3 +85,19 @@ h1 {font-size:28px;line-height:36px;font-weight:700;margin:0;font-family:ui-seri
 .box {background:rgb(var(--raised));border-radius:12px;padding:12px}
 
 .box b {display:block;font-size:20px;line-height:28px}
+
+/* The drawn chips and step controls are buttons now: keep the drawn look
+   and the 44 px targets, and show the states a control needs. */
+.chip {font-family:inherit;cursor:pointer}
+
+.sb {padding:0;color:inherit;cursor:pointer}
+
+.sb:disabled {opacity:.4;cursor:not-allowed}
+
+.chip:focus-visible,.sb:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+/* The quiet line that sits where the recipe card will appear, and the
+   staging demo's own label above the title. */
+.hint {margin:24px 4px 0;font-size:14px;line-height:20px;color:rgb(var(--muted));padding:0}
+
+.demo-note {color:rgb(var(--crust));font-weight:600}

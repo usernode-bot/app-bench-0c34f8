@@ -95,22 +95,31 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread recipe calculator. Pick one of five breads, set the hydration, how
+many loaves or bagels and their size, then tap Get recipe to see the grams
+of every ingredient, the rise times and the bake settings. The five recipes
+are fixed (the creator's choice); only the batch changes. Nothing is saved:
+each visit starts fresh.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look. Every later change follows it, and updates it when a request
+changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** accent: wheat gold (light 201 148 30 with dark bread text on
+  it, dark 222 170 60); second colour: crust brown (light 122 74 36, dark
+  214 150 96), used for the picked bread chip and the recipe card's top edge;
+  neutrals: flour white through warm greys (ground, surface, raised, fg,
+  muted, line), each with a light and a dark value in
+  `styles/tailwind-input.css`.
+- **Signature element:** the recipe card as a baker's formula card: a
+  crust-brown top edge, a round wheat-gold hydration dial, and dashed rules
+  between ingredient rows with each ingredient's baker's percentage in small
+  muted text beside its grams.
+- **Type scale:** headings and the dial's number in
+  `ui-serif, Georgia, serif` (`font-serif`); everything else in
+  `ui-rounded, system-ui, sans-serif` (`font-rounded`), with tabular figures
+  for grams. `text-title` is 28/36.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -140,6 +149,13 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- All recipe data lives in `RECIPES` in `public/index.html`. Do not duplicate
+  it in the markup, and keep the five breads fixed: only hydration, loaf
+  count and loaf size are adjustable.
+- Baker's percentages are shares of the total flour (the flours sum to 100).
+  Starter and yeast are counted as a share of the flour; the starter's own
+  flour and water are not added to the hydration.
+- Loaf size is the dough weight per loaf in grams. Ingredient weights show
+  whole grams, and amounts under 10 g to one decimal.
+- Nothing is stored, so there is no loading or error state on the
+  calculator; the hint line stands in until Get recipe is tapped.

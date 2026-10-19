@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
@@ -90,6 +91,16 @@ app.get(/^\/usernode-(?:bridge|native|tailwind)\//, async (req, res) => {
 // staging container reads either. See "Time-dependent features" in the
 // platform conventions.
 const IS_STAGING = process.env.USERNODE_ENV === 'staging';
+
+// The HTML shell says whether this is the staging preview, so the page can
+// offer its ?demo=1 sample batch there and nowhere else.
+const INDEX_PATH = path.join(__dirname, 'public', 'index.html');
+function shellHtml() {
+  const html = fs.readFileSync(INDEX_PATH, 'utf8');
+  return IS_STAGING
+    ? html.replace('<html lang="en">', '<html lang="en" data-env="staging">')
+    : html;
+}
 const PREVIEW_NOW = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 function requestNow(req) {
   const raw = IS_STAGING ? (req.headers['x-usernode-now'] || req.query['un-now']) : null;
@@ -154,6 +165,10 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// The HTML shell, ahead of the static handler, so it can say whether this
+// is the staging preview (the page's ?demo=1 sample batch is staging-only).
+app.get('/', (_req, res) => res.type('html').send(shellHtml()));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -188,13 +203,29 @@ app.get('*', (req, res) => {
   </div>
 </body>`);
   }
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(shellHtml());
 });
 
 async function start() {
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  // Stop accepting connections, give in-flight requests about 3 seconds,
+  // close the pool, then exit. The timer is a backstop for a connection
+  // that outlives the drain.
+  let shuttingDown = false;
+  function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received, shutting down`);
+    server.close(() => {
+      pool.end().finally(() => process.exit(0));
+    });
+    setTimeout(() => process.exit(1), 3000).unref();
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
