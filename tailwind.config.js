@@ -55,6 +55,18 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The five feed spine colours, given out in turn per user
+        // (brick, blue, ochre, plum, leaf; both looks in tailwind-input.css).
+        f1: token('f1'),
+        f2: token('f2'),
+        f3: token('f3'),
+        f4: token('f4'),
+        f5: token('f5'),
+      },
+      fontFamily: {
+        // Headings and article text are set in a serif; labels in the
+        // rounded sans the drawn screens use.
+        display: ['ui-serif', 'Georgia', 'serif'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

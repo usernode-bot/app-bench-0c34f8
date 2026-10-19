@@ -3,5 +3,24 @@
     "emoji": "📰"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "id": "reader-demo",
+      "name": "Unread list with demo feeds",
+      "path": "/?demo=1",
+      "expectSelector": ".list-row .spine",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "server.js"]
+    },
+    {
+      "name": "Reader opens",
+      "path": "/",
+      "expectText": "RSS Reader"
+    },
+    {
+      "name": "Health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }

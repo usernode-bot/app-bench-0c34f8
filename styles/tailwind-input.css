@@ -47,17 +47,22 @@
     --f5: 60 110 70; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 24 21 18;
+    --surface: 34 30 26;
+    --raised: 46 41 36;
+    --fg: 240 236 228;
+    --muted: 176 168 157;
+    --line: 64 58 51;
+    --accent: 45 190 175;
+    --on-accent: 6 40 37;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 45 190 175;
+    --f1: 226 128 102; /* brick */
+    --f2: 128 156 214; /* blue */
+    --f3: 196 166 92;  /* ochre */
+    --f4: 190 140 192; /* plum */
+    --f5: 120 176 128; /* leaf */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

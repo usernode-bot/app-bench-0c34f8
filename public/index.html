@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -27,7 +27,6 @@
             seen.add(val);
           }
           if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +63,7 @@
   })();
   </script>
   <title>RSS Reader</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f766e'/><circle cx='10' cy='22' r='2.5' fill='%23ffffff'/><path d='M8.5 15.5a8 8 0 0 1 8 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round'/><path d='M8.5 9a14 14 0 0 1 14 14' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,55 +108,86 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
-  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
-       first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+  <!-- usernode-spec-screens@1: the screens the spec drew. Screen 1 is the
+       reader; screen 2, the preview, moved out of its template into the
+       overlay it is live. The drawn rows are sample data: app.js renders
+       the list from real data with the same markup. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="hd"><div><div class="app-name">RSS Reader</div><h1 class="title">22 unread</h1></div>
-    <button class="btn-secondary"><svg class="ico" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1"/></svg>Add feed</button></div>
-    <div class="chips"><button class="chip"><b>5 feeds</b><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><span>Refreshed 8:42 am</span></div>
-    <p class="section-label">Newest first</p>
-    <ul class="list">
-    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, 12 min ago</div><p class="pt">Why your laminated dough keeps leaking butter</p><p class="ex">Temperature is usually the culprit, not technique. Here is a simple fridge schedule that fixed it.</p></div></li>
-    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, 1 hr ago</div><p class="pt">Scheduler changes landing in the next release</p><p class="ex">A walk through the patches that reduce latency on busy machines.</p></div></li>
-    <li class="list-row read" style="--c:var(--f3)"><div class="spine"></div><div class="body"><div class="meta">Field Guide Weekly, 2 hr ago</div><p class="pt">Ten quiet trails within an hour of the city</p><p class="ex">Fewer crowds, better views and parking that is actually free.</p></div></li>
-    <li class="list-row" style="--c:var(--f4)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Type &amp; Grid, 3 hr ago</div><p class="pt">Setting small text so it stays readable</p><p class="ex">Spacing, weight and size choices for captions and footnotes.</p></div></li>
-    <li class="list-row" style="--c:var(--f1)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>The Pastry Ledger, Yesterday</div><p class="pt">An honest review of three home proofing boxes</p><p class="ex">We tested each overnight with the same sourdough batch.</p></div></li>
-    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Yesterday</div><p class="pt">Sowing lettuce in late spring heat</p><p class="ex">Shade cloth, deep watering and which varieties bolt last.</p></div></li>
-    <li class="list-row" style="--c:var(--f2)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Kernel Notes, Mon</div><p class="pt">Reading a flame graph without getting lost</p><p class="ex">Start at the widest bar and work outward.</p></div></li>
-    <li class="list-row" style="--c:var(--f5)"><div class="spine"></div><div class="body"><div class="meta"><i class="dot"></i>Balcony Garden, Mon</div><p class="pt">Three herbs that like a windy balcony</p><p class="ex">Thyme, rosemary and chives shrug off gusts that flatten basil.</p></div></li>
-    </ul>
+      <div class="hd">
+        <div>
+          <div class="app-name">RSS Reader</div>
+          <h1 class="title" id="unread-title"></h1>
+        </div>
+        <button class="btn-secondary" id="add-feed-btn">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M5 5a14 14 0 0 1 14 14"/><path d="M5 11a8 8 0 0 1 8 8"/><circle cx="6" cy="18" r="1"/></svg>Add feed</button>
+      </div>
+      <div class="chips" id="chips">
+        <button class="chip" id="feeds-chip"><b id="feeds-count"></b><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <span id="refresh-time"></span>
+        <button class="chip failed" id="failed-chip" hidden></button>
+      </div>
+      <p class="section-label" id="list-label">Newest first</p>
+      <ul class="list" id="post-list"></ul>
+      <div id="state" hidden></div>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="peek">22 unread</div>
-      <div class="scrim"></div>
-      <div class="sheet"><div class="grab"></div>
-      <div class="top"><div class="meta"><span class="tick"></span>Field Guide Weekly, 2 hr ago</div><button class="icon-btn" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
-      <h2 class="sh">Ten quiet trails within an hour of the city</h2>
-      <p class="by">By Rowan Example</p>
-      <div class="prose">
-      <p>Most guides send you to the same five summits. These routes trade fame for silence, with clear paths, shade and places to sit.</p>
-      <p>The first loop starts behind the old reservoir car park and climbs gently through beech woods for two kilometres before opening onto a long grassy ridge.</p>
-      <p>Start early and bring water: only three of the ten have a tap at the trailhead, and none of them sell anything once you are past the gate.</p>
+
+  <!-- Screen 2 as the spec drew it, live: the preview sheet over the list.
+       The drawn peek (the count behind the scrim) is the real screen 1
+       header now, so only the scrim and the sheet are carried over. -->
+  <div data-spec-screen="2" id="preview" hidden>
+    <div class="scrim" data-close-preview></div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="top">
+        <div class="meta"><span class="tick" id="preview-tick"></span><span id="preview-meta"></span></div>
+        <button class="icon-btn" id="preview-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
       </div>
-      <button class="btn-primary">Open full article<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></button>
-      <p class="note">Opens on fieldguideweekly.example</p>
+      <h2 class="sh" id="preview-title"></h2>
+      <p class="by" id="preview-by" hidden></p>
+      <div class="prose" id="preview-body"></div>
+      <button class="btn-primary" id="preview-open">Open full article<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></button>
+      <p class="note" id="preview-note"></p>
+    </div>
+  </div>
+
+  <!-- The Add feed sheet: the drawn sheet's shell with the kit's field and
+       buttons. -->
+  <div class="sheet-overlay" id="add-sheet" hidden>
+    <div class="scrim" data-close-sheet></div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="top">
+        <h2 class="sh">Add feed</h2>
+        <button class="icon-btn" id="add-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
       </div>
+      <form id="add-form" novalidate>
+        <label class="field-label" for="feed-url">Feed address</label>
+        <input class="field" id="feed-url" name="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="e.g. https://example.com/feed.xml">
+        <p class="add-error" id="add-error" hidden></p>
+        <div class="add-actions">
+          <button class="btn-primary" type="submit" id="add-submit">Add feed</button>
+          <button class="btn-secondary" type="button" id="add-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- The Feeds sheet: your feeds in the order you added them. -->
+  <div class="sheet-overlay" id="feeds-sheet" hidden>
+    <div class="scrim" data-close-sheet></div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="top">
+        <h2 class="sh">Your feeds</h2>
+        <button class="icon-btn" id="feeds-close" aria-label="Close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button>
+      </div>
+      <div class="sheet-scroll">
+        <p class="add-error" id="feeds-error" hidden></p>
+        <ul class="list" id="feeds-list"></ul>
+        <p class="feeds-empty" id="feeds-empty" hidden>You follow no feeds yet. Add one with the Add feed button.</p>
       </div>
     </div>
-  </template>
+  </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>

@@ -74,9 +74,10 @@
 
 .read .spine {opacity:.4}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Scoped so the second
+   .app block does not restyle screen 1. */
 
-.app {
+[data-spec-screen="2"] .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   height: 844px;
@@ -115,10 +116,43 @@
 
 .by {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0 0 16px}
 
-.prose {flex:1;overflow:hidden;font-size:17px;line-height:27px;font-family:ui-serif,Georgia,serif}
+.prose {flex:1;overflow-y:auto;font-size:17px;line-height:27px;font-family:ui-serif,Georgia,serif}
 
 .prose p {margin:0 0 14px}
 
 .btn-primary {display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));border-radius:8px;border:0;padding:0 16px;font-size:16px;font-weight:500;font-family:inherit;width:100%}
 
 .note {font-size:14px;line-height:20px;color:rgb(var(--muted));text-align:center;margin:8px 0 0}
+
+/* ── The preview and the sheets, live ───────────────────────────────────
+   The drawn screens were fixed 390x844 mocks. Live, the preview's scrim
+   covers the viewport and the sheet is the drawn bottom sheet in the
+   centred column; the Add feed and Feeds sheets reuse the same shell.
+   The elements under here that the spec did not draw are built from the
+   kit's tokens. */
+[data-spec-screen="2"][data-open] { position: fixed; inset: 0; z-index: 30; max-width: none; }
+[data-spec-screen="2"][data-open] .sheet,
+.sheet-overlay .sheet { left: 0; right: 0; margin-inline: auto; max-width: 42rem; }
+.sheet-overlay { position: fixed; inset: 0; z-index: 40; }
+
+.field-label {display:block;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin:16px 0 6px;padding:0 4px}
+
+.add-error {font-size:14px;line-height:20px;color:rgb(var(--danger));margin:8px 0 0;padding:0 4px}
+
+.add-actions {display:flex;flex-direction:column;gap:8px;margin-top:16px}
+
+.add-actions .btn-secondary {width:100%}
+
+.sheet-scroll {flex:1;overflow-y:auto;margin-top:8px;min-height:0}
+
+.feed-name {font-weight:600;font-size:16px;line-height:22px;margin:0}
+
+.feed-url {font-size:14px;line-height:20px;color:rgb(var(--muted));margin:0;word-break:break-all}
+
+.feed-err {font-size:14px;line-height:20px;color:rgb(var(--danger));margin:4px 0 0}
+
+.feeds-empty {padding:16px 4px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.remove-btn {flex:none}
+
+.chip.failed {color:rgb(var(--danger))}
