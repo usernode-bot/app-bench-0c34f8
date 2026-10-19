@@ -132,7 +132,9 @@
 
   // ── Piano strip ─────────────────────────────────────────────────────────
   var WHITE = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
-  var BLACK_GAP = { 1: 0, 3: 1, 6: 3, 8: 4, 10: 5 };
+  // Black keys by pitch: 1 = C#, 3 = Eb, 6 = Gb, 8 = Ab, 10 = Bb. The
+  // offsets run in the order the black keys are built (children 8 to 12).
+  var BLACK_GAP = { 1: 0, 3: 1, 6: 2, 8: 3, 10: 4 };
   function buildKeyboard() {
     ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'].forEach(function (n) {
       var d = document.createElement('div');
@@ -211,8 +213,13 @@
 
   function renderLessonHead() {
     els.title.textContent = lesson.name;
-    els.sub.textContent = lesson.items.map(function (i) { return i.label; }).join(', ')
-      + ': ' + lesson.items.length + ' of ' + lesson.total + ' ' + lesson.unit;
+    // Sentence case, no unit word, so the line fits on one at 390px.
+    // Song names are proper nouns and keep their capitals.
+    els.sub.textContent = lesson.items.map(function (i, n) {
+      return n > 0 && lesson.type !== 'progressions'
+        ? i.label.charAt(0).toLowerCase() + i.label.slice(1)
+        : i.label;
+    }).join(', ') + ': ' + lesson.items.length + ' of ' + lesson.total;
   }
 
   function renderAnswers() {
