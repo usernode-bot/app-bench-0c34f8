@@ -1,0 +1,145 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1060px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 16px 16px 40px;
+}
+
+.app * {box-sizing:border-box;margin:0}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.t {font-size:28px;line-height:36px;font-weight:700}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.hint {margin-top:16px}
+
+.btn-primary {display:inline-flex;min-height:44px;min-width:44px;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:0 14px;font-size:16px;font-weight:500;background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;font-family:inherit}
+
+.pick {display:flex;align-items:center;gap:4px;min-height:44px;padding:0;background:none;border:0;font:inherit;font-size:16px;font-weight:600;color:rgb(var(--fg))}
+
+.pick svg {color:rgb(var(--muted))}
+
+.seg {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:12px 0 14px}
+
+.seg span {flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:rgb(var(--muted));border-radius:8px}
+
+.seg .on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
+
+.ladder {border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden;background:rgb(var(--surface))}
+
+.tier {display:flex;border-bottom:1px solid rgb(var(--line))}
+
+.tier:last-child {border-bottom:0}
+
+.lab {width:52px;flex:none;color:rgb(var(--on-tier));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;line-height:24px}
+
+.s {background:rgb(var(--ts))}
+
+.a {background:rgb(var(--ta))}
+
+.b {background:rgb(var(--tb))}
+
+.c {background:rgb(var(--tc))}
+
+.d {background:rgb(var(--td))}
+
+.f {background:rgb(var(--tf))}
+
+.items {flex:1;display:flex;flex-wrap:wrap;gap:6px;padding:8px;align-content:flex-start;min-height:60px}
+
+.it {min-height:44px;padding:4px 10px;border:1px solid rgb(var(--line));background:rgb(var(--ground));border-radius:8px;font-size:14px;line-height:18px;display:flex;flex-direction:column;justify-content:center}
+
+.it i {font-style:normal;font-size:14px;color:rgb(var(--muted));line-height:16px}
+
+.empty {color:rgb(var(--muted));font-size:14px;padding:10px 4px}
+
+.sl {font-size:14px;font-weight:500;color:rgb(var(--muted));margin:20px 4px 8px}
+
+.un {display:flex;gap:6px;flex-wrap:wrap;border:1px dashed rgb(var(--line));border-radius:12px;padding:8px;background:rgb(var(--surface))}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--fg) / .45);
+  color: rgb(var(--fg));
+  min-height: 844px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding-top: 96px;
+}
+
+.sheet {
+  background: rgb(var(--surface));
+  border-radius: 16px 16px 0 0;
+  padding: 8px 16px 32px;
+  min-height: 748px;
+}
+
+.grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 12px}
+
+.hd {display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+
+.h {font-size:22px;line-height:28px;font-weight:700}
+
+.under {margin-top:6px}
+
+.x {min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:rgb(var(--muted))}
+
+.section-label {font-size:14px;line-height:20px;font-weight:600;color:rgb(var(--muted));margin:20px 0 8px}
+
+.bar {display:flex;height:28px;border-radius:6px;overflow:hidden;gap:2px}
+
+.bar span {color:rgb(var(--on-tier));font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.w1 {flex:1}
+
+.w3 {flex:3}
+
+.vote {display:flex;gap:6px}
+
+.vote button {flex:1;min-height:44px;border-radius:8px;border:1px solid rgb(var(--line));background:rgb(var(--ground));font:inherit;font-weight:700;color:rgb(var(--fg))}
+
+.vote .on {color:rgb(var(--on-tier));border-color:transparent}
+
+.list {border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
+
+.list-row {display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 12px;border-bottom:1px solid rgb(var(--line))}
+
+.list-row:last-child {border-bottom:0}
+
+.chip {width:32px;height:28px;border-radius:6px;color:rgb(var(--on-tier));font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+
+.foot {display:flex;gap:8px;margin-top:20px}
+
+.btn-secondary {flex:1;display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:0 14px;font:inherit;font-size:16px;font-weight:500;background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line))}
+
+.btn-secondary.del {color:rgb(var(--danger))}
