@@ -15,8 +15,13 @@
 
 .app {
   position: relative;
-  width: 390px;
-  height: 844px;
+  width: 100%;
+  max-width: 390px;
+  margin-inline: auto;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 844px;
+  min-height: 560px;
   background: rgb(var(--ground));
   color: rgb(var(--fg));
   font-family: ui-rounded,system-ui,sans-serif;
@@ -37,9 +42,23 @@
 
 .dot {display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 
-.scene {position:absolute;left:0;top:130px;width:390px;height:520px}
+.scene {position:absolute;left:0;top:130px;width:100%;height:520px;display:block;touch-action:none}
 
-.aim {position:absolute;left:183px;top:383px;width:24px;height:24px;color:rgb(var(--fg))}
+/* The world's own loading, empty and error states sit over the scene area,
+   quiet and centred, never on top of the controls. */
+.world-state {position:absolute;left:0;right:0;top:130px;height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 32px;text-align:center;pointer-events:none}
+.world-state[hidden] {display:none}
+.world-state .btn-primary {pointer-events:auto}
+
+/* "Staging demo", once, as a line of its own under the header. */
+.demo-note {position:absolute;left:16px;top:114px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:4px 10px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+/* A block that could not be saved. */
+.save-note {position:absolute;left:16px;right:16px;bottom:216px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;padding:8px 12px;font-size:14px;line-height:20px;color:rgb(var(--fg))}
+
+.dot.dot-warn {background:rgb(var(--muted)) !important}
+
+.aim {position:absolute;left:calc(50% - 12px);top:383px;width:24px;height:24px;color:rgb(var(--fg))}
 
 .mode {position:absolute;right:16px;top:260px;display:flex;flex-direction:column;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
 

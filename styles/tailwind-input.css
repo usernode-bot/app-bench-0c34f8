@@ -29,39 +29,50 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 250 249;    /* the page: warm grey */
     --surface: 255 255 255;   /* lists, cards, fields */
     --raised: 245 245 244;    /* hovers, badges */
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 21 128 61;     /* the one accent */
+    --accent: 21 128 61;      /* grass green: the one accent */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
-    --sky: 214 232 244; /* from the spec's screens */
-    --grass: 92 160 64; /* from the spec's screens */
-    --dirt: 134 96 60; /* from the spec's screens */
-    --stone: 140 140 138; /* from the spec's screens */
-    --wood: 176 128 72; /* from the spec's screens */
-    --leaves: 58 122 48; /* from the spec's screens */
-    --water: 70 140 200; /* from the spec's screens */
-    --sand: 225 205 140; /* from the spec's screens */
-    --brick: 170 74 58; /* from the spec's screens */
+    --focus: 21 128 61;       /* the keyboard focus ring */
+    /* The sky and the eight materials. The materials are the same in both
+       looks: they are the blocks themselves, not the app's chrome. */
+    --sky: 214 232 244;
+    --grass: 92 160 64;
+    --dirt: 134 96 60;
+    --stone: 140 140 138;
+    --wood: 176 128 72;
+    --leaves: 58 122 48;
+    --water: 70 140 200;
+    --sand: 225 205 140;
+    --brick: 170 74 58;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
+    --ground: 23 21 19;
+    --surface: 33 30 28;
+    --raised: 45 41 38;
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 74 222 128;
+    --on-accent: 5 46 22;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 74 222 128;
+    --sky: 30 41 59;          /* dusk blue */
+    --grass: 92 160 64;
+    --dirt: 134 96 60;
+    --stone: 140 140 138;
+    --wood: 176 128 72;
+    --leaves: 58 122 48;
+    --water: 70 140 200;
+    --sand: 225 205 140;
+    --brick: 170 74 58;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

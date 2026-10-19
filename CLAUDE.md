@@ -95,22 +95,36 @@ tables you've marked private), etc.
 
 ## About Block World
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A 3D voxel creative building game. Everyone in the group flies around one
+small shared floating island and places or breaks blocks from a hotbar of
+eight materials. The island is the same world for everyone: blocks other
+people place or break show up within a few seconds.
+
+The world has edges 64 blocks out from the island's centre each way and 48
+up or down. There is one world, not several, and no walking with gravity or
+collisions: you always fly.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+- **Palette:** accent: grass green (light 21 128 61 with white text, dark
+  74 222 128 with deep green 5 46 22 text); neutrals: warm greys (dark look
+  ground 23 21 19, surface 33 30 28, raised 45 41 38); sky: pale blue 214 232
+  244 / dusk blue 30 41 59. The eight block materials are the subject's own
+  colours and stay the same in both looks: grass 92 160 64, dirt 134 96 60,
+  stone 140 140 138, oak 176 128 72, leaves 58 122 48, water 70 140 200, sand
+  225 205 140, brick 170 74 58. Block sides are drawn a little darker than
+  their top so shapes read without textures.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  The kit's names for the materials are `--grass`, `--dirt`, `--stone`,
+  `--wood` (oak), `--leaves`, `--water`, `--sand`, `--brick`; the sky is
+  `--sky`.
+- **Signature element:** the floating island itself, hanging in open sky with
+  its stone underside tapering to a point, seen in 3D from every side.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  set in the system rounded face (`ui-rounded`), like toy blocks.
+- **Two looks**, following the viewer's Homeroom theme: the sky changes
+  between a pale morning blue and a dusk blue, and everything drawn over it
+  sits on solid surfaces so it always reads.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

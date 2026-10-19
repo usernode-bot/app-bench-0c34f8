@@ -3,5 +3,24 @@
     "emoji": "🧱"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "World loads",
+      "path": "/",
+      "expectSelector": "#hotbar"
+    },
+    {
+      "name": "Demo world",
+      "id": "demo-world",
+      "path": "/?demo=1",
+      "expectText": "Staging demo",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Hotbar names",
+      "path": "/",
+      "expectText": "Oak planks"
+    }
+  ]
 }

@@ -55,6 +55,16 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The sky and the eight block materials.
+        sky: token('sky'),
+        grass: token('grass'),
+        dirt: token('dirt'),
+        stone: token('stone'),
+        wood: token('wood'),
+        leaves: token('leaves'),
+        water: token('water'),
+        sand: token('sand'),
+        brick: token('brick'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
