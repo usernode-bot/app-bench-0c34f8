@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%230f766e'/><path d='M32 24h36v16a18 18 0 0 1-36 0Zm36 2h12v6a12 12 0 0 1-12 12m-48-18H20v6a12 12 0 0 0 12 12' fill='none' stroke='white' stroke-width='5'/><path d='M43 62h14v8h9v8H34v-8h9Z' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -118,51 +118,22 @@
        components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
-       Change them where behaviour needs it; do not redraw them. -->
+       The drawn values are sample data: app.js renders the real rows from the
+       API with the same markup, and renders screen 2 (the item sheet) too. -->
   <div data-spec-screen="1">
     <div class="app">
-    <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
-    <button class="pick">Bay Area restaurants<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-    <p class="sub">15 things, ranked by 5 people</p>
-    <div class="seg"><span class="on">Your view</span><span>Crowd view</span></div>
-    <div class="ladder">
-    <div class="tier"><div class="lab s">S</div><div class="items"><div class="it">Zuni Cafe<i>Crowd: S</i></div><div class="it">Tartine Bakery<i>Crowd: A</i></div></div></div>
-    <div class="tier"><div class="lab a">A</div><div class="items"><div class="it">Swan Oyster Depot<i>Crowd: A</i></div><div class="it">La Taqueria<i>Crowd: S</i></div><div class="it">Nopa<i>Crowd: A</i></div><div class="it">Burma Superstar<i>Crowd: B</i></div></div></div>
-    <div class="tier"><div class="lab b">B</div><div class="items"><div class="it">Pizzeria Delfina<i>Crowd: B</i></div><div class="it">Yank Sing<i>Crowd: A</i></div><div class="it">Gott's Roadside<i>Crowd: C</i></div></div></div>
-    <div class="tier"><div class="lab c">C</div><div class="items"><div class="it">Mission Chinese<i>Crowd: B</i></div><div class="it">Anchor Oyster Bar<i>Crowd: C</i></div></div></div>
-    <div class="tier"><div class="lab d">D</div><div class="items"><div class="it">Fisherman's Wharf crab<i>Crowd: D</i></div></div></div>
-    <div class="tier"><div class="lab f">F</div><div class="items"><p class="empty">Drag an item here</p></div></div>
-    </div>
-    <p class="sl">Not ranked by you yet</p>
-    <div class="un"><div class="it">Sushi Ran<i>Added by Maya</i></div><div class="it">Cheese Board Pizza<i>Added by Dev</i></div><div class="it">Brenda's French Soul Food<i>Added by Jo</i></div></div>
-    <p class="sub hint">Drag an item into a tier to vote. Drag again to change it. Tap an item to see how everyone voted.</p>
+    <div class="top"><h1 class="t">Tier List</h1><button class="btn-primary" id="addItemBtn" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add item</button></div>
+    <button class="pick" id="listPick" hidden><span id="listName"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <p class="sub" id="listSub"></p>
+    <div class="seg" id="viewSeg" hidden><span class="on" data-view="you" role="button" tabindex="0">Your view</span><span data-view="crowd" role="button" tabindex="0">Crowd view</span></div>
+    <div id="state"></div>
+    <div class="ladder" id="ladder" hidden></div>
+    <p class="sl" id="trayLabel" hidden>Not ranked by you yet</p>
+    <div class="un" id="tray" data-drop="tray" hidden></div>
+    <p class="sub hint" id="hint"></p>
     </div>
   </div>
-  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
-  <template data-spec-screen="2">
-    <div data-spec-screen="2">
-      <div class="app">
-      <div class="sheet">
-      <div class="grab"></div>
-      <div class="hd"><div><h2 class="h">Swan Oyster Depot</h2><p class="sub">Added by you</p></div><button class="x" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-      <p class="section-label">Crowd, 5 votes</p>
-      <div class="bar"><span class="s w1">S</span><span class="a w3">A</span><span class="b w1">B</span></div>
-      <p class="sub under">Crowd tier: A</p>
-      <p class="section-label">Your vote</p>
-      <div class="vote"><button>S</button><button class="on a">A</button><button>B</button><button>C</button><button>D</button><button>F</button></div>
-      <p class="section-label">How everyone voted</p>
-      <div class="list">
-      <div class="list-row">You<span class="chip a">A</span></div>
-      <div class="list-row">Maya<span class="chip s">S</span></div>
-      <div class="list-row">Dev<span class="chip a">A</span></div>
-      <div class="list-row">Jo<span class="chip a">A</span></div>
-      <div class="list-row">Sam<span class="chip b">B</span></div>
-      </div>
-      <div class="foot"><button class="btn-secondary del"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Remove item</button><button class="btn-secondary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report</button></div>
-      </div>
-      </div>
-    </div>
-  </template>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js" defer></script>
 </body>
 </html>

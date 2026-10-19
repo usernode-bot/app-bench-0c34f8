@@ -1,27 +1,35 @@
 # Tier List
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+Rank anything with friends, from restaurants to movies. A group keeps
+shared lists of things to rank; anyone adds an item, everyone drags each
+item into a tier (S at the top down to F), and each item shows your vote,
+the crowd's tier and how every person voted.
 
-The scaffold is a small working demo that proves the plumbing works:
+- **Your view** puts each item where you put it, with the crowd's tier on
+  its card; a tray holds what you have not ranked yet.
+- **Crowd view** puts each item in the crowd's tier (the average of
+  everyone's votes, rounded to the nearest tier), with a small stacked bar
+  of everyone's tiers and the vote count.
+- Tap an item for the crowd's stacked bar, your vote buttons, and how each
+  person voted. Whoever added an item can remove it; anyone can report it
+  (reports go to the group's admins and hide nothing by themselves).
+- Lists are switched from the list name under the title; whoever started
+  a list can delete it.
+
+## Running it
 
 - **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+  (an RS256 JWT) on every request, so the app knows who is voting. Guests
+  may look around read-only.
+- **Database** — Postgres; the schema (`lists`, `items`, `votes`,
+  `reports`) is created idempotently on boot.
+- **Styling** — Tailwind CSS, precompiled by `npm run build` during image
+  creation, in a light and a dark look that follow the viewer's Homeroom
+  theme.
 
-## Replacing the template
+## Staging demo
 
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+Open a staging preview with `?demo=1` for a populated demo: a
+"Bay Area restaurants" list with 15 restaurants voted on by four made-up
+friends and you, plus a "Movies to rewatch" list. Everything works on the
+demo rows: dragging, adding, removing, reporting.

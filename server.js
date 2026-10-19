@@ -147,6 +147,262 @@ app.use((req, res, next) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+app.get('/api/me', (req, res) => {
+  // A guest reads without an account; their writes are refused downstream.
+  res.json({ id: req.user ? req.user.id : null, username: req.user ? req.user.username : null });
+});
+
+// ── Tier List data ────────────────────────────────────────────────────────
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+// Public tables except `reports`, which records abuse reports for the
+// group's admins: schema-only on staging (`staging:private`), and no public
+// table points into it.
+async function migrate() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS lists (
+      id serial PRIMARY KEY,
+      name text NOT NULL CHECK (length(name) BETWEEN 1 AND 60),
+      created_by text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      demo_for text
+    );
+    -- A viewer's demo lists: one row per (viewer, name), so a viewer can
+    -- hold two demo lists and a racing seed still loses the index. NULLs
+    -- (real lists) are distinct in a unique index, so real lists are
+    -- untouched.
+    ALTER TABLE lists DROP CONSTRAINT IF EXISTS lists_demo_for_unique;
+    CREATE UNIQUE INDEX IF NOT EXISTS lists_demo_for_key ON lists (demo_for, name);
+    CREATE TABLE IF NOT EXISTS items (
+      id serial PRIMARY KEY,
+      list_id integer NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+      name text NOT NULL CHECK (length(name) BETWEEN 1 AND 80),
+      added_by text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS votes (
+      item_id integer NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier text NOT NULL CHECK (tier IN ('S', 'A', 'B', 'C', 'D', 'F')),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );
+    CREATE TABLE IF NOT EXISTS reports (
+      id serial PRIMARY KEY,
+      item_id integer NOT NULL,
+      reporter text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    COMMENT ON TABLE reports IS 'staging:private';
+  `);
+}
+
+// The first version's populated demo: the viewer's two lists, seeded once
+// per viewer behind IS_STAGING && ?demo=1. Real lists stay out of staging's
+// way; a reload changes nothing and edits the viewer makes stick.
+const DEMO_LISTS = [
+  {
+    name: 'Movies to rewatch',
+    items: [
+      { name: 'The Princess Bride', added_by: 'Maya', me: null, votes: { Maya: 'S', Jo: 'A' } },
+      { name: 'Ratatouille', added_by: 'Dev', me: null, votes: { Maya: 'S', Sam: 'A' } },
+      { name: 'Paddington', added_by: 'Jo', me: null, votes: { Dev: 'A', Sam: 'S' } },
+      { name: 'Spirited Away', added_by: 'Sam', me: null, votes: { Maya: 'A', Dev: 'S' } },
+      { name: 'Toy Story', added_by: 'Maya', me: null, votes: { Dev: 'B', Jo: 'A' } },
+      { name: 'The Sound of Music', added_by: 'Dev', me: null, votes: { Jo: 'B' } },
+    ],
+  },
+  {
+    name: 'Bay Area restaurants',
+    items: [
+      { name: 'Zuni Cafe', added_by: 'Maya', me: 'S', votes: { Maya: 'S', Dev: 'S', Jo: 'A', Sam: 'S' } },
+      { name: 'Tartine Bakery', added_by: 'Dev', me: 'A', votes: { Maya: 'A', Dev: 'S', Jo: 'B', Sam: 'A' } },
+      { name: 'Swan Oyster Depot', mine: true, me: 'A', votes: { Maya: 'S', Dev: 'A', Jo: 'A', Sam: 'B' } },
+      { name: 'La Taqueria', added_by: 'Maya', me: 'A', votes: { Maya: 'S', Dev: 'A', Jo: 'S', Sam: 'S' } },
+      { name: 'Nopa', added_by: 'Jo', me: 'A', votes: { Maya: 'A', Dev: 'A', Jo: 'B', Sam: 'A' } },
+      { name: 'Burma Superstar', added_by: 'Dev', me: 'A', votes: { Maya: 'B', Dev: 'B', Jo: 'A', Sam: 'C' } },
+      { name: 'Pizzeria Delfina', added_by: 'Sam', me: 'B', votes: { Maya: 'B', Dev: 'A', Jo: 'B', Sam: 'C' } },
+      { name: 'Yank Sing', added_by: 'Jo', me: 'B', votes: { Maya: 'A', Dev: 'S', Jo: 'A', Sam: 'A' } },
+      { name: "Gott's Roadside", added_by: 'Maya', me: 'B', votes: { Maya: 'C', Dev: 'B', Jo: 'C', Sam: 'D' } },
+      { name: 'Mission Chinese', added_by: 'Dev', me: 'C', votes: { Maya: 'B', Dev: 'B', Jo: 'B', Sam: 'B' } },
+      { name: 'Anchor Oyster Bar', added_by: 'Sam', me: 'C', votes: { Maya: 'C', Dev: 'C', Jo: 'B', Sam: 'C' } },
+      { name: "Fisherman's Wharf crab", added_by: 'Jo', me: 'D', votes: { Maya: 'D', Dev: 'C', Jo: 'D', Sam: 'D' } },
+      { name: 'Sushi Ran', added_by: 'Maya', me: null, votes: { Maya: 'S' } },
+      { name: 'Cheese Board Pizza', added_by: 'Dev', me: null, votes: { Dev: 'A' } },
+      { name: "Brenda's French Soul Food", added_by: 'Jo', me: null, votes: { Jo: 'C' } },
+    ],
+  },
+];
+
+async function seedDemo(user) {
+  const seen = await pool.query('SELECT id FROM lists WHERE demo_for = $1 LIMIT 1', [user.id]);
+  if (seen.rowCount) return;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const demo of DEMO_LISTS) {
+      const list = await client.query(
+        'INSERT INTO lists (name, created_by, demo_for) VALUES ($1, $2, $3) RETURNING id',
+        [demo.name, user.username, user.id]
+      );
+      const listId = list.rows[0].id;
+      for (const item of demo.items) {
+        const row = await client.query(
+          'INSERT INTO items (list_id, name, added_by) VALUES ($1, $2, $3) RETURNING id',
+          [listId, item.name, item.mine ? user.username : item.added_by]
+        );
+        const itemId = row.rows[0].id;
+        const voteRows = Object.entries(item.votes || {})
+          .map(([who, tier]) => ['demo-' + who.toLowerCase(), who, tier]);
+        if (item.me) voteRows.unshift([user.id, user.username, item.me]);
+        for (const [userId, username, tier] of voteRows) {
+          await client.query(
+            `INSERT INTO votes (item_id, user_id, username, tier)
+             VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`,
+            [itemId, userId, username, tier]
+          );
+        }
+      }
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    // Two viewers racing the same first ?demo=1 request: the winner's rows
+    // stand (unique demo_for), the loser reloads into them.
+    if (err.code !== '23505') throw err;
+  } finally {
+    client.release();
+  }
+}
+
+const wrap = (fn) => (req, res) => fn(req, res).catch((err) => {
+  console.error(err);
+  res.status(500).json({ error: 'request_failed' });
+});
+
+app.get('/api/lists', wrap(async (req, res) => {
+  const demo = IS_STAGING && req.query.demo === '1';
+  if (demo && req.user) await seedDemo(req.user);
+  // Rows seeded for a viewer stay behind ?demo=1: the plain route stays
+  // production-shaped even after the demo has run for this account.
+  const { rows } = await pool.query(
+    `SELECT l.id, l.name, l.created_by, l.demo_for IS NOT NULL AS demo,
+            (SELECT count(*) FROM items WHERE list_id = l.id)::int AS item_count,
+            (SELECT count(DISTINCT v.user_id) FROM votes v
+               JOIN items i ON i.id = v.item_id WHERE i.list_id = l.id)::int AS voter_count
+     FROM lists l
+     WHERE $1::boolean OR l.demo_for IS NULL
+     ORDER BY l.created_at DESC, l.id DESC`,
+    [demo && !!req.user]
+  );
+  res.json({ lists: rows });
+}));
+
+app.post('/api/lists', wrap(async (req, res) => {
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  if (!name || name.length > 60) return res.status(400).json({ error: 'invalid_name' });
+  const { rows } = await pool.query(
+    `INSERT INTO lists (name, created_by) VALUES ($1, $2)
+     RETURNING id, name, created_by, false AS demo`,
+    [name, req.user.username]
+  );
+  res.status(201).json({ list: Object.assign(rows[0], { item_count: 0, voter_count: 0 }) });
+}));
+
+app.delete('/api/lists/:id', wrap(async (req, res) => {
+  const found = await pool.query('SELECT created_by FROM lists WHERE id = $1', [req.params.id]);
+  if (!found.rowCount) return res.status(404).json({ error: 'not_found' });
+  if (found.rows[0].created_by !== req.user.username) {
+    return res.status(403).json({ error: 'not_yours' });
+  }
+  await pool.query('DELETE FROM lists WHERE id = $1', [req.params.id]);
+  res.json({ ok: true });
+}));
+
+app.get('/api/lists/:id', wrap(async (req, res) => {
+  const lists = await pool.query(
+    'SELECT id, name, created_by, demo_for IS NOT NULL AS demo FROM lists WHERE id = $1',
+    [req.params.id]
+  );
+  if (!lists.rowCount) return res.status(404).json({ error: 'not_found' });
+  const viewerId = req.user ? req.user.id : null;
+  const { rows } = await pool.query(
+    `SELECT i.id, i.name, i.added_by, v.tier AS my_tier,
+            COALESCE(
+              json_agg(json_build_object('username', v2.username, 'tier', v2.tier)
+                       ORDER BY v2.updated_at, v2.user_id)
+                FILTER (WHERE v2.user_id IS NOT NULL),
+              '[]') AS votes
+     FROM items i
+     LEFT JOIN votes v ON v.item_id = i.id AND v.user_id = $2
+     LEFT JOIN votes v2 ON v2.item_id = i.id
+     WHERE i.list_id = $1
+     GROUP BY i.id, i.name, i.added_by, v.tier, i.created_at
+     ORDER BY i.created_at, i.id`,
+    [req.params.id, viewerId]
+  );
+  res.json({ list: lists.rows[0], items: rows });
+}));
+
+app.post('/api/lists/:id/items', wrap(async (req, res) => {
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  if (!name || name.length > 80) return res.status(400).json({ error: 'invalid_name' });
+  const lists = await pool.query('SELECT id FROM lists WHERE id = $1', [req.params.id]);
+  if (!lists.rowCount) return res.status(404).json({ error: 'not_found' });
+  const { rows } = await pool.query(
+    `INSERT INTO items (list_id, name, added_by) VALUES ($1, $2, $3)
+     RETURNING id, name, added_by, NULL::text AS my_tier, '[]'::json AS votes`,
+    [req.params.id, name, req.user.username]
+  );
+  res.status(201).json({ item: rows[0] });
+}));
+
+async function itemOwner(req, res) {
+  const found = await pool.query('SELECT added_by FROM items WHERE id = $1', [req.params.id]);
+  if (!found.rowCount) { res.status(404).json({ error: 'not_found' }); return null; }
+  if (found.rows[0].added_by !== req.user.username) {
+    res.status(403).json({ error: 'not_yours' });
+    return null;
+  }
+  return found.rows[0];
+}
+
+app.delete('/api/items/:id', wrap(async (req, res) => {
+  if (!(await itemOwner(req, res))) return;
+  await pool.query('DELETE FROM items WHERE id = $1', [req.params.id]); // its votes go with it
+  res.json({ ok: true });
+}));
+
+app.put('/api/items/:id/vote', wrap(async (req, res) => {
+  const tier = req.body.tier;
+  if (!TIERS.includes(tier)) return res.status(400).json({ error: 'invalid_tier' });
+  const items = await pool.query('SELECT id FROM items WHERE id = $1', [req.params.id]);
+  if (!items.rowCount) return res.status(404).json({ error: 'not_found' });
+  const { rows } = await pool.query(
+    `INSERT INTO votes (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (item_id, user_id)
+     DO UPDATE SET tier = EXCLUDED.tier, updated_at = now()
+     RETURNING tier`,
+    [req.params.id, req.user.id, req.user.username, tier]
+  );
+  res.json({ tier: rows[0].tier });
+}));
+
+app.delete('/api/items/:id/vote', wrap(async (req, res) => {
+  await pool.query('DELETE FROM votes WHERE item_id = $1 AND user_id = $2',
+    [req.params.id, req.user.id]);
+  res.json({ ok: true });
+}));
+
+app.post('/api/items/:id/report', wrap(async (req, res) => {
+  const items = await pool.query('SELECT id FROM items WHERE id = $1', [req.params.id]);
+  if (!items.rowCount) return res.status(404).json({ error: 'not_found' });
+  await pool.query('INSERT INTO reports (item_id, reporter) VALUES ($1, $2)',
+    [req.params.id, req.user.username]);
+  res.json({ ok: true }); // recorded for the admins; hides nothing by itself
+}));
+
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
 // /favicon.ico (older browsers, direct visits) doesn't fall through to
@@ -191,10 +447,28 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await migrate();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop listening, drain in-flight requests for about 3 s, close the pool,
+// exit.
+let shuttingDown = false;
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log('Shutting down');
+  if (server) server.close();
+  setTimeout(() => {
+    pool.end().finally(() => process.exit(0));
+  }, 3000);
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });

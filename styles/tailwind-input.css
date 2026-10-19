@@ -49,17 +49,24 @@
     --on-tier: 255 255 255; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
+    --ground: 24 22 20;
+    --surface: 34 31 28;
+    --raised: 46 42 38;
+    --fg: 245 243 240;
+    --muted: 170 163 155;
+    --line: 66 61 56;
     --accent: 45 212 191;
     --on-accent: 4 47 46;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
     --focus: 94 234 212;
+    --ts: 210 40 40; /* from the spec's screens */
+    --ta: 194 65 12; /* from the spec's screens */
+    --tb: 161 98 7; /* from the spec's screens */
+    --tc: 21 128 61; /* from the spec's screens */
+    --td: 3 105 161; /* from the spec's screens */
+    --tf: 124 58 237; /* from the spec's screens */
+    --on-tier: 255 255 255; /* from the spec's screens */
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -141,5 +148,14 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+
+  /* A small stacked bar of everyone's tiers, inside an item card in the
+     crowd view. Segments are <b class="s|a|b|c|d|f"> with a flex weight. */
+  .minibar {
+    @apply mr-1 inline-flex h-3 w-14 gap-px overflow-hidden rounded align-middle;
+  }
+  .minibar b {
+    @apply block h-full;
   }
 }

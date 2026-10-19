@@ -95,22 +95,42 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A group app for ranking things together: shared lists (Bay Area
+restaurants, movies to rewatch, anything), where anyone adds items and
+everyone drags each item into a tier from S (best) to F (worst). Each item
+shows your vote, the crowd's tier and how every person voted. The
+scaffold's starter screen was replaced by this app.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+Set by the first version's spec; every later change follows it.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** warm greys for neutrals; teal as the one action colour
+  (`bg-accent`, on `btn-primary` only, so a button never looks like a
+  tier); six tier colours people already read in tier lists — S red,
+  A orange, B amber, C green, D blue, F violet (`--ts`…`--tf`, exposed as
+  `tier-s`…`tier-f` with `on-tier` for their letters). Exact values live in
+  `styles/tailwind-input.css`; every text pair is 4.5:1 or better in both
+  looks.
+- **Signature element:** the tier ladder — six labelled bands, S at the
+  top, each growing taller as more items sit in it. The same tier colours
+  appear everywhere a tier shows: bands, stacked bars, vote buttons, tier
+  chips.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  in the rounded system face (`ui-rounded`); bold tier letters.
+- **One fixed look:** none — the app follows the viewer's Homeroom theme
+  in light and dark.
+
+## App-specific conventions
+
+- The `reports` table is marked `staging:private` (schema only on staging)
+  and no public table carries a foreign key into it.
+- Tiers are fixed S/A/B/C/D/F, best at the top; the crowd tier is the
+  average of votes (S counts 6 down to F counts 1), rounded to the nearest
+  tier.
+- Demo rows are written only on staging, only behind `?demo=1`, once per
+  viewer (`lists.demo_for`), and are left out of every response without
+  `?demo=1`, so the plain routes stay production-shaped.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

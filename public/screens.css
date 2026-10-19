@@ -83,10 +83,23 @@
 
 .un {display:flex;gap:6px;flex-wrap:wrap;border:1px dashed rgb(var(--line));border-radius:12px;padding:8px;background:rgb(var(--surface))}
 
-/* Screen 2: its rules the first screen has not got. */
+/* Screen 2: its rules the first screen has not got. Scoped to the item
+   sheet, which the app renders as an overlay (screen 1 keeps the .app
+   rules above). */
 
-.app {
+[data-spec-screen="2"] {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   background: rgb(var(--fg) / .45);
+}
+
+[data-spec-screen="2"] .app {
+  background: none;
   color: rgb(var(--fg));
   min-height: 844px;
   width: 390px;
@@ -96,6 +109,10 @@
   box-sizing: border-box;
   padding-top: 96px;
 }
+
+/* Small form sheets (add item, new list, list picker) are not drawn
+   screens: they size to their content, not the drawn sheet's height. */
+[data-spec-screen="2"] .sheet.compact { min-height: 0 }
 
 .sheet {
   background: rgb(var(--surface));
@@ -130,6 +147,15 @@
 
 .vote .on {color:rgb(var(--on-tier));border-color:transparent}
 
+/* The drawn `.vote button` background outranks the tier classes, so the
+   selected button shows its tier colour through these. */
+.vote .on.s {background:rgb(var(--ts))}
+.vote .on.a {background:rgb(var(--ta))}
+.vote .on.b {background:rgb(var(--tb))}
+.vote .on.c {background:rgb(var(--tc))}
+.vote .on.d {background:rgb(var(--td))}
+.vote .on.f {background:rgb(var(--tf))}
+
 .list {border:1px solid rgb(var(--line));border-radius:12px;overflow:hidden}
 
 .list-row {display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 12px;border-bottom:1px solid rgb(var(--line))}
@@ -143,3 +169,10 @@
 .btn-secondary {flex:1;display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:0 14px;font:inherit;font-size:16px;font-weight:500;background:rgb(var(--surface));color:rgb(var(--fg));border:1px solid rgb(var(--line))}
 
 .btn-secondary.del {color:rgb(var(--danger))}
+
+/* Behaviour the drawn screens need: dragging feedback, tappable segments. */
+.seg span {cursor:pointer}
+.it.dragging {opacity:.35}
+.drag-ghost {box-shadow:0 6px 16px rgb(0 0 0 / .25);cursor:grabbing}
+.drop-hover {background:rgb(var(--accent) / .1)}
+body.dragging-item {user-select:none;-webkit-user-select:none;cursor:grabbing}
