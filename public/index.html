@@ -78,6 +78,7 @@
        classes, swap this link for the platform-hosted engine instead:
        <script src="/usernode-tailwind/v1/tailwind.js"></script> -->
   <link rel="stylesheet" href="/tailwind.css">
+  <link rel="stylesheet" href="/screens.css">
   <!-- The platform bridge, centrally hosted and loaded by RELATIVE path (the
        handler in server.js serves it under a plain "node server.js"; the
        platform's edge answers it everywhere else). Never vendor it and never
@@ -115,21 +116,60 @@
   <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
        these files, comments included, and the starter should ship only the
        components its screen uses.) -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
-
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <div class="flex h-20 w-20 items-center justify-center rounded-2xl border border-line bg-ground text-title">📰</div>
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">RSS Reader</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
-
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
+       first version's starting point. Their styles are in public/screens.css.
+       Change them where behaviour needs it; do not redraw them. -->
+  <div data-spec-screen="1">
+    <div>
+    <div class="app">
+    <div class="top"><div><h1>RSS Reader</h1><div class="sub">Updated just now</div></div>
+    <div class="acts"><button class="btn-secondary icon" aria-label="Your feeds"><svg viewBox="0 0 24 24"><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1"/></svg></button>
+    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add feed</button></div></div>
+    <div class="tabs"><span class="tab on">Unread <span class="count">12</span></span><span class="tab">Saved <span class="count">4</span></span><span class="tab">All</span></div>
+    <div class="chips"><span><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly</span><span><i class="dot" style="background:rgb(var(--f2))"></i>Kitchen Notes</span><span><i class="dot" style="background:rgb(var(--f3))"></i>Quiet Software</span><span><i class="dot" style="background:rgb(var(--f4))"></i>Space Desk</span></div>
+    <div class="section-label">Today</div>
+    <ul class="list">
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f1))"></i><div class="body"><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Telescope spots the earliest spiral galaxy yet</div><div class="meta">Space Desk, 4 hr ago</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f5))"></i><div class="body"><div class="t">A field guide to city foxes after dark</div><div class="meta">Nature Notes, 5 hr ago</div></div></li>
+    </ul>
+    <div class="section-label" style="margin-top:20px">Yesterday</div>
+    <ul class="list">
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f3))"></i><div class="body"><div class="t">On keeping a personal reading list</div><div class="meta">Quiet Software, yesterday 9:05 am</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f2))"></i><div class="body"><div class="t">Weeknight dal, three ways</div><div class="meta">Kitchen Notes, yesterday 6:40 pm</div></div></li>
+    <li class="list-row"><i class="un"></i><i class="dot" style="background:rgb(var(--f4))"></i><div class="body"><div class="t">Crew completes suit fit checks for the next moon trip</div><div class="meta">Space Desk, yesterday 2:15 pm</div></div></li>
+    </ul>
+    </div>
+    </div>
+  </div>
+  <!-- Screen 2 as the spec drew it: inert until moved where that view belongs. -->
+  <template data-spec-screen="2">
+    <div data-spec-screen="2">
+      <div>
+      <div class="app">
+      <div class="top"><h1>RSS Reader</h1></div>
+      <ul class="list">
+      <li class="list-row"><i class="dot" style="background:rgb(var(--f1))"></i><div><div class="t">Why the new battery chemistry might finally reach phones</div><div class="meta">Circuit Weekly, 25 min ago</div></div></li>
+      <li class="list-row"><i class="dot" style="background:rgb(var(--f2))"></i><div><div class="t">The crispiest roast potatoes need one odd step</div><div class="meta">Kitchen Notes, 1 hr ago</div></div></li>
+      <li class="list-row"><i class="dot" style="background:rgb(var(--f3))"></i><div><div class="t">Notes on a quieter kind of software update</div><div class="meta">Quiet Software, 2 hr ago</div></div></li>
+      </ul>
+      <div class="scrim"></div>
+      <div class="sheet">
+      <div class="grab"></div>
+      <div class="bar"><div class="meta" style="display:flex;align-items:center;gap:6px"><i class="dot" style="background:rgb(var(--f1))"></i>Circuit Weekly, 25 min ago</div>
+      <button class="ghost" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <h2>Why the new battery chemistry might finally reach phones</h2>
+      <p>Engineers say a silicon-rich anode could add a third more runtime without a bigger cell. The catch is how it behaves after a few hundred charges, and early tests are promising but small.</p>
+      <div class="note">Marked as read</div>
+      <div class="row"><button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Open full article</button><button class="btn-secondary"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-4-6 4z"/></svg>Save</button></div>
+      <div style="display:flex;justify-content:center;margin-top:8px"><button class="ghost">Mark as unread</button></div>
+      </div>
+      </div>
+      </div>
+    </div>
+  </template>
+  <!-- /usernode-spec-screens@1 -->
 </body>
 </html>

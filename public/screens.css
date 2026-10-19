@@ -1,0 +1,120 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 1000px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 0 16px 24px;
+}
+
+.app * {box-sizing:border-box;margin:0}
+
+.top {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:20px 0 12px}
+
+.top h1 {font-size:28px;line-height:36px;font-weight:700}
+
+.sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.acts {display:flex;gap:8px}
+
+.btn-primary,.btn-secondary {display:inline-flex;min-height:44px;min-width:44px;align-items:center;justify-content:center;gap:6px;border-radius:8px;padding:0 14px;font-size:16px;font-weight:500;font-family:inherit}
+
+.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0}
+
+.btn-secondary {border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg))}
+
+.icon {padding:0}
+
+.tabs {display:flex;gap:8px;margin:4px 0 16px}
+
+.tab {min-height:44px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;border-radius:22px;border:1px solid rgb(var(--line));background:rgb(var(--surface));font-size:14px;color:rgb(var(--muted))}
+
+.tab.on {background:rgb(var(--fg));color:rgb(var(--ground));border-color:rgb(var(--fg))}
+
+.count {font-size:14px;font-weight:600}
+
+.chips {display:flex;gap:16px;overflow:hidden;margin-bottom:16px;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.chips span {display:flex;align-items:center;gap:6px;white-space:nowrap}
+
+.dot {width:10px;height:10px;border-radius:50%;flex:none}
+
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin-bottom:8px;padding:0 4px}
+
+.list {list-style:none;padding:0;border:1px solid rgb(var(--line));border-radius:12px;background:rgb(var(--surface));overflow:hidden}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;min-height:44px;border-top:1px solid rgb(var(--line))}
+
+.list-row:first-child {border-top:0}
+
+.list-row .dot {margin-top:7px}
+
+.body {flex:1;min-width:0}
+
+.t {font-weight:600;font-size:16px;line-height:22px}
+
+.meta {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:2px}
+
+.un {width:8px;height:8px;border-radius:50%;background:rgb(var(--unread));margin-top:9px;flex:none}
+
+svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Screen 2: its rules the first screen has not got. */
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  height: 844px;
+  width: 390px;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.top {display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px}
+
+.list-row {display:flex;gap:12px;padding:14px 16px;border-top:1px solid rgb(var(--line))}
+
+.meta {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.scrim {position:absolute;inset:0;background:rgb(var(--fg) / .4)}
+
+.sheet {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-radius:16px 16px 0 0;padding:8px 20px 28px;border-top:1px solid rgb(var(--line))}
+
+.grab {width:40px;height:4px;border-radius:2px;background:rgb(var(--line));margin:0 auto 12px}
+
+.bar {display:flex;align-items:center;justify-content:space-between}
+
+.sheet h2 {font-size:22px;line-height:30px;font-weight:700;margin:8px 0 12px}
+
+.sheet p {color:rgb(var(--fg));margin-bottom:12px}
+
+.note {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:20px}
+
+.row {display:flex;gap:8px}
+
+.btn-primary {background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;flex:1}
+
+.ghost {border:0;background:none;color:rgb(var(--muted));min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-family:inherit}
