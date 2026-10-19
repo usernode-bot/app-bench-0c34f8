@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -26,8 +26,8 @@
             if (seen.has(val)) return '[Circular]';
             seen.add(val);
           }
-          if (typeof val === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
-          if (val instanceof Error) return val.stack || (val.name + ': ' + val.message);
+          if (typeof val === 'function') return '[Function ' + (v.name || 'anonymous') + ']';
+          if (val instanceof Error) return val.stack || val.name + ': ' + val.message;
           return val;
         });
       } catch (e) { try { return String(v); } catch (_) { return '[unserializable]'; } }
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Tier List</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='8' y='8' width='84' height='26' rx='8' fill='%23b91c1c'/><rect x='8' y='40' width='84' height='26' rx='8' fill='%23c2410c'/><rect x='8' y='72' width='84' height='20' rx='8' fill='%2378716c'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,50 +109,77 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div><div class="app">
+    <div><div class="app" id="app">
     <div class="brand">Tier List</div>
-    <div class="picker">Bay Area restaurants<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
-    <div class="sub">4 people voting · 11 restaurants</div>
-    <div class="toggle"><div class="on">My view</div><div>Crowd view</div></div>
-    <div class="board">
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-s))">S</div><div class="items"><div class="chip" style="border-left-color:rgb(var(--tier-s))">Tartine Bakery<small>You, Maya, Dev</small></div><div class="chip" style="border-left-color:rgb(var(--tier-s))">Nopalito<small>You, Jon</small></div></div></div>
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-a))">A</div><div class="items"><div class="chip sel" style="border-left-color:rgb(var(--tier-a))">Swan Oyster Depot<small>You, Dev</small></div><div class="chip" style="border-left-color:rgb(var(--tier-a))">Zuni Café<small>You</small></div><div class="chip" style="border-left-color:rgb(var(--tier-a))">La Taqueria<small>You, Maya</small></div></div></div>
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-b))">B</div><div class="items"><div class="chip" style="border-left-color:rgb(var(--tier-b))">Burma Superstar<small>You, Jon</small></div><div class="chip" style="border-left-color:rgb(var(--tier-b))">Mission Chinese<small>You</small></div></div></div>
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-c))">C</div><div class="items"><div class="chip" style="border-left-color:rgb(var(--tier-c))">Lers Ros<small>You, Dev</small></div></div></div>
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-d))">D</div><div class="items"><div class="chip" style="border-left-color:rgb(var(--tier-d))">Pier crab stand<small>You</small></div></div></div>
-    <div class="row"><div class="lab" style="background:rgb(var(--tier-f))">F</div><div class="items"><span class="hint">Drag here</span></div></div>
+    <div class="picker" id="listPickerBtn" role="button" tabindex="0" aria-expanded="false"><span id="listName"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+    <div class="sub" id="listSub"></div>
+    <div id="pickerPanel" hidden>
+      <div class="section-label">Your lists</div>
+      <ul class="list" id="pickerList"></ul>
+      <div style="margin-top:8px"><button type="button" class="btn-secondary" id="newListBtn">Start a new list</button></div>
+      <form id="newListForm" hidden>
+        <label class="section-label" for="newListName" style="margin-top:12px">List name</label>
+        <input id="newListName" class="field" maxlength="80" placeholder="e.g. Movies">
+        <label class="section-label" for="newListNoun">What one thing on it is called</label>
+        <input id="newListNoun" class="field" maxlength="40" placeholder="e.g. movie">
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-primary" type="submit" style="flex:1">Create list</button>
+          <button class="btn-secondary" type="button" id="newListCancel">Cancel</button>
+        </div>
+      </form>
     </div>
-    <div class="section-label">Not placed by you yet (2)</div>
-    <div class="tray"><div class="chip">Rich Table<small>Added by Jon</small></div><div class="chip">Sam's Chowder House<small>Added by Maya</small></div></div>
-    <div class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add a restaurant</div>
-    <div class="section-label">Swan Oyster Depot</div>
-    <div class="card">
-    <div class="ct">Swan Oyster Depot</div>
-    <div class="cs">Added by Dev · 4 votes</div>
-    <div class="pick"><div>S</div><div class="on">A</div><div>B</div><div>C</div><div>D</div><div>F</div></div>
-    <div class="cs">Your tier. Tap one, or drag the card on the board.</div>
-    <div style="margin-top:12px">
-    <div class="vote"><span>You</span><span class="badge" style="background:rgb(var(--tier-a))">A</span></div>
-    <div class="vote"><span>Dev</span><span class="badge" style="background:rgb(var(--tier-a))">A</span></div>
-    <div class="vote"><span>Maya</span><span class="badge" style="background:rgb(var(--tier-s))">S</span></div>
-    <div class="vote"><span>Jon</span><span class="badge" style="background:rgb(var(--tier-b))">B</span></div>
-    <div class="vote tot"><span>Crowd average</span><span class="badge" style="background:rgb(var(--tier-a))">A</span></div>
+    <div class="toggle" id="viewToggle" role="tablist" aria-label="Board view">
+      <div id="viewMy" class="on" role="tab" aria-selected="true" tabindex="0">My view</div>
+      <div id="viewCrowd" role="tab" aria-selected="false" tabindex="0">Crowd view</div>
     </div>
-    <div class="quiet"><div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>Clear my vote</div><div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report</div></div>
+    <div class="board" id="board">
+      <div class="row" data-tier="S"><div class="lab" style="background:rgb(var(--tier-s))">S</div><div class="items" data-tier-items="S"></div></div>
+      <div class="row" data-tier="A"><div class="lab" style="background:rgb(var(--tier-a))">A</div><div class="items" data-tier-items="A"></div></div>
+      <div class="row" data-tier="B"><div class="lab" style="background:rgb(var(--tier-b))">B</div><div class="items" data-tier-items="B"></div></div>
+      <div class="row" data-tier="C"><div class="lab" style="background:rgb(var(--tier-c))">C</div><div class="items" data-tier-items="C"></div></div>
+      <div class="row" data-tier="D"><div class="lab" style="background:rgb(var(--tier-d))">D</div><div class="items" data-tier-items="D"></div></div>
+      <div class="row" data-tier="F"><div class="lab" style="background:rgb(var(--tier-f))">F</div><div class="items" data-tier-items="F"></div></div>
+    </div>
+    <div class="section-label" id="trayLabel" hidden></div>
+    <div class="tray" id="tray" hidden></div>
+    <div class="state-empty" id="emptyState" hidden>
+      <div style="font-weight:600">Nothing to rank yet</div>
+      <div class="cs">Be the first to put something on this list.</div>
+      <button type="button" class="btn-primary" id="emptyAddBtn">Add a restaurant</button>
+    </div>
+    <form id="addForm" hidden>
+      <label class="section-label" for="addInput" id="addLabel">New restaurant</label>
+      <input id="addInput" class="field" maxlength="80" placeholder="e.g. Tartine Bakery">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-primary" type="submit" id="addSubmit" style="flex:1">Add</button>
+        <button class="btn-secondary" type="button" id="addCancel">Cancel</button>
+      </div>
+    </form>
+    <div class="btn-primary" id="addBtn" role="button" tabindex="0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add a restaurant</div>
+    <div id="status" class="sub" role="status" hidden></div>
+    <div class="state-error" id="errorState" hidden>
+      <div style="font-weight:600">The board could not be loaded</div>
+      <div class="cs">Nothing else was changed; check your connection and try again.</div>
+      <button type="button" class="btn-secondary" id="retryBtn">Retry</button>
+    </div>
+    <div id="detailWrap" hidden>
+      <div class="section-label" id="detailLabel"></div>
+      <div class="card">
+        <div class="ct" id="detailTitle"></div>
+        <div class="cs" id="detailMeta"></div>
+        <div class="pick" id="detailPick"></div>
+        <div class="cs">Your tier. Tap one, or drag the card on the board.</div>
+        <div style="margin-top:12px" id="detailVotes"></div>
+        <div class="quiet" id="detailQuiet"></div>
+      </div>
     </div>
     </div></div>
   </div>
   <!-- /usernode-spec-screens@1 -->
+  <script src="/app.js"></script>
 </body>
 </html>

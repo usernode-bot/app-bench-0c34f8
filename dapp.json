@@ -3,5 +3,23 @@
     "emoji": "🏆"
   },
   "secrets": [],
-  "tests": []
+  "tests": [
+    {
+      "name": "board renders",
+      "path": "/",
+      "expectSelector": "[data-tier=\"S\"]"
+    },
+    {
+      "name": "demo board populated",
+      "path": "/?demo=1",
+      "expectText": "Swan Oyster Depot",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "health",
+      "path": "/health",
+      "expectText": "ok"
+    }
+  ]
 }

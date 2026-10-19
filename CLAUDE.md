@@ -95,22 +95,46 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A shared tier board for ranking things with friends: one list (starting
+with Bay Area restaurants), six tier rows S through F. A placement is the
+person's own vote, never a shared ranking; the crowd view places every
+thing at its crowd average (S=0 … F=5, mean, ties to the better tier), and
+each thing's detail shows every vote by name. Anyone can add things or
+start a new list; the add button takes the list's own word ("Add a
+restaurant", "Add a movie"). Reports are recorded only, nothing is hidden.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+The screen's one job is ranking, so the board takes the room.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+- **Palette:** kit warm greys for neutrals, kit teal as the action colour
+  (the one filled button, the open card's ring, drag highlights). Six tier
+  band colours, warm red for S fading through orange, amber and green to
+  slate and grey for F, as tokens `tier-s` … `tier-f` in
+  `styles/tailwind-input.css` (light and dark values, white letters on
+  every band in both looks).
+- **Signature element:** the board itself — each tier a band with a solid
+  coloured label, and every card carrying its tier's colour on its left
+  edge. Vote badges reuse the same colours, so a tier reads the same
+  everywhere.
+- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`,
+  the kit's four sizes unchanged.
+- Both looks follow the viewer's Homeroom theme; no fixed look, no theme
+  picker.
+
+## App-specific conventions
+
+- A vote is one row per person per item (`votes`, primary key
+  `(item_id, user_id)`); drag and tap writes are optimistic in the page and
+  roll back with a short message on failure. Crowd average is computed in
+  the page, not stored.
+- Names are trimmed, 1 to 80 characters; duplicate item names in one list
+  are refused case-insensitively.
+- The staging demo (`?demo=1`, staging only) is written once per viewer
+  (`demo_seeded` marks it) and never re-seeded; demo lists appear only
+  under `?demo=1` to their owner.
+- Boot creates the first list, "Bay Area restaurants", with no creator, so
+  nobody can remove it.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components

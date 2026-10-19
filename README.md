@@ -1,27 +1,32 @@
 # Tier List
 
-> **Starter template** — this repo was scaffolded by Homeroom Social
-> Vibecoding. Everything in it is placeholder example code until the
-> app's first real feature is built.
+A shared tier board for ranking things with friends. One list at a time
+(the first is Bay Area restaurants), six tier rows, S through F. Everyone
+drags each thing into the tier where they think it belongs: your
+placements are your own votes, never a shared final ranking. Next to your
+board, the crowd's view places every thing at its crowd average, and each
+thing's detail shows who added it, every person's vote by name, and the
+average.
 
-The scaffold is a small working demo that proves the plumbing works:
+Anyone can add new things to rank, and anyone can start a new list for
+something else (a name, and what one thing on it is called, like
+"movie"). Whoever starts a list can remove it; anything can be reported,
+and reports are recorded only.
+
+## How it runs
 
 - **Sign-in** — the server verifies the platform-issued user token
-  (an RS256 JWT) on every request, so the app already knows who is
-  using it. No accounts to build.
-- **Database** — the app has its own private Postgres database, ready
-  to store things.
-- **Styling** — Tailwind CSS, precompiled by `npm run build` during
-  image creation with either Kubernetes/Paketo or standalone Docker, in a
-  light and a dark look that follow the viewer's Homeroom theme.
+  (an RS256 JWT) on every request. Guests can look around read-only;
+  every write needs an account.
+- **Database** — Postgres: `lists`, `items`, `votes` (one row per person
+  per item, primary key `(item_id, user_id)`), `reports` and
+  `demo_seeded`, all public tables, schema applied idempotently on boot.
+- **Styling** — Tailwind CSS, precompiled by `npm run build` at image
+  build time, in a light and a dark look that follow the viewer's Homeroom
+  theme. The tier band colours are kit tokens (`tier-s` … `tier-f`).
+- **Staging demo** — on staging only, `?demo=1` seeds a populated demo of
+  the Bay Area restaurants list for the viewer, once, with three made-up
+  friends' votes and the viewer's own nine votes already in.
 
-## Replacing the template
-
-To change this app, ask Homeroom bot: open the app on Homeroom, tap the
-Homeroom icon in the header, then **Suggest an improvement**, and describe
-the app you want in plain English. The template will be replaced with your
-real app. You can also run
-Claude Code against this repo directly; start with `CLAUDE.md`, which
-carries the app-specific notes and points at the platform rules.
-
-Once the real app exists, rewrite this README to describe it.
+`npm start` runs `node server.js`; `npm run build` compiles the
+stylesheet. See `CLAUDE.md` for the app's design notes.

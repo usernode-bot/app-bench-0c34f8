@@ -114,8 +114,11 @@ app.use((req, res, next) => {
         audience: APP_AUDIENCE,
       });
       // `pur` names what the token is for. Only user-identity tokens
-      // authenticate a person here.
-      if (claims && claims.pur === 'iframe') req.user = claims;
+      // authenticate a person here. The id is normalised to a string so it
+      // matches the text columns it is stored in.
+      if (claims && claims.pur === 'iframe') {
+        req.user = Object.assign({}, claims, { id: String(claims.id) });
+      }
     } catch {}
   }
   if (!req.user && token && GUEST_PUBLIC_KEY && GUEST_AUDIENCE) {
@@ -154,6 +157,324 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Tier List data ─────────────────────────────────────────────────────────
+//
+// One board per list. A vote is one person's placement of one item in one
+// tier (S..F); the crowd average is worked out in the page from the votes.
+
+const TIERS = ['S', 'A', 'B', 'C', 'D', 'F'];
+
+async function bootSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS lists (
+      id serial PRIMARY KEY,
+      name text NOT NULL,
+      noun text NOT NULL DEFAULT 'item',
+      created_by_id text,
+      created_by_name text,
+      is_demo boolean NOT NULL DEFAULT false,
+      demo_owner_id text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS items (
+      id serial PRIMARY KEY,
+      list_id integer NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+      name text NOT NULL,
+      added_by_id text NOT NULL,
+      added_by_name text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS votes (
+      item_id integer NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+      user_id text NOT NULL,
+      username text NOT NULL,
+      tier text NOT NULL CHECK (tier IN ('S','A','B','C','D','F')),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (item_id, user_id)
+    );
+    CREATE TABLE IF NOT EXISTS reports (
+      id serial PRIMARY KEY,
+      item_id integer REFERENCES items(id) ON DELETE CASCADE,
+      list_id integer REFERENCES lists(id) ON DELETE CASCADE,
+      reporter_id text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS demo_seeded (
+      user_id text PRIMARY KEY,
+      seeded_at timestamptz NOT NULL DEFAULT now()
+    );
+  `);
+  // First list: created once, owned by nobody, so nobody can remove it.
+  const { rows } = await pool.query('SELECT count(*)::int AS n FROM lists WHERE NOT is_demo');
+  if (rows[0].n === 0) {
+    await pool.query("INSERT INTO lists (name, noun) VALUES ('Bay Area restaurants', 'restaurant')");
+  }
+}
+
+function cleanText(value, max) {
+  if (typeof value !== 'string') return null;
+  const t = value.trim();
+  return t.length >= 1 && t.length <= max ? t : null;
+}
+
+function fail(res, status, message) {
+  return res.status(status).json({ error: message });
+}
+
+// Who is signed in — the page asks this rather than reading the URL, since
+// at the app's own address there is no ?token= to read.
+app.get('/api/me', (req, res) => {
+  res.json(req.user ? { id: req.user.id, username: req.user.username } : null);
+});
+
+app.get('/api/lists', async (req, res) => {
+  try {
+    const wantDemo = IS_STAGING && req.query.demo === '1';
+    if (wantDemo && req.user) await seedDemo(req.user);
+    // Demo lists exist only for their owner, and only under ?demo=1 on staging.
+    const viewerId = wantDemo && req.user ? req.user.id : null;
+    const { rows } = await pool.query(
+      `SELECT id, name, noun, created_by_id, created_by_name, is_demo
+         FROM lists
+        WHERE NOT is_demo OR ($1::text IS NOT NULL AND demo_owner_id = $1::text)
+        ORDER BY is_demo DESC, created_at, id`,
+      [viewerId]
+    );
+    res.json({ lists: rows });
+  } catch (err) {
+    console.error('GET /api/lists failed: ' + err.message);
+    fail(res, 500, 'Could not load the lists');
+  }
+});
+
+app.post('/api/lists', async (req, res) => {
+  const name = cleanText(req.body && req.body.name, 80);
+  if (!name) return fail(res, 400, 'Give the list a name of 1 to 80 characters');
+  const noun = cleanText(req.body && req.body.noun, 40) || 'item';
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO lists (name, noun, created_by_id, created_by_name)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [name, noun, req.user.id, req.user.username]
+    );
+    res.status(201).json({ list: rows[0] });
+  } catch (err) {
+    console.error('POST /api/lists failed: ' + err.message);
+    fail(res, 500, 'Could not start the list');
+  }
+});
+
+app.delete('/api/lists/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM lists WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return fail(res, 404, 'That list is gone');
+    if (rows[0].created_by_id !== req.user.id) {
+      return fail(res, 403, 'Only whoever started this list can remove it');
+    }
+    await pool.query('DELETE FROM lists WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/lists/:id failed: ' + err.message);
+    fail(res, 500, 'Could not remove the list');
+  }
+});
+
+// One list with everything on it: items, every vote, and the viewer's own
+// tier per item. Guests (req.user null) get the same read-only view.
+app.get('/api/lists/:id', async (req, res) => {
+  try {
+    const { rows: lists } = await pool.query('SELECT * FROM lists WHERE id = $1', [req.params.id]);
+    if (!lists[0]) return fail(res, 404, 'That list is gone');
+    const list = lists[0];
+    if (list.is_demo && !(IS_STAGING && req.query.demo === '1' && req.user && req.user.id === list.demo_owner_id)) {
+      return fail(res, 404, 'That list is gone');
+    }
+    const { rows: items } = await pool.query(
+      'SELECT * FROM items WHERE list_id = $1 ORDER BY created_at, id',
+      [list.id]
+    );
+    const { rows: votes } = await pool.query(
+      'SELECT item_id, user_id, username, tier FROM votes WHERE item_id = ANY($1) ORDER BY updated_at',
+      [items.map(i => i.id)]
+    );
+    const byItem = new Map(items.map(i => [i.id, []]));
+    votes.forEach(v => {
+      const bucket = byItem.get(v.item_id);
+      if (bucket) bucket.push({ user_id: v.user_id, username: v.username, tier: v.tier });
+    });
+    res.json({
+      list: {
+        id: list.id, name: list.name, noun: list.noun,
+        created_by_id: list.created_by_id, created_by_name: list.created_by_name,
+        is_demo: list.is_demo,
+      },
+      items: items.map(i => ({
+        id: i.id, name: i.name, added_by_id: i.added_by_id, added_by_name: i.added_by_name,
+        votes: byItem.get(i.id),
+      })),
+    });
+  } catch (err) {
+    console.error('GET /api/lists/:id failed: ' + err.message);
+    fail(res, 500, 'Could not load the board');
+  }
+});
+
+app.post('/api/lists/:id/items', async (req, res) => {
+  const name = cleanText(req.body && req.body.name, 80);
+  if (!name) return fail(res, 400, 'Give it a name of 1 to 80 characters');
+  try {
+    const { rows: lists } = await pool.query('SELECT id FROM lists WHERE id = $1', [req.params.id]);
+    if (!lists[0]) return fail(res, 404, 'That list is gone');
+    const { rows: dup } = await pool.query(
+      'SELECT id FROM items WHERE list_id = $1 AND lower(name) = lower($2)',
+      [req.params.id, name]
+    );
+    if (dup[0]) return fail(res, 409, 'That one is already on this list');
+    const { rows } = await pool.query(
+      `INSERT INTO items (list_id, name, added_by_id, added_by_name)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [req.params.id, name, req.user.id, req.user.username]
+    );
+    res.status(201).json({ item: { ...rows[0], votes: [] } });
+  } catch (err) {
+    console.error('POST /api/lists/:id/items failed: ' + err.message);
+    fail(res, 500, 'Could not add it');
+  }
+});
+
+app.delete('/api/items/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM items WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return fail(res, 404, 'That one is gone');
+    if (rows[0].added_by_id !== req.user.id) {
+      return fail(res, 403, 'Only whoever added it can remove it');
+    }
+    await pool.query('DELETE FROM items WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/items/:id failed: ' + err.message);
+    fail(res, 500, 'Could not remove it');
+  }
+});
+
+app.put('/api/items/:id/vote', async (req, res) => {
+  const tier = req.body && typeof req.body.tier === 'string' ? req.body.tier.toUpperCase() : '';
+  if (!TIERS.includes(tier)) return fail(res, 400, 'Pick a tier from S to F');
+  try {
+    const { rows } = await pool.query('SELECT id FROM items WHERE id = $1', [req.params.id]);
+    if (!rows[0]) return fail(res, 404, 'That one is gone');
+    await pool.query(
+      `INSERT INTO votes (item_id, user_id, username, tier)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (item_id, user_id)
+       DO UPDATE SET tier = EXCLUDED.tier, username = EXCLUDED.username, updated_at = now()`,
+      [req.params.id, req.user.id, req.user.username, tier]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('PUT /api/items/:id/vote failed: ' + err.message);
+    fail(res, 500, 'Could not save your vote');
+  }
+});
+
+app.delete('/api/items/:id/vote', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM votes WHERE item_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/items/:id/vote failed: ' + err.message);
+    fail(res, 500, 'Could not clear your vote');
+  }
+});
+
+// Reports are recorded only; nothing is hidden by this app.
+app.post('/api/reports', async (req, res) => {
+  const itemId = req.body && req.body.itemId;
+  const listId = req.body && req.body.listId;
+  if (!itemId && !listId) return fail(res, 400, 'Say what you are reporting');
+  try {
+    if (itemId) {
+      const { rows } = await pool.query('SELECT id FROM items WHERE id = $1', [itemId]);
+      if (!rows[0]) return fail(res, 404, 'That one is gone');
+      await pool.query('INSERT INTO reports (item_id, reporter_id) VALUES ($1, $2)',
+        [itemId, req.user.id]);
+    } else {
+      const { rows } = await pool.query('SELECT id FROM lists WHERE id = $1', [listId]);
+      if (!rows[0]) return fail(res, 404, 'That list is gone');
+      await pool.query('INSERT INTO reports (list_id, reporter_id) VALUES ($1, $2)',
+        [listId, req.user.id]);
+    }
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/reports failed: ' + err.message);
+    fail(res, 500, 'Could not send the report');
+  }
+});
+
+// ── Staging demo ───────────────────────────────────────────────────────────
+//
+// Only on staging, only under ?demo=1, once per viewer: a populated demo
+// list of Bay Area restaurants with three made-up friends' votes and the
+// viewer's own nine votes already in. Never re-seeded, so what the viewer
+// changes stays.
+
+const DEMO_PEOPLE = [
+  { id: 'staging-demo-maya', username: 'Maya' },
+  { id: 'staging-demo-dev', username: 'Dev' },
+  { id: 'staging-demo-jon', username: 'Jon' },
+];
+
+// adder: 'you' (the viewer), or a demo person's username. votes: one entry
+// per voter; the viewer's nine votes come from the 'you' entries.
+const DEMO_ITEMS = [
+  { name: 'Tartine Bakery', addedBy: 'you', votes: { you: 'S', Maya: 'S', Dev: 'S', Jon: 'B' } },
+  { name: 'Nopalito', addedBy: 'Dev', votes: { you: 'S', Jon: 'S' } },
+  { name: 'Swan Oyster Depot', addedBy: 'Dev', votes: { you: 'A', Dev: 'A', Maya: 'S', Jon: 'B' } },
+  { name: 'Zuni Café', addedBy: 'Maya', votes: { you: 'A', Dev: 'A', Maya: 'B' } },
+  { name: 'La Taqueria', addedBy: 'you', votes: { you: 'A', Maya: 'A', Dev: 'S', Jon: 'A' } },
+  { name: 'Burma Superstar', addedBy: 'Jon', votes: { you: 'B', Jon: 'B', Maya: 'A' } },
+  { name: 'Mission Chinese', addedBy: 'Dev', votes: { you: 'B', Dev: 'C', Jon: 'B' } },
+  { name: 'Lers Ros', addedBy: 'Maya', votes: { you: 'C', Dev: 'C', Maya: 'B' } },
+  { name: 'Pier crab stand', addedBy: 'Jon', votes: { you: 'D', Jon: 'C', Maya: 'D' } },
+  { name: 'Rich Table', addedBy: 'Jon', votes: {} },
+  { name: "Sam's Chowder House", addedBy: 'Maya', votes: {} },
+];
+
+async function seedDemo(user) {
+  // Claim first: whoever holds the demo_seeded row owns the seeding, so a
+  // slow first load never writes the demo twice.
+  const claim = await pool.query(
+    'INSERT INTO demo_seeded (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING RETURNING user_id',
+    [user.id]
+  );
+  if (claim.rowCount === 0) return;
+  const people = new Map(DEMO_PEOPLE.map(p => [p.username, p]));
+  const { rows: lists } = await pool.query(
+    `INSERT INTO lists (name, noun, created_by_id, created_by_name, is_demo, demo_owner_id)
+     VALUES ('Bay Area restaurants', 'restaurant', $1, $2, true, $1) RETURNING id`,
+    [user.id, user.username]
+  );
+  const listId = lists[0].id;
+  for (const def of DEMO_ITEMS) {
+    const adder = def.addedBy === 'you'
+      ? { id: user.id, username: user.username }
+      : people.get(def.addedBy);
+    const { rows: items } = await pool.query(
+      `INSERT INTO items (list_id, name, added_by_id, added_by_name)
+       VALUES ($1, $2, $3, $4) RETURNING id`,
+      [listId, def.name, adder.id, adder.username]
+    );
+    for (const [who, tier] of Object.entries(def.votes)) {
+      const voter = who === 'you' ? { id: user.id, username: user.username } : people.get(who);
+      await pool.query(
+        'INSERT INTO votes (item_id, user_id, username, tier) VALUES ($1, $2, $3, $4)',
+        [items[0].id, voter.id, voter.username, tier]
+      );
+    }
+  }
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +512,26 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Boot and shutdown ──────────────────────────────────────────────────────
+
+let server;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await bootSchema();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+function shutdown() {
+  if (!server) process.exit(0);
+  console.log('Shutting down: stopping the listener and draining');
+  server.close(() => process.exit(0));
+  // Drain in-flight requests for about 3 s, then close the pool and exit.
+  setTimeout(() => pool.end().then(() => process.exit(0)), 3000).unref();
+  setTimeout(() => process.exit(0), 4000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 start().catch(err => { console.error(err); process.exit(1); });
