@@ -118,15 +118,34 @@
     statusTimer = setTimeout(function () { els.status.hidden = true; }, 3000);
   }
 
+  // The chevron is an <svg>, whose `hidden` property does not reflect to
+  // the attribute, so the header renders it in the name's own flow: after
+  // the last word, glued with a non-breaking space so it never wraps to a
+  // line of its own, and absent until the name is known.
+  var CHEVRON = '<span style="white-space:nowrap">&nbsp;<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>';
+
   // ── Rendering ───────────────────────────────────────────────────────────
+
+  // "a restaurant", "an item" — the article follows the noun's first letter.
+  function articleFor(noun) {
+    return /^[aeiou]/i.test(noun) ? 'an' : 'a';
+  }
+
+  // The placeholder is an example name that says it is an example, not a
+  // bare value or "e.g. a restaurant", which says nothing.
+  function exampleFor(noun) {
+    var known = { restaurant: 'Tartine Bakery', movie: 'The Godfather' };
+    var example = known[noun.toLowerCase()];
+    if (!example) example = noun.charAt(0).toUpperCase() + noun.slice(1);
+    return 'e.g. ' + example;
+  }
 
   function setNounWords() {
     var noun = (state.list && state.list.noun) || 'item';
-    var cap = noun.charAt(0).toUpperCase() + noun.slice(1);
-    els.addBtn.lastChild.textContent = 'Add a ' + noun;
-    els.emptyAddBtn.textContent = 'Add a ' + noun;
+    els.addBtn.lastChild.textContent = 'Add ' + articleFor(noun) + ' ' + noun;
+    els.emptyAddBtn.textContent = 'Add ' + articleFor(noun) + ' ' + noun;
     els.addLabel.textContent = 'New ' + noun;
-    els.addInput.placeholder = 'e.g. a ' + noun;
+    els.addInput.placeholder = exampleFor(noun);
     els.addSubmit.textContent = 'Add';
   }
 
@@ -202,12 +221,17 @@
 
   function renderHeader() {
     setNounWords();
-    if (!state.list) return;
+    if (!state.list) {
+      // The list's name is not known yet (loading, or the load failed): a
+      // grey bar where the title goes, and no chevron to hint at a picker.
+      els.listName.innerHTML = '<span class="skeleton" style="display:inline-block;width:180px;height:30px;border-radius:8px"></span>';
+      return;
+    }
     var name = esc(state.list.name);
     if (state.list.is_demo) {
       name += ' <span data-usernode-demo-note>(Staging demo)</span>';
     }
-    els.listName.innerHTML = name;
+    els.listName.innerHTML = name + CHEVRON;
     var people = {};
     var voters = 0;
     state.items.forEach(function (item) {
@@ -273,7 +297,8 @@
     var empty = !state.loading && !state.loadError && state.list && !state.items.length;
     els.emptyState.hidden = !empty;
     els.errorState.hidden = !state.loadError;
-    els.board.hidden = state.loadError;
+    // An empty list speaks in the board's place: no blank tier rows under it.
+    els.board.hidden = state.loadError || empty;
     els.addBtn.hidden = !!state.loadError || empty || !els.addForm.hidden;
     els.emptyAddBtn.hidden = !els.addForm.hidden;
     if (empty) {
@@ -521,7 +546,10 @@
     els.addForm.hidden = false;
     els.addBtn.hidden = true;
     els.emptyAddBtn.hidden = true;
-    els.addInput.focus();
+    // Bring the whole form — field and its buttons — into view, then put
+    // the cursor in the field without scrolling over the smooth scroll.
+    els.addForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    els.addInput.focus({ preventScroll: true });
   }
   function closeAddForm() {
     els.addForm.hidden = true;
@@ -673,6 +701,7 @@
 
   renderBoard(); // skeleton rows until the first answer arrives
   renderTray();
+  renderHeader(); // a grey bar where the list name goes, no chevron yet
   Promise.all([api('/api/me'), loadLists()])
     .then(function (results) {
       state.me = results[0];

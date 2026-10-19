@@ -30,13 +30,18 @@
 
 .brand {font-size:14px;line-height:20px;color:rgb(var(--muted));font-weight:500}
 
-.picker {display:flex;align-items:center;gap:6px;min-height:44px;font-size:28px;line-height:36px;font-weight:700}
+/* Block flow, so the 20 px chevron sits directly after the list's name,
+   inline with the text, instead of floating to the row's far edge when the
+   name wraps. The whole row is the 44 px tap target. */
+.picker {min-height:44px;font-size:28px;line-height:36px;font-weight:700;cursor:pointer}
+
+.picker svg {vertical-align:middle;margin-left:2px}
 
 .sub {font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
 .toggle {display:flex;background:rgb(var(--raised));border:1px solid rgb(var(--line));border-radius:10px;padding:3px;margin:14px 0 16px}
 
-.toggle div {flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:8px;color:rgb(var(--muted))}
+.toggle div {flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;border-radius:8px;color:rgb(var(--muted))}
 
 .toggle .on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
 
@@ -58,9 +63,20 @@
 
 .hint {font-size:14px;color:rgb(var(--muted));align-self:center}
 
-.section-label {margin:20px 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
+/* display:block: a <label class="section-label"> is inline otherwise, and
+   inline elements ignore their vertical margins — the label then crowds
+   whatever sits above it. */
+.section-label {display:block;margin:20px 0 8px;padding:0 4px;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted))}
 
 .tray {display:flex;gap:8px;flex-wrap:wrap;background:rgb(var(--raised));border:1px dashed rgb(var(--muted));border-radius:12px;padding:10px}
+
+/* The add form: 16 px between the tray above and the label, and Add and
+   Cancel as one aligned row of equal 48 px buttons, Cancel quiet. */
+#addForm .section-label {margin-top:16px}
+
+#addForm .btn-primary {margin-top:0;min-height:48px}
+
+#addForm .btn-secondary {min-height:48px;border-color:transparent;color:rgb(var(--muted));background:transparent}
 
 .btn-primary {margin-top:16px;width:100%;min-height:48px;border-radius:8px;background:rgb(var(--accent));color:rgb(var(--on-accent));display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500}
 
