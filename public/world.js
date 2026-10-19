@@ -220,7 +220,9 @@ function showNote() {
   noteTimer = setTimeout(() => { $('save-note').hidden = true; }, 3000);
 }
 function showEmpty() {
-  app.classList.toggle('is-empty', loaded && world.size === 0);
+  const empty = loaded && world.size === 0;
+  app.classList.toggle('is-empty', empty);
+  $('empty').hidden = !empty;
 }
 
 // ── actions ────────────────────────────────────────────────────────────────
@@ -378,11 +380,14 @@ async function loadWorld() {
     seq = data.seq;
     loaded = true;
     updateCounts(data);
+    $('live-pill').hidden = false; // the pill stays hidden until the first load succeeds
     $('loading').hidden = true;
     app.classList.remove('is-loading');
   } catch (err) {
     app.classList.remove('is-loading');
     app.classList.add('is-error');
+    $('live-pill').hidden = true;
+    $('empty').hidden = true;
     $('loading').hidden = true;
     $('error').hidden = false;
   }

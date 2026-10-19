@@ -51,9 +51,12 @@
 
 .near {position:absolute;left:16px;bottom:176px;display:flex;align-items:center}
 
-.dock {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-top:1px solid rgb(var(--line));padding:12px 12px 28px}
+/* Side padding lives on the row, not the dock: the hotbar keeps only a small
+   edge inset so each of its eight slots stays at least 44 px wide on a phone
+   (390 px: (390 - 2*4 - 7*4) / 8 = 44.25 px). */
+.dock {position:absolute;left:0;right:0;bottom:0;background:rgb(var(--surface));border-top:1px solid rgb(var(--line));padding:12px 0 28px}
 
-.bar {display:flex;gap:6px;margin-top:8px}
+.bar {display:flex;gap:4px;margin-top:8px;margin-inline:4px}
 
 .slot {flex:1;height:48px;border-radius:10px;border:2px solid rgb(var(--line));background:rgb(var(--raised));display:flex;align-items:center;justify-content:center;padding:0}
 
@@ -61,7 +64,7 @@
 
 .sw {width:24px;height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.2)}
 
-.row {display:flex;justify-content:space-between;align-items:center}
+.row {display:flex;justify-content:space-between;align-items:center;margin-inline:16px}
 
 .btn-primary {min-height:44px;padding:0 16px;border-radius:8px;border:0;background:rgb(var(--accent));color:rgb(var(--on-accent));font:500 16px ui-rounded,system-ui,sans-serif;display:inline-flex;align-items:center;gap:8px}
 
@@ -122,7 +125,10 @@
 }
 
 #loading, #error { background: rgb(var(--sky)); }
-#empty { background: transparent; }
+/* The empty state floats over the sky; only its button takes taps, so you
+   can still drag the world behind it. */
+#empty { background: transparent; pointer-events: none; }
+#empty .btn-primary { pointer-events: auto; }
 .loading-note { color: rgb(var(--muted)); }
 
 #save-note {
@@ -134,15 +140,34 @@
   white-space: nowrap;
 }
 
-/* Loading shows the frame with the hotbar's eight slots as grey skeleton
-   squares; the drawn values stay empty until data arrives. */
-.app.is-loading .sw {
+/* Loading shows the frame with the hotbar's eight slots as plain grey
+   skeleton squares — no swatch colours (their inline styles would beat a
+   class rule, so the swatch hides and the slot itself goes grey), no
+   selection ring — and the dock's top row as grey skeleton bars in place of
+   the block name, placed count and primary button. */
+.app.is-loading .sw { visibility: hidden; }
+.app.is-loading .slot {
   background: rgb(var(--line));
   border-color: transparent;
   animation: sw-pulse 1.6s ease-in-out infinite;
 }
+.app.is-loading .slot.sel { border-color: transparent; }
 @keyframes sw-pulse { 50% { opacity: 0.5; } }
-.app.is-loading .dock .row { visibility: hidden; }
+.app.is-loading .dock .row > button { visibility: hidden; }
+.app.is-loading .dock .row > div { position: relative; }
+.app.is-loading .dock .row > div > * { visibility: hidden; }
+.app.is-loading .dock .row > div::before,
+.app.is-loading .dock .row > div::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 12px;
+  border-radius: 6px;
+  background: rgb(var(--line));
+  animation: sw-pulse 1.6s ease-in-out infinite;
+}
+.app.is-loading .dock .row > div::before { top: 5px; width: 110px; }
+.app.is-loading .dock .row > div::after { bottom: 4px; width: 150px; }
 
 /* On the empty and error states the screen's own primary button gives way to
    the state's own action. */
