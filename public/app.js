@@ -140,19 +140,22 @@
     return { itemId: id, options: optionIds(id), played: false, answered: false, picked: null, correct: null };
   }
 
-  // The answer plus its closest-sounding items within the level, up to four.
+  // The answer plus its closest-sounding items within the level, up to four:
+  // always min(4, level size), padded with other items in the set when there
+  // are fewer than three close ones.
   function optionIds(answerId) {
     var items = C.itemsForLevel(state.kind, state.level);
     var byId = {};
     items.forEach(function (item) { byId[item.id] = item; });
     var answer = byId[answerId];
-    if (!answer) return items.slice(0, 4).map(function (item) { return item.id; });
+    var target = Math.min(4, items.length);
+    if (!answer) return items.slice(0, target).map(function (item) { return item.id; });
     var ids = [answer.id];
     (answer.close || []).forEach(function (id) {
-      if (byId[id] && ids.indexOf(id) === -1 && ids.length < 4) ids.push(id);
+      if (ids.length < target && byId[id] && ids.indexOf(id) === -1) ids.push(id);
     });
     items.forEach(function (item) {
-      if (ids.length < 2 && ids.indexOf(item.id) === -1) ids.push(item.id);
+      if (ids.length < target && ids.indexOf(item.id) === -1) ids.push(item.id);
     });
     for (var i = ids.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -232,23 +235,25 @@
       root = 57 + Math.floor(Math.random() * 12);
       tone(ctx, root, start, 0.7);
       tone(ctx, root + item.semitones, start + 0.75, 0.7);
-      return;
+      return 1520;
     }
 
     root = 48 + Math.floor(Math.random() * 12);
 
     if (kind === 'chords') {
       item.intervals.forEach(function (semis) { tone(ctx, root + semis, start, 0.9); });
-      return;
+      return 970;
     }
 
     var at = start;
-    item.roman.split(' ').forEach(function (numeral) {
+    var numerals = item.roman.split(' ');
+    numerals.forEach(function (numeral) {
       var chord = parseRoman(numeral);
       var intervals = chord.quality === 'major' ? [0, 4, 7] : [0, 3, 7];
       intervals.forEach(function (semis) { tone(ctx, root + chord.semis + semis, at, 0.85); });
       at += 0.95;
     });
+    return Math.round((0.05 + 0.95 * (numerals.length - 1) + 0.87) * 1000);
   }
 
   // ── Rendering ────────────────────────────────────────────────────────────
@@ -309,7 +314,7 @@
       els.play.classList.remove('is-quiet');
     }
 
-    els.play.setAttribute('aria-label', 'Play the ' + lesson.soundNoun + ' again');
+    els.play.setAttribute('aria-label', playLabel());
     els.questionTitle.textContent = 'Question ' + state.questionNo;
     els.questionHint.textContent = questionHint();
   }
@@ -372,9 +377,10 @@
 
     // One rung per item, filling from the bottom: mastered first, then the
     // item being asked, then grey ones.
-    var mastered = items.filter(function (item) { return rowFor(kind, item.id).mastered; });
-    var current = items.filter(function (item) {
-      return item.id === currentId && !rowFor(kind, item.id).mastered;
+    // The item being asked is always the amber rung, mastered or not.
+    var current = items.filter(function (item) { return item.id === currentId; });
+    var mastered = items.filter(function (item) {
+      return rowFor(kind, item.id).mastered && item.id !== currentId;
     });
     var rest = items.filter(function (item) {
       return !rowFor(kind, item.id).mastered && item.id !== currentId;
@@ -579,12 +585,33 @@
     render();
   }
 
+  var playTimer = null;
+
+  function playLabel() {
+    if (state.loading) return 'Play';
+    return 'Play the ' + C.lessons[state.kind].soundNoun + ' again';
+  }
+
+  // While the sound plays the triangle becomes a sound wave and the label
+  // reads "Playing"; both go back to the play state when playback ends.
+  function setPlaying(on) {
+    els.play.classList.toggle('is-playing', on);
+    els.play.setAttribute('aria-label', on ? 'Playing' : playLabel());
+  }
+
   function play() {
     var q = state.question;
     if (state.loading || !q) return;
-    playQuestion(state.kind, q.itemId);
+    if (playTimer) { clearTimeout(playTimer); playTimer = null; }
+    var ms = playQuestion(state.kind, q.itemId);
     q.played = true;
     els.questionHint.textContent = questionHint();
+    if (!ms) { setPlaying(false); return; }
+    setPlaying(true);
+    playTimer = setTimeout(function () {
+      playTimer = null;
+      setPlaying(false);
+    }, ms);
   }
 
   function confirmReset() {

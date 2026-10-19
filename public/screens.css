@@ -41,7 +41,7 @@
 
 .tabs {display:flex;gap:6px;background:rgb(var(--raised));padding:4px;border-radius:12px;margin-bottom:12px}
 
-.tab {flex:1;min-height:44px;border-radius:9px;border:0;background:none;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:inherit;font-weight:500;color:rgb(var(--muted));cursor:pointer}
+.tab {flex:auto;min-height:44px;padding:0 12px;border-radius:9px;border:0;background:none;display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:inherit;font-weight:500;color:rgb(var(--muted));cursor:pointer}
 
 .tab.on {background:rgb(var(--surface));color:rgb(var(--fg));box-shadow:0 0 0 1px rgb(var(--line))}
 
@@ -52,6 +52,18 @@
 .stage {display:flex;gap:16px;align-items:center;margin-top:12px}
 
 .play {width:96px;height:96px;border-radius:50%;background:rgb(var(--accent));color:rgb(var(--on-accent));border:0;display:flex;align-items:center;justify-content:center;flex:none}
+
+.play-icon-wave {display:none}
+
+.play.is-playing .play-icon-play {display:none}
+
+.play.is-playing .play-icon-wave {display:block}
+
+@media (prefers-reduced-motion:no-preference) {
+  .play.is-playing .play-icon-wave {animation:play-pulse 1s ease-in-out infinite}
+}
+
+@keyframes play-pulse {0%,100%{opacity:1}50%{opacity:.45}}
 
 .ladder {display:flex;flex-direction:column-reverse;gap:6px;width:120px;flex:none;border-left:2px solid rgb(var(--line));border-right:2px solid rgb(var(--line));padding:0 6px}
 
